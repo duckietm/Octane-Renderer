@@ -198,6 +198,15 @@ export class SessionDataManager implements ISessionDataManager
 
     public dispose(): void
     {
+        if(this._respectTimer)
+        {
+            clearTimeout(this._respectTimer);
+
+            this._respectTimer = null;
+        }
+
+        this._pendingRespects = [];
+
         // Remove all message events
         for(const event of this._messageEvents)
         {
@@ -629,15 +638,61 @@ export class SessionDataManager implements ISessionDataManager
         return (this._securityLevel >= level);
     }
 
+    /** Matches the ratelimit on the server's RoomUserGiveRespectEvent. */
+    private static readonly RESPECT_MIN_INTERVAL: number = 250;
+
+    private _pendingRespects: number[] = [];
+    private _nextRespectAt: number = 0;
+    private _respectTimer: ReturnType<typeof setTimeout> = null;
+
+    /**
+     * The server drops a respect that arrives within its handler ratelimit and
+     * never runs the handler, so nothing is spent on its side. Decrementing
+     * locally on every click therefore made the counter drift: click three
+     * times quickly and the client showed three spent while only two were
+     * delivered.
+     *
+     * Reserve the point immediately — the UI must not offer more than we have —
+     * but pace the sends so every one of them is actually accepted.
+     */
     public giveRespect(userId: number): void
     {
         if((userId < 0) || (this._respectsLeft <= 0)) return;
 
-        this.send(new UserRespectComposer(userId));
-
         this._respectsLeft--;
 
         this.invalidateUserDataSnapshot();
+
+        this._pendingRespects.push(userId);
+
+        this.flushPendingRespects();
+    }
+
+    private flushPendingRespects(): void
+    {
+        if(this._respectTimer || !this._pendingRespects.length) return;
+
+        const wait = this._nextRespectAt - Date.now();
+
+        if(wait > 0)
+        {
+            this._respectTimer = setTimeout(() =>
+            {
+                this._respectTimer = null;
+
+                this.flushPendingRespects();
+            }, wait);
+
+            return;
+        }
+
+        const userId = this._pendingRespects.shift();
+
+        this.send(new UserRespectComposer(userId));
+
+        this._nextRespectAt = Date.now() + SessionDataManager.RESPECT_MIN_INTERVAL;
+
+        this.flushPendingRespects();
     }
 
     public givePetRespect(petId: number): void

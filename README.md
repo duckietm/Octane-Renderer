@@ -1,12 +1,6 @@
 # Octane Renderer
 
-Octane originated as a fork of [Nitro React](https://github.com/billsonnn/nitro-react) and its companion [Nitro Renderer](https://github.com/billsonnn/nitro-renderer).
-
-Since then, Octane has evolved beyond its origins. Both the client and renderer have been expanded, improved and maintained through numerous fixes and new features.
-
-While Octane remains grateful to the Nitro project and its contributors, it is no longer intended to be a simple fork or reskin. It is an independently developed platform with its own identity, technical direction and long-term vision.
-
-Octane Renderer is a Javascript library for rendering Octane in the browser using PixiJS
+Octane originated as a fork of [Nitro React](https://github.com/billsonnn/nitro-react) and its companion [Nitro Renderer](https://github.com/billsonnn/nitro-renderer) and is completely independently developed and has no further ties to Billsonnn / Nitro.
 
 ## Installation
 
