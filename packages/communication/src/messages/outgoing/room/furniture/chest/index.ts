@@ -10,3 +10,6 @@ export * from './ChestSaveSettingsComposer';
 export * from './ChestSaveNotificationsComposer';
 export * from './ChestUpgradeCapacityComposer';
 export * from './ChestRequestLogComposer';
+export * from './WiredChestRoomLogsComposer';
+export * from './WiredChestLockComposer';
+export * from './WiredChestTransactionDetailsComposer';

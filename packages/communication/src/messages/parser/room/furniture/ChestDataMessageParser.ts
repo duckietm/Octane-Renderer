@@ -20,7 +20,8 @@ export const CHEST_KIND_FURNI = 1;
  * int itemId, string name, string description, int capacityMax, int used,
  * bool accessOpen, bool accessDonate, int appearanceState,
  * bool notifyFull, bool notifyDonation, bool notifyWithdraw, bool notifyEmpty, bool notifyWired, int notifyMode,
- * int entryCount, [int currencyType, int amount]*.
+ * int entryCount, [int currencyType, int amount]*,
+ * int chestKind, int furniCount, [int baseItemId, int quantity]*, bool locked.
  */
 export class ChestDataMessageParser implements IMessageParser
 {
@@ -41,6 +42,7 @@ export class ChestDataMessageParser implements IMessageParser
     private _entries: IChestCurrencyEntry[] = [];
     private _chestKind: number = CHEST_KIND_CURRENCY;
     private _furniEntries: IChestFurniEntry[] = [];
+    private _locked: boolean = false;
 
     public flush(): boolean
     {
@@ -61,6 +63,7 @@ export class ChestDataMessageParser implements IMessageParser
         this._entries = [];
         this._chestKind = CHEST_KIND_CURRENCY;
         this._furniEntries = [];
+        this._locked = false;
 
         return true;
     }
@@ -93,9 +96,10 @@ export class ChestDataMessageParser implements IMessageParser
             this._entries.push({ currencyType, amount });
         }
 
-        // chestKind + furni contents (appended; guard so an un-rebuilt server still parses)
+        // chestKind + furni contents + lock (appended; guard so an un-rebuilt server still parses)
         this._chestKind = CHEST_KIND_CURRENCY;
         this._furniEntries = [];
+        this._locked = false;
 
         if(!wrapper.bytesAvailable) return true;
 
@@ -110,6 +114,10 @@ export class ChestDataMessageParser implements IMessageParser
 
             this._furniEntries.push({ baseItemId, quantity });
         }
+
+        if(!wrapper.bytesAvailable) return true;
+
+        this._locked = wrapper.readBoolean();
 
         return true;
     }
@@ -131,4 +139,5 @@ export class ChestDataMessageParser implements IMessageParser
     public get entries(): IChestCurrencyEntry[] { return this._entries; }
     public get chestKind(): number { return this._chestKind; }
     public get furniEntries(): IChestFurniEntry[] { return this._furniEntries; }
+    public get locked(): boolean { return this._locked; }
 }

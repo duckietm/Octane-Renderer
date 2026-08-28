@@ -31,3 +31,6 @@ export * from './WelcomeGiftStatusParser';
 export * from './floor';
 export * from './wall';
 export * from './youtube';
+export * from './WiredChestRoomLogsMessageParser';
+export * from './WiredChestLockStateMessageParser';
+export * from './WiredChestTransactionDetailsMessageParser';

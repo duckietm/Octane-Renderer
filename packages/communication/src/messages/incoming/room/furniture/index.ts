@@ -29,3 +29,6 @@ export * from './WelcomeGiftStatusEvent';
 export * from './floor';
 export * from './wall';
 export * from './youtube';
+export * from './WiredChestRoomLogsEvent';
+export * from './WiredChestLockStateEvent';
+export * from './WiredChestTransactionDetailsEvent';
