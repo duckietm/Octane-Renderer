@@ -120,6 +120,10 @@ export class OutgoingHeader
     public static CHEST_DEPOSIT_INVENTORY_ITEM = 9325;
     public static CHEST_WITHDRAW_ALL_FURNI = 9326;
     public static CHEST_OPEN = 9327;
+    public static WIRED_CHEST_ROOM_LOGS = 9328;
+    public static WIRED_CHEST_LOCK = 9329;
+    // 9330-9333 belong to the Trax editor; the chests tab continues at 9334.
+    public static WIRED_CHEST_TRANSACTION_DETAILS = 9334;
     public static ITEM_DIMMER_TOGGLE = 2296;
     public static ITEM_EXCHANGE_REDEEM = 3115;
     public static ITEM_PAINT = 711;
