@@ -23,7 +23,7 @@ export const CHEST_KIND_FURNI = 1;
  * int entryCount, [int currencyType, int amount]*,
  * int chestKind, int furniCount, [int baseItemId, int quantity]*, bool locked, int capacity,
  * bool autoLock, bool viewerOwnsChest, int chestSpriteId, bool wiredEnabled,
- * bool starterChest.
+ * bool starterChest, int previewMode, int previewAmount.
  */
 export class ChestDataMessageParser implements IMessageParser
 {
@@ -51,6 +51,8 @@ export class ChestDataMessageParser implements IMessageParser
     private _chestSpriteId: number = 0;
     private _wiredEnabled: boolean = true;
     private _starterChest: boolean = false;
+    private _previewMode: number = 0;
+    private _previewAmount: number = 1;
 
     public flush(): boolean
     {
@@ -79,6 +81,8 @@ export class ChestDataMessageParser implements IMessageParser
         // A server that does not send these is one where every chest answered wired.
         this._wiredEnabled = true;
         this._starterChest = false;
+        this._previewMode = 0;
+        this._previewAmount = 1;
 
         return true;
     }
@@ -122,6 +126,8 @@ export class ChestDataMessageParser implements IMessageParser
         // A server that does not send these is one where every chest answered wired.
         this._wiredEnabled = true;
         this._starterChest = false;
+        this._previewMode = 0;
+        this._previewAmount = 1;
 
         if(!wrapper.bytesAvailable) return true;
 
@@ -165,6 +171,14 @@ export class ChestDataMessageParser implements IMessageParser
 
         this._starterChest = wrapper.readBoolean();
 
+        if(!wrapper.bytesAvailable) return true;
+
+        this._previewMode = wrapper.readInt();
+
+        if(!wrapper.bytesAvailable) return true;
+
+        this._previewAmount = wrapper.readInt();
+
         return true;
     }
 
@@ -196,6 +210,9 @@ export class ChestDataMessageParser implements IMessageParser
     public get chestSpriteId(): number { return this._chestSpriteId; }
     /** Whether wired may reach this chest. Off until its owner upgrades it, then permanent. */
     public get wiredEnabled(): boolean { return this._wiredEnabled; }
+    /** Whether the chest shows some of what it holds on its lid, and how many. */
+    public get previewMode(): number { return this._previewMode; }
+    public get previewAmount(): number { return this._previewAmount; }
     /** A starter chest holds less and can never be grown. */
     public get starterChest(): boolean { return this._starterChest; }
 }
