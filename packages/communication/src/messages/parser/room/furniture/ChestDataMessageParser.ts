@@ -21,7 +21,8 @@ export const CHEST_KIND_FURNI = 1;
  * bool accessOpen, bool accessDonate, int appearanceState,
  * bool notifyFull, bool notifyDonation, bool notifyWithdraw, bool notifyEmpty, bool notifyWired, int notifyMode,
  * int entryCount, [int currencyType, int amount]*,
- * int chestKind, int furniCount, [int baseItemId, int quantity]*, bool locked, int capacity.
+ * int chestKind, int furniCount, [int baseItemId, int quantity]*, bool locked, int capacity,
+ * bool autoLock, bool viewerOwnsChest, int chestSpriteId.
  */
 export class ChestDataMessageParser implements IMessageParser
 {
@@ -44,6 +45,9 @@ export class ChestDataMessageParser implements IMessageParser
     private _furniEntries: IChestFurniEntry[] = [];
     private _locked: boolean = false;
     private _capacity: number = 0;
+    private _autoLock: boolean = false;
+    private _viewerOwnsChest: boolean = false;
+    private _chestSpriteId: number = 0;
 
     public flush(): boolean
     {
@@ -66,6 +70,9 @@ export class ChestDataMessageParser implements IMessageParser
         this._furniEntries = [];
         this._locked = false;
         this._capacity = 0;
+        this._autoLock = false;
+        this._viewerOwnsChest = false;
+        this._chestSpriteId = 0;
 
         return true;
     }
@@ -103,6 +110,9 @@ export class ChestDataMessageParser implements IMessageParser
         this._furniEntries = [];
         this._locked = false;
         this._capacity = 0;
+        this._autoLock = false;
+        this._viewerOwnsChest = false;
+        this._chestSpriteId = 0;
 
         if(!wrapper.bytesAvailable) return true;
 
@@ -125,6 +135,18 @@ export class ChestDataMessageParser implements IMessageParser
         if(!wrapper.bytesAvailable) return true;
 
         this._capacity = wrapper.readInt();
+
+        if(!wrapper.bytesAvailable) return true;
+
+        this._autoLock = wrapper.readBoolean();
+
+        if(!wrapper.bytesAvailable) return true;
+
+        this._viewerOwnsChest = wrapper.readBoolean();
+
+        if(!wrapper.bytesAvailable) return true;
+
+        this._chestSpriteId = wrapper.readInt();
 
         return true;
     }
@@ -149,4 +171,10 @@ export class ChestDataMessageParser implements IMessageParser
     public get locked(): boolean { return this._locked; }
     /** The ceiling the owner set, at or below what they have bought. */
     public get capacity(): number { return this._capacity; }
+    /** Whether the chest closes itself once it fills up. */
+    public get autoLock(): boolean { return this._autoLock; }
+    /** Whether the person this state was sent to owns the chest. Owner-only controls read it. */
+    public get viewerOwnsChest(): boolean { return this._viewerOwnsChest; }
+    /** The chest's own furnidata id, for showing what is being upgraded. */
+    public get chestSpriteId(): number { return this._chestSpriteId; }
 }

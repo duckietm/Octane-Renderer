@@ -32,6 +32,7 @@ export * from './floor';
 export * from './wall';
 export * from './youtube';
 export * from './WiredChestRoomLogsMessageParser';
+export * from './ChestUpgradeResultMessageParser';
 export * from './WiredChestLockStateMessageParser';
 export * from './WiredChestTransactionDetailsMessageParser';
 export * from './WiredTradeRuleParser';
