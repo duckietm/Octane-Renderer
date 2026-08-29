@@ -113,6 +113,7 @@ export class OutgoingHeader
     public static CHEST_SAVE_SETTINGS = 9315;
     public static CHEST_SAVE_OPTIONS = 9338;
     public static CHEST_CLOSE = 9339;
+    public static CHEST_ENABLE_WIRED = 9345;
     public static CHEST_SAVE_NOTIFICATIONS = 9316;
     public static CHEST_UPGRADE_CAPACITY = 9317;
     public static CHEST_REQUEST_LOG = 9318;

@@ -22,7 +22,8 @@ export const CHEST_KIND_FURNI = 1;
  * bool notifyFull, bool notifyDonation, bool notifyWithdraw, bool notifyEmpty, bool notifyWired, int notifyMode,
  * int entryCount, [int currencyType, int amount]*,
  * int chestKind, int furniCount, [int baseItemId, int quantity]*, bool locked, int capacity,
- * bool autoLock, bool viewerOwnsChest, int chestSpriteId.
+ * bool autoLock, bool viewerOwnsChest, int chestSpriteId, bool wiredEnabled,
+ * bool starterChest.
  */
 export class ChestDataMessageParser implements IMessageParser
 {
@@ -48,6 +49,8 @@ export class ChestDataMessageParser implements IMessageParser
     private _autoLock: boolean = false;
     private _viewerOwnsChest: boolean = false;
     private _chestSpriteId: number = 0;
+    private _wiredEnabled: boolean = true;
+    private _starterChest: boolean = false;
 
     public flush(): boolean
     {
@@ -73,6 +76,9 @@ export class ChestDataMessageParser implements IMessageParser
         this._autoLock = false;
         this._viewerOwnsChest = false;
         this._chestSpriteId = 0;
+        // A server that does not send these is one where every chest answered wired.
+        this._wiredEnabled = true;
+        this._starterChest = false;
 
         return true;
     }
@@ -113,6 +119,9 @@ export class ChestDataMessageParser implements IMessageParser
         this._autoLock = false;
         this._viewerOwnsChest = false;
         this._chestSpriteId = 0;
+        // A server that does not send these is one where every chest answered wired.
+        this._wiredEnabled = true;
+        this._starterChest = false;
 
         if(!wrapper.bytesAvailable) return true;
 
@@ -148,6 +157,14 @@ export class ChestDataMessageParser implements IMessageParser
 
         this._chestSpriteId = wrapper.readInt();
 
+        if(!wrapper.bytesAvailable) return true;
+
+        this._wiredEnabled = wrapper.readBoolean();
+
+        if(!wrapper.bytesAvailable) return true;
+
+        this._starterChest = wrapper.readBoolean();
+
         return true;
     }
 
@@ -177,4 +194,8 @@ export class ChestDataMessageParser implements IMessageParser
     public get viewerOwnsChest(): boolean { return this._viewerOwnsChest; }
     /** The chest's own furnidata id, for showing what is being upgraded. */
     public get chestSpriteId(): number { return this._chestSpriteId; }
+    /** Whether wired may reach this chest. Off until its owner upgrades it, then permanent. */
+    public get wiredEnabled(): boolean { return this._wiredEnabled; }
+    /** A starter chest holds less and can never be grown. */
+    public get starterChest(): boolean { return this._starterChest; }
 }

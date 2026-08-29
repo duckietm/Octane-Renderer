@@ -7,6 +7,7 @@ export * from './ChestWithdrawComposer';
 export * from './ChestWithdrawFurniComposer';
 export * from './ChestWithdrawAllFurniComposer';
 export * from './ChestCloseComposer';
+export * from './ChestEnableWiredComposer';
 export * from './ChestSaveOptionsComposer';
 export * from './ChestSaveSettingsComposer';
 export * from './ChestSaveNotificationsComposer';
