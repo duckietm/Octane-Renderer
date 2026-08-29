@@ -30,6 +30,7 @@ export * from './floor';
 export * from './wall';
 export * from './youtube';
 export * from './WiredChestRoomLogsEvent';
+export * from './ChestNotificationEvent';
 export * from './ChestUpgradeResultEvent';
 export * from './WiredChestLockStateEvent';
 export * from './WiredChestTransactionDetailsEvent';
