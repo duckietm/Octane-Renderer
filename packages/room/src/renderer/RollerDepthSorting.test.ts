@@ -2,6 +2,7 @@ import { Vector3d } from '@nitrots/utils';
 import { describe, expect, it } from 'vitest';
 import { SizeData } from '../object/visualization/data/SizeData';
 import { RoomGeometry } from '../utils/RoomGeometry';
+import { OBJECT_ALTITUDE_DEPTH } from './ObjectAltitudeDepth';
 
 // Classic roller (queue_tile1) visualization data, verbatim from the
 // converted .nitro (which matches the original SWF): every layer is pushed
@@ -18,9 +19,8 @@ const createQueueTileSizeData = () => {
     return sizeData;
 };
 
-// Mirrors of the production constants this test guards:
-// RoomSpriteCanvas.OBJECT_ALTITUDE_DEPTH and FurnitureVisualization.DEPTH_MULTIPLIER.
-const OBJECT_ALTITUDE_DEPTH = 0.2;
+// Mirror of the production constant this test guards:
+// FurnitureVisualization.DEPTH_MULTIPLIER.
 const DEPTH_MULTIPLIER = Math.sqrt(0.5);
 const AVATAR_SPRITE_DEFAULT_DEPTH = -0.01;
 
