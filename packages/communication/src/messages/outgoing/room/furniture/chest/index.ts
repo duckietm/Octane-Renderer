@@ -13,3 +13,6 @@ export * from './ChestRequestLogComposer';
 export * from './WiredChestRoomLogsComposer';
 export * from './WiredChestLockComposer';
 export * from './WiredChestTransactionDetailsComposer';
+export * from './WiredTradeOfferItemsComposer';
+export * from './WiredTradeAcceptComposer';
+export * from './WiredTradeCancelComposer';

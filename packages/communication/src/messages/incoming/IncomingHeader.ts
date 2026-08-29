@@ -100,6 +100,10 @@ export class IncomingHeader
     public static WIRED_CHEST_ROOM_LOGS = 9328;
     public static WIRED_CHEST_LOCK_STATE = 9329;
     public static WIRED_CHEST_TRANSACTION_DETAILS = 9330;
+    public static WIRED_TRADE_OPEN = 9331;
+    public static WIRED_TRADE_ITEMS = 9332;
+    public static WIRED_TRADE_CANCELLED = 9333;
+    public static WIRED_TRADE_COMPLETED = 9334;
     public static ITEM_STACK_HELPER = 2816;
     public static ITEM_WALL = 1369;
     public static ITEM_WALL_ADD = 2187;

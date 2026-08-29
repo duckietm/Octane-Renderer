@@ -124,6 +124,9 @@ export class OutgoingHeader
     public static WIRED_CHEST_LOCK = 9329;
     // 9330-9333 belong to the Trax editor; the chests tab continues at 9334.
     public static WIRED_CHEST_TRANSACTION_DETAILS = 9334;
+    public static WIRED_TRADE_OFFER_ITEMS = 9335;
+    public static WIRED_TRADE_ACCEPT = 9336;
+    public static WIRED_TRADE_CANCEL = 9337;
     public static ITEM_DIMMER_TOGGLE = 2296;
     public static ITEM_EXCHANGE_REDEEM = 3115;
     public static ITEM_PAINT = 711;

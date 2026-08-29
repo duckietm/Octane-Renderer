@@ -34,3 +34,8 @@ export * from './youtube';
 export * from './WiredChestRoomLogsMessageParser';
 export * from './WiredChestLockStateMessageParser';
 export * from './WiredChestTransactionDetailsMessageParser';
+export * from './WiredTradeRuleParser';
+export * from './WiredTradeOpenMessageParser';
+export * from './WiredTradeItemsMessageParser';
+export * from './WiredTradeCancelledMessageParser';
+export * from './WiredTradeCompletedMessageParser';

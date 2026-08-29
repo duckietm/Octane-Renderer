@@ -32,3 +32,7 @@ export * from './youtube';
 export * from './WiredChestRoomLogsEvent';
 export * from './WiredChestLockStateEvent';
 export * from './WiredChestTransactionDetailsEvent';
+export * from './WiredTradeOpenEvent';
+export * from './WiredTradeItemsEvent';
+export * from './WiredTradeCancelledEvent';
+export * from './WiredTradeCompletedEvent';
