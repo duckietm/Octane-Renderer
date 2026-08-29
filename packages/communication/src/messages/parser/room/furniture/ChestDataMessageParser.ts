@@ -21,7 +21,7 @@ export const CHEST_KIND_FURNI = 1;
  * bool accessOpen, bool accessDonate, int appearanceState,
  * bool notifyFull, bool notifyDonation, bool notifyWithdraw, bool notifyEmpty, bool notifyWired, int notifyMode,
  * int entryCount, [int currencyType, int amount]*,
- * int chestKind, int furniCount, [int baseItemId, int quantity]*, bool locked.
+ * int chestKind, int furniCount, [int baseItemId, int quantity]*, bool locked, int capacity.
  */
 export class ChestDataMessageParser implements IMessageParser
 {
@@ -43,6 +43,7 @@ export class ChestDataMessageParser implements IMessageParser
     private _chestKind: number = CHEST_KIND_CURRENCY;
     private _furniEntries: IChestFurniEntry[] = [];
     private _locked: boolean = false;
+    private _capacity: number = 0;
 
     public flush(): boolean
     {
@@ -64,6 +65,7 @@ export class ChestDataMessageParser implements IMessageParser
         this._chestKind = CHEST_KIND_CURRENCY;
         this._furniEntries = [];
         this._locked = false;
+        this._capacity = 0;
 
         return true;
     }
@@ -100,6 +102,7 @@ export class ChestDataMessageParser implements IMessageParser
         this._chestKind = CHEST_KIND_CURRENCY;
         this._furniEntries = [];
         this._locked = false;
+        this._capacity = 0;
 
         if(!wrapper.bytesAvailable) return true;
 
@@ -118,6 +121,10 @@ export class ChestDataMessageParser implements IMessageParser
         if(!wrapper.bytesAvailable) return true;
 
         this._locked = wrapper.readBoolean();
+
+        if(!wrapper.bytesAvailable) return true;
+
+        this._capacity = wrapper.readInt();
 
         return true;
     }
@@ -140,4 +147,6 @@ export class ChestDataMessageParser implements IMessageParser
     public get chestKind(): number { return this._chestKind; }
     public get furniEntries(): IChestFurniEntry[] { return this._furniEntries; }
     public get locked(): boolean { return this._locked; }
+    /** The ceiling the owner set, at or below what they have bought. */
+    public get capacity(): number { return this._capacity; }
 }
