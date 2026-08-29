@@ -8,68 +8,157 @@ import { FurnitureAnimatedVisualization } from './FurnitureAnimatedVisualization
  *
  * <p>Its asset carries a layer tagged `wired_emblem` — the mark that says this chest is part of the
  * room's machinery rather than a box. It was drawn on every chest whether it meant anything or not,
- * because until a chest could be told apart, every one of them answered wired. Now it shows exactly
- * when it is true.
+ * because until a chest could be told apart, every one of them answered wired.
  *
- * <p>And a chest can show some of what it holds, sitting on its lid. Those items are not in the
- * chest's own spritesheet — they are whatever somebody put inside — so they arrive as furnidata ids
- * in the chest's data, are fetched as icons and registered as assets, and are drawn on layers added
- * beyond the ones the asset declares.
+ * <p>And an open chest floats a few of the things inside it above the lid. Those items are not in the
+ * chest's own spritesheet — they are whatever somebody put inside — so they arrive as furnidata ids,
+ * are fetched as icons, and are drawn on sprites added beyond the ones the asset declares. The
+ * layout, the drift and the way they fade with height follow the official client.
  */
 export class FurnitureChestVisualization extends FurnitureAnimatedVisualization
 {
     private static readonly WIRED_EMBLEM_TAG: string = 'wired_emblem';
+    private static readonly FLOATING_ICON_TAG_PREFIX: string = 'floating_icon_';
 
     /** Keys the server puts in the chest's furni data. */
     private static readonly WIRED_ENABLED_KEY: string = 'is_wired_enabled';
-    private static readonly PREVIEW_ITEMS_KEY: string = 'preview_items';
+    private static readonly VISUALS_KEY: string = 'visuals';
 
-    /** The lid has room for four. */
-    private static readonly MAX_PREVIEW_ITEMS: number = 4;
+    private static readonly MAX_ICONS: number = 4;
 
-    /** Where the row of previewed items sits relative to the chest's own origin. */
-    private static readonly PREVIEW_Y_OFFSET: number = -46;
-    private static readonly PREVIEW_SPACING: number = 15;
-    private static readonly PREVIEW_SIZE: number = 24;
+    /** Icons are only drawn at full size; at half scale there is no room for them. */
+    private static readonly ICON_SCALE: number = 64;
 
-    private _previewIds: string = '';
-    private _previewAssetNames: string[] = [];
+    /** How far an icon drifts, and how long a step of that drift lasts. */
+    private static readonly FLOATING_PIXELS: number = 2;
+    private static readonly FLOAT_INTERVAL: number = 300;
+
+    /**
+     * Where each icon sits, by how many are shown: [x, y, xSpread, ySpread].
+     *
+     * <p>Straight from the official client. The spreads are a random nudge applied once, so two chests
+     * side by side do not look stamped from the same mould.
+     */
+    private static readonly ICON_POSITIONING: number[][][] = [
+        [],
+        [[0, -68, 17, 17]],
+        [[16, -70, 4, 4], [-14, -59, 4, 4]],
+        [[12, -52, 2, 2], [-17, -70, 3, 2], [17, -87, 7, 2]],
+        [[14, -50, 2, 2], [-14, -59, 2, 2], [19, -78, 4, 2], [-20, -90, 4, 2]]
+    ];
+
+    private _lastVisuals: string = '';
+    private _iconAssetNames: string[] = [];
+    private _icons: { x: number; y: number; width: number; height: number; alpha: number; z: number }[] = [];
+    private _mirrored: boolean = false;
+    private _floatStep: number = 0;
+    private _lastFloatUpdate: number = -1;
 
     protected getAdditionalLayerCount(): number
     {
-        return super.getAdditionalLayerCount() + FurnitureChestVisualization.MAX_PREVIEW_ITEMS;
+        return super.getAdditionalLayerCount() + FurnitureChestVisualization.MAX_ICONS;
     }
 
     protected updateModel(scale: number): boolean
     {
-        const needsUpdate = super.updateModel(scale);
-        const ids = this.readData(FurnitureChestVisualization.PREVIEW_ITEMS_KEY, '');
+        let needsUpdate = super.updateModel(scale);
 
-        if(ids === this._previewIds) return needsUpdate;
+        // Only an open chest shows what is inside it, which the official reads off the state being
+        // odd -- for a furni chest that is the raised lid, and for a coin chest the piles of gold.
+        const open = ((this.object?.getState(0) ?? 0) % 2) === 1;
+        const visuals = (open && (scale === FurnitureChestVisualization.ICON_SCALE))
+            ? this.readData(FurnitureChestVisualization.VISUALS_KEY, '')
+            : '';
 
-        this._previewIds = ids;
-        this._previewAssetNames = [];
+        if(visuals === this._lastVisuals) return needsUpdate;
 
-        // Fetching is asynchronous; each icon asks for a redraw as it lands, so a slow one does not
-        // hold up the other three.
-        const typeIds = ids.split(',').filter(id => id.length).slice(0, FurnitureChestVisualization.MAX_PREVIEW_ITEMS);
+        this._lastVisuals = visuals;
+        this._iconAssetNames = [];
+        this._icons = [];
 
-        typeIds.forEach((typeId, index) => this.loadPreviewIcon(parseInt(typeId, 10), index));
+        const entries = visuals.split(';').filter(entry => entry.length).slice(0, FurnitureChestVisualization.MAX_ICONS);
+
+        this.layOutIcons(entries.length);
+
+        entries.forEach((entry, index) => this.loadIcon(entry, index));
 
         this.updateObjectCounter = -1;
 
         return true;
     }
 
-    private async loadPreviewIcon(typeId: number, index: number): Promise<void>
+    public update(geometry: any, time: number, update: boolean, skipUpdate: boolean): void
     {
+        // The drift: a step every 300ms, four steps folded into an up-and-back so the icons breathe
+        // rather than snapping back down. Asking for a redraw here is what makes them move at all.
+        if(this._icons.length)
+        {
+            if((this._lastFloatUpdate < 0) || ((time - this._lastFloatUpdate) > FurnitureChestVisualization.FLOAT_INTERVAL))
+            {
+                this._lastFloatUpdate = time;
+                this._floatStep = (this._floatStep + 1) % (FurnitureChestVisualization.FLOATING_PIXELS * 2);
+                this.updateObjectCounter = -1;
+            }
+        }
+
+        super.update(geometry, time, update, skipUpdate);
+    }
+
+    /** Place the icons for a given count, nudged so no two chests look identical. */
+    private layOutIcons(count: number): void
+    {
+        const positions = FurnitureChestVisualization.ICON_POSITIONING[count] ?? [];
+
+        this._mirrored = Math.random() < 0.5;
+        this._floatStep = 0;
+
+        this._icons = positions.map(([x, y, xSpread, ySpread]) =>
+        {
+            const nudgedX = Math.round(x + (Math.random() * (xSpread + 1)) - (xSpread / 2));
+            const nudgedY = Math.round(y + (Math.random() * (ySpread + 1)) - (ySpread / 2));
+
+            return {
+                x: nudgedX,
+                y: nudgedY,
+                width: 0,
+                height: 0,
+                alpha: this.alphaForHeight(nudgedY),
+                z: 0.001 + (nudgedY / 10000)
+            };
+        });
+    }
+
+    /**
+     * The higher an icon floats, the fainter it is: 0.9 at the lid, down to 0.4 well above it.
+     */
+    private alphaForHeight(y: number): number
+    {
+        const near = -40;
+        const far = -100;
+        const nearAlpha = 0.9;
+        const farAlpha = 0.4;
+
+        const along = (y - near) / (far - near);
+        const alpha = nearAlpha + ((farAlpha - nearAlpha) * along);
+
+        return Math.min(Math.max(alpha, farAlpha), nearAlpha);
+    }
+
+    /** `visuals` entries look like `isWallItem,typeId[,extra]`, the way the official writes them. */
+    private async loadIcon(entry: string, index: number): Promise<void>
+    {
+        const parts = entry.split(',');
+        const wallItem = parts[0] === 'true';
+        const typeId = parseInt(parts[1], 10);
+
         if(isNaN(typeId) || (typeId <= 0) || !this.asset) return;
 
-        const url = GetRoomEngine()?.getFurnitureFloorIconUrl(typeId);
+        const roomEngine = GetRoomEngine();
+        const url = wallItem ? roomEngine?.getFurnitureWallIconUrl(typeId) : roomEngine?.getFurnitureFloorIconUrl(typeId);
 
         if(!url) return;
 
-        const name = `chest_preview_${ typeId }`;
+        const name = `chest_icon_${ wallItem ? 'w' : 'f' }_${ typeId }`;
 
         try
         {
@@ -84,53 +173,105 @@ export class FurnitureChestVisualization extends FurnitureAnimatedVisualization
         }
         catch
         {
-            // A furni whose icon will not load simply is not previewed. The chest still draws.
+            // An icon that will not load simply is not shown. The chest still draws.
             return;
         }
 
-        this._previewAssetNames[index] = name;
+        const asset = this.asset.getAsset(name);
+        const icon = this._icons[index];
+
+        if(icon && asset)
+        {
+            icon.width = asset.width;
+            icon.height = asset.height;
+        }
+
+        this._iconAssetNames[index] = name;
         this.updateObjectCounter = -1;
+    }
+
+    /** Which floating slot a layer is, or -1 when it is one of the chest's own. */
+    private iconIndexOf(layerId: number): number
+    {
+        const index = layerId - this.totalSprites + FurnitureChestVisualization.MAX_ICONS;
+
+        if((index < 0) || (index >= this._icons.length)) return -1;
+
+        return index;
     }
 
     protected getSpriteAssetName(scale: number, layerId: number): string
     {
-        const previewIndex = this.previewIndexOf(scale, layerId);
+        const index = this.iconIndexOf(layerId);
 
-        if(previewIndex < 0) return super.getSpriteAssetName(scale, layerId);
+        if((index < 0) || (scale !== FurnitureChestVisualization.ICON_SCALE)) return super.getSpriteAssetName(scale, layerId);
 
-        const name = this._previewAssetNames[previewIndex];
+        return this._iconAssetNames[index] ?? super.getSpriteAssetName(scale, layerId);
+    }
 
-        if(!name) return super.getSpriteAssetName(scale, layerId);
+    protected getLayerTag(scale: number, direction: number, layerId: number): string
+    {
+        const index = this.iconIndexOf(layerId);
 
-        const asset = this.getAsset(name, layerId);
+        if(index < 0) return super.getLayerTag(scale, direction, layerId);
 
-        if(!asset || !asset.texture) return super.getSpriteAssetName(scale, layerId);
+        return FurnitureChestVisualization.FLOATING_ICON_TAG_PREFIX + index;
+    }
 
-        return name;
+    protected getLayerAlpha(scale: number, direction: number, layerId: number): number
+    {
+        const index = this.iconIndexOf(layerId);
+        const alpha = super.getLayerAlpha(scale, direction, layerId);
+
+        if(index < 0) return alpha;
+
+        return (this._icons[index].alpha * alpha);
     }
 
     protected getLayerXOffset(scale: number, direction: number, layerId: number): number
     {
-        const previewIndex = this.previewIndexOf(scale, layerId);
+        const index = this.iconIndexOf(layerId);
 
-        if(previewIndex < 0) return super.getLayerXOffset(scale, direction, layerId);
+        if(index < 0) return super.getLayerXOffset(scale, direction, layerId);
 
-        const shown = this.shownPreviewCount();
-        const spacing = this.scaled(scale, FurnitureChestVisualization.PREVIEW_SPACING);
+        const icon = this._icons[index];
+        const facingOther = ((direction / 2) % 2) === 1;
 
-        // Centre the row on the chest, whether there is one item on it or four.
-        const centred = (previewIndex - ((shown - 1) / 2)) * spacing;
+        // Mirrored per chest and per facing, so a row of chests does not read as a repeated pattern.
+        const x = (this._mirrored !== facingOther) ? -icon.x : icon.x;
 
-        return Math.round(centred - (this.scaled(scale, FurnitureChestVisualization.PREVIEW_SIZE) / 2));
+        return Math.round(x - (icon.width / 2));
     }
 
     protected getLayerYOffset(scale: number, direction: number, layerId: number): number
     {
-        const previewIndex = this.previewIndexOf(scale, layerId);
+        const index = this.iconIndexOf(layerId);
 
-        if(previewIndex < 0) return super.getLayerYOffset(scale, direction, layerId);
+        if(index < 0) return super.getLayerYOffset(scale, direction, layerId);
 
-        return this.scaled(scale, FurnitureChestVisualization.PREVIEW_Y_OFFSET);
+        const icon = this._icons[index];
+
+        // Fold 0,1,2,3 into 0,1,2,1 so the drift goes up and comes back rather than snapping.
+        let step = this._floatStep;
+        if(step > FurnitureChestVisualization.FLOATING_PIXELS) step = (FurnitureChestVisualization.FLOATING_PIXELS * 2) - step;
+
+        return Math.round(icon.y + (icon.height / 2) - step);
+    }
+
+    protected getLayerZOffset(scale: number, direction: number, layerId: number): number
+    {
+        const index = this.iconIndexOf(layerId);
+
+        if(index < 0) return super.getLayerZOffset(scale, direction, layerId);
+
+        return this._icons[index].z;
+    }
+
+    protected getLayerIgnoreMouse(scale: number, direction: number, layerId: number): boolean
+    {
+        if(this.iconIndexOf(layerId) >= 0) return true;
+
+        return super.getLayerIgnoreMouse(scale, direction, layerId);
     }
 
     protected updateSprite(scale: number, layerId: number): void
@@ -147,47 +288,11 @@ export class FurnitureChestVisualization extends FurnitureAnimatedVisualization
             return;
         }
 
-        const previewIndex = this.previewIndexOf(scale, layerId);
+        const index = this.iconIndexOf(layerId);
 
-        if(previewIndex < 0) return;
+        if(index < 0) return;
 
-        const name = this._previewAssetNames[previewIndex];
-
-        sprite.visible = !!name;
-
-        if(!name) return;
-
-        sprite.alpha = 255;
-        sprite.color = 0xFFFFFF;
-
-        // Icons are drawn at their own size; bring them down to something that sits on a lid.
-        const asset = this.getAsset(name, layerId);
-
-        if(asset?.texture?.width) sprite.scale = (this.scaled(scale, FurnitureChestVisualization.PREVIEW_SIZE) / asset.texture.width);
-
-        // In front of the chest's own layers, which top out at z 500.
-        sprite.relativeDepth = -0.01 - (previewIndex * 0.001);
-    }
-
-    /** Which preview slot a layer is, or -1 when it is one of the chest's own layers. */
-    private previewIndexOf(scale: number, layerId: number): number
-    {
-        const ownLayers = (this._data?.getLayerCount(scale) || 0);
-        const index = layerId - ownLayers;
-
-        if((index < 0) || (index >= FurnitureChestVisualization.MAX_PREVIEW_ITEMS)) return -1;
-
-        return index;
-    }
-
-    private shownPreviewCount(): number
-    {
-        return Math.max(1, this._previewAssetNames.filter(name => !!name).length);
-    }
-
-    private scaled(scale: number, value: number): number
-    {
-        return (scale === 32) ? (value * 0.5) : value;
+        sprite.visible = !!this._iconAssetNames[index];
     }
 
     /**
