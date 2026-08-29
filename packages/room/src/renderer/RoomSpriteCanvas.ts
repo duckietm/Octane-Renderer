@@ -1,38 +1,15 @@
-import { AvatarAction, IPlaneVisualization, IRoomCanvasMouseListener, IRoomGeometry, IRoomObject, IRoomObjectSprite, IRoomObjectSpriteVisualization, IRoomPlane, IRoomRenderingCanvas, IRoomSpriteCanvasContainer, IRoomSpriteMouseEvent, MouseEventType, RoomObjectSpriteData, RoomObjectSpriteType, RoomObjectVariable } from '@nitrots/api';
+import { IPlaneVisualization, IRoomCanvasMouseListener, IRoomGeometry, IRoomObject, IRoomObjectSprite, IRoomObjectSpriteVisualization, IRoomPlane, IRoomRenderingCanvas, IRoomSpriteCanvasContainer, IRoomSpriteMouseEvent, MouseEventType, RoomObjectSpriteData, RoomObjectSpriteType } from '@nitrots/api';
 import { GetConfiguration } from '@nitrots/configuration';
 import { RoomSpriteMouseEvent } from '@nitrots/events';
 import { GetTicker, TextureUtils, Vector3d } from '@nitrots/utils';
 import { Container, Graphics, Matrix, Point, Rectangle, Sprite, Texture } from 'pixi.js';
 import { RoomEnterEffect, RoomGeometry, RoomRotatingEffect, RoomShakingEffect } from '../utils';
 import { RoomObjectCache, RoomObjectCacheItem } from './cache';
+import { getObjectAltitudeDepth } from './ObjectAltitudeDepth';
 import { ExtendedSprite, ObjectMouseData, SortableSprite } from './utils';
 
 export class RoomSpriteCanvas implements IRoomRenderingCanvas
 {
-    // Sort-depth weight per unit of object altitude. The geometry's depth
-    // vector is nearly horizontal (0.5° vertical angle), so altitude alone
-    // contributes almost nothing to painter ordering. Classic ride-on
-    // furniture depends on it: queue tiles push their layers back 0.9 tiles
-    // (asset z -900) and expect the rider's altitude (0.45) to cover the
-    // remaining fraction of the tile step (sqrt(0.5) per tile). 0.2 gives a
-    // 0.45-high rider ~0.09 depth (> the 0.071 shortfall), while a closer
-    // tile still outranks anything elevated less than ~3.5 units.
-    private static OBJECT_ALTITUDE_DEPTH: number = 0.2;
-
-    // A unit resting on furniture must still sort against that furniture's own
-    // layers: a sofa pushes its front layers barely a hundredth of a unit ahead
-    // of the seat tile, so weighting the sitter's altitude - a whole seat height
-    // - paints it over the armrests. Ride-on furniture carries standing riders,
-    // so it keeps the weighting.
-    private static getAltitudeDepthWeight(object: IRoomObject): number
-    {
-        const posture = object.model?.getValue<string>(RoomObjectVariable.FIGURE_POSTURE);
-
-        if((posture === AvatarAction.POSTURE_SIT) || (posture === AvatarAction.POSTURE_LAY)) return 0;
-
-        return RoomSpriteCanvas.OBJECT_ALTITUDE_DEPTH;
-    }
-
     private _geometry: RoomGeometry;
     private _animationFPS: number;
     private _renderTimestamp: number = 0;
@@ -577,7 +554,7 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
 
         let x = vector.x;
         let y = vector.y;
-        let z = (vector.z - (object.getLocation().z * RoomSpriteCanvas.getAltitudeDepthWeight(object)));
+        let z = (vector.z - getObjectAltitudeDepth(object));
 
         if(x > 0) z = (z + (x * 1.2E-7));
         else z = (z + (-(x) * 1.2E-7));
