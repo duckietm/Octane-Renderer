@@ -6,6 +6,7 @@ export * from './ChestDepositInventoryItemComposer';
 export * from './ChestWithdrawComposer';
 export * from './ChestWithdrawFurniComposer';
 export * from './ChestWithdrawAllFurniComposer';
+export * from './ChestCloseComposer';
 export * from './ChestSaveOptionsComposer';
 export * from './ChestSaveSettingsComposer';
 export * from './ChestSaveNotificationsComposer';
