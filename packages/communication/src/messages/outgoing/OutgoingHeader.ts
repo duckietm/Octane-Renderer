@@ -111,6 +111,9 @@ export class OutgoingHeader
     public static CHEST_DEPOSIT = 9313;
     public static CHEST_WITHDRAW = 9314;
     public static CHEST_SAVE_SETTINGS = 9315;
+    public static CHEST_SAVE_OPTIONS = 9338;
+    public static CHEST_CLOSE = 9339;
+    public static CHEST_ENABLE_WIRED = 9345;
     public static CHEST_SAVE_NOTIFICATIONS = 9316;
     public static CHEST_UPGRADE_CAPACITY = 9317;
     public static CHEST_REQUEST_LOG = 9318;
@@ -120,6 +123,13 @@ export class OutgoingHeader
     public static CHEST_DEPOSIT_INVENTORY_ITEM = 9325;
     public static CHEST_WITHDRAW_ALL_FURNI = 9326;
     public static CHEST_OPEN = 9327;
+    public static WIRED_CHEST_ROOM_LOGS = 9328;
+    public static WIRED_CHEST_LOCK = 9329;
+    // 9330-9333 belong to the Trax editor; the chests tab continues at 9334.
+    public static WIRED_CHEST_TRANSACTION_DETAILS = 9334;
+    public static WIRED_TRADE_OFFER_ITEMS = 9335;
+    public static WIRED_TRADE_ACCEPT = 9336;
+    public static WIRED_TRADE_CANCEL = 9337;
     public static ITEM_DIMMER_TOGGLE = 2296;
     public static ITEM_EXCHANGE_REDEEM = 3115;
     public static ITEM_PAINT = 711;
