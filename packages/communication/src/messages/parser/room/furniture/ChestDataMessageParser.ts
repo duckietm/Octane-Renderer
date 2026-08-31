@@ -20,7 +20,10 @@ export const CHEST_KIND_FURNI = 1;
  * int itemId, string name, string description, int capacityMax, int used,
  * bool accessOpen, bool accessDonate, int appearanceState,
  * bool notifyFull, bool notifyDonation, bool notifyWithdraw, bool notifyEmpty, bool notifyWired, int notifyMode,
- * int entryCount, [int currencyType, int amount]*.
+ * int entryCount, [int currencyType, int amount]*,
+ * int chestKind, int furniCount, [int baseItemId, int quantity]*, bool locked, int capacity,
+ * bool autoLock, bool viewerOwnsChest, int chestSpriteId, bool wiredEnabled,
+ * bool starterChest, int previewMode, int previewAmount.
  */
 export class ChestDataMessageParser implements IMessageParser
 {
@@ -41,6 +44,15 @@ export class ChestDataMessageParser implements IMessageParser
     private _entries: IChestCurrencyEntry[] = [];
     private _chestKind: number = CHEST_KIND_CURRENCY;
     private _furniEntries: IChestFurniEntry[] = [];
+    private _locked: boolean = false;
+    private _capacity: number = 0;
+    private _autoLock: boolean = false;
+    private _viewerOwnsChest: boolean = false;
+    private _chestSpriteId: number = 0;
+    private _wiredEnabled: boolean = true;
+    private _starterChest: boolean = false;
+    private _previewMode: number = 0;
+    private _previewAmount: number = 1;
 
     public flush(): boolean
     {
@@ -61,6 +73,16 @@ export class ChestDataMessageParser implements IMessageParser
         this._entries = [];
         this._chestKind = CHEST_KIND_CURRENCY;
         this._furniEntries = [];
+        this._locked = false;
+        this._capacity = 0;
+        this._autoLock = false;
+        this._viewerOwnsChest = false;
+        this._chestSpriteId = 0;
+        // A server that does not send these is one where every chest answered wired.
+        this._wiredEnabled = true;
+        this._starterChest = false;
+        this._previewMode = 0;
+        this._previewAmount = 1;
 
         return true;
     }
@@ -93,9 +115,19 @@ export class ChestDataMessageParser implements IMessageParser
             this._entries.push({ currencyType, amount });
         }
 
-        // chestKind + furni contents (appended; guard so an un-rebuilt server still parses)
+        // chestKind + furni contents + lock (appended; guard so an un-rebuilt server still parses)
         this._chestKind = CHEST_KIND_CURRENCY;
         this._furniEntries = [];
+        this._locked = false;
+        this._capacity = 0;
+        this._autoLock = false;
+        this._viewerOwnsChest = false;
+        this._chestSpriteId = 0;
+        // A server that does not send these is one where every chest answered wired.
+        this._wiredEnabled = true;
+        this._starterChest = false;
+        this._previewMode = 0;
+        this._previewAmount = 1;
 
         if(!wrapper.bytesAvailable) return true;
 
@@ -110,6 +142,42 @@ export class ChestDataMessageParser implements IMessageParser
 
             this._furniEntries.push({ baseItemId, quantity });
         }
+
+        if(!wrapper.bytesAvailable) return true;
+
+        this._locked = wrapper.readBoolean();
+
+        if(!wrapper.bytesAvailable) return true;
+
+        this._capacity = wrapper.readInt();
+
+        if(!wrapper.bytesAvailable) return true;
+
+        this._autoLock = wrapper.readBoolean();
+
+        if(!wrapper.bytesAvailable) return true;
+
+        this._viewerOwnsChest = wrapper.readBoolean();
+
+        if(!wrapper.bytesAvailable) return true;
+
+        this._chestSpriteId = wrapper.readInt();
+
+        if(!wrapper.bytesAvailable) return true;
+
+        this._wiredEnabled = wrapper.readBoolean();
+
+        if(!wrapper.bytesAvailable) return true;
+
+        this._starterChest = wrapper.readBoolean();
+
+        if(!wrapper.bytesAvailable) return true;
+
+        this._previewMode = wrapper.readInt();
+
+        if(!wrapper.bytesAvailable) return true;
+
+        this._previewAmount = wrapper.readInt();
 
         return true;
     }
@@ -131,4 +199,20 @@ export class ChestDataMessageParser implements IMessageParser
     public get entries(): IChestCurrencyEntry[] { return this._entries; }
     public get chestKind(): number { return this._chestKind; }
     public get furniEntries(): IChestFurniEntry[] { return this._furniEntries; }
+    public get locked(): boolean { return this._locked; }
+    /** The ceiling the owner set, at or below what they have bought. */
+    public get capacity(): number { return this._capacity; }
+    /** Whether the chest closes itself once it fills up. */
+    public get autoLock(): boolean { return this._autoLock; }
+    /** Whether the person this state was sent to owns the chest. Owner-only controls read it. */
+    public get viewerOwnsChest(): boolean { return this._viewerOwnsChest; }
+    /** The chest's own furnidata id, for showing what is being upgraded. */
+    public get chestSpriteId(): number { return this._chestSpriteId; }
+    /** Whether wired may reach this chest. Off until its owner upgrades it, then permanent. */
+    public get wiredEnabled(): boolean { return this._wiredEnabled; }
+    /** Whether the chest shows some of what it holds on its lid, and how many. */
+    public get previewMode(): number { return this._previewMode; }
+    public get previewAmount(): number { return this._previewAmount; }
+    /** A starter chest holds less and can never be grown. */
+    public get starterChest(): boolean { return this._starterChest; }
 }
