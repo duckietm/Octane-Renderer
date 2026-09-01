@@ -45,7 +45,7 @@ export class RoomContentLoader implements IRoomContentLoader
     {
         this.processFurnitureData(GetSessionDataManager().getAllFurnitureData());
 
-        for(const [index, name] of GetConfiguration().getValue<string[]>('pet.types').entries()) this._pets[name] = index;
+        for(const [index, name] of (GetConfiguration().getValue<string[]>('pet.types') ?? []).entries()) this._pets[name] = index;
 
         await Promise.all(RoomContentLoader.MANDATORY_LIBRARIES.map(value => this.downloadAsset(value)));
     }
@@ -274,7 +274,7 @@ export class RoomContentLoader implements IRoomContentLoader
 
     public getPetNameForType(type: number): string
     {
-        return GetConfiguration().getValue<string[]>('pet.types')[type] || null;
+        return (GetConfiguration().getValue<string[]>('pet.types') ?? [])[type] || null;
     }
 
     public isLoaderType(type: string): boolean

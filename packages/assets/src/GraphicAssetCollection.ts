@@ -16,6 +16,7 @@ export class GraphicAssetCollection implements IGraphicAssetCollection
     private _assets: Map<string, IGraphicAsset>;
     private _palettes: Map<string, IGraphicAssetPalette>;
     private _paletteAssetNames: string[];
+    private _masterPaletteName: string;
 
     constructor(data: IAssetData, spritesheet: Spritesheet)
     {
@@ -28,6 +29,7 @@ export class GraphicAssetCollection implements IGraphicAssetCollection
         this._assets = new Map();
         this._palettes = new Map();
         this._paletteAssetNames = [];
+        this._masterPaletteName = null;
 
         if(spritesheet) this.addLibraryAsset(spritesheet.textures);
 
@@ -104,8 +106,6 @@ export class GraphicAssetCollection implements IGraphicAssetCollection
 
             if(asset.flipH && source.length) flipH = true;
 
-            // if(asset.flipV && source.length) flipV = true;
-
             if(!source.length) source = name;
 
             const texture = this.getLibraryAsset(source);
@@ -143,16 +143,72 @@ export class GraphicAssetCollection implements IGraphicAssetCollection
             let colorOne = 0xFFFFFF;
             let colorTwo = 0xFFFFFF;
 
-            let color = palette.color1;
+            const color1 = palette.color1;
+            const color2 = palette.color2;
 
-            if(color && color.length > 0) colorOne = parseInt(color, 16);
+            if(color1 && color1.length > 0)
+            {
+                colorOne = parseInt(color1, 16);
 
-            color = palette.color2;
+                if(color2 && color2.length > 0) colorTwo = parseInt(color2, 16);
+            }
+            else
+            {
+                const derived = this.derivePaletteSwatchColor(palette.rgb);
 
-            if(color && color.length > 0) colorTwo = parseInt(color, 16);
+                colorOne = derived;
+                colorTwo = ((color2 && color2.length > 0) ? parseInt(color2, 16) : derived);
+            }
 
             this._palettes.set(id, new GraphicAssetPalette(palette.rgb, colorOne, colorTwo));
+
+            if(this._masterPaletteName === null) this._masterPaletteName = id;
+            if(palette.master) this._masterPaletteName = id;
         }
+    }
+
+    private getFallbackPaletteName(): string
+    {
+        if((this._masterPaletteName !== null) && this._palettes.has(this._masterPaletteName)) return this._masterPaletteName;
+
+        const first = this._palettes.keys().next();
+
+        return (first.done ? null : first.value);
+    }
+
+    private derivePaletteSwatchColor(rgb: [number, number, number][]): number
+    {
+        if(!rgb || !rgb.length) return 0xFFFFFF;
+
+        let r = 0;
+        let g = 0;
+        let b = 0;
+        let count = 0;
+
+        for(const entry of rgb)
+        {
+            if(!entry) continue;
+
+            const er = entry[0];
+            const eg = entry[1];
+            const eb = entry[2];
+
+            if((er <= 8) && (eg <= 8) && (eb <= 8)) continue;
+            if((er >= 248) && (eg >= 248) && (eb >= 248)) continue;
+
+            r += er;
+            g += eg;
+            b += eb;
+            count++;
+        }
+
+        if(!count) return 0xFFFFFF;
+
+        r = Math.round(r / count);
+        g = Math.round(g / count);
+        b = Math.round(b / count);
+
+        return ((r << 16) | (g << 8) | b);
     }
 
     private createAsset(name: string, source: string, texture: Texture, flipH: boolean, flipV: boolean, x: number, y: number, usesPalette: boolean): boolean
@@ -193,7 +249,22 @@ export class GraphicAssetCollection implements IGraphicAssetCollection
 
     public getAssetWithPalette(name: string, paletteName: string): IGraphicAsset
     {
-        const saveName = (name + '@' + paletteName);
+        let resolvedPaletteName = paletteName;
+        let palette = this.getPalette(resolvedPaletteName);
+
+        if(!palette && this._palettes.size)
+        {
+            const fallbackName = this.getFallbackPaletteName();
+            const fallbackPalette = fallbackName ? this.getPalette(fallbackName) : null;
+
+            if(fallbackPalette)
+            {
+                resolvedPaletteName = fallbackName;
+                palette = fallbackPalette;
+            }
+        }
+
+        const saveName = (name + '@' + resolvedPaletteName);
 
         let asset = this.getAsset(saveName);
 
@@ -203,8 +274,6 @@ export class GraphicAssetCollection implements IGraphicAssetCollection
 
             if(!asset || !asset.usesPalette) return asset;
 
-            const palette = this.getPalette(paletteName);
-
             if(palette)
             {
                 const texture = palette.applyPalette(asset.texture);
@@ -213,7 +282,7 @@ export class GraphicAssetCollection implements IGraphicAssetCollection
                 {
                     this._paletteAssetNames.push(saveName);
 
-                    this.createAsset(saveName, (asset.source + '@' + paletteName), texture, asset.flipH, asset.flipV, asset.x, asset.y, false);
+                    this.createAsset(saveName, (asset.source + '@' + resolvedPaletteName), texture, asset.flipH, asset.flipV, asset.x, asset.y, false);
 
                     asset = this.getAsset(saveName);
                 }
