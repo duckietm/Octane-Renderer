@@ -10,7 +10,7 @@
   ],
   "resolutions": {
     "pako": "3.0.1",
-    "pixi.js": "8.19.0",
+    "pixi.js": "8.20.1",
     "vite": "8.2.1",
     "vitest": "4.1.10"
   },
