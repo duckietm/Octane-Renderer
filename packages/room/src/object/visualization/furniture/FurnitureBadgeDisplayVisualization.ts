@@ -73,7 +73,9 @@ export class FurnitureBadgeDisplayVisualization extends FurnitureAnimatedVisuali
                 if(!currentFrameTexture) return;
 
                 // Update the badge canvas with the current frame
-                const badgeCanvas = (tex.source as any).resource as HTMLCanvasElement;
+                const badgeCanvas = this.getBadgeCanvas(tex);
+                if(!badgeCanvas) return;
+
                 const ctx = badgeCanvas.getContext('2d', { willReadFrequently: true });
 
                 // Create a temporary canvas to extract the frame texture data
@@ -221,6 +223,39 @@ export class FurnitureBadgeDisplayVisualization extends FurnitureAnimatedVisuali
         return offset;
     }
 
+    private getBadgeCanvas(tex: Texture): HTMLCanvasElement
+    {
+        const source = tex.source as any;
+        const resource = source?.resource;
+
+        if(resource instanceof HTMLCanvasElement) return resource;
+
+        const isBitmap = (typeof ImageBitmap !== 'undefined') && (resource instanceof ImageBitmap);
+
+        if(isBitmap || (resource instanceof HTMLImageElement))
+        {
+            const width = resource.width || (resource as HTMLImageElement).naturalWidth || source.pixelWidth || 0;
+            const height = resource.height || (resource as HTMLImageElement).naturalHeight || source.pixelHeight || 0;
+
+            if(!width || !height) return null;
+
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+            if(!ctx) return null;
+
+            ctx.drawImage(resource, 0, 0);
+
+            source.resource = canvas;
+
+            return canvas;
+        }
+
+        return null;
+    }
+
     private async addBadgeToAssetCollection(badgeId: string): Promise<void>
     {
         const sessionDataManager = GetSessionDataManager();
@@ -230,7 +265,15 @@ export class FurnitureBadgeDisplayVisualization extends FurnitureAnimatedVisuali
 
         if(!tex || !this.asset) return;
 
-        const badgeCanvas = (tex.source as any).resource as HTMLCanvasElement;
+        const badgeCanvas = this.getBadgeCanvas(tex);
+
+        if(!badgeCanvas)
+        {
+            this.asset.addAsset(badgeId, tex, true, 0, 0, false, false);
+
+            return;
+        }
+
         const ctx = badgeCanvas.getContext('2d', { willReadFrequently: true });
         const imageData = ctx.getImageData(0, 0, 1, 1);
         const isEmpty = imageData.data[3] === 0;
