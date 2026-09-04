@@ -436,7 +436,12 @@ export class SocketConnection implements IConnection
 
         if(this._socket.readyState === WebSocket.OPEN || this._socket.readyState === WebSocket.CONNECTING)
         {
-            try { this._socket.close(); } catch(e) {}
+            try
+            {
+                this._socket.close();
+            }
+            catch (e)
+            {}
         }
 
         this._socket = null;

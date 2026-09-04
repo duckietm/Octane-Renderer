@@ -8,4 +8,7 @@ class DelegatedParserFixture
 }
 
 interface Wrapper {}
-declare class Payload { constructor(wrapper: Wrapper); }
+declare class Payload
+{
+    constructor(wrapper: Wrapper);
+}

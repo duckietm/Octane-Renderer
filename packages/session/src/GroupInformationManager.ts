@@ -51,7 +51,7 @@ export class GroupInformationManager implements IGroupInformationManager
     {
         if(this._groupBadgesSnapshot) return this._groupBadgesSnapshot;
 
-        this._groupBadgesSnapshot = new Map(this._groupBadges) as ReadonlyMap<number, string>;
+        this._groupBadgesSnapshot = new Map(this._groupBadges);
 
         return this._groupBadgesSnapshot;
     }

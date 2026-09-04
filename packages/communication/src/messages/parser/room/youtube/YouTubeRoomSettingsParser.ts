@@ -17,5 +17,8 @@ export class YouTubeRoomSettingsParser implements IMessageParser
         return true;
     }
 
-    public get youtubeEnabled(): boolean { return this._youtubeEnabled; }
+    public get youtubeEnabled(): boolean
+    {
+        return this._youtubeEnabled;
+    }
 }

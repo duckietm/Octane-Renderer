@@ -77,7 +77,7 @@ export class AvatarRenderManager implements IAvatarRenderManager
         {
             this._structure.updateActions(await loadGamedata(url));
         }
-        catch(err)
+        catch (err)
         {
             throw new Error(`Could not load avatar actions from "${ url }" — check "avatar.actions.url" in renderer-config.json (${ err?.message || err })`);
         }
@@ -97,7 +97,7 @@ export class AvatarRenderManager implements IAvatarRenderManager
         {
             this._structure.figureData.appendJSON(await loadGamedata(url));
         }
-        catch(err)
+        catch (err)
         {
             throw new Error(`Could not load figure data from "${ url }" — check "avatar.figuredata.url" in renderer-config.json (${ err?.message || err })`);
         }
@@ -216,8 +216,8 @@ export class AvatarRenderManager implements IAvatarRenderManager
 
                 const palette = figureData.getPalette(set.paletteID);
                 const colors = container.getPartColorIds(part);
-				
-				if(!palette) continue;
+
+                if(!palette) continue;
 
                 for(const colorId of colors)
                 {

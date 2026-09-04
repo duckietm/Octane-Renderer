@@ -30,7 +30,7 @@ describe('loadGamedataWithMode', () =>
             }
 
             return new Response('', { status: 404 });
-        }) as typeof fetch;
+        });
 
         await expect(loadGamedataWithMode('https://hotel.test/gamedata/', 'jsonc', { tiers: [] }))
             .resolves.toEqual({ items: [ { id: 1 } ] });
@@ -55,7 +55,7 @@ describe('loadGamedataWithMode', () =>
             if(url.endsWith('/data.json')) return new Response('{ "value": 2 }', { status: 200 });
 
             return new Response('', { status: 404 });
-        }) as typeof fetch;
+        });
 
         await expect(loadGamedataWithMode('https://hotel.test/gamedata/', 'auto', { tiers: [] }))
             .resolves.toEqual({ value: 2 });
@@ -80,7 +80,7 @@ describe('loadGamedataWithMode', () =>
             if(url.endsWith('/data.json')) return new Response('{ "value": 3 }', { status: 200 });
 
             return new Response('', { status: 404 });
-        }) as typeof fetch;
+        });
 
         await expect(loadGamedataWithMode('https://hotel.test/gamedata/', 'legacy', { tiers: [] }))
             .resolves.toEqual({ value: 3 });

@@ -43,7 +43,7 @@ export class ConfigurationManager implements IConfigurationManager
                 {
                     response = await fetch(url);
                 }
-                catch(fetchError)
+                catch (fetchError)
                 {
                     throw new Error(`Failed to fetch config "${ url }" — check that the file exists and the server is reachable (${ fetchError.message })`);
                 }
@@ -56,7 +56,7 @@ export class ConfigurationManager implements IConfigurationManager
                 {
                     json = await parseConfigJsonFromResponse(response, url);
                 }
-                catch(parseError)
+                catch (parseError)
                 {
                     throw new Error(`Invalid config "${ url }" — JSON/JSONC parse failed. JSONC allows comments and trailing commas (${ parseError.message })`);
                 }

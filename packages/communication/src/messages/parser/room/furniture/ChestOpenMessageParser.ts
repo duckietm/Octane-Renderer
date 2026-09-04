@@ -13,7 +13,7 @@ export class ChestOpenMessageParser implements IMessageParser
 
     public parse(wrapper: IMessageDataWrapper): boolean
     {
-        if (!wrapper) return false;
+        if(!wrapper) return false;
 
         this._chestId = wrapper.readInt();
         return true;

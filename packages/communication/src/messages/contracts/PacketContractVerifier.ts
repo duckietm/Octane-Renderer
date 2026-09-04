@@ -33,7 +33,7 @@ const compare = (expected: WireSchema, observed: WireSchema, path: string): void
         const expectedKeys = Object.keys(expected.branches).sort();
         const observedKeys = Object.keys(observed.branches).sort();
         if(expectedKeys.join(',') !== observedKeys.join(','))
-            throw new Error(`${ path }.variant: expected branches ${ expectedKeys }, observed ${ observedKeys }`);
+            throw new Error(`${ path }.variant: expected branches ${ expectedKeys.join(', ') }, observed ${ observedKeys.join(', ') }`);
         expectedKeys.forEach(key => compareFields(
             expected.branches[key], observed.branches[key], `${ path }.variant.branches.${ key }`));
     }

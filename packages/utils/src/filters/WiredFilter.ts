@@ -112,7 +112,7 @@ export class WiredFilter extends Filter
 
     public get lineColor(): ColorSource
     {
-        return this._lineColor.value as ColorSource;
+        return this._lineColor.value;
     }
 
     public set lineColor(value: ColorSource)
@@ -128,7 +128,7 @@ export class WiredFilter extends Filter
 
     public get color(): ColorSource
     {
-        return this._color.value as ColorSource;
+        return this._color.value;
     }
 
     public set color(value: ColorSource)

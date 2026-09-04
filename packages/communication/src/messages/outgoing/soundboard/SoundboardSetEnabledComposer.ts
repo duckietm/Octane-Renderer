@@ -9,6 +9,12 @@ export class SoundboardSetEnabledComposer implements IMessageComposer<[ number ]
         this._data = [ enabled ? 1 : 0 ];
     }
 
-    public getMessageArray(): [ number ] { return this._data; }
-    public dispose(): void { return; }
+    public getMessageArray(): [ number ]
+    {
+        return this._data;
+    }
+    public dispose(): void
+    {
+        return;
+    }
 }

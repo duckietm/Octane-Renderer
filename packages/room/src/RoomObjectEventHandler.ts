@@ -175,7 +175,7 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
                 return;
             case RoomObjectMoveEvent.POSITION_CHANGED:
             case RoomObjectMoveEvent.OBJECT_REMOVED:
-                this.handleSelectedObjectRemove((event as RoomObjectMoveEvent), roomId);
+                this.handleSelectedObjectRemove((event), roomId);
                 return;
             case RoomObjectWidgetRequestEvent.OPEN_WIDGET:
             case RoomObjectWidgetRequestEvent.CLOSE_WIDGET:
@@ -215,14 +215,14 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
             case RoomObjectWidgetRequestEvent.INERNAL_LINK:
             case RoomObjectWidgetRequestEvent.ROOM_LINK:
             case RoomObjectWidgetRequestEvent.YOUTUBE:
-                this.onRoomObjectWidgetRequestEvent((event as RoomObjectWidgetRequestEvent), roomId);
+                this.onRoomObjectWidgetRequestEvent((event), roomId);
                 return;
             case RoomObjectFurnitureActionEvent.DICE_ACTIVATE:
             case RoomObjectFurnitureActionEvent.DICE_OFF:
             case RoomObjectFurnitureActionEvent.USE_HABBOWHEEL:
             case RoomObjectFurnitureActionEvent.STICKIE:
             case RoomObjectFurnitureActionEvent.ENTER_ONEWAYDOOR:
-                this.onRoomObjectFurnitureActionEvent((event as RoomObjectFurnitureActionEvent), roomId);
+                this.onRoomObjectFurnitureActionEvent((event), roomId);
                 return;
             case RoomObjectFurnitureActionEvent.SOUND_MACHINE_INIT:
             case RoomObjectFurnitureActionEvent.SOUND_MACHINE_START:
@@ -238,7 +238,7 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
                 return;
             case RoomObjectFloorHoleEvent.ADD_HOLE:
             case RoomObjectFloorHoleEvent.REMOVE_HOLE:
-                this.onRoomObjectFloorHoleEvent((event as RoomObjectFloorHoleEvent), roomId);
+                this.onRoomObjectFloorHoleEvent((event), roomId);
                 return;
             case RoomObjectRoomAdEvent.ROOM_AD_FURNI_CLICK:
             case RoomObjectRoomAdEvent.ROOM_AD_FURNI_DOUBLE_CLICK:
@@ -252,7 +252,7 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
                 return;
             case RoomObjectFurnitureActionEvent.MOUSE_ARROW:
             case RoomObjectFurnitureActionEvent.MOUSE_BUTTON:
-                this.handleMousePointer((event as RoomObjectFurnitureActionEvent), roomId);
+                this.handleMousePointer((event), roomId);
                 return;
             case RoomObjectPlaySoundIdEvent.PLAY_SOUND:
             case RoomObjectPlaySoundIdEvent.PLAY_SOUND_AT_PITCH:
@@ -269,7 +269,7 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
                 return;
             case RoomObjectDataRequestEvent.RODRE_CURRENT_USER_ID:
             case RoomObjectDataRequestEvent.RODRE_URL_PREFIX:
-                this.onRoomObjectDataRequestEvent((event as RoomObjectDataRequestEvent), roomId);
+                this.onRoomObjectDataRequestEvent((event), roomId);
                 return;
             default:
                 NitroLogger.warn('Unhandled Event', event.constructor.name, 'Object ID', event.object.id);
@@ -2159,26 +2159,26 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
             {
                 targetAvatar.logic.processUpdateMessage(new ObjectAvatarSelectedMessage(true));
 
-                  avatarSelected = true;
+                avatarSelected = true;
 
-                  this._selectedAvatarId = objectId;
+                this._selectedAvatarId = objectId;
 
-                  const location = targetAvatar.getLocation();
+                const location = targetAvatar.getLocation();
 
-                  if(location)
-                  {
-                      this._pendingAvatarLookTimeout = setTimeout(() =>
-                      {
-                          this._pendingAvatarLookTimeout = null;
+                if(location)
+                {
+                    this._pendingAvatarLookTimeout = setTimeout(() =>
+                    {
+                        this._pendingAvatarLookTimeout = null;
 
-                          if(this.shouldSuppressAvatarLook()) return;
-                          if(this._selectedAvatarId !== objectId) return;
+                        if(this.shouldSuppressAvatarLook()) return;
+                        if(this._selectedAvatarId !== objectId) return;
 
-                          GetCommunication().connection.send(new RoomUnitLookComposer(~~(location.x), ~~(location.y)));
-                      }, RoomObjectEventHandler.CLICK_USER_LOOK_DELAY_MS);
-                  }
-              }
-          }
+                        GetCommunication().connection.send(new RoomUnitLookComposer(~~(location.x), ~~(location.y)));
+                    }, RoomObjectEventHandler.CLICK_USER_LOOK_DELAY_MS);
+                }
+            }
+        }
 
         const selectionArrow = this._roomEngine.getRoomObjectSelectionArrow(roomId);
 

@@ -11,6 +11,6 @@ export class FurnitureListInvalidateEvent extends MessageEvent implements IMessa
 
     public getParser(): FurnitureListInvalidateParser
     {
-        return this.parser as FurnitureListInvalidateParser;
+        return this.parser;
     }
 }

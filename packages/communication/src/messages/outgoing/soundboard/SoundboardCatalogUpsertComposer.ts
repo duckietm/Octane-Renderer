@@ -17,7 +17,13 @@ export class SoundboardCatalogUpsertComposer implements IMessageComposer<Soundbo
         this._data = [ id, name, url, minRank, enabled, classname ];
     }
 
-    public getMessageArray(): SoundboardCatalogUpsertData { return this._data; }
+    public getMessageArray(): SoundboardCatalogUpsertData
+    {
+        return this._data;
+    }
 
-    public dispose(): void { return; }
+    public dispose(): void
+    {
+        return;
+    }
 }

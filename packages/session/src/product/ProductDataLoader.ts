@@ -24,7 +24,7 @@ export class ProductDataLoader
         {
             responseData = await loadGamedata(url);
         }
-        catch(err)
+        catch (err)
         {
             throw new Error(`Could not load product data from "${ url }" — check "productdata.url" in renderer-config.json (${ err?.message || err })`);
         }

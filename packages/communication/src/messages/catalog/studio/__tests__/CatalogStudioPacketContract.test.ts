@@ -20,17 +20,45 @@ import { CATALOG_STUDIO_DOCUMENT_ENCODING, decodeCatalogStudioDocument, encodeCa
 
 class TestWrapper
 {
-    constructor(private reader: BinaryReader) {}
-    readByte() { return this.reader.readByte(); }
-    readBytes(length: number) { return this.reader.readBytes(length); }
-    readBoolean() { return this.reader.readByte() === 1; }
-    readShort() { return this.reader.readShort(); }
-    readInt() { return this.reader.readInt(); }
-    readFloat() { return this.reader.readFloat(); }
-    readDouble() { return this.reader.readDouble(); }
-    readString() { const length = this.reader.readShort(); return this.reader.readBytes(length).toString(); }
+    constructor(private reader: BinaryReader)
+    {}
+    readByte()
+    {
+        return this.reader.readByte();
+    }
+    readBytes(length: number)
+    {
+        return this.reader.readBytes(length);
+    }
+    readBoolean()
+    {
+        return this.reader.readByte() === 1;
+    }
+    readShort()
+    {
+        return this.reader.readShort();
+    }
+    readInt()
+    {
+        return this.reader.readInt();
+    }
+    readFloat()
+    {
+        return this.reader.readFloat();
+    }
+    readDouble()
+    {
+        return this.reader.readDouble();
+    }
+    readString()
+    {
+        const length = this.reader.readShort(); return this.reader.readBytes(length).toString();
+    }
     header = 0;
-    get bytesAvailable() { return this.reader.remaining() > 0; }
+    get bytesAvailable()
+    {
+        return this.reader.remaining() > 0;
+    }
 }
 
 describe('catalog studio packet contract', () =>
@@ -49,7 +77,7 @@ describe('catalog studio packet contract', () =>
 
     it('serializes requests in the frozen emulator field order', () =>
     {
-        const sql = "UPDATE catalog_pages SET caption = 'Shop' WHERE id = 1;";
+        const sql = 'UPDATE catalog_pages SET caption = \'Shop\' WHERE id = 1;';
         const encodedSql = encodeCatalogStudioDocument(sql);
         expect(new CatalogStudioOpenSessionComposer().getMessageArray()).toEqual([]);
         expect(new CatalogStudioHistoryComposer(1, -4, 5000).getMessageArray()).toEqual([ 1, -4, 5000 ]);
@@ -69,7 +97,7 @@ describe('catalog studio packet contract', () =>
         const resultWriter = new BinaryWriter();
         resultWriter.writeString('op-dry'); resultWriter.writeByte(1); resultWriter.writeString('DRY_RUN_READY');
         resultWriter.writeString('Dry-run ready'); resultWriter.writeInt(7); resultWriter.writeString('SQL');
-        const encodedDocument = encodeCatalogStudioDocument("UPDATE catalog_pages SET caption = 'Shop' WHERE id = 1;");
+        const encodedDocument = encodeCatalogStudioDocument('UPDATE catalog_pages SET caption = \'Shop\' WHERE id = 1;');
         resultWriter.writeString(encodedDocument.encoding); resultWriter.writeInt(encodedDocument.chunks.length);
         encodedDocument.chunks.forEach(chunk => resultWriter.writeString(chunk));
         resultWriter.writeString('fingerprint'); resultWriter.writeInt(3);

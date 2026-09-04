@@ -182,37 +182,115 @@ export class ChestDataMessageParser implements IMessageParser
         return true;
     }
 
-    public get itemId(): number { return this._itemId; }
-    public get name(): string { return this._name; }
-    public get description(): string { return this._description; }
-    public get capacityMax(): number { return this._capacityMax; }
-    public get used(): number { return this._used; }
-    public get accessOpen(): boolean { return this._accessOpen; }
-    public get accessDonate(): boolean { return this._accessDonate; }
-    public get appearanceState(): number { return this._appearanceState; }
-    public get notifyFull(): boolean { return this._notifyFull; }
-    public get notifyDonation(): boolean { return this._notifyDonation; }
-    public get notifyWithdraw(): boolean { return this._notifyWithdraw; }
-    public get notifyEmpty(): boolean { return this._notifyEmpty; }
-    public get notifyWired(): boolean { return this._notifyWired; }
-    public get notifyMode(): number { return this._notifyMode; }
-    public get entries(): IChestCurrencyEntry[] { return this._entries; }
-    public get chestKind(): number { return this._chestKind; }
-    public get furniEntries(): IChestFurniEntry[] { return this._furniEntries; }
-    public get locked(): boolean { return this._locked; }
+    public get itemId(): number
+    {
+        return this._itemId;
+    }
+    public get name(): string
+    {
+        return this._name;
+    }
+    public get description(): string
+    {
+        return this._description;
+    }
+    public get capacityMax(): number
+    {
+        return this._capacityMax;
+    }
+    public get used(): number
+    {
+        return this._used;
+    }
+    public get accessOpen(): boolean
+    {
+        return this._accessOpen;
+    }
+    public get accessDonate(): boolean
+    {
+        return this._accessDonate;
+    }
+    public get appearanceState(): number
+    {
+        return this._appearanceState;
+    }
+    public get notifyFull(): boolean
+    {
+        return this._notifyFull;
+    }
+    public get notifyDonation(): boolean
+    {
+        return this._notifyDonation;
+    }
+    public get notifyWithdraw(): boolean
+    {
+        return this._notifyWithdraw;
+    }
+    public get notifyEmpty(): boolean
+    {
+        return this._notifyEmpty;
+    }
+    public get notifyWired(): boolean
+    {
+        return this._notifyWired;
+    }
+    public get notifyMode(): number
+    {
+        return this._notifyMode;
+    }
+    public get entries(): IChestCurrencyEntry[]
+    {
+        return this._entries;
+    }
+    public get chestKind(): number
+    {
+        return this._chestKind;
+    }
+    public get furniEntries(): IChestFurniEntry[]
+    {
+        return this._furniEntries;
+    }
+    public get locked(): boolean
+    {
+        return this._locked;
+    }
     /** The ceiling the owner set, at or below what they have bought. */
-    public get capacity(): number { return this._capacity; }
+    public get capacity(): number
+    {
+        return this._capacity;
+    }
     /** Whether the chest closes itself once it fills up. */
-    public get autoLock(): boolean { return this._autoLock; }
+    public get autoLock(): boolean
+    {
+        return this._autoLock;
+    }
     /** Whether the person this state was sent to owns the chest. Owner-only controls read it. */
-    public get viewerOwnsChest(): boolean { return this._viewerOwnsChest; }
+    public get viewerOwnsChest(): boolean
+    {
+        return this._viewerOwnsChest;
+    }
     /** The chest's own furnidata id, for showing what is being upgraded. */
-    public get chestSpriteId(): number { return this._chestSpriteId; }
+    public get chestSpriteId(): number
+    {
+        return this._chestSpriteId;
+    }
     /** Whether wired may reach this chest. Off until its owner upgrades it, then permanent. */
-    public get wiredEnabled(): boolean { return this._wiredEnabled; }
+    public get wiredEnabled(): boolean
+    {
+        return this._wiredEnabled;
+    }
     /** Whether the chest shows some of what it holds on its lid, and how many. */
-    public get previewMode(): number { return this._previewMode; }
-    public get previewAmount(): number { return this._previewAmount; }
+    public get previewMode(): number
+    {
+        return this._previewMode;
+    }
+    public get previewAmount(): number
+    {
+        return this._previewAmount;
+    }
     /** A starter chest holds less and can never be grown. */
-    public get starterChest(): boolean { return this._starterChest; }
+    public get starterChest(): boolean
+    {
+        return this._starterChest;
+    }
 }

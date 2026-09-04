@@ -68,21 +68,72 @@ export class CatalogAdminOfferDetailsMessageParser implements IMessageParser
         return true;
     }
 
-    public get offerId(): number { return this._offerId; }
-    public get pageId(): number { return this._pageId; }
-    public get itemIds(): string { return this._itemIds; }
-    public get catalogName(): string { return this._catalogName; }
-    public get costCredits(): number { return this._costCredits; }
-    public get costPoints(): number { return this._costPoints; }
-    public get pointsType(): number { return this._pointsType; }
-    public get amount(): number { return this._amount; }
-    public get clubOnly(): boolean { return this._clubOnly; }
-    public get extradata(): string { return this._extradata; }
-    public get haveOffer(): boolean { return this._haveOffer; }
-    public get offerIdGroup(): number { return this._offerIdGroup; }
-    public get limitedStack(): number { return this._limitedStack; }
-    public get limitedSells(): number { return this._limitedSells; }
-    public get orderNumber(): number { return this._orderNumber; }
-    public get songId(): number { return this._songId; }
-    public get catalogMode(): string { return this._catalogMode; }
+    public get offerId(): number
+    {
+        return this._offerId;
+    }
+    public get pageId(): number
+    {
+        return this._pageId;
+    }
+    public get itemIds(): string
+    {
+        return this._itemIds;
+    }
+    public get catalogName(): string
+    {
+        return this._catalogName;
+    }
+    public get costCredits(): number
+    {
+        return this._costCredits;
+    }
+    public get costPoints(): number
+    {
+        return this._costPoints;
+    }
+    public get pointsType(): number
+    {
+        return this._pointsType;
+    }
+    public get amount(): number
+    {
+        return this._amount;
+    }
+    public get clubOnly(): boolean
+    {
+        return this._clubOnly;
+    }
+    public get extradata(): string
+    {
+        return this._extradata;
+    }
+    public get haveOffer(): boolean
+    {
+        return this._haveOffer;
+    }
+    public get offerIdGroup(): number
+    {
+        return this._offerIdGroup;
+    }
+    public get limitedStack(): number
+    {
+        return this._limitedStack;
+    }
+    public get limitedSells(): number
+    {
+        return this._limitedSells;
+    }
+    public get orderNumber(): number
+    {
+        return this._orderNumber;
+    }
+    public get songId(): number
+    {
+        return this._songId;
+    }
+    public get catalogMode(): string
+    {
+        return this._catalogMode;
+    }
 }

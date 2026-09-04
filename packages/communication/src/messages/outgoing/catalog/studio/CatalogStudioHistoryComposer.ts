@@ -7,6 +7,12 @@ export class CatalogStudioHistoryComposer implements IMessageComposer<Constructo
     {
         this._data = [ draftVersionId, offset, limit ];
     }
-    public dispose(): void { this._data = null; }
-    public getMessageArray() { return this._data; }
+    public dispose(): void
+    {
+        this._data = null;
+    }
+    public getMessageArray()
+    {
+        return this._data;
+    }
 }

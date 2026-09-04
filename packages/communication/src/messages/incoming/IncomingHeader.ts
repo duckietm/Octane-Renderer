@@ -10,7 +10,7 @@ export class IncomingHeader
     // Original packets
     public static ACHIEVEMENT_LIST = 305;
     public static AUTHENTICATED = 2491;
-	public static AVAILABLE_COMMANDS = 4050;
+    public static AVAILABLE_COMMANDS = 4050;
     public static AVAILABILITY_STATUS = 2033;
     public static BUILDERS_CLUB_EXPIRED = 1452;
     public static CLUB_OFFERS = 2405;
@@ -506,16 +506,16 @@ export class IncomingHeader
     public static WEEKLY_GAME2_LEADERBOARD = 2196;
     public static RENTABLE_FURNI_RENT_OR_BUYOUT_OFFER = 35;
     public static HANDSHAKE_IDENTITY_ACCOUNT = 3523;
-	
-	// Furni Editor
-	public static FURNI_EDITOR_SEARCH_RESULT = 10040;
-	public static FURNI_EDITOR_DETAIL_RESULT = 10041;
-	public static FURNI_EDITOR_INTERACTIONS_RESULT = 10043;
-	public static FURNI_EDITOR_RESULT = 10044;
-	public static FURNITURE_DATA_RELOAD = 10047;
-	public static FURNI_EDITOR_IMPORT_TEXT_RESULT = 10049;
 
-	// Catalog Admin
+    // Furni Editor
+    public static FURNI_EDITOR_SEARCH_RESULT = 10040;
+    public static FURNI_EDITOR_DETAIL_RESULT = 10041;
+    public static FURNI_EDITOR_INTERACTIONS_RESULT = 10043;
+    public static FURNI_EDITOR_RESULT = 10044;
+    public static FURNITURE_DATA_RELOAD = 10047;
+    public static FURNI_EDITOR_IMPORT_TEXT_RESULT = 10049;
+
+    // Catalog Admin
     public static CATALOG_ADMIN_RESULT = 10059;
     public static CATALOG_ADMIN_OFFER_DETAILS = 10062;
     public static CATALOG_ADMIN_PAGE_DETAILS = 10063;

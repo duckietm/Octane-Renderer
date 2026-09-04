@@ -201,7 +201,7 @@ describe('ColorConverter', () =>
         {
             const colors = [0xFF0000, 0x00FF00, 0x0000FF, 0xFFFF00, 0xFF00FF, 0x00FFFF];
 
-            for (const original of colors)
+            for(const original of colors)
             {
                 const hsl = ColorConverter.rgbToHSL(original);
                 const result = ColorConverter.hslToRGB(hsl);

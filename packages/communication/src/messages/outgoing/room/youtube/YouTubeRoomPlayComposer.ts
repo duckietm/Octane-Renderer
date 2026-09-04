@@ -9,6 +9,10 @@ export class YouTubeRoomPlayComposer implements IMessageComposer<any[]>
         this._data = [videoId, playlist.length, ...playlist];
     }
 
-    public getMessageArray() { return this._data; }
-    public dispose(): void {}
+    public getMessageArray()
+    {
+        return this._data;
+    }
+    public dispose(): void
+    {}
 }

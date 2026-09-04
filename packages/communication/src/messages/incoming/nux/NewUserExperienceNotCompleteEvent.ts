@@ -11,6 +11,6 @@ export class NewUserExperienceNotCompleteEvent extends MessageEvent implements I
 
     public getParser(): NewUserExperienceNotCompleteParser
     {
-        return this.parser as NewUserExperienceNotCompleteParser;
+        return this.parser;
     }
 }

@@ -145,7 +145,7 @@ describe('NumberBank', () =>
             const bank = new NumberBank(1000);
 
             // Reserve all
-            for (let i = 0; i < 1000; i++)
+            for(let i = 0; i < 1000; i++)
             {
                 expect(bank.reserveNumber()).toBeGreaterThanOrEqual(0);
             }
@@ -159,7 +159,7 @@ describe('NumberBank', () =>
             const reserved: number[] = [];
 
             // Reserve 5
-            for (let i = 0; i < 5; i++)
+            for(let i = 0; i < 5; i++)
             {
                 reserved.push(bank.reserveNumber());
             }
@@ -171,7 +171,7 @@ describe('NumberBank', () =>
 
             // Reserve 3 more (should get the freed ones)
             const newReserved: number[] = [];
-            for (let i = 0; i < 3; i++)
+            for(let i = 0; i < 3; i++)
             {
                 newReserved.push(bank.reserveNumber());
             }

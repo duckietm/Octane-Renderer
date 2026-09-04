@@ -4,8 +4,17 @@ export class HousekeepingSendHotelAlertComposer implements IMessageComposer<Cons
 {
     private _data: ConstructorParameters<typeof HousekeepingSendHotelAlertComposer>;
 
-    constructor(message: string) { this._data = [message]; }
+    constructor(message: string)
+    {
+        this._data = [message];
+    }
 
-    public getMessageArray() { return this._data; }
-    public dispose(): void { return; }
+    public getMessageArray()
+    {
+        return this._data;
+    }
+    public dispose(): void
+    {
+        return;
+    }
 }

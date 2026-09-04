@@ -17,7 +17,7 @@ const createManager = (overrides: Record<string, unknown> = {}) =>
         loadNitroBundle: vi.fn(),
         ...overrides
     };
-    const manager = new AssetManager(dependencies as never);
+    const manager = new AssetManager(dependencies);
 
     return { manager, dependencies };
 };

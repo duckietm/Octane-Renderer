@@ -38,7 +38,10 @@ class RespectPacer
 
         if(wait > 0)
         {
-            this.timer = setTimeout(() => { this.timer = null; this.flush(); }, wait);
+            this.timer = setTimeout(() =>
+            {
+                this.timer = null; this.flush();
+            }, wait);
 
             return;
         }

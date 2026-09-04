@@ -21,7 +21,10 @@ describe('recordConnectionStates', () =>
             callback =>
             {
                 listener = callback;
-                return () => { unsubscribed = true; };
+                return () =>
+                {
+                    unsubscribed = true;
+                };
             });
 
         snapshot = Object.freeze({ ...snapshot, phase: 'connecting' });
@@ -56,7 +59,8 @@ describe('recordConnectionStates', () =>
             callback =>
             {
                 listener = callback;
-                return () => {};
+                return () =>
+                {};
             });
 
         listener();

@@ -86,27 +86,96 @@ export class CatalogAdminPageDetailsMessageParser implements IMessageParser
         return true;
     }
 
-    public get pageId(): number { return this._pageId; }
-    public get caption(): string { return this._caption; }
-    public get captionSave(): string { return this._captionSave; }
-    public get parentId(): number { return this._parentId; }
-    public get catalogMode(): string { return this._catalogMode; }
-    public get layout(): string { return this._layout; }
-    public get iconColor(): number { return this._iconColor; }
-    public get iconImage(): number { return this._iconImage; }
-    public get minRank(): number { return this._minRank; }
-    public get orderNum(): number { return this._orderNum; }
-    public get visible(): boolean { return this._visible; }
-    public get enabled(): boolean { return this._enabled; }
-    public get clubOnly(): boolean { return this._clubOnly; }
-    public get vipOnly(): boolean { return this._vipOnly; }
-    public get headline(): string { return this._headline; }
-    public get teaser(): string { return this._teaser; }
-    public get special(): string { return this._special; }
-    public get textOne(): string { return this._textOne; }
-    public get textTwo(): string { return this._textTwo; }
-    public get textDetails(): string { return this._textDetails; }
-    public get textTeaser(): string { return this._textTeaser; }
-    public get roomId(): number { return this._roomId; }
-    public get includes(): string { return this._includes; }
+    public get pageId(): number
+    {
+        return this._pageId;
+    }
+    public get caption(): string
+    {
+        return this._caption;
+    }
+    public get captionSave(): string
+    {
+        return this._captionSave;
+    }
+    public get parentId(): number
+    {
+        return this._parentId;
+    }
+    public get catalogMode(): string
+    {
+        return this._catalogMode;
+    }
+    public get layout(): string
+    {
+        return this._layout;
+    }
+    public get iconColor(): number
+    {
+        return this._iconColor;
+    }
+    public get iconImage(): number
+    {
+        return this._iconImage;
+    }
+    public get minRank(): number
+    {
+        return this._minRank;
+    }
+    public get orderNum(): number
+    {
+        return this._orderNum;
+    }
+    public get visible(): boolean
+    {
+        return this._visible;
+    }
+    public get enabled(): boolean
+    {
+        return this._enabled;
+    }
+    public get clubOnly(): boolean
+    {
+        return this._clubOnly;
+    }
+    public get vipOnly(): boolean
+    {
+        return this._vipOnly;
+    }
+    public get headline(): string
+    {
+        return this._headline;
+    }
+    public get teaser(): string
+    {
+        return this._teaser;
+    }
+    public get special(): string
+    {
+        return this._special;
+    }
+    public get textOne(): string
+    {
+        return this._textOne;
+    }
+    public get textTwo(): string
+    {
+        return this._textTwo;
+    }
+    public get textDetails(): string
+    {
+        return this._textDetails;
+    }
+    public get textTeaser(): string
+    {
+        return this._textTeaser;
+    }
+    public get roomId(): number
+    {
+        return this._roomId;
+    }
+    public get includes(): string
+    {
+        return this._includes;
+    }
 }

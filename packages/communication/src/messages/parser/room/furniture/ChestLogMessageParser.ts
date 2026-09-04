@@ -47,6 +47,12 @@ export class ChestLogMessageParser implements IMessageParser
         return true;
     }
 
-    public get itemId(): number { return this._itemId; }
-    public get rows(): IChestLogRow[] { return this._rows; }
+    public get itemId(): number
+    {
+        return this._itemId;
+    }
+    public get rows(): IChestLogRow[]
+    {
+        return this._rows;
+    }
 }

@@ -4,8 +4,17 @@ export class HousekeepingListActionLogComposer implements IMessageComposer<Const
 {
     private _data: ConstructorParameters<typeof HousekeepingListActionLogComposer>;
 
-    constructor(limit: number) { this._data = [limit]; }
+    constructor(limit: number)
+    {
+        this._data = [limit];
+    }
 
-    public getMessageArray() { return this._data; }
-    public dispose(): void { return; }
+    public getMessageArray()
+    {
+        return this._data;
+    }
+    public dispose(): void
+    {
+        return;
+    }
 }

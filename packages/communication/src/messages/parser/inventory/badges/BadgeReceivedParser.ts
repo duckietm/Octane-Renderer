@@ -1,4 +1,4 @@
-﻿﻿import { IMessageDataWrapper, IMessageParser } from '@nitrots/api';
+﻿import { IMessageDataWrapper, IMessageParser } from '@nitrots/api';
 
 export class BadgeReceivedParser implements IMessageParser
 {

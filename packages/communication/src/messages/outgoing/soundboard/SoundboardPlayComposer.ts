@@ -9,6 +9,12 @@ export class SoundboardPlayComposer implements IMessageComposer<[ number ]>
         this._data = [ soundId ];
     }
 
-    public getMessageArray(): [ number ] { return this._data; }
-    public dispose(): void { return; }
+    public getMessageArray(): [ number ]
+    {
+        return this._data;
+    }
+    public dispose(): void
+    {
+        return;
+    }
 }

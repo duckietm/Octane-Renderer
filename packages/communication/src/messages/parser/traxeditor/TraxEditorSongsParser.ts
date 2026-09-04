@@ -49,8 +49,20 @@ export class TraxEditorSongsParser implements IMessageParser
         return true;
     }
 
-    public get maxSongs(): number { return this._maxSongs; }
-    public get costCurrency(): number { return this._costCurrency; }
-    public get costAmount(): number { return this._costAmount; }
-    public get songs(): ITraxEditorSong[] { return this._songs; }
+    public get maxSongs(): number
+    {
+        return this._maxSongs;
+    }
+    public get costCurrency(): number
+    {
+        return this._costCurrency;
+    }
+    public get costAmount(): number
+    {
+        return this._costAmount;
+    }
+    public get songs(): ITraxEditorSong[]
+    {
+        return this._songs;
+    }
 }

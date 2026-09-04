@@ -11,6 +11,6 @@ export class CameraPurchaseOKMessageEvent extends MessageEvent implements IMessa
 
     public getParser(): CameraPurchaseOKMessageParser
     {
-        return this.parser as CameraPurchaseOKMessageParser;
+        return this.parser;
     }
 }

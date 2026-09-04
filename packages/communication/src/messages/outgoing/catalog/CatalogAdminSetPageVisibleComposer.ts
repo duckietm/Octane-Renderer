@@ -9,6 +9,12 @@ export class CatalogAdminSetPageVisibleComposer implements IMessageComposer<Cons
         this._data = [ pageId, visible, catalogMode, draftVersionId, expectedRevision, lockToken, summary, operationId ];
     }
 
-    dispose(): void { this._data = null; }
-    public getMessageArray() { return this._data; }
+    dispose(): void
+    {
+        this._data = null;
+    }
+    public getMessageArray()
+    {
+        return this._data;
+    }
 }

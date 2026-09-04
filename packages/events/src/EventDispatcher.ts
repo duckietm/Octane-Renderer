@@ -104,7 +104,8 @@ export class EventDispatcher implements IEventDispatcher
 
     public subscribe<T extends INitroEvent>(type: string | string[], callback: (event: T) => void): () => void
     {
-        if(!type || !callback) return () => {};
+        if(!type || !callback) return () =>
+        {};
 
         if(Array.isArray(type))
         {

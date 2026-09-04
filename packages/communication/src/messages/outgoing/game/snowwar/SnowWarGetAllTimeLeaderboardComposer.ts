@@ -9,6 +9,12 @@ export class SnowWarGetAllTimeLeaderboardComposer implements IMessageComposer<Co
         this._data = [ gameTypeId, startRank, direction, viewSize, windowSize ];
     }
 
-    public getMessageArray() { return this._data; }
-    public dispose(): void { this._data = null; }
+    public getMessageArray()
+    {
+        return this._data;
+    }
+    public dispose(): void
+    {
+        this._data = null;
+    }
 }

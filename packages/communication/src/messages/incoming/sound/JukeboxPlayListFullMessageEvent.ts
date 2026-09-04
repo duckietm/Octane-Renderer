@@ -11,6 +11,6 @@ export class JukeboxPlayListFullMessageEvent extends MessageEvent implements IMe
 
     public getParser(): JukeboxPlayListFullMessageParser
     {
-        return this.parser as JukeboxPlayListFullMessageParser;
+        return this.parser;
     }
 }

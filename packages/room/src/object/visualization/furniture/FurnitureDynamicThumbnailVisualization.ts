@@ -1,48 +1,61 @@
 import { Texture } from 'pixi.js';
 import { IsometricImageFurniVisualization } from './IsometricImageFurniVisualization';
 
-export class FurnitureDynamicThumbnailVisualization extends IsometricImageFurniVisualization {
+export class FurnitureDynamicThumbnailVisualization extends IsometricImageFurniVisualization
+{
     private _cachedUrl: string;
 
-    constructor() {
+    constructor()
+    {
         super();
 
         this._cachedUrl = null;
         this._hasOutline = true;
     }
 
-    protected updateModel(scale: number): boolean {
-        if (this.object) {
+    protected updateModel(scale: number): boolean
+    {
+        if(this.object)
+        {
             const thumbnailUrl = this.getThumbnailURL();
 
-            if (this._cachedUrl !== thumbnailUrl) {
+            if(this._cachedUrl !== thumbnailUrl)
+            {
                 this._cachedUrl = thumbnailUrl;
 
-                if (this._cachedUrl && this._cachedUrl !== '') {
+                if(this._cachedUrl && this._cachedUrl !== '')
+                {
                     const image = new Image();
 
                     image.src = thumbnailUrl;
                     image.crossOrigin = '*';
 
-                    image.onload = () => {
-                        if (image.complete && image.width > 0 && image.height > 0) {
+                    image.onload = () =>
+                    {
+                        if(image.complete && image.width > 0 && image.height > 0)
+                        {
                             const texture = Texture.from(image);
                             texture.source.scaleMode = 'linear';
 
                             this.setThumbnailImages(texture, thumbnailUrl);
-                        } else {
+                        }
+                        else
+                        {
                             this.setThumbnailImages(null);
                         }
                         image.onload = null;
                         image.onerror = null;
                     };
 
-                    image.onerror = () => {
+                    image.onerror = () =>
+                    {
                         this.setThumbnailImages(null);
                         image.onload = null;
                         image.onerror = null;
                     };
-                } else {
+                }
+                else
+                {
                     this.setThumbnailImages(null);
                 }
             }
@@ -51,7 +64,8 @@ export class FurnitureDynamicThumbnailVisualization extends IsometricImageFurniV
         return super.updateModel(scale);
     }
 
-    protected getThumbnailURL(): string {
+    protected getThumbnailURL(): string
+    {
         throw new Error('This method must be overridden!');
     }
 }

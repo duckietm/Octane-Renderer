@@ -11,6 +11,6 @@ export class RoomRightsClearEvent extends MessageEvent implements IMessageEvent
 
     public getParser(): RoomRightsClearParser
     {
-        return this.parser as RoomRightsClearParser;
+        return this.parser;
     }
 }

@@ -17,6 +17,12 @@ export class CatalogAdminReorderOffersComposer implements IMessageComposer<any[]
         this._data.push(catalogMode, draftVersionId, expectedRevision, lockToken, summary, operationId);
     }
 
-    dispose(): void { this._data = null; }
-    public getMessageArray() { return this._data; }
+    dispose(): void
+    {
+        this._data = null;
+    }
+    public getMessageArray()
+    {
+        return this._data;
+    }
 }

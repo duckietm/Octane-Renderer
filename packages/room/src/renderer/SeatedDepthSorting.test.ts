@@ -12,7 +12,8 @@ const SOFA_LAYERS = { 0: { z: -1 }, 1: { z: 30 }, 2: { z: 999 }, 3: { z: 1030 } 
 const SOFA_DIRECTIONS = { 0: { layers: {} }, 2: { layers: {} }, 4: { layers: {} }, 6: { layers: {} } };
 const SEAT_HEIGHT = 1;
 
-const createSofaSizeData = () => {
+const createSofaSizeData = () =>
+{
     const sizeData = new SizeData(4, 45);
 
     expect(sizeData.processLayers(SOFA_LAYERS)).toBe(true);
@@ -39,7 +40,8 @@ const createFurniture = (location: Vector3d): IRoomObject => ({
 const createSitter = (location: Vector3d, seatHeight: number): IRoomObject => ({
     getLocation: () => location,
     model: {
-        getValue: (key: string) => {
+        getValue: (key: string) =>
+        {
             if(key === RoomObjectVariable.FIGURE_POSTURE) return AvatarAction.POSTURE_SIT;
             if(key === RoomObjectVariable.FIGURE_VERTICAL_OFFSET) return seatHeight;
 
@@ -51,7 +53,8 @@ const createSitter = (location: Vector3d, seatHeight: number): IRoomObject => ({
 // Sort depth exactly as RoomSpriteCanvas.renderObject computes it (minus the
 // negligible screen-x and sprite-count tiebreakers). Smaller = drawn later =
 // on top.
-const sortDepth = (geometry: RoomGeometry, object: IRoomObject, relativeDepth: number) => {
+const sortDepth = (geometry: RoomGeometry, object: IRoomObject, relativeDepth: number) =>
+{
     const screen = geometry.getScreenPosition(object.getLocation());
 
     expect(screen).not.toBeNull();
@@ -64,7 +67,8 @@ const layerDepth = (geometry: RoomGeometry, sizeData: SizeData, layerId: number,
 
 // The sitter sits on the second tile of a sofa standing on `floorHeight`, so it
 // is raised to the seat surface.
-const seatedOrder = (floorHeight: number) => {
+const seatedOrder = (floorHeight: number) =>
+{
     const geometry = createGeometry();
     const sizeData = createSofaSizeData();
     const sitter = sortDepth(geometry, createSitter(new Vector3d(9, 5, (floorHeight + SEAT_HEIGHT)), SEAT_HEIGHT), AVATAR_SPRITE_DEFAULT_DEPTH);
@@ -75,8 +79,10 @@ const seatedOrder = (floorHeight: number) => {
     };
 };
 
-describe('seated avatar depth sorting', () => {
-    it('keeps a sitter behind the seat front and over the seat back', () => {
+describe('seated avatar depth sorting', () =>
+{
+    it('keeps a sitter behind the seat front and over the seat back', () =>
+    {
         const { sitter, layer } = seatedOrder(0);
 
         expect(layer(3)).toBeLessThan(sitter);
@@ -85,7 +91,8 @@ describe('seated avatar depth sorting', () => {
         expect(sitter).toBeLessThan(layer(0));
     });
 
-    it('keeps that order when the seat stands on a raised floor', () => {
+    it('keeps that order when the seat stands on a raised floor', () =>
+    {
         // a step under the sofa raises the seat and the sitter by the same
         // amount, so it must not reorder one against the other
         const { sitter, layer } = seatedOrder(1);
@@ -96,7 +103,8 @@ describe('seated avatar depth sorting', () => {
         expect(sitter).toBeLessThan(layer(0));
     });
 
-    it('documents that weighting the seat height would paint the sitter over the whole seat', () => {
+    it('documents that weighting the seat height would paint the sitter over the whole seat', () =>
+    {
         const geometry = createGeometry();
         const sizeData = createSofaSizeData();
 
@@ -108,7 +116,8 @@ describe('seated avatar depth sorting', () => {
         expect(weightedSitter).toBeLessThan(layerDepth(geometry, sizeData, 3, 0));
     });
 
-    it('documents that dropping the floor weight would paint the whole seat over the sitter', () => {
+    it('documents that dropping the floor weight would paint the whole seat over the sitter', () =>
+    {
         const geometry = createGeometry();
         const sizeData = createSofaSizeData();
         const screen = geometry.getScreenPosition(new Vector3d(9, 5, 2));

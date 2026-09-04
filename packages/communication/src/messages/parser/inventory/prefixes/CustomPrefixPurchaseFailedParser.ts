@@ -19,5 +19,8 @@ export class CustomPrefixPurchaseFailedParser implements IMessageParser
         return true;
     }
 
-    public get message(): string { return this._message; }
+    public get message(): string
+    {
+        return this._message;
+    }
 }

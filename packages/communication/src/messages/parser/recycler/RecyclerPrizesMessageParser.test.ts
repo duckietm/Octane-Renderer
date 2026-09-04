@@ -6,8 +6,10 @@ const wrapper = (values: unknown[]) => ({
     readString: () => values.shift() as string
 });
 
-describe('RecyclerPrizesMessageParser', () => {
-    it('parses ordered prize levels and products', () => {
+describe('RecyclerPrizesMessageParser', () =>
+{
+    it('parses ordered prize levels and products', () =>
+    {
         const parser = new RecyclerPrizesMessageParser();
 
         expect(parser.parse(wrapper([1, 4, 25, 1, 'eco_lamp', 1, 's', 300]) as any)).toBe(true);
@@ -20,7 +22,8 @@ describe('RecyclerPrizesMessageParser', () => {
         ]);
     });
 
-    it('rejects impossible collection sizes before allocating', () => {
+    it('rejects impossible collection sizes before allocating', () =>
+    {
         const parser = new RecyclerPrizesMessageParser();
 
         expect(parser.parse(wrapper([51]) as any)).toBe(false);

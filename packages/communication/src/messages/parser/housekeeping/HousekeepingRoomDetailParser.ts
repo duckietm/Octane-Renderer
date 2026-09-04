@@ -25,6 +25,12 @@ export class HousekeepingRoomDetailParser implements IMessageParser
         return true;
     }
 
-    public get found(): boolean { return this._found; }
-    public get room(): HousekeepingRoomData | null { return this._room; }
+    public get found(): boolean
+    {
+        return this._found;
+    }
+    public get room(): HousekeepingRoomData | null
+    {
+        return this._room;
+    }
 }

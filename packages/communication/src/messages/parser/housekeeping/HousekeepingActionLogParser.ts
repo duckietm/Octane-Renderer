@@ -23,5 +23,8 @@ export class HousekeepingActionLogParser implements IMessageParser
         return true;
     }
 
-    public get entries(): HousekeepingActionLogEntryData[] { return this._entries; }
+    public get entries(): HousekeepingActionLogEntryData[]
+    {
+        return this._entries;
+    }
 }

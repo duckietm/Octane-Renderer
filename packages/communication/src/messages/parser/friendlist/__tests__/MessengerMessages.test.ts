@@ -17,14 +17,33 @@ import {
 
 class TestWrapper
 {
-    constructor(private reader: BinaryReader) {}
-    readByte() { return this.reader.readByte(); }
-    readShort() { return this.reader.readShort(); }
-    readInt() { return this.reader.readInt(); }
-    readBoolean() { return this.reader.readByte() === 1; }
-    readString() { const length = this.reader.readShort(); return this.reader.readBytes(length).toString(); }
+    constructor(private reader: BinaryReader)
+    {}
+    readByte()
+    {
+        return this.reader.readByte();
+    }
+    readShort()
+    {
+        return this.reader.readShort();
+    }
+    readInt()
+    {
+        return this.reader.readInt();
+    }
+    readBoolean()
+    {
+        return this.reader.readByte() === 1;
+    }
+    readString()
+    {
+        const length = this.reader.readShort(); return this.reader.readBytes(length).toString();
+    }
     header = 0;
-    get bytesAvailable() { return this.reader.remaining() > 0; }
+    get bytesAvailable()
+    {
+        return this.reader.remaining() > 0;
+    }
 }
 
 const wrapper = (write: (writer: BinaryWriter) => void) =>
@@ -51,7 +70,8 @@ describe('messenger parsers', () =>
     {
         const parser = new MessengerConversationsParser();
         parser.flush();
-        expect(parser.parse(wrapper(w => {
+        expect(parser.parse(wrapper(w =>
+        {
             w.writeInt(1); w.writeInt(42); w.writeInt(0); w.writeInt(7); w.writeString('Alex');
             w.writeInt(900); w.writeInt(3); w.writeInt(1234);
         }))).toBe(true);
@@ -62,7 +82,8 @@ describe('messenger parsers', () =>
     {
         const parser = new MessengerHistoryParser();
         parser.flush();
-        parser.parse(wrapper(w => {
+        parser.parse(wrapper(w =>
+        {
             w.writeInt(42); w.writeByte(1); w.writeInt(1); w.writeInt(900); w.writeInt(7);
             w.writeInt(0); w.writeString('hello'); w.writeString(''); w.writeInt(1234);
         }));
@@ -74,21 +95,31 @@ describe('messenger parsers', () =>
     it('parses acknowledgement, failure, realtime message and read cursor', () =>
     {
         const ack = new MessengerMessageAckParser();
-        ack.flush(); ack.parse(wrapper(w => { w.writeInt(11); w.writeInt(42); w.writeInt(900); w.writeInt(1234); }));
+        ack.flush(); ack.parse(wrapper(w =>
+        {
+            w.writeInt(11); w.writeInt(42); w.writeInt(900); w.writeInt(1234);
+        }));
         expect([ ack.confirmationId, ack.conversationId, ack.messageId, ack.createdAt ]).toEqual([ 11, 42, 900, 1234 ]);
 
         const failed = new MessengerMessageFailedParser();
-        failed.flush(); failed.parse(wrapper(w => { w.writeInt(11); w.writeInt(6); }));
+        failed.flush(); failed.parse(wrapper(w =>
+        {
+            w.writeInt(11); w.writeInt(6);
+        }));
         expect([ failed.confirmationId, failed.errorCode ]).toEqual([ 11, 6 ]);
 
         const realtime = new MessengerMessageParser();
-        realtime.flush(); realtime.parse(wrapper(w => {
+        realtime.flush(); realtime.parse(wrapper(w =>
+        {
             w.writeInt(42); w.writeInt(900); w.writeInt(7); w.writeInt(0); w.writeString('hello'); w.writeString(''); w.writeInt(1234);
         }));
         expect(realtime.message).toMatchObject({ conversationId: 42, id: 900 });
 
         const read = new MessengerReadCursorParser();
-        read.flush(); read.parse(wrapper(w => { w.writeInt(42); w.writeInt(7); w.writeInt(900); }));
+        read.flush(); read.parse(wrapper(w =>
+        {
+            w.writeInt(42); w.writeInt(7); w.writeInt(900);
+        }));
         expect([ read.conversationId, read.readerId, read.messageId ]).toEqual([ 42, 7, 900 ]);
     });
 });

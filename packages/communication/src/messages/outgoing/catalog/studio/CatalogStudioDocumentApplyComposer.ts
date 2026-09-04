@@ -11,6 +11,12 @@ export class CatalogStudioDocumentApplyComposer implements IMessageComposer<(str
         this._data = [ operationId, draftVersionId, expectedRevision, rootLockToken, format, encoded.encoding,
             encoded.chunks.length, ...encoded.chunks, fingerprint, summary ];
     }
-    public dispose(): void { this._data = null; }
-    public getMessageArray() { return this._data; }
+    public dispose(): void
+    {
+        this._data = null;
+    }
+    public getMessageArray()
+    {
+        return this._data;
+    }
 }

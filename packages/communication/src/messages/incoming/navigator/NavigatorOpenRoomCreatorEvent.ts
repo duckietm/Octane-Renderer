@@ -11,6 +11,6 @@ export class NavigatorOpenRoomCreatorEvent extends MessageEvent implements IMess
 
     public getParser(): NavigatorOpenRoomCreatorParser
     {
-        return this.parser as NavigatorOpenRoomCreatorParser;
+        return this.parser;
     }
 }

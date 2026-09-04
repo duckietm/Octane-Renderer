@@ -40,7 +40,16 @@ export class ChestFurniDeltaMessageParser implements IMessageParser
         return true;
     }
 
-    public get chestId(): number { return this._chestId; }
-    public get removedIds(): number[] { return this._removedIds; }
-    public get added(): IChestFurniStoredItem[] { return this._added; }
+    public get chestId(): number
+    {
+        return this._chestId;
+    }
+    public get removedIds(): number[]
+    {
+        return this._removedIds;
+    }
+    public get added(): IChestFurniStoredItem[]
+    {
+        return this._added;
+    }
 }

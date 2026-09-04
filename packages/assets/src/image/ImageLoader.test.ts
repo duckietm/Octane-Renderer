@@ -8,7 +8,7 @@ const animatedWebP = (): Uint8Array => new Uint8Array([
     0x41, 0x4e, 0x49, 0x4d
 ]);
 
-const createDependencies = (overrides: Partial<ImageLoaderDependencies> = {}): ImageLoaderDependencies => ({
+const createDependencies = (overrides: Partial<ImageLoaderDependencies> = {}): ImageLoaderDependencies => (({
     fetch: vi.fn(),
     decodeStatic: vi.fn().mockResolvedValue({ kind: 'static' }),
     decodeGif: vi.fn().mockReturnValue({ kind: 'gif' }),
@@ -16,7 +16,7 @@ const createDependencies = (overrides: Partial<ImageLoaderDependencies> = {}): I
     decodeAnimatedWebP: vi.fn().mockResolvedValue({ kind: 'animated-webp' }),
     warn: vi.fn(),
     ...overrides
-} as unknown as ImageLoaderDependencies);
+}));
 
 describe('loadImageResource', () =>
 {

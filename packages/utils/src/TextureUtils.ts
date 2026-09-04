@@ -30,7 +30,7 @@ export class TextureUtils
         {
             return await this.getExtractor().image(options) as HTMLImageElement;
         }
-        catch(e)
+        catch (e)
         {
             return null;
         }
@@ -53,7 +53,7 @@ export class TextureUtils
         {
             return await this.getExtractor().base64(options);
         }
-        catch(e)
+        catch (e)
         {
             return null;
         }

@@ -11,6 +11,6 @@ export class SnowWarRejoinPreviousRoomEvent extends MessageEvent implements IMes
 
     public getParser(): SnowWarRejoinPreviousRoomParser
     {
-        return this.parser as SnowWarRejoinPreviousRoomParser;
+        return this.parser;
     }
 }

@@ -16,7 +16,7 @@ export class RoomUserData implements IRoomUserData
     private _prefixFont: string = '';
     private _displayOrder: string = 'icon-prefix-name';
     private _activityPoints: number;
-	private _background: number;
+    private _background: number;
     private _stand: number;
     private _overlay: number;
     private _cardBackground: number;
@@ -59,8 +59,8 @@ export class RoomUserData implements IRoomUserData
     {
         this._activityPoints = value;
     }
-	
-	public get background(): number
+
+    public get background(): number
     {
         return this._background;
     }

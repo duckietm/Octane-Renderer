@@ -11,6 +11,6 @@ export class MiniMailNewMessageEvent extends MessageEvent implements IMessageEve
 
     public getParser(): MiniMailNewMessageParser
     {
-        return this.parser as MiniMailNewMessageParser;
+        return this.parser;
     }
 }

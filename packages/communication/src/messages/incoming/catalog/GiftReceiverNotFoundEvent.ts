@@ -11,6 +11,6 @@ export class GiftReceiverNotFoundEvent extends MessageEvent implements IMessageE
 
     public getParser(): GiftReceiverNotFoundParser
     {
-        return this.parser as GiftReceiverNotFoundParser;
+        return this.parser;
     }
 }

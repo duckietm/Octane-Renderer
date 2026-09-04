@@ -28,7 +28,16 @@ export class ChestUpgradeResultMessageParser implements IMessageParser
         return true;
     }
 
-    public get chestId(): number { return this._chestId; }
-    public get resultCode(): number { return this._resultCode; }
-    public get successful(): boolean { return this._resultCode === 0; }
+    public get chestId(): number
+    {
+        return this._chestId;
+    }
+    public get resultCode(): number
+    {
+        return this._resultCode;
+    }
+    public get successful(): boolean
+    {
+        return this._resultCode === 0;
+    }
 }

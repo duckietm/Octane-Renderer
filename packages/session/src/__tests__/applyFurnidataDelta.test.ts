@@ -1,11 +1,13 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { applyFurnidataDeltaTo } from '../furniture/applyFurnidataDelta';
 
-describe('applyFurnidataDeltaTo', () => {
+describe('applyFurnidataDeltaTo', () =>
+{
     const setValue = vi.fn();
     beforeEach(() => setValue.mockClear());
 
-    it('patches floor FurnitureData name/desc + localization keys, dispatches window event', () => {
+    it('patches floor FurnitureData name/desc + localization keys, dispatches window event', () =>
+    {
         const floor: any = { _localizedName: 'Old', _description: 'Old desc' };
         const floorItems = new Map<number, any>([[ 5, floor ]]);
         const dispatched: string[] = [];
@@ -23,12 +25,14 @@ describe('applyFurnidataDeltaTo', () => {
         expect(dispatched).toContain('nitro-localization-updated');
     });
 
-    it('patches wall items by id', () => {
+    it('patches wall items by id', () =>
+    {
         const wall: any = { _localizedName: 'W', _description: '' };
         const wallItems = new Map<number, any>([[ 9, wall ]]);
         applyFurnidataDeltaTo(
             [ { type: 'I', id: 9, classname: 'poster', name: 'WallNew', description: 'd' } ],
-            new Map(), wallItems, { setValue }, { dispatchEvent: () => {} }
+            new Map(), wallItems, { setValue }, { dispatchEvent: () =>
+            {} }
         );
         expect(wall._localizedName).toBe('WallNew');
         expect(setValue).toHaveBeenCalledWith('wallItem.name.9', 'WallNew');

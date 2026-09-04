@@ -6,7 +6,8 @@ export class SoundboardChannel
 {
     private _audio: HTMLAudioElement = null;
 
-    constructor(private readonly _createAudio: AudioFactory = url => new Audio(url)) {}
+    constructor(private readonly _createAudio: AudioFactory = url => new Audio(url))
+    {}
 
     public async play(url: string, volume: number): Promise<boolean>
     {
@@ -27,7 +28,7 @@ export class SoundboardChannel
 
             return this._audio === audio;
         }
-        catch(error)
+        catch (error)
         {
             NitroLogger.error(error);
             this.release(audio);
@@ -70,7 +71,7 @@ export class SoundboardChannel
             audio.removeAttribute('src');
             audio.load();
         }
-        catch(error)
+        catch (error)
         {
             NitroLogger.error(error);
         }

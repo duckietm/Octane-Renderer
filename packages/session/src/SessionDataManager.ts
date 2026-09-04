@@ -101,7 +101,7 @@ export class SessionDataManager implements ISessionDataManager
     {
         if(this._permissionsSnapshot) return this._permissionsSnapshot;
 
-        this._permissionsSnapshot = new Map(this._permissions) as ReadonlyMap<string, number>;
+        this._permissionsSnapshot = new Map(this._permissions);
 
         return this._permissionsSnapshot;
     }
@@ -129,7 +129,7 @@ export class SessionDataManager implements ISessionDataManager
             isSystemOpen: this._systemOpen,
             isSystemShutdown: this._systemShutdown,
             uiFlags: this._uiFlags,
-            tags: Object.freeze<string[]>([...this._tags]) as ReadonlyArray<string>,
+            tags: Object.freeze<string[]>([...this._tags]),
             rankId: this._rankId,
             rankName: this._rankName,
             rankBadge: this._rankBadge,
@@ -146,8 +146,8 @@ export class SessionDataManager implements ISessionDataManager
             this._furnitureData.init(),
             this._productData.init(),
             this._badgeImageManager.init(),
-            this._ignoredUsersManager.init(),
-            this._groupInformationManager.init()
+            Promise.resolve(this._ignoredUsersManager.init()),
+            Promise.resolve(this._groupInformationManager.init())
         ]);
 
         // Store message event references for cleanup
@@ -177,8 +177,14 @@ export class SessionDataManager implements ISessionDataManager
             GetCommunication().registerMessageEvent(new FurnitureDataReloadEvent((event: FurnitureDataReloadEvent) =>
             {
                 const parser = event.getParser();
-                if(parser.mode === 1) { void this.applyFurnidataReloadHint(); }
-                else { this.applyFurnidataDelta(parser.entries); }
+                if(parser.mode === 1)
+                {
+                    void this.applyFurnidataReloadHint();
+                }
+                else
+                {
+                    this.applyFurnidataDelta(parser.entries);
+                }
             }))
         );
 
@@ -556,7 +562,7 @@ export class SessionDataManager implements ISessionDataManager
 
         if(!override) return item;
 
-        const clonedItem = Object.assign(Object.create(Object.getPrototypeOf(item)), item) as any;
+        const clonedItem = Object.assign(Object.create(Object.getPrototypeOf(item)), item);
 
         if(override.name !== undefined) clonedItem._localizedName = override.name;
         if(override.description !== undefined) clonedItem._description = override.description;
@@ -587,7 +593,8 @@ export class SessionDataManager implements ISessionDataManager
 
     public applyFurnidataDelta(entries: FurnidataDeltaEntry[]): void
     {
-        applyFurnidataDeltaTo(entries, this._floorItems as any, this._wallItems as any, GetLocalizationManager(), (typeof window !== 'undefined') ? window : { dispatchEvent: () => {} } as any);
+        applyFurnidataDeltaTo(entries, this._floorItems as any, this._wallItems as any, GetLocalizationManager(), (typeof window !== 'undefined') ? window : { dispatchEvent: () =>
+        {} });
     }
 
     public async applyFurnidataReloadHint(): Promise<void>

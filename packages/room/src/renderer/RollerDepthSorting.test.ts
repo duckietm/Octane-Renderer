@@ -10,7 +10,8 @@ import { OBJECT_ALTITUDE_DEPTH } from './ObjectAltitudeDepth';
 const QUEUE_TILE_LAYERS = { 0: { z: -900 }, 1: { z: -899 }, 2: { z: -898 }, 3: { z: -897 } };
 const QUEUE_TILE_DIRECTIONS = { 0: { layers: {} }, 2: { layers: {} }, 4: { layers: {} }, 6: { layers: {} } };
 
-const createQueueTileSizeData = () => {
+const createQueueTileSizeData = () =>
+{
     const sizeData = new SizeData(4, 45);
 
     expect(sizeData.processLayers(QUEUE_TILE_LAYERS)).toBe(true);
@@ -29,7 +30,8 @@ const createGeometry = () => new RoomGeometry(64, new Vector3d(-135, 30, 0), new
 // Sort depth exactly as RoomSpriteCanvas.renderObject computes it (minus the
 // negligible screen-x and sprite-count tiebreakers). Smaller = drawn later =
 // on top.
-const sortDepth = (geometry: RoomGeometry, location: Vector3d, relativeDepth: number, altitudeWeight: number = OBJECT_ALTITUDE_DEPTH) => {
+const sortDepth = (geometry: RoomGeometry, location: Vector3d, relativeDepth: number, altitudeWeight: number = OBJECT_ALTITUDE_DEPTH) =>
+{
     const screen = geometry.getScreenPosition(location);
 
     expect(screen).not.toBeNull();
@@ -37,17 +39,21 @@ const sortDepth = (geometry: RoomGeometry, location: Vector3d, relativeDepth: nu
     return (screen.z - (location.z * altitudeWeight)) + relativeDepth;
 };
 
-describe('roller depth sorting', () => {
-    it('loads the layer z offsets from the asset for every direction', () => {
+describe('roller depth sorting', () =>
+{
+    it('loads the layer z offsets from the asset for every direction', () =>
+    {
         const sizeData = createQueueTileSizeData();
 
-        for (const direction of [0, 2, 4, 6]) {
+        for(const direction of [0, 2, 4, 6])
+        {
             expect(sizeData.getLayerZOffset(direction, 0)).toBeCloseTo(0.9, 5);
             expect(sizeData.getLayerZOffset(direction, 3)).toBeCloseTo(0.897, 5);
         }
     });
 
-    it('sorts riders above neighbouring rollers, and rollers above floor objects behind them', () => {
+    it('sorts riders above neighbouring rollers, and rollers above floor objects behind them', () =>
+    {
         const geometry = createGeometry();
         const sizeData = createQueueTileSizeData();
         const beltRelativeDepth = sizeData.getLayerZOffset(0, 0) * DEPTH_MULTIPLIER;
@@ -70,7 +76,8 @@ describe('roller depth sorting', () => {
         expect(ownBelt).toBeLessThan(floorAvatarBehind);
     });
 
-    it('documents that the altitude weight is what makes riders clear the next roller', () => {
+    it('documents that the altitude weight is what makes riders clear the next roller', () =>
+    {
         const geometry = createGeometry();
         const sizeData = createQueueTileSizeData();
         const beltRelativeDepth = sizeData.getLayerZOffset(0, 0) * DEPTH_MULTIPLIER;

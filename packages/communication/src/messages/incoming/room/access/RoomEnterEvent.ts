@@ -11,6 +11,6 @@ export class RoomEnterEvent extends MessageEvent implements IMessageEvent
 
     public getParser(): RoomEnterParser
     {
-        return this.parser as RoomEnterParser;
+        return this.parser;
     }
 }

@@ -20,5 +20,8 @@ export class WheelResultParser implements IMessageParser
         return true;
     }
 
-    public get prizeId(): number { return this._prizeId; }
+    public get prizeId(): number
+    {
+        return this._prizeId;
+    }
 }

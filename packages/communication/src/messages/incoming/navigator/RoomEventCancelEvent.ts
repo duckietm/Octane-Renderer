@@ -11,6 +11,6 @@ export class RoomEventCancelEvent extends MessageEvent implements IMessageEvent
 
     public getParser(): RoomEventCancelMessageParser
     {
-        return this.parser as RoomEventCancelMessageParser;
+        return this.parser;
     }
 }

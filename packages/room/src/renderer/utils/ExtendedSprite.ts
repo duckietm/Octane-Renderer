@@ -1,6 +1,6 @@
 import { AlphaTolerance } from '@nitrots/api';
 import { GetRenderer, TextureUtils } from '@nitrots/utils';
-import { GlRenderTarget, Point, RendererType, Sprite, Texture, TextureSource, WebGLRenderer, WebGPURenderer } from 'pixi.js';
+import { Point, Sprite, Texture, TextureSource, WebGLRenderer, WebGPURenderer } from 'pixi.js';
 
 const BYTES_PER_PIXEL = 4;
 
@@ -93,13 +93,13 @@ export class ExtendedSprite extends Sprite
             pixels = TextureUtils.getPixels(new Texture(textureSource))?.pixels ?? null;
         }
 
-        else if((renderer.type as RendererType) === RendererType.WEBGL)
+        else if(renderer instanceof WebGLRenderer)
         {
             pixels = new Uint8ClampedArray(BYTES_PER_PIXEL * width * height);
 
-            const webglRenderer = renderer as WebGLRenderer;
+            const webglRenderer = renderer;
             const renderTarget = webglRenderer.renderTarget.getRenderTarget(textureSource);
-            const glRenderTarget = webglRenderer.renderTarget.getGpuRenderTarget(renderTarget) as GlRenderTarget;
+            const glRenderTarget = webglRenderer.renderTarget.getGpuRenderTarget(renderTarget);
 
             const gl = webglRenderer.gl;
 

@@ -102,7 +102,7 @@ describe('packet contract manifest', () =>
             symbol: 'DuplicateEvent',
             path: 'src/DuplicateEvent.java',
             reason: 'This packet exists only in the emulator implementation'
-        } as never);
+        });
 
         expect(() => parsePacketContractManifest(input)).toThrow('classified more than once');
     });
@@ -129,7 +129,7 @@ describe('packet contract manifest', () =>
             java: { symbol: 'DynamicComposer', className: 'DynamicComposer', path: 'src/DynamicComposer.java' },
             typescript: { symbol: 'DYNAMIC', className: 'DynamicEvent', path: 'src/DynamicEvent.ts' },
             reason: 'complex packet'
-        } as never);
+        });
 
         expect(() => parsePacketContractManifest(input)).toThrow('concrete exemption reason');
     });

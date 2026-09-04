@@ -4,8 +4,17 @@ export class HousekeepingGiveCreditsComposer implements IMessageComposer<Constru
 {
     private _data: ConstructorParameters<typeof HousekeepingGiveCreditsComposer>;
 
-    constructor(userId: number, amount: number) { this._data = [userId, amount]; }
+    constructor(userId: number, amount: number)
+    {
+        this._data = [userId, amount];
+    }
 
-    public getMessageArray() { return this._data; }
-    public dispose(): void { return; }
+    public getMessageArray()
+    {
+        return this._data;
+    }
+    public dispose(): void
+    {
+        return;
+    }
 }

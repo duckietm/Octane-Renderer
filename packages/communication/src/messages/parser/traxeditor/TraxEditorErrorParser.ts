@@ -26,5 +26,8 @@ export class TraxEditorErrorParser implements IMessageParser
         return true;
     }
 
-    public get errorCode(): number { return this._errorCode; }
+    public get errorCode(): number
+    {
+        return this._errorCode;
+    }
 }

@@ -9,6 +9,10 @@ export class YouTubeRoomSettingsComposer implements IMessageComposer<any[]>
         this._data = [enabled ? 1 : 0];
     }
 
-    public getMessageArray() { return this._data; }
-    public dispose(): void {}
+    public getMessageArray()
+    {
+        return this._data;
+    }
+    public dispose(): void
+    {}
 }

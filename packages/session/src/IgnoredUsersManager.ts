@@ -18,7 +18,7 @@ export class IgnoredUsersManager implements IIgnoredUsersManager
     {
         if(this._ignoredUsersSnapshot) return this._ignoredUsersSnapshot;
 
-        this._ignoredUsersSnapshot = Object.freeze<string[]>([ ...this._ignoredUsers ]) as ReadonlyArray<string>;
+        this._ignoredUsersSnapshot = Object.freeze<string[]>([ ...this._ignoredUsers ]);
 
         return this._ignoredUsersSnapshot;
     }

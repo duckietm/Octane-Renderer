@@ -51,7 +51,7 @@ export class AvatarAssetDownloadManager
             // silently render empty. loadGamedata handles both split + single.
             responseData = await loadGamedata(url);
         }
-        catch(fetchErr)
+        catch (fetchErr)
         {
             throw new Error(`Could not load figure map from "${ url }" — check "avatar.figuremap.url" in renderer-config.json (${ fetchErr.message })`);
         }
@@ -252,7 +252,7 @@ export class AvatarAssetDownloadManager
         // rh:1, ...), so "any part in an NFT library" would classify base
         // figure sets as NFT. A set is NFT only when every library that can
         // serve one of its parts is an NFT library.
-        let hasNftLibrary = false;
+        const hasNftLibrary = false;
 
         for(const part of partSet.parts)
         {
@@ -264,7 +264,7 @@ export class AvatarAssetDownloadManager
             if(!libraries) continue;
 
             let hasNftLibrary = false;
-            let hasStandardLibrary = false;
+            const hasStandardLibrary = false;
 
             for(const library of libraries)
             {

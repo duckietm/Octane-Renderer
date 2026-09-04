@@ -4,8 +4,17 @@ export class HousekeepingMuteRoomComposer implements IMessageComposer<Constructo
 {
     private _data: ConstructorParameters<typeof HousekeepingMuteRoomComposer>;
 
-    constructor(roomId: number, minutes: number) { this._data = [roomId, minutes]; }
+    constructor(roomId: number, minutes: number)
+    {
+        this._data = [roomId, minutes];
+    }
 
-    public getMessageArray() { return this._data; }
-    public dispose(): void { return; }
+    public getMessageArray()
+    {
+        return this._data;
+    }
+    public dispose(): void
+    {
+        return;
+    }
 }

@@ -3,7 +3,8 @@ import { GetRenderer } from '@nitrots/utils';
 import { Container, Matrix, Sprite, Texture, RenderTexture } from 'pixi.js';
 import { FurnitureAnimatedVisualization } from './FurnitureAnimatedVisualization';
 
-export class IsometricImageFurniVisualization extends FurnitureAnimatedVisualization {
+export class IsometricImageFurniVisualization extends FurnitureAnimatedVisualization
+{
     protected static THUMBNAIL: string = 'THUMBNAIL';
 
     private _thumbnailImageNormal: Texture;
@@ -16,7 +17,8 @@ export class IsometricImageFurniVisualization extends FurnitureAnimatedVisualiza
     private _photoUrl: string;
     protected _hasOutline: boolean;
 
-    constructor() {
+    constructor()
+    {
         super();
 
         this._thumbnailImageNormal = null;
@@ -28,9 +30,11 @@ export class IsometricImageFurniVisualization extends FurnitureAnimatedVisualiza
         this._uniqueId = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
         this._photoUrl = null;
     }
-	
-	public dispose(): void {
-        if (this._thumbnailTexture instanceof RenderTexture) {
+
+    public dispose(): void
+    {
+        if(this._thumbnailTexture instanceof RenderTexture)
+        {
             this._thumbnailTexture.destroy(true);
         }
 
@@ -40,26 +44,31 @@ export class IsometricImageFurniVisualization extends FurnitureAnimatedVisualiza
         super.dispose();
     }
 
-    public get hasThumbnailImage(): boolean {
+    public get hasThumbnailImage(): boolean
+    {
         return !(this._thumbnailImageNormal == null);
     }
 
-    public setThumbnailImages(texture: Texture, url?: string): void {
+    public setThumbnailImages(texture: Texture, url?: string): void
+    {
         this._thumbnailImageNormal = texture;
         this._photoUrl = url || null;
         this._thumbnailChanged = true;
     }
 
-    public getPhotoUrl(): string {
+    public getPhotoUrl(): string
+    {
         return this._photoUrl;
     }
 
-    protected updateModel(scale: number): boolean {
+    protected updateModel(scale: number): boolean
+    {
         const flag = super.updateModel(scale);
 
         const size = this.getValidSize(scale);
 
-        if (!this._thumbnailChanged && (this._thumbnailDirection === this.direction) && (this._thumbnailSize === size)) {
+        if(!this._thumbnailChanged && (this._thumbnailDirection === this.direction) && (this._thumbnailSize === size))
+        {
             return flag;
         }
 
@@ -68,15 +77,21 @@ export class IsometricImageFurniVisualization extends FurnitureAnimatedVisualiza
         return true;
     }
 
-    private refreshThumbnail(size: number): void {
-        if (this.asset == null) {
+    private refreshThumbnail(size: number): void
+    {
+        if(this.asset == null)
+        {
             return;
         }
 
-        if (this._thumbnailImageNormal) {
+        if(this._thumbnailImageNormal)
+        {
             this.addThumbnailAsset(this._thumbnailImageNormal, size);
-        } else {
-            if (this._thumbnailTexture instanceof RenderTexture) {
+        }
+        else
+        {
+            if(this._thumbnailTexture instanceof RenderTexture)
+            {
                 this._thumbnailTexture.destroy(true);
             }
             this._thumbnailTexture = null;
@@ -88,20 +103,25 @@ export class IsometricImageFurniVisualization extends FurnitureAnimatedVisualiza
         this._thumbnailSize = size;
     }
 
-    private addThumbnailAsset(texture: Texture, scale: number): void {
+    private addThumbnailAsset(texture: Texture, scale: number): void
+    {
         let layerId = 0;
 
-        while (layerId < this.totalSprites) {
+        while(layerId < this.totalSprites)
+        {
             const layerTag = this.getLayerTag(scale, this.direction, layerId);
 
-            if (layerTag === IsometricImageFurniVisualization.THUMBNAIL) {
+            if(layerTag === IsometricImageFurniVisualization.THUMBNAIL)
+            {
                 this._thumbnailLayerId = layerId;
 
                 const assetName = (this.cacheSpriteAssetName(scale, layerId, false) + this.getFrameNumber(scale, layerId));
                 const asset = this.getAsset(assetName, layerId);
 
-                if (asset) {
-                    if (this._thumbnailTexture instanceof RenderTexture) {
+                if(asset)
+                {
+                    if(this._thumbnailTexture instanceof RenderTexture)
+                    {
                         this._thumbnailTexture.destroy(true);
                     }
                     this._thumbnailTexture = this.generateTransformedThumbnail(texture, asset);
@@ -114,22 +134,27 @@ export class IsometricImageFurniVisualization extends FurnitureAnimatedVisualiza
         }
     }
 
-    protected updateSprite(scale: number, layerId: number): void {
+    protected updateSprite(scale: number, layerId: number): void
+    {
         super.updateSprite(scale, layerId);
 
-        if (this._thumbnailTexture && this._thumbnailLayerId === layerId) {
+        if(this._thumbnailTexture && this._thumbnailLayerId === layerId)
+        {
             const sprite = this.getSprite(layerId);
-            if (sprite) {
+            if(sprite)
+            {
                 sprite.texture = this._thumbnailTexture;
                 sprite.offsetY -= 1;
             }
         }
     }
 
-    protected generateTransformedThumbnail(texture: Texture, asset: IGraphicAsset): Texture {
+    protected generateTransformedThumbnail(texture: Texture, asset: IGraphicAsset): Texture
+    {
         let outlineTexture: RenderTexture = null;
 
-        if (this._hasOutline) {
+        if(this._hasOutline)
+        {
             outlineTexture = this.buildOutlinedTexture(texture);
             texture = outlineTexture;
         }
@@ -143,7 +168,8 @@ export class IsometricImageFurniVisualization extends FurnitureAnimatedVisualiza
 
         const matrix = new Matrix();
 
-        switch (this.direction) {
+        switch(this.direction)
+        {
             case 2:
                 matrix.a = scaleX;
                 matrix.b = -(0.5 * scaleX);
@@ -172,12 +198,13 @@ export class IsometricImageFurniVisualization extends FurnitureAnimatedVisualiza
 
         const renderTexture = this.renderThumbnailWithMatrix(texture, matrix);
 
-        if (outlineTexture) outlineTexture.destroy(true);
+        if(outlineTexture) outlineTexture.destroy(true);
 
         return renderTexture;
     }
 
-    protected buildOutlinedTexture(texture: Texture): RenderTexture {
+    protected buildOutlinedTexture(texture: Texture): RenderTexture
+    {
         const borderSize = 20;
         const bgWidth = texture.width + borderSize * 2;
         const bgHeight = texture.height + borderSize * 2;
@@ -199,7 +226,8 @@ export class IsometricImageFurniVisualization extends FurnitureAnimatedVisualiza
         return outlineTexture;
     }
 
-    protected renderThumbnailWithMatrix(texture: Texture, matrix: Matrix): RenderTexture {
+    protected renderThumbnailWithMatrix(texture: Texture, matrix: Matrix): RenderTexture
+    {
         const texW = texture.width;
         const texH = texture.height;
 
@@ -213,11 +241,12 @@ export class IsometricImageFurniVisualization extends FurnitureAnimatedVisualiza
         let minX = corners[0].x, minY = corners[0].y;
         let maxX = corners[0].x, maxY = corners[0].y;
 
-        for (const corner of corners) {
-            if (corner.x < minX) minX = corner.x;
-            if (corner.y < minY) minY = corner.y;
-            if (corner.x > maxX) maxX = corner.x;
-            if (corner.y > maxY) maxY = corner.y;
+        for(const corner of corners)
+        {
+            if(corner.x < minX) minX = corner.x;
+            if(corner.y < minY) minY = corner.y;
+            if(corner.x > maxX) maxX = corner.x;
+            if(corner.y > maxY) maxY = corner.y;
         }
 
         const renderWidth = Math.ceil(maxX - minX);

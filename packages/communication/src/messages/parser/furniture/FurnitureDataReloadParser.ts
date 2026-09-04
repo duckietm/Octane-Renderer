@@ -2,7 +2,7 @@ import { IMessageDataWrapper, IMessageParser } from '@nitrots/api';
 
 export interface FurnidataDeltaEntry
 {
-    type: string;        // "S" floor | "I" wall
+    type: string; // "S" floor | "I" wall
     id: number;
     classname: string;
     name: string;
@@ -51,6 +51,12 @@ export class FurnitureDataReloadParser implements IMessageParser
         return true;
     }
 
-    public get mode(): number { return this._mode; }
-    public get entries(): FurnidataDeltaEntry[] { return this._entries; }
+    public get mode(): number
+    {
+        return this._mode;
+    }
+    public get entries(): FurnidataDeltaEntry[]
+    {
+        return this._entries;
+    }
 }

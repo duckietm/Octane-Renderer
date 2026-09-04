@@ -196,7 +196,7 @@ export class MusicPlayer
             sample.once('loaderror', () =>
             {
                 NitroLogger.error('failed to load sample ' + songId);
-                reject('failed to load sample ' + songId);
+                reject(new Error('failed to load sample ' + songId));
             });
         });
     }

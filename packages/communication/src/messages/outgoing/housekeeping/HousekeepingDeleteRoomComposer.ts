@@ -4,8 +4,17 @@ export class HousekeepingDeleteRoomComposer implements IMessageComposer<Construc
 {
     private _data: ConstructorParameters<typeof HousekeepingDeleteRoomComposer>;
 
-    constructor(roomId: number) { this._data = [roomId]; }
+    constructor(roomId: number)
+    {
+        this._data = [roomId];
+    }
 
-    public getMessageArray() { return this._data; }
-    public dispose(): void { return; }
+    public getMessageArray()
+    {
+        return this._data;
+    }
+    public dispose(): void
+    {
+        return;
+    }
 }

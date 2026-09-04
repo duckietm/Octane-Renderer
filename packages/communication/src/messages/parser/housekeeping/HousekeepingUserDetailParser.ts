@@ -25,6 +25,12 @@ export class HousekeepingUserDetailParser implements IMessageParser
         return true;
     }
 
-    public get found(): boolean { return this._found; }
-    public get user(): HousekeepingUserDetailData | null { return this._user; }
+    public get found(): boolean
+    {
+        return this._found;
+    }
+    public get user(): HousekeepingUserDetailData | null
+    {
+        return this._user;
+    }
 }

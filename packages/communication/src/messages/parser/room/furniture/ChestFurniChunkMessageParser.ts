@@ -36,8 +36,20 @@ export class ChestFurniChunkMessageParser implements IMessageParser
         return true;
     }
 
-    public get chestId(): number { return this._chestId; }
-    public get totalFragments(): number { return this._totalFragments; }
-    public get fragmentNo(): number { return this._fragmentNo; }
-    public get items(): IChestFurniStoredItem[] { return this._items; }
+    public get chestId(): number
+    {
+        return this._chestId;
+    }
+    public get totalFragments(): number
+    {
+        return this._totalFragments;
+    }
+    public get fragmentNo(): number
+    {
+        return this._fragmentNo;
+    }
+    public get items(): IChestFurniStoredItem[]
+    {
+        return this._items;
+    }
 }

@@ -23,7 +23,13 @@ export class SoundboardPlayDeniedParser implements IMessageParser
         return true;
     }
 
-    public get reason(): number { return this._reason; }
+    public get reason(): number
+    {
+        return this._reason;
+    }
 
-    public get remainingSeconds(): number { return this._remainingSeconds; }
+    public get remainingSeconds(): number
+    {
+        return this._remainingSeconds;
+    }
 }

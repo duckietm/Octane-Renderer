@@ -2,10 +2,10 @@ import { IMessageDataWrapper, IMessageParser } from '@nitrots/api';
 
 export interface IEarningsReward
 {
-    type: string;       // credits | pixels | points | badge | item | hc_days
+    type: string; // credits | pixels | points | badge | item | hc_days
     amount: number;
     pointsType: number; // currency type when type === 'points'
-    data: string;       // badge code (badge), items_base.id (item), else ''
+    data: string; // badge code (badge), items_base.id (item), else ''
 }
 
 export interface IEarningsEntry
@@ -64,5 +64,8 @@ export class EarningsCenterParser implements IMessageParser
         return true;
     }
 
-    public get entries(): IEarningsEntry[] { return this._entries; }
+    public get entries(): IEarningsEntry[]
+    {
+        return this._entries;
+    }
 }

@@ -11,6 +11,6 @@ export class ClientPingEvent extends MessageEvent implements IMessageEvent
 
     public getParser(): ClientPingParser
     {
-        return this.parser as ClientPingParser;
+        return this.parser;
     }
 }

@@ -23,12 +23,12 @@ export class ImageData
 
     public dispose(): void
     {
-		if(this._container)
+        if(this._container)
         {
             this._container.destroy({ children: true });
             this._container = null;
         }
-		
+
         this._texture = null;
         this._regPoint = null;
         this._colorTransform = null;

@@ -3,9 +3,9 @@ import { IMessageDataWrapper, IMessageParser } from '@nitrots/api';
 export interface IWheelPrize
 {
     id: number;
-    type: string;       // item | badge | credits | points | spin | nothing
-    spriteId: number;   // item only (furni icon), else 0
-    badgeCode: string;  // badge only, else ''
+    type: string; // item | badge | credits | points | spin | nothing
+    spriteId: number; // item only (furni icon), else 0
+    badgeCode: string; // badge only, else ''
     amount: number;
     pointsType: number;
     label: string;
@@ -58,9 +58,24 @@ export class WheelDataParser implements IMessageParser
         return true;
     }
 
-    public get freeSpins(): number { return this._freeSpins; }
-    public get extraSpins(): number { return this._extraSpins; }
-    public get spinCost(): number { return this._spinCost; }
-    public get spinCostType(): number { return this._spinCostType; }
-    public get prizes(): IWheelPrize[] { return this._prizes; }
+    public get freeSpins(): number
+    {
+        return this._freeSpins;
+    }
+    public get extraSpins(): number
+    {
+        return this._extraSpins;
+    }
+    public get spinCost(): number
+    {
+        return this._spinCost;
+    }
+    public get spinCostType(): number
+    {
+        return this._spinCostType;
+    }
+    public get prizes(): IWheelPrize[]
+    {
+        return this._prizes;
+    }
 }

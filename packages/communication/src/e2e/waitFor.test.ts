@@ -6,7 +6,10 @@ describe('waitFor', () =>
     it('resolves when the predicate becomes true before the deadline', async () =>
     {
         let ready = false;
-        queueMicrotask(() => { ready = true; });
+        queueMicrotask(() =>
+        {
+            ready = true;
+        });
 
         await expect(waitFor(() => ready, {
             timeoutMs: 100,

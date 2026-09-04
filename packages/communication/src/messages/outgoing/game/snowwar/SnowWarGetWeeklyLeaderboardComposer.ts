@@ -9,6 +9,12 @@ export class SnowWarGetWeeklyLeaderboardComposer implements IMessageComposer<Con
         this._data = [ gameTypeId, weekOffset, startRank, direction, viewSize, windowSize ];
     }
 
-    public getMessageArray() { return this._data; }
-    public dispose(): void { this._data = null; }
+    public getMessageArray()
+    {
+        return this._data;
+    }
+    public dispose(): void
+    {
+        this._data = null;
+    }
 }

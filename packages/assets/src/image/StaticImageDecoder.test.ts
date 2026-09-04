@@ -15,7 +15,7 @@ const createDependencies = (overrides: Partial<StaticImageDecoderDependencies> =
         canvasFromRgba: vi.fn().mockImplementation(image => ({ width: image.width, height: image.height })),
         textureFrom: vi.fn().mockReturnValue(texture),
         ...overrides
-    } as StaticImageDecoderDependencies;
+    };
 };
 
 afterEach(() =>

@@ -11,6 +11,6 @@ export class RestoreClientMessageEvent extends MessageEvent implements IMessageE
 
     public getParser(): RestoreClientMessageParser
     {
-        return this.parser as RestoreClientMessageParser;
+        return this.parser;
     }
 }

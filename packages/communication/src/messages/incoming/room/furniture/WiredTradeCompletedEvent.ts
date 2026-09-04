@@ -11,6 +11,6 @@ export class WiredTradeCompletedEvent extends MessageEvent implements IMessageEv
 
     public getParser(): WiredTradeCompletedMessageParser
     {
-        return this.parser as WiredTradeCompletedMessageParser;
+        return this.parser;
     }
 }

@@ -19,7 +19,7 @@ export class CommunicationManager implements ICommunicationManager
     private _socketErrorCallback: () => void = null;
     private _socketReconnectedCallback: () => void = null;
 
-    private _machineIdPromise: Promise<string> = null;
+    private _machineIdPromise: Promise<string> | null = null;
     private _initResolved: boolean = false;
     private _recoveryToken: string = '';
 
@@ -31,7 +31,7 @@ export class CommunicationManager implements ICommunicationManager
 
             return result.thumbmark ? `IID-${result.thumbmark}` : 'FAILED';
         }
-        catch(error)
+        catch (error)
         {
             NitroLogger.warn('[CommunicationManager] Failed to generate machine ID', error);
 
@@ -41,7 +41,7 @@ export class CommunicationManager implements ICommunicationManager
 
     private async sendHandshake(): Promise<void>
     {
-        if(!this._machineIdPromise) this._machineIdPromise = this.generateMachineID();
+        if(this._machineIdPromise === null) this._machineIdPromise = this.generateMachineID();
 
         const machineId = await this._machineIdPromise;
 
@@ -94,7 +94,7 @@ export class CommunicationManager implements ICommunicationManager
             // Store callback for cleanup
             this._socketErrorCallback = () =>
             {
-                if(!this._initResolved) reject();
+                if(!this._initResolved) reject(new Error('Socket error before init resolved'));
             };
             GetEventDispatcher().addEventListener(NitroEventType.SOCKET_ERROR, this._socketErrorCallback);
 
@@ -218,7 +218,8 @@ export class CommunicationManager implements ICommunicationManager
 
     public subscribeMessage<T extends IMessageEvent>(eventCtor: new (callback: (event: T) => void) => T, handler: (event: T) => void): () => void
     {
-        if(!eventCtor || !handler) return () => {};
+        if(!eventCtor || !handler) return () =>
+        {};
 
         const event = new eventCtor(handler);
 

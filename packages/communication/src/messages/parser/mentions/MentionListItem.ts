@@ -30,14 +30,44 @@ export class MentionListItem
         this._read = withReadFlag ? wrapper.readBoolean() : false;
     }
 
-    public get mentionId(): number { return this._mentionId; }
-    public get senderId(): number { return this._senderId; }
-    public get senderUsername(): string { return this._senderUsername; }
-    public get senderFigure(): string { return this._senderFigure; }
-    public get roomId(): number { return this._roomId; }
-    public get roomName(): string { return this._roomName; }
-    public get message(): string { return this._message; }
-    public get mentionType(): number { return this._mentionType; }
-    public get timestamp(): number { return this._timestamp; }
-    public get read(): boolean { return this._read; }
+    public get mentionId(): number
+    {
+        return this._mentionId;
+    }
+    public get senderId(): number
+    {
+        return this._senderId;
+    }
+    public get senderUsername(): string
+    {
+        return this._senderUsername;
+    }
+    public get senderFigure(): string
+    {
+        return this._senderFigure;
+    }
+    public get roomId(): number
+    {
+        return this._roomId;
+    }
+    public get roomName(): string
+    {
+        return this._roomName;
+    }
+    public get message(): string
+    {
+        return this._message;
+    }
+    public get mentionType(): number
+    {
+        return this._mentionType;
+    }
+    public get timestamp(): number
+    {
+        return this._timestamp;
+    }
+    public get read(): boolean
+    {
+        return this._read;
+    }
 }

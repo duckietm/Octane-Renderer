@@ -11,13 +11,15 @@ vi.mock('./GetRoomEngine', () => ({
     GetRoomEngine: () => null
 }));
 
-const makePreviewer = (category = RoomObjectCategory.FLOOR) => {
+const makePreviewer = (category = RoomObjectCategory.FLOOR) =>
+{
     let roomDirection = 90;
     const roomObject = {
         getDirection: () => ({ x: roomDirection }),
         getLocation: () => ({ x: 0.5, y: 2.3, z: 1.8 }),
         model: {
-            getValue: vi.fn((variable) => {
+            getValue: vi.fn((variable) =>
+            {
                 if(variable === RoomObjectVariable.FURNITURE_SIZE_Z) return 1.4;
                 if(variable === RoomObjectVariable.FURNITURE_CENTER_Z) return 0.25;
 
@@ -25,7 +27,8 @@ const makePreviewer = (category = RoomObjectCategory.FLOOR) => {
             }),
             setValue: vi.fn()
         },
-        setDirection: vi.fn((direction) => {
+        setDirection: vi.fn((direction) =>
+        {
             roomDirection = direction.x;
         })
     };
@@ -95,8 +98,10 @@ const makePreviewer = (category = RoomObjectCategory.FLOOR) => {
     return { previewer, internals, roomEngine, roomObject };
 };
 
-describe('RoomPreviewer catalog controls', () => {
-    it('reports stable capabilities for the object that is actually loaded', () => {
+describe('RoomPreviewer catalog controls', () =>
+{
+    it('reports stable capabilities for the object that is actually loaded', () =>
+    {
         const { previewer, internals } = makePreviewer();
 
         internals.refreshPreviewCapabilities();
@@ -111,7 +116,8 @@ describe('RoomPreviewer catalog controls', () => {
         });
     });
 
-    it('notifies subscribers when zoom availability changes', () => {
+    it('notifies subscribers when zoom availability changes', () =>
+    {
         const { previewer, internals } = makePreviewer();
         const listener = vi.fn();
         const unsubscribe = (previewer as any).subscribePreviewCapabilities(listener);
@@ -125,7 +131,8 @@ describe('RoomPreviewer catalog controls', () => {
         unsubscribe();
     });
 
-    it('distinguishes avatar actions from furniture interactions', () => {
+    it('distinguishes avatar actions from furniture interactions', () =>
+    {
         const { previewer, internals } = makePreviewer(RoomObjectCategory.UNIT);
 
         internals._currentPreviewMode = 'avatar';
@@ -139,7 +146,8 @@ describe('RoomPreviewer catalog controls', () => {
         });
     });
 
-    it('keeps wall-item mirroring available without floor-direction metadata', () => {
+    it('keeps wall-item mirroring available without floor-direction metadata', () =>
+    {
         const { previewer, internals, roomObject } = makePreviewer(RoomObjectCategory.WALL);
 
         internals._currentPreviewMode = 'wall';
@@ -149,7 +157,8 @@ describe('RoomPreviewer catalog controls', () => {
         expect(previewer.getPreviewCapabilities()).toMatchObject({ mode: 'wall', canRotate: true });
     });
 
-    it('cycles an avatar through walk, dance, sit, lay, wave and stand', () => {
+    it('cycles an avatar through walk, dance, sit, lay, wave and stand', () =>
+    {
         const { previewer, internals, roomEngine } = makePreviewer(RoomObjectCategory.UNIT);
 
         internals._currentPreviewMode = 'avatar';
@@ -176,7 +185,8 @@ describe('RoomPreviewer catalog controls', () => {
         expect(roomEngine.updateRoomObjectUserPosture).toHaveBeenLastCalledWith(77, RoomPreviewer.PREVIEW_OBJECT_ID, AvatarAction.POSTURE_STAND, '');
     });
 
-    it('skips avatar poses that are incompatible with the current direction', () => {
+    it('skips avatar poses that are incompatible with the current direction', () =>
+    {
         const { previewer, internals, roomEngine } = makePreviewer(RoomObjectCategory.UNIT);
 
         internals._currentPreviewMode = 'avatar';
@@ -189,7 +199,8 @@ describe('RoomPreviewer catalog controls', () => {
         expect(roomEngine.updateRoomObjectUserAction).toHaveBeenLastCalledWith(77, RoomPreviewer.PREVIEW_OBJECT_ID, RoomObjectVariable.FIGURE_EXPRESSION, AvatarAction.getExpressionId(AvatarAction.EXPRESSION_WAVE), null);
     });
 
-    it('keeps avatar rotation on valid directions for directional poses', () => {
+    it('keeps avatar rotation on valid directions for directional poses', () =>
+    {
         const { previewer, internals, roomEngine } = makePreviewer(RoomObjectCategory.UNIT);
 
         internals._currentPreviewMode = 'avatar';
@@ -201,7 +212,8 @@ describe('RoomPreviewer catalog controls', () => {
         expect(roomEngine.updateRoomObjectUserLocation).toHaveBeenLastCalledWith(77, RoomPreviewer.PREVIEW_OBJECT_ID, expect.anything(), expect.anything(), false, 0, expect.objectContaining({ x: 180 }), 180);
     });
 
-    it('keeps laying avatars on the two supported directions', () => {
+    it('keeps laying avatars on the two supported directions', () =>
+    {
         const { previewer, internals } = makePreviewer(RoomObjectCategory.UNIT);
 
         internals._currentPreviewMode = 'avatar';
@@ -215,7 +227,8 @@ describe('RoomPreviewer catalog controls', () => {
         expect(internals._currentAvatarDirection).toBe(2);
     });
 
-    it('keeps sitting, laying and waving anchored to the same floor reference', () => {
+    it('keeps sitting, laying and waving anchored to the same floor reference', () =>
+    {
         const { previewer, internals } = makePreviewer(RoomObjectCategory.UNIT);
         const floorReference = new Rectangle(-30, -110, 60, 120);
 
@@ -233,7 +246,8 @@ describe('RoomPreviewer catalog controls', () => {
         expect(internals._currentPreviewRectangle).toBe(floorReference);
     });
 
-    it('keeps a laying avatar anchored while rotating', () => {
+    it('keeps a laying avatar anchored while rotating', () =>
+    {
         const { previewer, internals } = makePreviewer(RoomObjectCategory.UNIT);
         const floorReference = new Rectangle(-30, -110, 60, 120);
 
@@ -247,7 +261,8 @@ describe('RoomPreviewer catalog controls', () => {
         expect(internals._currentPreviewRectangle).toBe(floorReference);
     });
 
-    it('rotates floor furniture in both requested directions and refreshes the preview', () => {
+    it('rotates floor furniture in both requested directions and refreshes the preview', () =>
+    {
         const { previewer, roomEngine } = makePreviewer();
 
         previewer.changeRoomObjectDirection(false);
@@ -259,7 +274,8 @@ describe('RoomPreviewer catalog controls', () => {
         expect(roomEngine.updateRoomObjectFloor).toHaveBeenNthCalledWith(2, 77, RoomPreviewer.PREVIEW_OBJECT_ID, expect.anything(), expect.objectContaining({ x: 180 }), null, null);
     });
 
-    it('mirrors wall furniture around the preview corner and preserves its visual center height', () => {
+    it('mirrors wall furniture around the preview corner and preserves its visual center height', () =>
+    {
         const { previewer, internals, roomEngine, roomObject } = makePreviewer(RoomObjectCategory.WALL);
 
         internals._currentPreviewMode = 'wall';
@@ -273,7 +289,8 @@ describe('RoomPreviewer catalog controls', () => {
         );
     });
 
-    it('enables the invisible visualization layer when a furniture preview becomes available', () => {
+    it('enables the invisible visualization layer when a furniture preview becomes available', () =>
+    {
         const { internals, roomObject } = makePreviewer();
 
         internals.onRoomObjectAdded({ roomId: 77, objectId: RoomPreviewer.PREVIEW_OBJECT_ID, category: RoomObjectCategory.FLOOR });
@@ -281,7 +298,8 @@ describe('RoomPreviewer catalog controls', () => {
         expect(roomObject.model.setValue).toHaveBeenCalledWith('furniture_invisible_layer', 1);
     });
 
-    it('centers wall furniture on the configured horizontal preview offset', () => {
+    it('centers wall furniture on the configured horizontal preview offset', () =>
+    {
         const { internals } = makePreviewer(RoomObjectCategory.WALL);
 
         internals._centerWallItems = true;
@@ -291,7 +309,8 @@ describe('RoomPreviewer catalog controls', () => {
         expect(internals.getCanvasOffset(new Point(0, 10))).toEqual(expect.objectContaining({ x: 4, y: 10 }));
     });
 
-    it('keeps the small scale until furniture has enough margin to grow without clipping', () => {
+    it('keeps the small scale until furniture has enough margin to grow without clipping', () =>
+    {
         const { internals, roomEngine } = makePreviewer();
 
         internals._currentPreviewScale = RoomPreviewer.SCALE_SMALL;
@@ -304,7 +323,8 @@ describe('RoomPreviewer catalog controls', () => {
         expect(internals._currentPreviewScale).toBe(RoomPreviewer.SCALE_SMALL);
     });
 
-    it('changes furni state and disables automatic cycling', () => {
+    it('changes furni state and disables automatic cycling', () =>
+    {
         const { previewer, internals, roomEngine } = makePreviewer();
 
         previewer.changeRoomObjectState();
@@ -313,7 +333,8 @@ describe('RoomPreviewer catalog controls', () => {
         expect(roomEngine.changeObjectState).toHaveBeenCalledWith(77, RoomPreviewer.PREVIEW_OBJECT_ID, RoomObjectCategory.FLOOR);
     });
 
-    it('applies explicit zoom in and out without an automatic-size lock overriding the choice', () => {
+    it('applies explicit zoom in and out without an automatic-size lock overriding the choice', () =>
+    {
         const { previewer, internals, roomEngine } = makePreviewer();
 
         previewer.zoomOut();

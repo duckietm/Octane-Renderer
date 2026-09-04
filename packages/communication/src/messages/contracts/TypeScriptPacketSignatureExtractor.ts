@@ -58,7 +58,10 @@ const extractIncomingMethod = (
     if(dynamic) return unsupported(dynamic);
 
     const calls: ts.CallExpression[] = [];
-    visit(method.body, node => { if(ts.isCallExpression(node)) calls.push(node); });
+    visit(method.body, node =>
+    {
+        if(ts.isCallExpression(node)) calls.push(node);
+    });
     calls.sort((left, right) => left.getStart() - right.getStart());
     const fields: WireSchema[] = [];
     const optionalGuard = trailingOptionalGuard(method);
@@ -245,7 +248,10 @@ const dynamicPacketFlow = (method: ts.MethodDeclaration): string | undefined =>
             || ts.isForOfStatement(node) || ts.isForInStatement(node) || ts.isWhileStatement(node)
             || ts.isDoStatement(node))) return;
         let containsRead = false;
-        visit(node, child => { if(ts.isCallExpression(child) && readCall(child)) containsRead = true; });
+        visit(node, child =>
+        {
+            if(ts.isCallExpression(child) && readCall(child)) containsRead = true;
+        });
         if(containsRead) reason = `Data-dependent packet operations in ${ ts.SyntaxKind[node.kind] } inside ${ method.name.getText() }`;
     });
     return reason;

@@ -8,17 +8,45 @@ import { SoundboardSettingsParser } from '../SoundboardSettingsParser';
 
 class TestWrapper
 {
-    constructor(private reader: BinaryReader) {}
-    readByte() { return this.reader.readByte(); }
-    readBytes(length: number) { return this.reader.readBytes(length); }
-    readBoolean() { return this.reader.readByte() === 1; }
-    readShort() { return this.reader.readShort(); }
-    readInt() { return this.reader.readInt(); }
-    readFloat() { return this.reader.readFloat(); }
-    readDouble() { return this.reader.readDouble(); }
-    readString() { const length = this.reader.readShort(); return this.reader.readBytes(length).toString(); }
+    constructor(private reader: BinaryReader)
+    {}
+    readByte()
+    {
+        return this.reader.readByte();
+    }
+    readBytes(length: number)
+    {
+        return this.reader.readBytes(length);
+    }
+    readBoolean()
+    {
+        return this.reader.readByte() === 1;
+    }
+    readShort()
+    {
+        return this.reader.readShort();
+    }
+    readInt()
+    {
+        return this.reader.readInt();
+    }
+    readFloat()
+    {
+        return this.reader.readFloat();
+    }
+    readDouble()
+    {
+        return this.reader.readDouble();
+    }
+    readString()
+    {
+        const length = this.reader.readShort(); return this.reader.readBytes(length).toString();
+    }
     header = 0;
-    get bytesAvailable() { return this.reader.remaining() > 0; }
+    get bytesAvailable()
+    {
+        return this.reader.remaining() > 0;
+    }
 }
 
 describe('SoundboardSettingsParser', () =>
@@ -82,7 +110,7 @@ describe('SoundboardSettingsParser', () =>
         writer.writeInt(0);
 
         const parser = new SoundboardSettingsParser();
-        parser.parse(new TestWrapper(new BinaryReader(writer.getBuffer())) as any);
+        parser.parse(new TestWrapper(new BinaryReader(writer.getBuffer())));
 
         expect(parser.cooldownSeconds).toBe(0);
     });
@@ -113,7 +141,7 @@ describe('SoundboardPlayParser', () =>
         writer.writeString('Simoleo');
 
         const parser = new SoundboardPlayParser();
-        parser.parse(new TestWrapper(new BinaryReader(writer.getBuffer())) as any);
+        parser.parse(new TestWrapper(new BinaryReader(writer.getBuffer())));
 
         expect(parser.soundId).toBe(7);
         expect(parser.url).toBe('/sounds/soundboard/campanella.mp3');
