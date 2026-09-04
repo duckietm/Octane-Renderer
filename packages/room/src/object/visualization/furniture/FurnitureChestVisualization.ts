@@ -80,7 +80,7 @@ export class FurnitureChestVisualization extends FurnitureAnimatedVisualization
 
         this.layOutIcons(entries.length);
 
-        entries.forEach((entry, index) => this.loadIcon(entry, index));
+        entries.forEach((entry, index) => void this.loadIcon(entry, index));
 
         this.updateObjectCounter = -1;
 

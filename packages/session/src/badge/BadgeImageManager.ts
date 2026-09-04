@@ -20,7 +20,7 @@ export class BadgeImageManager
     private _groupBadgesQueue: Map<string, boolean> = new Map();
     private _readyToGenerateGroupBadges: boolean = false;
     private _groupBadgeAssetsLoaded: boolean = false;
-    private _groupBadgeAssetsLoading: Promise<boolean> = null;
+    private _groupBadgeAssetsLoading: Promise<boolean> | null = null;
     private _groupBadgeRetryTimeout: ReturnType<typeof setTimeout> = null;
 
     public async init(): Promise<void>
@@ -127,7 +127,7 @@ export class BadgeImageManager
     {
         if(this._groupBadgeAssetsLoaded) return true;
 
-        if(!this._groupBadgeAssetsLoading)
+        if(this._groupBadgeAssetsLoading === null)
         {
             this._groupBadgeAssetsLoading = GetAssetManager().downloadAsset('local://group_badge')
                 .then(result =>

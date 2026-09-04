@@ -146,8 +146,8 @@ export class SessionDataManager implements ISessionDataManager
             this._furnitureData.init(),
             this._productData.init(),
             this._badgeImageManager.init(),
-            this._ignoredUsersManager.init(),
-            this._groupInformationManager.init()
+            Promise.resolve(this._ignoredUsersManager.init()),
+            Promise.resolve(this._groupInformationManager.init())
         ]);
 
         // Store message event references for cleanup

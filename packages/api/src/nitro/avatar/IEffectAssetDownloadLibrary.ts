@@ -2,7 +2,7 @@ import { IAssetAnimation } from '../../asset';
 
 export interface IEffectAssetDownloadLibrary
 {
-    downloadAsset(): void;
+    downloadAsset(): Promise<void>;
     readonly libraryName: string;
     readonly animation: { [index: string]: IAssetAnimation };
     readonly isLoaded: boolean;

@@ -4,7 +4,7 @@ export class PollErrorParser implements IMessageParser
 {
     flush(): boolean
     {
-        throw true;
+        throw new Error('PollErrorParser cannot be flushed');
     }
 
     parse(wrapper: IMessageDataWrapper): boolean

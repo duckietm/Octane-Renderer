@@ -44,7 +44,7 @@ export class HabbiconAssetManager
     private static CONTENT_INSET: number = 7;
     public static readonly SPINNING_DUCK_NAME: string = 'duck_spinning';
 
-    private _loading: Promise<void> = null;
+    private _loading: Promise<void> | null = null;
     private _definitions = new Map<number, HabbiconDefinition>();
     private _runtimeAssets = new Map<number, HabbiconRuntimeAsset>();
     private _sourceCanvases = new Map<string, HTMLCanvasElement>();
@@ -61,7 +61,7 @@ export class HabbiconAssetManager
 
     public preload(): Promise<void>
     {
-        if(!this._loading) this._loading = this.load();
+        if(this._loading === null) this._loading = this.load();
 
         return this._loading;
     }

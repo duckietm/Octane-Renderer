@@ -19,7 +19,7 @@ export class CommunicationManager implements ICommunicationManager
     private _socketErrorCallback: () => void = null;
     private _socketReconnectedCallback: () => void = null;
 
-    private _machineIdPromise: Promise<string> = null;
+    private _machineIdPromise: Promise<string> | null = null;
     private _initResolved: boolean = false;
     private _recoveryToken: string = '';
 
@@ -41,7 +41,7 @@ export class CommunicationManager implements ICommunicationManager
 
     private async sendHandshake(): Promise<void>
     {
-        if(!this._machineIdPromise) this._machineIdPromise = this.generateMachineID();
+        if(this._machineIdPromise === null) this._machineIdPromise = this.generateMachineID();
 
         const machineId = await this._machineIdPromise;
 
@@ -94,7 +94,7 @@ export class CommunicationManager implements ICommunicationManager
             // Store callback for cleanup
             this._socketErrorCallback = () =>
             {
-                if(!this._initResolved) reject();
+                if(!this._initResolved) reject(new Error('Socket error before init resolved'));
             };
             GetEventDispatcher().addEventListener(NitroEventType.SOCKET_ERROR, this._socketErrorCallback);
 
