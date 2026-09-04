@@ -93,7 +93,7 @@ export class ExtendedSprite extends Sprite
             pixels = TextureUtils.getPixels(new Texture(textureSource))?.pixels ?? null;
         }
 
-        else if((renderer.type as RendererType) === RendererType.WEBGL)
+        else if(renderer.type === RendererType.WEBGL)
         {
             pixels = new Uint8ClampedArray(BYTES_PER_PIXEL * width * height);
 
