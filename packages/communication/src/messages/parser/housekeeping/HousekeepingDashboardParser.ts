@@ -47,14 +47,44 @@ export class HousekeepingDashboardParser implements IMessageParser
         return true;
     }
 
-    public get onlineUsers(): number { return this._onlineUsers; }
-    public get totalUsers(): number { return this._totalUsers; }
-    public get activeRooms(): number { return this._activeRooms; }
-    public get totalRooms(): number { return this._totalRooms; }
-    public get peakOnlineToday(): number { return this._peakOnlineToday; }
-    public get peakOnlineAllTime(): number { return this._peakOnlineAllTime; }
-    public get pendingTickets(): number { return this._pendingTickets; }
-    public get sanctionsLast24h(): number { return this._sanctionsLast24h; }
-    public get serverUptimeSeconds(): number { return this._serverUptimeSeconds; }
-    public get serverVersion(): string { return this._serverVersion; }
+    public get onlineUsers(): number
+    {
+        return this._onlineUsers;
+    }
+    public get totalUsers(): number
+    {
+        return this._totalUsers;
+    }
+    public get activeRooms(): number
+    {
+        return this._activeRooms;
+    }
+    public get totalRooms(): number
+    {
+        return this._totalRooms;
+    }
+    public get peakOnlineToday(): number
+    {
+        return this._peakOnlineToday;
+    }
+    public get peakOnlineAllTime(): number
+    {
+        return this._peakOnlineAllTime;
+    }
+    public get pendingTickets(): number
+    {
+        return this._pendingTickets;
+    }
+    public get sanctionsLast24h(): number
+    {
+        return this._sanctionsLast24h;
+    }
+    public get serverUptimeSeconds(): number
+    {
+        return this._serverUptimeSeconds;
+    }
+    public get serverVersion(): string
+    {
+        return this._serverVersion;
+    }
 }

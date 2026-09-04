@@ -11,6 +11,6 @@ export class NoOwnedRoomsAlertMessageEvent extends MessageEvent implements IMess
 
     public getParser(): NoOwnedRoomsAlertMessageParser
     {
-        return this.parser as NoOwnedRoomsAlertMessageParser;
+        return this.parser;
     }
 }

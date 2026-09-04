@@ -145,7 +145,7 @@ export class HabbiconBubbleAddition implements IAvatarAddition
     private applyOffsets(sprite: IRoomObjectSprite, elapsed: number, fromUpdate: boolean): void
     {
         const small = this._scale < 48;
-        let offsetX = small ? HabbiconBubbleAddition.ROOM_SMALL_OFFSET_X : HabbiconBubbleAddition.ROOM_LARGE_OFFSET_X;
+        const offsetX = small ? HabbiconBubbleAddition.ROOM_SMALL_OFFSET_X : HabbiconBubbleAddition.ROOM_LARGE_OFFSET_X;
         let offsetY = small ? HabbiconBubbleAddition.ROOM_SMALL_OFFSET_Y : HabbiconBubbleAddition.ROOM_LARGE_OFFSET_Y;
 
         if(fromUpdate)

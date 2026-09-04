@@ -37,7 +37,7 @@ const tryFetchManifest = async <T = any>(url: string): Promise<T | null> =>
     {
         return await fetchConfigJson<T>(url);
     }
-    catch(err)
+    catch (err)
     {
         if(isMissingResource(err)) return null;
         throw err;

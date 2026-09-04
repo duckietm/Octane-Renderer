@@ -4,8 +4,17 @@ export class HousekeepingTransferRoomOwnershipComposer implements IMessageCompos
 {
     private _data: ConstructorParameters<typeof HousekeepingTransferRoomOwnershipComposer>;
 
-    constructor(roomId: number, newOwnerId: number) { this._data = [roomId, newOwnerId]; }
+    constructor(roomId: number, newOwnerId: number)
+    {
+        this._data = [roomId, newOwnerId];
+    }
 
-    public getMessageArray() { return this._data; }
-    public dispose(): void { return; }
+    public getMessageArray()
+    {
+        return this._data;
+    }
+    public dispose(): void
+    {
+        return;
+    }
 }

@@ -264,7 +264,7 @@ export class AvatarImage implements IAvatarImage, IAvatarEffectListener
             if(this._avatarSpriteData.colorTransform)
             {
                 if(container.filters === undefined || container.filters === null) container.filters = [ this._avatarSpriteData.colorTransform ];
-                else container.filters = [ ...(container.filters as readonly Filter[]), this._avatarSpriteData.colorTransform ];
+                else container.filters = [ ...(container.filters), this._avatarSpriteData.colorTransform ];
             }
 
             if(this._avatarSpriteData.paletteIsGrayscale)
@@ -274,7 +274,7 @@ export class AvatarImage implements IAvatarImage, IAvatarEffectListener
                 const paletteMapFilter = this.getPaletteMapFilter(this._avatarSpriteData);
 
                 if(container.filters === undefined || container.filters === null) container.filters = [ paletteMapFilter ];
-                else container.filters = [ ...(container.filters as readonly Filter[]), paletteMapFilter ];
+                else container.filters = [ ...(container.filters), paletteMapFilter ];
             }
         }
 
@@ -337,8 +337,8 @@ export class AvatarImage implements IAvatarImage, IAvatarEffectListener
         const canvas = GetRenderer().texture.generateCanvas(texture);
 
         const url = canvas.toDataURL('image/png');
-		
-		canvas.width = 0;
+
+        canvas.width = 0;
         canvas.height = 0;
 
         return url;
@@ -881,7 +881,7 @@ export class AvatarImage implements IAvatarImage, IAvatarEffectListener
         const filter = this.getGrayscaleFilter(channel);
 
         if(container.filters === undefined || container.filters === null) container.filters = [ filter ];
-        else container.filters = [ ...(container.filters as readonly Filter[]), filter ];
+        else container.filters = [ ...(container.filters), filter ];
 
         return container;
     }

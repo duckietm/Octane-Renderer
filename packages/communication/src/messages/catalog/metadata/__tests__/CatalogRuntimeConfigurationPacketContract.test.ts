@@ -8,17 +8,45 @@ import { CatalogRuntimeConfigurationMessageParser } from '../../../parser/catalo
 
 class TestWrapper
 {
-    constructor(private reader: BinaryReader) {}
-    readByte() { return this.reader.readByte(); }
-    readBytes(length: number) { return this.reader.readBytes(length); }
-    readBoolean() { return this.reader.readByte() === 1; }
-    readShort() { return this.reader.readShort(); }
-    readInt() { return this.reader.readInt(); }
-    readFloat() { return this.reader.readFloat(); }
-    readDouble() { return this.reader.readDouble(); }
-    readString() { const length = this.reader.readShort(); return this.reader.readBytes(length).toString(); }
+    constructor(private reader: BinaryReader)
+    {}
+    readByte()
+    {
+        return this.reader.readByte();
+    }
+    readBytes(length: number)
+    {
+        return this.reader.readBytes(length);
+    }
+    readBoolean()
+    {
+        return this.reader.readByte() === 1;
+    }
+    readShort()
+    {
+        return this.reader.readShort();
+    }
+    readInt()
+    {
+        return this.reader.readInt();
+    }
+    readFloat()
+    {
+        return this.reader.readFloat();
+    }
+    readDouble()
+    {
+        return this.reader.readDouble();
+    }
+    readString()
+    {
+        const length = this.reader.readShort(); return this.reader.readBytes(length).toString();
+    }
     header = 0;
-    get bytesAvailable() { return this.reader.remaining() > 0; }
+    get bytesAvailable()
+    {
+        return this.reader.remaining() > 0;
+    }
 }
 
 describe('catalog runtime configuration packet contract', () =>

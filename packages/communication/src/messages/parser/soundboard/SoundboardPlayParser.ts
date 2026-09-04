@@ -42,11 +42,32 @@ export class SoundboardPlayParser implements IMessageParser
         return true;
     }
 
-    public get soundId(): number { return this._soundId; }
-    public get url(): string { return this._url; }
-    public get soundName(): string { return this._soundName; }
-    public get actorUserId(): number { return this._actorUserId; }
-    public get actorRoomIndex(): number { return this._actorRoomIndex; }
-    public get username(): string { return this._username; }
-    public get classname(): string { return this._classname; }
+    public get soundId(): number
+    {
+        return this._soundId;
+    }
+    public get url(): string
+    {
+        return this._url;
+    }
+    public get soundName(): string
+    {
+        return this._soundName;
+    }
+    public get actorUserId(): number
+    {
+        return this._actorUserId;
+    }
+    public get actorRoomIndex(): number
+    {
+        return this._actorRoomIndex;
+    }
+    public get username(): string
+    {
+        return this._username;
+    }
+    public get classname(): string
+    {
+        return this._classname;
+    }
 }

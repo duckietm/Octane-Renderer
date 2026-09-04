@@ -70,7 +70,7 @@ export const loadImageResource = async (
                 return decodeStaticWithContext(fetched.bytes, detected.format, source, dependencies);
         }
     }
-    catch(animationError)
+    catch (animationError)
     {
         const animationReason = errorMessage(animationError);
 
@@ -82,7 +82,7 @@ export const loadImageResource = async (
 
             return resource;
         }
-        catch(staticError)
+        catch (staticError)
         {
             throw new Error(`Image loading failed for "${ source }" (${ detected.format }): animated decoder failed (${ animationReason}); static fallback failed (${ errorMessage(staticError) })`);
         }
@@ -97,7 +97,7 @@ const fetchImageBytes = async (source: string, dependencies: ImageLoaderDependen
     {
         response = await dependencies.fetch(source);
     }
-    catch(error)
+    catch (error)
     {
         throw new Error(`Image loading failed for "${ source }" during fetch: ${ errorMessage(error) }`);
     }
@@ -112,7 +112,7 @@ const fetchImageBytes = async (source: string, dependencies: ImageLoaderDependen
             contentType: response.headers?.get('Content-Type') ?? undefined
         };
     }
-    catch(error)
+    catch (error)
     {
         throw new Error(`Image loading failed for "${ source }" while reading the response: ${ errorMessage(error) }`);
     }
@@ -129,7 +129,7 @@ const decodeStaticWithContext = async (
     {
         return await dependencies.decodeStatic(bytes, format, source);
     }
-    catch(error)
+    catch (error)
     {
         throw new Error(`Image loading failed for "${ source }" (${ format }) during static decode: ${ errorMessage(error) }`);
     }

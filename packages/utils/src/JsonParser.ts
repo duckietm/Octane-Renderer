@@ -39,7 +39,8 @@ export const resolveJsonMode = (): JsonMode =>
             if(__NITRO_JSON_MODE__ === 'legacy' || __NITRO_JSON_MODE__ === 'jsonc' || __NITRO_JSON_MODE__ === 'auto') return __NITRO_JSON_MODE__;
         }
     }
-    catch {}
+    catch
+    {}
 
     return 'auto';
 };
@@ -65,7 +66,7 @@ const parseStrict = <T>(text: string, sourceUrl: string): T =>
     {
         return JSON.parse(text) as T;
     }
-    catch(error)
+    catch (error)
     {
         throw new ConfigJsonError(
             `Failed to parse strict JSON${ sourceSuffix(sourceUrl) } — ${ errorMessage(error) } (use JSONC mode for comments or trailing commas)`,
@@ -86,7 +87,7 @@ const parseJsoncWithError = <T>(text: string, sourceUrl: string): T =>
     {
         return parseJsonc<T>(text);
     }
-    catch(error)
+    catch (error)
     {
         throw new ConfigJsonError(
             `Failed to parse JSONC${ sourceSuffix(sourceUrl) } — ${ errorMessage(error) }`,
@@ -112,7 +113,7 @@ export const parseConfigJsonWithMode = <T = any>(text: string, mode: JsonMode, s
     {
         return JSON.parse(text) as T;
     }
-    catch(error)
+    catch (error)
     {
         strictError = error;
     }
@@ -121,7 +122,7 @@ export const parseConfigJsonWithMode = <T = any>(text: string, mode: JsonMode, s
     {
         return parseJsonc<T>(text);
     }
-    catch(jsoncError)
+    catch (jsoncError)
     {
         throw new ConfigJsonError(
             `Failed to parse JSON/JSONC${ sourceSuffix(sourceUrl) } — JSONC: ${ errorMessage(jsoncError) } (strict JSON: ${ errorMessage(strictError) })`,
@@ -168,7 +169,7 @@ export const fetchConfigJson = async <T = any>(url: string, init?: RequestInit):
     {
         response = await fetch(url, init);
     }
-    catch(networkError)
+    catch (networkError)
     {
         throw new ConfigJsonError(
             `Network error fetching "${ url }" — ${ errorMessage(networkError) }`,

@@ -11,6 +11,6 @@ export class HotelMergeNameChangeEvent extends MessageEvent implements IMessageE
 
     public getParser(): HotelMergeNameChangeParser
     {
-        return this.parser as HotelMergeNameChangeParser;
+        return this.parser;
     }
 }

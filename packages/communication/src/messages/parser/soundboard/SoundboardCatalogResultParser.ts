@@ -26,9 +26,18 @@ export class SoundboardCatalogResultParser implements IMessageParser
         return true;
     }
 
-    public get operation(): number { return this._operation; }
+    public get operation(): number
+    {
+        return this._operation;
+    }
 
-    public get resultCode(): number { return this._resultCode; }
+    public get resultCode(): number
+    {
+        return this._resultCode;
+    }
 
-    public get soundId(): number { return this._soundId; }
+    public get soundId(): number
+    {
+        return this._soundId;
+    }
 }

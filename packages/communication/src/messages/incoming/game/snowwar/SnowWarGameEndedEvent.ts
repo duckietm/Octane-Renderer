@@ -11,6 +11,6 @@ export class SnowWarGameEndedEvent extends MessageEvent implements IMessageEvent
 
     public getParser(): SnowWarGameEndedParser
     {
-        return this.parser as SnowWarGameEndedParser;
+        return this.parser;
     }
 }

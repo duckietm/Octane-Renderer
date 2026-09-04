@@ -9,6 +9,10 @@ export class YouTubeRoomWatchingComposer implements IMessageComposer<any[]>
         this._data = [watching ? 1 : 0];
     }
 
-    public getMessageArray() { return this._data; }
-    public dispose(): void {}
+    public getMessageArray()
+    {
+        return this._data;
+    }
+    public dispose(): void
+    {}
 }

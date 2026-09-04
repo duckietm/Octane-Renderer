@@ -8,7 +8,10 @@ describe('AuthenticatedParser', () =>
     {
         const values: unknown[] = [ true, 42, 'recovery-token' ];
         const wrapper = {
-            get bytesAvailable() { return values.length > 0; },
+            get bytesAvailable()
+            {
+                return values.length > 0;
+            },
             readBoolean: () => values.shift() as boolean,
             readInt: () => values.shift() as number,
             readString: () => values.shift() as string

@@ -11,6 +11,6 @@ export class TradingOtherNotAllowedEvent extends MessageEvent implements IMessag
 
     public getParser(): TradingOtherNotAllowedParser
     {
-        return this.parser as TradingOtherNotAllowedParser;
+        return this.parser;
     }
 }

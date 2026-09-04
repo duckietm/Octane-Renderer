@@ -11,6 +11,6 @@ export class CallForHelpPendingCallsDeletedMessageEvent extends MessageEvent imp
 
     public getParser(): CallForHelpPendingCallsDeletedMessageParser
     {
-        return this.parser as CallForHelpPendingCallsDeletedMessageParser;
+        return this.parser;
     }
 }

@@ -65,7 +65,7 @@ export class FurnitureParticleSystem
             this._emptySprite = null;
         }
 
-        if (this._particleSprite)
+        if(this._particleSprite)
         {
             this._particleSprite.destroy();
             this._particleSprite = null;
@@ -109,7 +109,7 @@ export class FurnitureParticleSystem
         {
             if((this._roomSprite.width <= 1) || (this._roomSprite.height <= 1)) return;
 
-            if(this._canvasTexture && ((this._canvasTexture.width !== this._roomSprite.width) || (this._canvasTexture.height !== this._roomSprite.height))) 
+            if(this._canvasTexture && ((this._canvasTexture.width !== this._roomSprite.width) || (this._canvasTexture.height !== this._roomSprite.height)))
             {
                 this._canvasTexture.destroy();
                 this._canvasTexture = null;
@@ -212,7 +212,7 @@ export class FurnitureParticleSystem
                     else
                     {
                         const point = new Point((tx + asset.offsetX), (ty + asset.offsetY));
-                        
+
                         this._particleSprite.x = point.x;
                         this._particleSprite.y = point.y;
 
@@ -308,7 +308,8 @@ export class FurnitureParticleSystem
 
         if(this._currentEmitter) this._currentEmitter.copyStateFrom(particleSystem._currentEmitter, (particleSystem._size / this._size));
 
-        if (this._canvasTexture) {
+        if(this._canvasTexture)
+        {
             this._canvasTexture.destroy();
             this._canvasTexture = null;
         }

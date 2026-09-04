@@ -41,7 +41,7 @@ export const decodeStaticImage = async (
     {
         imageSource = await dependencies.decodeNative(bytes, mimeType, source);
     }
-    catch(nativeError)
+    catch (nativeError)
     {
         if(format !== 'webp' && format !== 'avif') throw nativeError;
 
@@ -84,7 +84,7 @@ export const decodeNativeBrowserImage = async (bytes: Uint8Array, mimeType: stri
 
             return bitmap;
         }
-        catch(error)
+        catch (error)
         {
             bitmapFailure = error;
         }

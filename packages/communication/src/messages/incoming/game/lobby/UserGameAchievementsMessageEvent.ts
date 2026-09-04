@@ -11,6 +11,6 @@ export class UserGameAchievementsMessageEvent extends MessageEvent implements IM
 
     public getParser(): UserGameAchievementsMessageParser
     {
-        return this.parser as UserGameAchievementsMessageParser;
+        return this.parser;
     }
 }

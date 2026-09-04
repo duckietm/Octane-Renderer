@@ -64,7 +64,16 @@ export class SoundboardSettingsParser implements IMessageParser
         return true;
     }
 
-    public get enabled(): boolean { return this._enabled; }
-    public get cooldownSeconds(): number { return this._cooldownSeconds; }
-    public get sounds(): ISoundboardSound[] { return this._sounds; }
+    public get enabled(): boolean
+    {
+        return this._enabled;
+    }
+    public get cooldownSeconds(): number
+    {
+        return this._cooldownSeconds;
+    }
+    public get sounds(): ISoundboardSound[]
+    {
+        return this._sounds;
+    }
 }

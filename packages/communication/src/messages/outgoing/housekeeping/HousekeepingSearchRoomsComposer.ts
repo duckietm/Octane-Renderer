@@ -4,8 +4,17 @@ export class HousekeepingSearchRoomsComposer implements IMessageComposer<Constru
 {
     private _data: ConstructorParameters<typeof HousekeepingSearchRoomsComposer>;
 
-    constructor(query: string, exactMatch: boolean, limit: number) { this._data = [query, exactMatch, limit]; }
+    constructor(query: string, exactMatch: boolean, limit: number)
+    {
+        this._data = [query, exactMatch, limit];
+    }
 
-    public getMessageArray() { return this._data; }
-    public dispose(): void { return; }
+    public getMessageArray()
+    {
+        return this._data;
+    }
+    public dispose(): void
+    {
+        return;
+    }
 }

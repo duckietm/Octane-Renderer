@@ -10,7 +10,8 @@ type AvatarVisualizationInternals = {
     updateScale(scale: number): void;
 };
 
-const getPostureOffset = (posture: string, scale: number) => {
+const getPostureOffset = (posture: string, scale: number) =>
+{
     const visualization = Object.create(AvatarVisualization.prototype) as AvatarVisualization;
     const internals = visualization as unknown as AvatarVisualizationInternals;
 
@@ -26,12 +27,15 @@ const getPostureOffset = (posture: string, scale: number) => {
     return internals._postureOffset;
 };
 
-describe('AvatarVisualization posture floor alignment', () => {
-    it.each([ 'sit', 'lay' ])('moves the %s sprite down by half the avatar scale', posture => {
+describe('AvatarVisualization posture floor alignment', () =>
+{
+    it.each([ 'sit', 'lay' ])('moves the %s sprite down by half the avatar scale', posture =>
+    {
         expect(getPostureOffset(posture, 64)).toBe(32);
     });
 
-    it('does not move a standing avatar down', () => {
+    it('does not move a standing avatar down', () =>
+    {
         expect(getPostureOffset('std', 64)).toBe(0);
     });
 });

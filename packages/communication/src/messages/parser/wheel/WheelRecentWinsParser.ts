@@ -37,5 +37,8 @@ export class WheelRecentWinsParser implements IMessageParser
         return true;
     }
 
-    public get wins(): IWheelRecentWin[] { return this._wins; }
+    public get wins(): IWheelRecentWin[]
+    {
+        return this._wins;
+    }
 }

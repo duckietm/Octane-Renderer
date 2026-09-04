@@ -55,5 +55,8 @@ export class SoundboardCatalogParser implements IMessageParser
         return true;
     }
 
-    public get sounds(): ISoundboardCatalogSound[] { return this._sounds; }
+    public get sounds(): ISoundboardCatalogSound[]
+    {
+        return this._sounds;
+    }
 }

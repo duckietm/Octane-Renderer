@@ -11,6 +11,6 @@ export class LimitedEditionSoldOutEvent extends MessageEvent implements IMessage
 
     public getParser(): LimitedEditionSoldOutParser
     {
-        return this.parser as LimitedEditionSoldOutParser;
+        return this.parser;
     }
 }

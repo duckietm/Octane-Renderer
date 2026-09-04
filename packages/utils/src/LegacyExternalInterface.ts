@@ -176,7 +176,7 @@ export class LegacyExternalInterface
 
                         fn(...params);
                     }
-                    catch(e)
+                    catch (e)
                     {
                         console.error('[LegacyExternalInterface] Error processing message:', e);
                     }

@@ -31,7 +31,7 @@ export class CommunicationManager implements ICommunicationManager
 
             return result.thumbmark ? `IID-${result.thumbmark}` : 'FAILED';
         }
-        catch(error)
+        catch (error)
         {
             NitroLogger.warn('[CommunicationManager] Failed to generate machine ID', error);
 
@@ -218,7 +218,8 @@ export class CommunicationManager implements ICommunicationManager
 
     public subscribeMessage<T extends IMessageEvent>(eventCtor: new (callback: (event: T) => void) => T, handler: (event: T) => void): () => void
     {
-        if(!eventCtor || !handler) return () => {};
+        if(!eventCtor || !handler) return () =>
+        {};
 
         const event = new eventCtor(handler);
 

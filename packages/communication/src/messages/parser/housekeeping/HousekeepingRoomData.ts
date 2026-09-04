@@ -31,15 +31,48 @@ export class HousekeepingRoomData
         this._createdAt = wrapper.readInt();
     }
 
-    public get id(): number { return this._id; }
-    public get name(): string { return this._name; }
-    public get description(): string { return this._description; }
-    public get ownerId(): number { return this._ownerId; }
-    public get ownerName(): string { return this._ownerName; }
-    public get userCount(): number { return this._userCount; }
-    public get maxUsers(): number { return this._maxUsers; }
-    public get isLocked(): boolean { return this._isLocked; }
-    public get isMuted(): boolean { return this._isMuted; }
-    public get isPublic(): boolean { return this._isPublic; }
-    public get createdAt(): number { return this._createdAt; }
+    public get id(): number
+    {
+        return this._id;
+    }
+    public get name(): string
+    {
+        return this._name;
+    }
+    public get description(): string
+    {
+        return this._description;
+    }
+    public get ownerId(): number
+    {
+        return this._ownerId;
+    }
+    public get ownerName(): string
+    {
+        return this._ownerName;
+    }
+    public get userCount(): number
+    {
+        return this._userCount;
+    }
+    public get maxUsers(): number
+    {
+        return this._maxUsers;
+    }
+    public get isLocked(): boolean
+    {
+        return this._isLocked;
+    }
+    public get isMuted(): boolean
+    {
+        return this._isMuted;
+    }
+    public get isPublic(): boolean
+    {
+        return this._isPublic;
+    }
+    public get createdAt(): number
+    {
+        return this._createdAt;
+    }
 }

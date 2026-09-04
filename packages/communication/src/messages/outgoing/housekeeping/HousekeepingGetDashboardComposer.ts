@@ -2,6 +2,12 @@ import { IMessageComposer } from '@nitrots/api';
 
 export class HousekeepingGetDashboardComposer implements IMessageComposer<[]>
 {
-    public getMessageArray(): [] { return []; }
-    public dispose(): void { return; }
+    public getMessageArray(): []
+    {
+        return [];
+    }
+    public dispose(): void
+    {
+        return;
+    }
 }

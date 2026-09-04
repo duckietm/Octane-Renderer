@@ -34,10 +34,28 @@ export class ActivePrefixUpdatedParser implements IMessageParser
         return true;
     }
 
-    public get prefixId(): number { return this._prefixId; }
-    public get text(): string { return this._text; }
-    public get color(): string { return this._color; }
-    public get icon(): string { return this._icon; }
-    public get effect(): string { return this._effect; }
-    public get font(): string { return this._font; }
+    public get prefixId(): number
+    {
+        return this._prefixId;
+    }
+    public get text(): string
+    {
+        return this._text;
+    }
+    public get color(): string
+    {
+        return this._color;
+    }
+    public get icon(): string
+    {
+        return this._icon;
+    }
+    public get effect(): string
+    {
+        return this._effect;
+    }
+    public get font(): string
+    {
+        return this._font;
+    }
 }

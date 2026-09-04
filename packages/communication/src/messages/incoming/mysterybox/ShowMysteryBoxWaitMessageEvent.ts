@@ -11,6 +11,6 @@ export class ShowMysteryBoxWaitMessageEvent extends MessageEvent implements IMes
 
     public getParser(): ShowMysteryBoxWaitMessageParser
     {
-        return this.parser as ShowMysteryBoxWaitMessageParser;
+        return this.parser;
     }
 }

@@ -4,7 +4,7 @@ import { IEarningsEntry, readEarningsEntry } from './EarningsCenterParser';
 export interface IEarningsClaimResult
 {
     categoryKey: string;
-    status: string;     // success | disabled | unknown_category | already_claimed | no_reward | error
+    status: string; // success | disabled | unknown_category | already_claimed | no_reward | error
     success: boolean;
     hasEntry: boolean;
     entry: IEarningsEntry | null; // refreshed entry when hasEntry === true
@@ -42,5 +42,8 @@ export class EarningsClaimResultParser implements IMessageParser
         return true;
     }
 
-    public get results(): IEarningsClaimResult[] { return this._results; }
+    public get results(): IEarningsClaimResult[]
+    {
+        return this._results;
+    }
 }

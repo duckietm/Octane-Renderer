@@ -7,6 +7,12 @@ export class CatalogStudioValidateComposer implements IMessageComposer<Construct
     {
         this._data = [ operationId, draftVersionId, expectedRevision ];
     }
-    public dispose(): void { this._data = null; }
-    public getMessageArray() { return this._data; }
+    public dispose(): void
+    {
+        this._data = null;
+    }
+    public getMessageArray()
+    {
+        return this._data;
+    }
 }

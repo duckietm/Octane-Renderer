@@ -34,7 +34,7 @@ export class OutgoingHeader
     public static FIND_NEW_FRIENDS = 516;
     public static FURNITURE_ALIASES = 3898;
     public static FURNITURE_FLOOR_UPDATE = 248;
-	public static FURNITURE_FLOOR_POSITION_UPDATE = 10019;
+    public static FURNITURE_FLOOR_POSITION_UPDATE = 10019;
     public static FURNITURE_MULTISTATE = 99;
     public static FURNITURE_PICKUP = 3456;
     public static FURNITURE_PLACE = 1258;
@@ -290,7 +290,7 @@ export class OutgoingHeader
     public static GET_SOUND_SETTINGS = 2388;
     public static USER_SETTINGS_CAMERA = 1461;
     public static USER_SETTINGS_CHAT_STYLE = 1030;
-	public static USER_SETTINGS_INFOSTAND_BACKGROUND = 1031;
+    public static USER_SETTINGS_INFOSTAND_BACKGROUND = 1031;
     public static USER_SETTINGS_INVITES = 1086;
     public static USER_SETTINGS_OLD_CHAT = 1262;
     public static USER_SETTINGS_VOLUME = 1367;
@@ -517,21 +517,21 @@ export class OutgoingHeader
     public static RENTABLE_EXTEND_RENT_OR_BUYOUT_STRIP_ITEM = 2115;
     public static RENTABLE_EXTEND_RENT_OR_BUYOUT_FURNI = 1071;
     public static RENTABLE_GET_RENT_OR_BUYOUT_OFFER = 2518;
-	
-	public static FURNITURE_PICKUP_ALL = 10017;
 
-	// Furni Editor
-	public static FURNI_EDITOR_SEARCH = 10040;
-	public static FURNI_EDITOR_DETAIL = 10041;
-	public static FURNI_EDITOR_BY_SPRITE = 10042;
-	public static FURNI_EDITOR_INTERACTIONS = 10043;
-	public static FURNI_EDITOR_UPDATE = 10044;
-	public static FURNI_EDITOR_DELETE = 10045;
-	public static FURNI_EDITOR_UPDATE_FURNIDATA = 10046;
-	public static FURNI_EDITOR_REVERT_FURNIDATA = 10048;
-	public static FURNI_EDITOR_IMPORT_TEXT = 10049;
+    public static FURNITURE_PICKUP_ALL = 10017;
 
-	public static CATALOG_ADMIN_SAVE_PAGE = 10050;
+    // Furni Editor
+    public static FURNI_EDITOR_SEARCH = 10040;
+    public static FURNI_EDITOR_DETAIL = 10041;
+    public static FURNI_EDITOR_BY_SPRITE = 10042;
+    public static FURNI_EDITOR_INTERACTIONS = 10043;
+    public static FURNI_EDITOR_UPDATE = 10044;
+    public static FURNI_EDITOR_DELETE = 10045;
+    public static FURNI_EDITOR_UPDATE_FURNIDATA = 10046;
+    public static FURNI_EDITOR_REVERT_FURNIDATA = 10048;
+    public static FURNI_EDITOR_IMPORT_TEXT = 10049;
+
+    public static CATALOG_ADMIN_SAVE_PAGE = 10050;
     public static CATALOG_ADMIN_CREATE_PAGE = 10051;
     public static CATALOG_ADMIN_DELETE_PAGE = 10052;
     public static CATALOG_ADMIN_SAVE_OFFER = 10053;
@@ -564,9 +564,9 @@ export class OutgoingHeader
     public static CATALOG_PRODUCT_METADATA = 10081;
     public static CATALOG_RUNTIME_CONFIGURATION = 10082;
 
-	public static DELETE_ITEM = 10018;
-	public static DELETE_PET = 10030;
-	public static DELETE_BADGE = 10031;
+    public static DELETE_ITEM = 10018;
+    public static DELETE_PET = 10030;
+    public static DELETE_BADGE = 10031;
 
     // Custom Prefixes
     public static REQUEST_PREFIXES = 7011;

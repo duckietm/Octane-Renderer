@@ -98,7 +98,7 @@ export class NitroMessages implements IMessageConfiguration
         this._events.set(IncomingHeader.CATALOG_PAGE_LIST, CatalogPagesListEvent);
         this._events.set(IncomingHeader.CATALOG_EARLIEST_EXPIRY, CatalogPageWithEarliestExpiryMessageEvent);
         this._events.set(IncomingHeader.CATALOG_PUBLISHED, CatalogPublishedMessageEvent);
-		this._events.set(IncomingHeader.CATALOG_ADMIN_RESULT, CatalogAdminResultEvent);
+        this._events.set(IncomingHeader.CATALOG_ADMIN_RESULT, CatalogAdminResultEvent);
         this._events.set(IncomingHeader.CATALOG_ADMIN_OFFER_DETAILS, CatalogAdminOfferDetailsEvent);
         this._events.set(IncomingHeader.CATALOG_ADMIN_PAGE_DETAILS, CatalogAdminPageDetailsEvent);
         this._events.set(IncomingHeader.CATALOG_STUDIO_OPEN_SESSION, CatalogStudioSessionEvent);
@@ -109,12 +109,12 @@ export class NitroMessages implements IMessageConfiguration
         this._events.set(IncomingHeader.CATALOG_PRODUCT_METADATA, CatalogProductMetadataEvent);
         this._events.set(IncomingHeader.CATALOG_RUNTIME_CONFIGURATION, CatalogRuntimeConfigurationEvent);
 
-		// Furni Editor
-		this._events.set(IncomingHeader.FURNI_EDITOR_SEARCH_RESULT, FurniEditorSearchResultEvent);
-		this._events.set(IncomingHeader.FURNI_EDITOR_DETAIL_RESULT, FurniEditorDetailResultEvent);
-		this._events.set(IncomingHeader.FURNI_EDITOR_INTERACTIONS_RESULT, FurniEditorInteractionsResultEvent);
-		this._events.set(IncomingHeader.FURNI_EDITOR_RESULT, FurniEditorResultEvent);
-		this._events.set(IncomingHeader.FURNI_EDITOR_IMPORT_TEXT_RESULT, FurniEditorImportTextResultEvent);
+        // Furni Editor
+        this._events.set(IncomingHeader.FURNI_EDITOR_SEARCH_RESULT, FurniEditorSearchResultEvent);
+        this._events.set(IncomingHeader.FURNI_EDITOR_DETAIL_RESULT, FurniEditorDetailResultEvent);
+        this._events.set(IncomingHeader.FURNI_EDITOR_INTERACTIONS_RESULT, FurniEditorInteractionsResultEvent);
+        this._events.set(IncomingHeader.FURNI_EDITOR_RESULT, FurniEditorResultEvent);
+        this._events.set(IncomingHeader.FURNI_EDITOR_IMPORT_TEXT_RESULT, FurniEditorImportTextResultEvent);
 
         this._events.set(IncomingHeader.CLUB_GIFT_INFO, ClubGiftInfoEvent);
         this._events.set(IncomingHeader.CLUB_GIFT_SELECTED, ClubGiftSelectedEvent);
@@ -138,8 +138,8 @@ export class NitroMessages implements IMessageConfiguration
         this._events.set(IncomingHeader.TARGET_OFFER_NOT_FOUND, TargetedOfferNotFoundEvent);
         this._events.set(IncomingHeader.REDEEM_VOUCHER_ERROR, VoucherRedeemErrorMessageEvent);
         this._events.set(IncomingHeader.REDEEM_VOUCHER_OK, VoucherRedeemOkMessageEvent);
-		
-		// COMMANDS
+
+        // COMMANDS
         this._events.set(IncomingHeader.AVAILABLE_COMMANDS, AvailableCommandsEvent);
 
         // CLIENT
@@ -187,15 +187,15 @@ export class NitroMessages implements IMessageConfiguration
         this._events.set(IncomingHeader.MESSENGER_REQUEST, NewFriendRequestEvent);
         this._events.set(IncomingHeader.MESSENGER_INVITE_ERROR, RoomInviteErrorEvent);
         this._events.set(IncomingHeader.MESSENGER_INVITE, RoomInviteEvent);
-		
-		// FURNIDELETE
-		this._composers.set(OutgoingHeader.DELETE_ITEM, DeleteItemMessageComposer);
 
-		// BADGEDELETE
-		this._composers.set(OutgoingHeader.DELETE_BADGE, DeleteBadgeMessageComposer);
+        // FURNIDELETE
+        this._composers.set(OutgoingHeader.DELETE_ITEM, DeleteItemMessageComposer);
 
-		// PETDELETE
-		this._composers.set(OutgoingHeader.DELETE_PET, DeletePetMessageComposer);
+        // BADGEDELETE
+        this._composers.set(OutgoingHeader.DELETE_BADGE, DeleteBadgeMessageComposer);
+
+        // PETDELETE
+        this._composers.set(OutgoingHeader.DELETE_PET, DeletePetMessageComposer);
 
         // GAMES
         this._events.set(IncomingHeader.ACHIEVEMENTRESOLUTIONCOMPLETED, AchievementResolutionCompletedMessageEvent);
@@ -756,7 +756,7 @@ export class NitroMessages implements IMessageConfiguration
         this._composers.set(OutgoingHeader.BUILDERS_CLUB_PLACE_ROOM_ITEM, BuildersClubPlaceRoomItemMessageComposer);
         this._composers.set(OutgoingHeader.BUILDERS_CLUB_PLACE_WALL_ITEM, BuildersClubPlaceWallItemMessageComposer);
         this._composers.set(OutgoingHeader.BUILDERS_CLUB_QUERY_FURNI_COUNT, BuildersClubQueryFurniCountMessageComposer);
-		this._composers.set(OutgoingHeader.CATALOG_ADMIN_SAVE_PAGE, CatalogAdminSavePageComposer);
+        this._composers.set(OutgoingHeader.CATALOG_ADMIN_SAVE_PAGE, CatalogAdminSavePageComposer);
         this._composers.set(OutgoingHeader.CATALOG_ADMIN_SAVE_PAGE_IMAGES, CatalogAdminSavePageImagesComposer);
         this._composers.set(OutgoingHeader.CATALOG_ADMIN_SAVE_PAGE_ICON, CatalogAdminSavePageIconComposer);
         this._composers.set(OutgoingHeader.CATALOG_ADMIN_CREATE_PAGE, CatalogAdminCreatePageComposer);
@@ -782,16 +782,16 @@ export class NitroMessages implements IMessageConfiguration
         this._composers.set(OutgoingHeader.CATALOG_PRODUCT_METADATA, CatalogProductMetadataComposer);
         this._composers.set(OutgoingHeader.CATALOG_RUNTIME_CONFIGURATION, CatalogRuntimeConfigurationComposer);
 
-		// Furni Editor
-		this._composers.set(OutgoingHeader.FURNI_EDITOR_SEARCH, FurniEditorSearchComposer);
-		this._composers.set(OutgoingHeader.FURNI_EDITOR_DETAIL, FurniEditorDetailComposer);
-		this._composers.set(OutgoingHeader.FURNI_EDITOR_BY_SPRITE, FurniEditorBySpriteComposer);
-		this._composers.set(OutgoingHeader.FURNI_EDITOR_INTERACTIONS, FurniEditorInteractionsComposer);
-		this._composers.set(OutgoingHeader.FURNI_EDITOR_UPDATE, FurniEditorUpdateComposer);
-		this._composers.set(OutgoingHeader.FURNI_EDITOR_DELETE, FurniEditorDeleteComposer);
-		this._composers.set(OutgoingHeader.FURNI_EDITOR_UPDATE_FURNIDATA, FurniEditorUpdateFurnidataComposer);
-		this._composers.set(OutgoingHeader.FURNI_EDITOR_REVERT_FURNIDATA, FurniEditorRevertFurnidataComposer);
-		this._composers.set(OutgoingHeader.FURNI_EDITOR_IMPORT_TEXT, FurniEditorImportTextComposer);
+        // Furni Editor
+        this._composers.set(OutgoingHeader.FURNI_EDITOR_SEARCH, FurniEditorSearchComposer);
+        this._composers.set(OutgoingHeader.FURNI_EDITOR_DETAIL, FurniEditorDetailComposer);
+        this._composers.set(OutgoingHeader.FURNI_EDITOR_BY_SPRITE, FurniEditorBySpriteComposer);
+        this._composers.set(OutgoingHeader.FURNI_EDITOR_INTERACTIONS, FurniEditorInteractionsComposer);
+        this._composers.set(OutgoingHeader.FURNI_EDITOR_UPDATE, FurniEditorUpdateComposer);
+        this._composers.set(OutgoingHeader.FURNI_EDITOR_DELETE, FurniEditorDeleteComposer);
+        this._composers.set(OutgoingHeader.FURNI_EDITOR_UPDATE_FURNIDATA, FurniEditorUpdateFurnidataComposer);
+        this._composers.set(OutgoingHeader.FURNI_EDITOR_REVERT_FURNIDATA, FurniEditorRevertFurnidataComposer);
+        this._composers.set(OutgoingHeader.FURNI_EDITOR_IMPORT_TEXT, FurniEditorImportTextComposer);
 
         this._composers.set(OutgoingHeader.GET_CATALOG_INDEX, GetCatalogIndexComposer);
         this._composers.set(OutgoingHeader.GET_CATALOG_PAGE, GetCatalogPageComposer);
@@ -1179,7 +1179,7 @@ export class NitroMessages implements IMessageConfiguration
         this._composers.set(OutgoingHeader.FURNITURE_ALIASES, FurnitureAliasesComposer);
         this._composers.set(OutgoingHeader.FURNITURE_GROUP_INFO, FurnitureGroupInfoComposer);
         this._composers.set(OutgoingHeader.FURNITURE_PICKUP, FurniturePickupComposer);
-		this._composers.set(OutgoingHeader.FURNITURE_PICKUP_ALL, FurniturePickupAllComposer);
+        this._composers.set(OutgoingHeader.FURNITURE_PICKUP_ALL, FurniturePickupAllComposer);
         this._composers.set(OutgoingHeader.FURNITURE_PLACE, FurniturePlaceComposer);
         this._composers.set(OutgoingHeader.ITEM_PAINT, FurniturePlacePaintComposer);
         this._composers.set(OutgoingHeader.FURNITURE_POSTIT_PLACE, FurniturePostItPlaceComposer);
@@ -1260,7 +1260,7 @@ export class NitroMessages implements IMessageConfiguration
         this._composers.set(OutgoingHeader.UNIT_CHAT, RoomUnitChatComposer);
         this._composers.set(OutgoingHeader.UNIT_CHAT_SHOUT, RoomUnitChatShoutComposer);
         this._composers.set(OutgoingHeader.USER_SETTINGS_CHAT_STYLE, RoomUnitChatStyleComposer);
-		this._composers.set(OutgoingHeader.USER_SETTINGS_INFOSTAND_BACKGROUND, RoomUnitBackgroundComposer);
+        this._composers.set(OutgoingHeader.USER_SETTINGS_INFOSTAND_BACKGROUND, RoomUnitBackgroundComposer);
         this._composers.set(OutgoingHeader.UNIT_CHAT_WHISPER, RoomUnitChatWhisperComposer);
         this._composers.set(OutgoingHeader.UNIT_TYPING, RoomUnitTypingStartComposer);
         this._composers.set(OutgoingHeader.UNIT_TYPING_STOP, RoomUnitTypingStopComposer);

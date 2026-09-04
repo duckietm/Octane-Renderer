@@ -66,7 +66,7 @@ export class RenderRoomMessageComposer implements IMessageComposer<ConstructorPa
         {
             binaryData = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
         }
-        catch(e)
+        catch (e)
         {
             NitroLogger.error('Camera: failed to decode base64 data');
             return;

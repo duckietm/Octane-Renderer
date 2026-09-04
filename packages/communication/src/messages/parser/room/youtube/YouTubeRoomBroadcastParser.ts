@@ -29,7 +29,16 @@ export class YouTubeRoomBroadcastParser implements IMessageParser
         return true;
     }
 
-    public get videoId(): string { return this._videoId; }
-    public get senderName(): string { return this._senderName; }
-    public get playlist(): string[] { return this._playlist; }
+    public get videoId(): string
+    {
+        return this._videoId;
+    }
+    public get senderName(): string
+    {
+        return this._senderName;
+    }
+    public get playlist(): string[]
+    {
+        return this._playlist;
+    }
 }

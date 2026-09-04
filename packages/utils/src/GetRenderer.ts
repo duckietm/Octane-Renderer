@@ -76,7 +76,7 @@ const patchResizeSkip = (r: Renderer): void =>
             view.screen.width = source.width;
             view.screen.height = source.height;
         }
-    }) as typeof r.resize;
+    });
 };
 
 export const PrepareRenderer = async (options: Partial<AutoDetectOptions>): Promise<Renderer> =>

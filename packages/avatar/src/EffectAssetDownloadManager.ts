@@ -38,7 +38,7 @@ export class EffectAssetDownloadManager
         {
             responseData = await loadGamedata(url);
         }
-        catch(err)
+        catch (err)
         {
             throw new Error(`Could not load effect map from "${ url }" — check "avatar.effectmap.url" in renderer-config.json (${ err?.message || err })`);
         }

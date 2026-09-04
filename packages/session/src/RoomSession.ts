@@ -96,8 +96,8 @@ export class RoomSession implements IRoomSession
         if(isTyping) GetCommunication().connection.send(new RoomUnitTypingStartComposer());
         else GetCommunication().connection.send(new RoomUnitTypingStopComposer());
     }
-	
-	public sendBackgroundMessage(backgroundImage: number, backgroundStand: number, backgroundOverlay: number, backgroundCard: number = 0, backgroundBorder: number = 0): void
+
+    public sendBackgroundMessage(backgroundImage: number, backgroundStand: number, backgroundOverlay: number, backgroundCard: number = 0, backgroundBorder: number = 0): void
     {
         GetCommunication().connection.send(new RoomUnitBackgroundComposer(backgroundImage, backgroundStand, backgroundOverlay, backgroundCard, backgroundBorder));
     }

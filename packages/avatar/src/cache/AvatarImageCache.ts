@@ -25,7 +25,7 @@ export class AvatarImageCache
     private _canvas: AvatarCanvas;
     private _disposed: boolean;
     private _geometryType: string;
-	private _defaultAction: string = 'std';
+    private _defaultAction: string = 'std';
     private _unionImages: ImageData[];
     private _matrix: Matrix;
     private _fallbackAssets: Map<string, IGraphicAsset>;
@@ -161,7 +161,7 @@ export class AvatarImageCache
 
             this._geometryType = geometryType;
             this._canvas = null;
-			this._defaultAction = (geometryType === GeometryType.HORIZONTAL) ? 'lay' : 'std';
+            this._defaultAction = (geometryType === GeometryType.HORIZONTAL) ? 'lay' : 'std';
 
             return;
         }
@@ -170,7 +170,7 @@ export class AvatarImageCache
 
         this._geometryType = geometryType;
         this._canvas = null;
-		this._defaultAction = (geometryType === GeometryType.HORIZONTAL) ? 'lay' : 'std';
+        this._defaultAction = (geometryType === GeometryType.HORIZONTAL) ? 'lay' : 'std';
     }
 
     public getImageContainer(key: string, frameNumber: number, forceRefresh: boolean = false): AvatarImageBodyPartContainer

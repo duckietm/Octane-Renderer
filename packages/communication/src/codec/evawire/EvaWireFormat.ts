@@ -79,7 +79,7 @@ export class EvaWireFormat implements ICodec
             if(length < 0 || (offset + 4 + length) > totalLength) break;
 
             const bodyStart = offset + 4;
-            const body = new BinaryReader(buffer.slice(bodyStart, bodyStart + length) as ArrayBuffer);
+            const body = new BinaryReader(buffer.slice(bodyStart, bodyStart + length));
 
             wrappers.push(new EvaWireDataWrapper(body.readShort(), body));
 

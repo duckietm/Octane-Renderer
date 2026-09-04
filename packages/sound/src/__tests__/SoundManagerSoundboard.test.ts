@@ -5,8 +5,10 @@ import { SoundManager } from '../SoundManager';
 vi.mock('../music/MusicController', () => ({
     MusicController: class
     {
-        public init() {}
-        public updateVolume() {}
+        public init()
+        {}
+        public updateVolume()
+        {}
     }
 }));
 

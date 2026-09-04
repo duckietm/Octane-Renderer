@@ -11,6 +11,6 @@ export class PollErrorEvent extends MessageEvent implements IMessageEvent
 
     public getParser(): PollErrorParser
     {
-        return this.parser as PollErrorParser;
+        return this.parser;
     }
 }

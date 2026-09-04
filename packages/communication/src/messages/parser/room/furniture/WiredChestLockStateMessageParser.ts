@@ -30,7 +30,16 @@ export class WiredChestLockStateMessageParser implements IMessageParser
         return true;
     }
 
-    public get locked(): boolean { return this._locked; }
-    public get all(): boolean { return this._all; }
-    public get affected(): number { return this._affected; }
+    public get locked(): boolean
+    {
+        return this._locked;
+    }
+    public get all(): boolean
+    {
+        return this._all;
+    }
+    public get affected(): number
+    {
+        return this._affected;
+    }
 }

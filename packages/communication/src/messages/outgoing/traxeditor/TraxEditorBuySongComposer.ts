@@ -9,6 +9,12 @@ export class TraxEditorBuySongComposer implements IMessageComposer<[ string ]>
         this._data = [ name ];
     }
 
-    public getMessageArray(): [ string ] { return this._data; }
-    public dispose(): void { return; }
+    public getMessageArray(): [ string ]
+    {
+        return this._data;
+    }
+    public dispose(): void
+    {
+        return;
+    }
 }

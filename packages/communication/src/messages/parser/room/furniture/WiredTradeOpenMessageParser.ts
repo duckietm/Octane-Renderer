@@ -59,12 +59,36 @@ export class WiredTradeOpenMessageParser implements IMessageParser
         return true;
     }
 
-    public get contractType(): number { return this._contractType; }
-    public get rewardText(): string { return this._rewardText; }
-    public get layoutType(): string { return this._layoutType; }
-    public get showRequirementsImmediate(): boolean { return this._showRequirementsImmediate; }
-    public get overridePreviousTrade(): boolean { return this._overridePreviousTrade; }
-    public get timeoutSeconds(): number { return this._timeoutSeconds; }
-    public get giveRules(): IWiredTradeRule[] { return this._giveRules; }
-    public get rewardRule(): IWiredTradeRule { return this._rewardRule; }
+    public get contractType(): number
+    {
+        return this._contractType;
+    }
+    public get rewardText(): string
+    {
+        return this._rewardText;
+    }
+    public get layoutType(): string
+    {
+        return this._layoutType;
+    }
+    public get showRequirementsImmediate(): boolean
+    {
+        return this._showRequirementsImmediate;
+    }
+    public get overridePreviousTrade(): boolean
+    {
+        return this._overridePreviousTrade;
+    }
+    public get timeoutSeconds(): number
+    {
+        return this._timeoutSeconds;
+    }
+    public get giveRules(): IWiredTradeRule[]
+    {
+        return this._giveRules;
+    }
+    public get rewardRule(): IWiredTradeRule
+    {
+        return this._rewardRule;
+    }
 }

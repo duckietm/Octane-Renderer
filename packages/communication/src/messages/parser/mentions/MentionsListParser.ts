@@ -23,5 +23,8 @@ export class MentionsListParser implements IMessageParser
         return true;
     }
 
-    public get mentions(): MentionListItem[] { return this._mentions; }
+    public get mentions(): MentionListItem[]
+    {
+        return this._mentions;
+    }
 }

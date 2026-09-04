@@ -35,8 +35,20 @@ export class HousekeepingActionResultParser implements IMessageParser
         return true;
     }
 
-    public get actionKey(): string { return this._actionKey; }
-    public get ok(): boolean { return this._ok; }
-    public get actionId(): number { return this._actionId; }
-    public get message(): string { return this._message; }
+    public get actionKey(): string
+    {
+        return this._actionKey;
+    }
+    public get ok(): boolean
+    {
+        return this._ok;
+    }
+    public get actionId(): number
+    {
+        return this._actionId;
+    }
+    public get message(): string
+    {
+        return this._message;
+    }
 }

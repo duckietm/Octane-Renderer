@@ -11,6 +11,6 @@ export class DesktopViewEvent extends MessageEvent implements IMessageEvent
 
     public getParser(): DesktopViewParser
     {
-        return this.parser as DesktopViewParser;
+        return this.parser;
     }
 }

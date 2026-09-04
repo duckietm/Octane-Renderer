@@ -30,7 +30,8 @@ vi.mock('@nitrots/configuration', () => ({
 
 vi.mock('../utils', () => ({
     RoomEnterEffect: { isVisualizationOn: () => false },
-    RoomGeometry: class {},
+    RoomGeometry: class
+    {},
     RoomRotatingEffect: {},
     RoomShakingEffect: {}
 }));

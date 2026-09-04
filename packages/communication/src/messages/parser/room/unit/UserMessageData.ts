@@ -21,7 +21,7 @@ export class UserMessageData
     private _prefixFont: string = '';
     private _displayOrder: string = 'icon-prefix-name';
     private _activityPoints: number = 0;
-	private _background: number = 0;
+    private _background: number = 0;
     private _stand: number = 0;
     private _overlay: number = 0;
     private _cardBackground: number = 0;
@@ -192,8 +192,8 @@ export class UserMessageData
             this._activityPoints = value;
         }
     }
-	
-	public get background(): number
+
+    public get background(): number
     {
         return this._background;
     }

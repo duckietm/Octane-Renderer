@@ -7,6 +7,12 @@ export class CatalogStudioUndoComposer implements IMessageComposer<ConstructorPa
     {
         this._data = [ operationId, draftVersionId, expectedRevision, groupId ];
     }
-    public dispose(): void { this._data = null; }
-    public getMessageArray() { return this._data; }
+    public dispose(): void
+    {
+        this._data = null;
+    }
+    public getMessageArray()
+    {
+        return this._data;
+    }
 }

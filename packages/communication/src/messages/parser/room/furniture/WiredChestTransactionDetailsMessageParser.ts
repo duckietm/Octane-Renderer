@@ -76,16 +76,52 @@ export class WiredChestTransactionDetailsMessageParser implements IMessageParser
         return true;
     }
 
-    public get transactionId(): number { return this._transactionId; }
-    public get chestId(): number { return this._chestId; }
-    public get chestKind(): number { return this._chestKind; }
-    public get type(): number { return this._type; }
-    public get source(): number { return this._source; }
-    public get userId(): number { return this._userId; }
-    public get userName(): string { return this._userName; }
-    public get currencyType(): number { return this._currencyType; }
-    public get withdrawn(): number { return this._withdrawn; }
-    public get deposited(): number { return this._deposited; }
-    public get timestamp(): number { return this._timestamp; }
-    public get items(): IWiredChestTransactionDetailItem[] { return this._items; }
+    public get transactionId(): number
+    {
+        return this._transactionId;
+    }
+    public get chestId(): number
+    {
+        return this._chestId;
+    }
+    public get chestKind(): number
+    {
+        return this._chestKind;
+    }
+    public get type(): number
+    {
+        return this._type;
+    }
+    public get source(): number
+    {
+        return this._source;
+    }
+    public get userId(): number
+    {
+        return this._userId;
+    }
+    public get userName(): string
+    {
+        return this._userName;
+    }
+    public get currencyType(): number
+    {
+        return this._currencyType;
+    }
+    public get withdrawn(): number
+    {
+        return this._withdrawn;
+    }
+    public get deposited(): number
+    {
+        return this._deposited;
+    }
+    public get timestamp(): number
+    {
+        return this._timestamp;
+    }
+    public get items(): IWiredChestTransactionDetailItem[]
+    {
+        return this._items;
+    }
 }

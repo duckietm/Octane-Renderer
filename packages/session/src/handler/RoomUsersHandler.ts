@@ -62,7 +62,7 @@ export class RoomUsersHandler extends BaseHandler
                 userData.prefixEffect = user.prefixEffect;
                 userData.prefixFont = user.prefixFont;
                 userData.displayOrder = user.displayOrder;
-				userData.background = user.background;
+                userData.background = user.background;
                 userData.stand = user.stand;
                 userData.overlay = user.overlay;
                 userData.cardBackground = user.cardBackground;
@@ -115,8 +115,8 @@ export class RoomUsersHandler extends BaseHandler
         session.userDataManager.updateMotto(parser.unitId, parser.motto);
         session.userDataManager.updateCustomization(parser.unitId, parser.nickIcon || '', parser.prefixText || '', parser.prefixColor || '', parser.prefixIcon || '', parser.prefixEffect || '', parser.prefixFont || '', parser.displayOrder || 'icon-prefix-name');
         session.userDataManager.updateAchievementScore(parser.unitId, parser.achievementScore);
-		
-		session.userDataManager.updateBackground(parser.unitId, parser.backgroundId, parser.standId, parser.overlayId, parser.cardBackgroundId, parser.borderId);
+
+        session.userDataManager.updateBackground(parser.unitId, parser.backgroundId, parser.standId, parser.overlayId, parser.cardBackgroundId, parser.borderId);
 
         GetEventDispatcher().dispatchEvent(new RoomSessionUserFigureUpdateEvent(session, parser.unitId, parser.figure, parser.gender, parser.motto, parser.achievementScore, parser.backgroundId, parser.standId, parser.overlayId, parser.cardBackgroundId, parser.nickIcon || '', parser.prefixText || '', parser.prefixColor || '', parser.prefixIcon || '', parser.prefixEffect || '', parser.prefixFont || '', parser.displayOrder || 'icon-prefix-name', parser.borderId));
 

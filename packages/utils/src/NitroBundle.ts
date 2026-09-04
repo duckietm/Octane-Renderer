@@ -9,7 +9,7 @@ export class NitroBundle
 {
     private static TEXT_DECODER: TextDecoder = new TextDecoder('utf-8');
 
-    private _jsonFile: Object = null;
+    private _jsonFile: object = null;
     private _texture: Texture = null;
 
     public static async from(buffer: ArrayBuffer, textureDecoder: NitroBundleTextureDecoder = decodePngTexture): Promise<NitroBundle>
@@ -48,7 +48,7 @@ export class NitroBundle
         }
     }
 
-    public get jsonFile(): Object
+    public get jsonFile(): object
     {
         return this._jsonFile;
     }

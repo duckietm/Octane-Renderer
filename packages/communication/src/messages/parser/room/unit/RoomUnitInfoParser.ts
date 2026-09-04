@@ -92,8 +92,8 @@ export class RoomUnitInfoParser implements IMessageParser
     {
         return this._achievementScore;
     }
-	
-	public get backgroundId(): number
+
+    public get backgroundId(): number
     {
         return this._backgroundId;
     }

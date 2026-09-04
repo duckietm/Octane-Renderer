@@ -11,6 +11,6 @@ export class TargetedOfferNotFoundEvent extends MessageEvent implements IMessage
 
     public getParser(): TargetedOfferNotFoundParser
     {
-        return this.parser as TargetedOfferNotFoundParser;
+        return this.parser;
     }
 }

@@ -11,6 +11,6 @@ export class SnowWarOnStageEndingEvent extends MessageEvent implements IMessageE
 
     public getParser(): SnowWarOnStageEndingParser
     {
-        return this.parser as SnowWarOnStageEndingParser;
+        return this.parser;
     }
 }

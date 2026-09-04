@@ -34,7 +34,7 @@ describe('parseConfigJson', () =>
     });
 
     it.each([
-        "{ 'value': 1 }",
+        '{ \'value\': 1 }',
         '{ value: 1 }',
         '{ "value": 0x10 }',
         '{ "value": Infinity }'
@@ -92,7 +92,7 @@ describe('fetchConfigJson', () =>
         globalThis.fetch = (async () => new Response('{ "a": 1, "b": 2, }', {
             status: 200,
             headers: { 'content-type': 'application/json' }
-        })) as any;
+        }));
 
         try
         {
@@ -107,7 +107,7 @@ describe('fetchConfigJson', () =>
     it('throws for non-200 responses', async () =>
     {
         const originalFetch = globalThis.fetch;
-        globalThis.fetch = (async () => new Response('', { status: 404 })) as any;
+        globalThis.fetch = (async () => new Response('', { status: 404 }));
 
         try
         {

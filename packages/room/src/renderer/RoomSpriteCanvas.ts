@@ -289,7 +289,7 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
 
             if(!viz || !viz.planes) continue;
 
-            for(const plane of (viz.planes as IRoomPlane[]))
+            for(const plane of (viz.planes))
             {
                 if(!plane || plane.type === 3) continue;
 
@@ -391,10 +391,10 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
         }
 
         return [
-            { x: hull[leftIdx].x - extension,  y: -extension },
+            { x: hull[leftIdx].x - extension, y: -extension },
             { x: hull[rightIdx].x + extension, y: -extension },
             { x: hull[rightIdx].x + extension, y: maxY + extension },
-            { x: hull[leftIdx].x - extension,  y: maxY + extension }
+            { x: hull[leftIdx].x - extension, y: maxY + extension }
         ];
     }
 
@@ -617,7 +617,7 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
 
             sortableSprite.x = (spriteX - this._screenOffsetX);
             sortableSprite.y = (spriteY - this._screenOffsetY);
-            
+
             sortableSprite.z = ((z + sprite.relativeDepth) + (3.7E-11 * count));
 
             spriteCount++;
@@ -664,7 +664,7 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
         const extendedSprite = this.getExtendedSprite(index);
 
         if(!objectSprite || !extendedSprite) return false;
-		
+
         if(extendedSprite.varyingDepth !== objectSprite.varyingDepth)
         {
             if(extendedSprite.varyingDepth && !objectSprite.varyingDepth)
@@ -700,8 +700,8 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
             if(extendedSprite.blendMode !== objectSprite.blendMode) extendedSprite.blendMode = objectSprite.blendMode;
 
             if(extendedSprite.texture !== objectSprite.texture) extendedSprite.setTexture(objectSprite.texture);
-			
-			
+
+
             // Per-sprite zoom (objectSprite.scale, default 1) combined with flip.
             // Setting the magnitude directly (instead of reading the previous
             // scale) avoids compounding across frames.
@@ -710,7 +710,7 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
             extendedSprite.scale.x = objectSprite.flipH ? -magnitude : magnitude;
             extendedSprite.scale.y = objectSprite.flipV ? -magnitude : magnitude;
         }
-	
+
         extendedSprite.x = Math.round(sprite.x);
         extendedSprite.y = Math.round(sprite.y);
 

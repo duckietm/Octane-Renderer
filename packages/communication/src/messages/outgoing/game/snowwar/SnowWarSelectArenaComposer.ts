@@ -9,6 +9,12 @@ export class SnowWarSelectArenaComposer implements IMessageComposer<number[]>
         this._data = [ arenaId ];
     }
 
-    public getMessageArray(): number[] { return this._data; }
-    public dispose(): void { this._data = null; }
+    public getMessageArray(): number[]
+    {
+        return this._data;
+    }
+    public dispose(): void
+    {
+        this._data = null;
+    }
 }

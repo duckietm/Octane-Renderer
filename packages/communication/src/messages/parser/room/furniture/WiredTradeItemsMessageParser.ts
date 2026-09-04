@@ -113,11 +113,32 @@ export class WiredTradeItemsMessageParser implements IMessageParser
         return true;
     }
 
-    public get state(): number { return this._state; }
-    public get canAccept(): boolean { return this._canAccept; }
-    public get secondsLeft(): number { return this._secondsLeft; }
-    public get offeredItems(): IWiredTradeOfferedItem[] { return this._offeredItems; }
-    public get rewardFurni(): IWiredTradeRewardFurni[] { return this._rewardFurni; }
-    public get rewardCurrency(): IWiredTradeRewardCurrency[] { return this._rewardCurrency; }
-    public get missing(): IWiredTradeNode[] { return this._missing; }
+    public get state(): number
+    {
+        return this._state;
+    }
+    public get canAccept(): boolean
+    {
+        return this._canAccept;
+    }
+    public get secondsLeft(): number
+    {
+        return this._secondsLeft;
+    }
+    public get offeredItems(): IWiredTradeOfferedItem[]
+    {
+        return this._offeredItems;
+    }
+    public get rewardFurni(): IWiredTradeRewardFurni[]
+    {
+        return this._rewardFurni;
+    }
+    public get rewardCurrency(): IWiredTradeRewardCurrency[]
+    {
+        return this._rewardCurrency;
+    }
+    public get missing(): IWiredTradeNode[]
+    {
+        return this._missing;
+    }
 }

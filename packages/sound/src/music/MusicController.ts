@@ -582,7 +582,7 @@ export class MusicController implements IMusicController
     private onJukeboxInit(event: Event): void
     {
         this.disposeRoomPlaylist();
-        this._roomItemPlaylist = (new JukeboxPlaylistController() as IPlaylistController);
+        this._roomItemPlaylist = (new JukeboxPlaylistController());
         this._roomItemPlaylist.init();
         GetCommunication().connection.send(new GetNowPlayingMessageComposer());
     }

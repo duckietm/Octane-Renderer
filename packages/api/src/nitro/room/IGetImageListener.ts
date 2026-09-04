@@ -1,4 +1,4 @@
-﻿﻿import { IImageResult } from './IImageResult';
+﻿import { IImageResult } from './IImageResult';
 
 export interface IGetImageListener
 {

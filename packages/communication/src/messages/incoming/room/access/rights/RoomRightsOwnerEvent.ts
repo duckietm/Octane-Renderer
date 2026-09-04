@@ -11,6 +11,6 @@ export class RoomRightsOwnerEvent extends MessageEvent implements IMessageEvent
 
     public getParser(): RoomRightsOwnerParser
     {
-        return this.parser as RoomRightsOwnerParser;
+        return this.parser;
     }
 }

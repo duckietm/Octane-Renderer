@@ -20,14 +20,20 @@ export function applyFurnidataDeltaTo(
         if(e.type === 'I')
         {
             const wall = wallItems.get(e.id);
-            if(wall) { wall._localizedName = e.name; wall._description = e.description; }
+            if(wall)
+            {
+                wall._localizedName = e.name; wall._description = e.description;
+            }
             localization.setValue('wallItem.name.' + e.id, e.name);
             localization.setValue('wallItem.desc.' + e.id, e.description);
         }
         else
         {
             const floor = floorItems.get(e.id);
-            if(floor) { floor._localizedName = e.name; floor._description = e.description; }
+            if(floor)
+            {
+                floor._localizedName = e.name; floor._description = e.description;
+            }
             localization.setValue('roomItem.name.' + e.id, e.name);
             localization.setValue('roomItem.desc.' + e.id, e.description);
         }

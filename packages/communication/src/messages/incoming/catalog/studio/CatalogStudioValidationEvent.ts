@@ -4,6 +4,12 @@ import { CatalogStudioValidationMessageParser } from '../../../parser/catalog/st
 
 export class CatalogStudioValidationEvent extends MessageEvent implements IMessageEvent
 {
-    constructor(callback: Function) { super(callback, CatalogStudioValidationMessageParser); }
-    public getParser(): CatalogStudioValidationMessageParser { return this.parser as CatalogStudioValidationMessageParser; }
+    constructor(callback: Function)
+    {
+        super(callback, CatalogStudioValidationMessageParser);
+    }
+    public getParser(): CatalogStudioValidationMessageParser
+    {
+        return this.parser as CatalogStudioValidationMessageParser;
+    }
 }

@@ -2,8 +2,10 @@ import { FurnitureType, RoomObjectCategory } from '@nitrots/api';
 import { describe, expect, it } from 'vitest';
 import { RoomContentLoader } from '../RoomContentLoader';
 
-describe('RoomContentLoader', () => {
-    it('categorizes indexed-color wall item object names as wall furni', () => {
+describe('RoomContentLoader', () =>
+{
+    it('categorizes indexed-color wall item object names as wall furni', () =>
+    {
         const loader = new RoomContentLoader();
 
         loader.processFurnitureData([
@@ -19,7 +21,8 @@ describe('RoomContentLoader', () => {
         expect(loader.getCategoryForType('wall_flag')).toBe(RoomObjectCategory.WALL);
     });
 
-    it('prefers wall category when furnidata has duplicate floor and wall class names', () => {
+    it('prefers wall category when furnidata has duplicate floor and wall class names', () =>
+    {
         const loader = new RoomContentLoader();
 
         loader.processFurnitureData([

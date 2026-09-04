@@ -45,7 +45,7 @@ describe('EventDispatcher', () =>
         it('should not add listener if type is null', () =>
         {
             const callback = vi.fn();
-            dispatcher.addEventListener(null as any, callback);
+            dispatcher.addEventListener(null, callback);
 
             // Should not throw and callback should never be called
             expect(() => dispatcher.dispatchEvent({ type: 'test' })).not.toThrow();
@@ -53,7 +53,7 @@ describe('EventDispatcher', () =>
 
         it('should not add listener if callback is null', () =>
         {
-            dispatcher.addEventListener('test', null as any);
+            dispatcher.addEventListener('test', null);
 
             // Should not throw
             expect(() => dispatcher.dispatchEvent({ type: 'test' })).not.toThrow();
@@ -100,7 +100,7 @@ describe('EventDispatcher', () =>
         {
             const callback = vi.fn();
             dispatcher.addEventListener('test', callback);
-            dispatcher.removeEventListener(null as any, callback);
+            dispatcher.removeEventListener(null, callback);
 
             dispatcher.dispatchEvent({ type: 'test' });
 

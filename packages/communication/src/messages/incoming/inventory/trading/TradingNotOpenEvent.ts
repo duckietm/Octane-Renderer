@@ -11,6 +11,6 @@ export class TradingNotOpenEvent extends MessageEvent implements IMessageEvent
 
     public getParser(): TradingNotOpenParser
     {
-        return this.parser as TradingNotOpenParser;
+        return this.parser;
     }
 }

@@ -5,17 +5,45 @@ import { MentionsListParser } from '../MentionsListParser';
 
 class TestWrapper
 {
-    constructor(private reader: BinaryReader) {}
-    readByte() { return this.reader.readByte(); }
-    readBytes(n: number) { return this.reader.readBytes(n); }
-    readBoolean() { return this.reader.readByte() === 1; }
-    readShort() { return this.reader.readShort(); }
-    readInt() { return this.reader.readInt(); }
-    readFloat() { return this.reader.readFloat(); }
-    readDouble() { return this.reader.readDouble(); }
-    readString() { const len = this.reader.readShort(); return this.reader.readBytes(len).toString(); }
+    constructor(private reader: BinaryReader)
+    {}
+    readByte()
+    {
+        return this.reader.readByte();
+    }
+    readBytes(n: number)
+    {
+        return this.reader.readBytes(n);
+    }
+    readBoolean()
+    {
+        return this.reader.readByte() === 1;
+    }
+    readShort()
+    {
+        return this.reader.readShort();
+    }
+    readInt()
+    {
+        return this.reader.readInt();
+    }
+    readFloat()
+    {
+        return this.reader.readFloat();
+    }
+    readDouble()
+    {
+        return this.reader.readDouble();
+    }
+    readString()
+    {
+        const len = this.reader.readShort(); return this.reader.readBytes(len).toString();
+    }
     header = 0;
-    get bytesAvailable() { return this.reader.remaining() > 0; }
+    get bytesAvailable()
+    {
+        return this.reader.remaining() > 0;
+    }
 }
 
 describe('MentionReceivedParser', () =>
@@ -27,7 +55,7 @@ describe('MentionReceivedParser', () =>
         w.writeString('My Room'); w.writeString('ciao @me'); w.writeInt(0); w.writeInt(1717000000);
         const parser = new MentionReceivedParser();
         parser.flush();
-        parser.parse(new TestWrapper(new BinaryReader(w.getBuffer())) as any);
+        parser.parse(new TestWrapper(new BinaryReader(w.getBuffer())));
         const m = parser.mention;
         expect(m.mentionId).toBe(7);
         expect(m.senderId).toBe(42);
@@ -52,7 +80,7 @@ describe('MentionsListParser', () =>
         w.writeString('My Room'); w.writeString('@all festa'); w.writeInt(1); w.writeInt(1717000000); w.writeByte(1);
         const parser = new MentionsListParser();
         parser.flush();
-        parser.parse(new TestWrapper(new BinaryReader(w.getBuffer())) as any);
+        parser.parse(new TestWrapper(new BinaryReader(w.getBuffer())));
         expect(parser.mentions).toHaveLength(1);
         expect(parser.mentions[0].mentionId).toBe(3);
         expect(parser.mentions[0].senderUsername).toBe('Bob');
@@ -68,7 +96,7 @@ describe('MentionsListParser', () =>
         w.writeInt(0);
         const parser = new MentionsListParser();
         parser.flush();
-        parser.parse(new TestWrapper(new BinaryReader(w.getBuffer())) as any);
+        parser.parse(new TestWrapper(new BinaryReader(w.getBuffer())));
         expect(parser.mentions).toHaveLength(0);
     });
 });

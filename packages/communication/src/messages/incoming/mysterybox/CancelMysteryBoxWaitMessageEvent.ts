@@ -11,6 +11,6 @@ export class CancelMysteryBoxWaitMessageEvent extends MessageEvent implements IM
 
     public getParser(): CancelMysteryBoxWaitMessageParser
     {
-        return this.parser as CancelMysteryBoxWaitMessageParser;
+        return this.parser;
     }
 }

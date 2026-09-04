@@ -57,7 +57,7 @@ export class FloorplanEditor
         this._actionSettings = new ActionSettings();
     }
 
-    public onPointerRelease(event: PointerEvent = null): void 
+    public onPointerRelease(event: PointerEvent = null): void
     {
         if(this._isSquareSelectMode && this._isPointerDown && this._squareSelectStart)
         {
@@ -189,7 +189,7 @@ export class FloorplanEditor
                 const dy = Math.abs(mousePositionY - centreY);
 
                 const solution = (dx / (width * 0.5) + dy / (height * 0.5) <= 1);//todo: improve this
-                
+
                 if(solution)
                 {
                     if(this._isPointerDown)
@@ -198,14 +198,14 @@ export class FloorplanEditor
                         {
                             this.onClick(x, y);
                         }
-                    
+
                         else if(this._lastUsedTile.x !== x || this._lastUsedTile.y !== y)
                         {
                             this._lastUsedTile.x = x;
                             this._lastUsedTile.y = y;
                             this.onClick(x, y);
                         }
-                    
+
                     }
                     return true;
                 }

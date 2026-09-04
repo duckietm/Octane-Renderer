@@ -11,6 +11,6 @@ export class SnowWarInitArenaEvent extends MessageEvent implements IMessageEvent
 
     public getParser(): SnowWarInitArenaParser
     {
-        return this.parser as SnowWarInitArenaParser;
+        return this.parser;
     }
 }

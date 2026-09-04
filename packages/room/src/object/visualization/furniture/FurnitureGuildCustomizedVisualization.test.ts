@@ -8,12 +8,14 @@ const { getGroupBadgeImage, loadGroupBadgeImage } = vi.hoisted(() => ({
 }));
 
 vi.mock('@nitrots/utils', () => ({
-    ChooserSelectionFilter: class {},
+    ChooserSelectionFilter: class
+    {},
     TextureUtils: {}
 }));
 
 vi.mock('../../../utils', () => ({
-    RoomGeometry: class {}
+    RoomGeometry: class
+    {}
 }));
 
 vi.mock('@nitrots/session', () => ({

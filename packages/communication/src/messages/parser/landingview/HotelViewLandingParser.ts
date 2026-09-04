@@ -132,7 +132,16 @@ export class HotelViewLandingParser implements IMessageParser
         return true;
     }
 
-    public get canEdit(): boolean { return this._canEdit; }
-    public get scene(): IHotelViewLandingScene { return this._scene; }
-    public get slots(): IHotelViewLandingSlot[] { return this._slots; }
+    public get canEdit(): boolean
+    {
+        return this._canEdit;
+    }
+    public get scene(): IHotelViewLandingScene
+    {
+        return this._scene;
+    }
+    public get slots(): IHotelViewLandingSlot[]
+    {
+        return this._slots;
+    }
 }

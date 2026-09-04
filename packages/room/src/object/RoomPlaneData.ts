@@ -141,7 +141,7 @@ export class RoomPlaneData
             return null;
         }
         const secondaryNormal: Vector3d = new Vector3d();
-        secondaryNormal.assign((this._secondaryNormals[index] as IVector3D));
+        secondaryNormal.assign((this._secondaryNormals[index]));
         return secondaryNormal;
     }
 

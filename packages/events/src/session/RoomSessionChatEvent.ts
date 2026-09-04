@@ -40,7 +40,7 @@ export class RoomSessionChatEvent extends RoomSessionEvent
         this._objectId = objectId;
         this._message = message;
         this._chatType = chatType;
-		this._chatColours = chatColours;
+        this._chatColours = chatColours;
         this._links = links;
         this._extraParam = extraParam;
         this._style = style;
@@ -83,7 +83,7 @@ export class RoomSessionChatEvent extends RoomSessionEvent
         return this._style;
     }
 
-	public get chatColours(): string
+    public get chatColours(): string
     {
         return this._chatColours;
     }

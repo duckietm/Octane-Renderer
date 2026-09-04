@@ -9,6 +9,12 @@ export class TraxEditorDeleteSongComposer implements IMessageComposer<[ number ]
         this._data = [ songId ];
     }
 
-    public getMessageArray(): [ number ] { return this._data; }
-    public dispose(): void { return; }
+    public getMessageArray(): [ number ]
+    {
+        return this._data;
+    }
+    public dispose(): void
+    {
+        return;
+    }
 }

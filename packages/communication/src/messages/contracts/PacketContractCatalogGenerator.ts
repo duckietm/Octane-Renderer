@@ -41,7 +41,7 @@ export class PacketContractCatalogGenerator
                 fields = result.fields;
                 unsupportedReason = result.unsupportedReason;
             }
-            catch(error)
+            catch (error)
             {
                 unsupportedReason = `TypeScript analyzer could not resolve packet source: ${ String(error) }`;
             }

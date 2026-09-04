@@ -37,5 +37,8 @@ export class RareValuesParser implements IMessageParser
         return true;
     }
 
-    public get values(): Map<number, IRareValue> { return this._values; }
+    public get values(): Map<number, IRareValue>
+    {
+        return this._values;
+    }
 }

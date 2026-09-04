@@ -11,6 +11,6 @@ export class ChatReviewSessionDetachedMessageEvent extends MessageEvent implemen
 
     public getParser(): ChatReviewSessionDetachedMessageParser
     {
-        return this.parser as ChatReviewSessionDetachedMessageParser;
+        return this.parser;
     }
 }

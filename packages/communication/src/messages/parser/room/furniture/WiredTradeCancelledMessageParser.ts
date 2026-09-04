@@ -27,5 +27,8 @@ export class WiredTradeCancelledMessageParser implements IMessageParser
         return true;
     }
 
-    public get failureId(): number { return this._failureId; }
+    public get failureId(): number
+    {
+        return this._failureId;
+    }
 }

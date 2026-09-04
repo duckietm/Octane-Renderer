@@ -21,5 +21,6 @@ interface IMessageComposer<T extends unknown[]>
 
 class Short
 {
-    constructor(public readonly value: number) {}
+    constructor(public readonly value: number)
+    {}
 }

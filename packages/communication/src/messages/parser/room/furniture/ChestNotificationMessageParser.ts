@@ -43,9 +43,24 @@ export class ChestNotificationMessageParser implements IMessageParser
         return true;
     }
 
-    public get chestId(): number { return this._chestId; }
-    public get reason(): number { return this._reason; }
-    public get chestName(): string { return this._chestName; }
-    public get actorName(): string { return this._actorName; }
-    public get amount(): number { return this._amount; }
+    public get chestId(): number
+    {
+        return this._chestId;
+    }
+    public get reason(): number
+    {
+        return this._reason;
+    }
+    public get chestName(): string
+    {
+        return this._chestName;
+    }
+    public get actorName(): string
+    {
+        return this._actorName;
+    }
+    public get amount(): number
+    {
+        return this._amount;
+    }
 }

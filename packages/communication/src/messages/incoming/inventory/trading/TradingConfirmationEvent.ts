@@ -11,6 +11,6 @@ export class TradingConfirmationEvent extends MessageEvent implements IMessageEv
 
     public getParser(): TradingConfirmationParser
     {
-        return this.parser as TradingConfirmationParser;
+        return this.parser;
     }
 }

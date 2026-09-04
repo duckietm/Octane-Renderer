@@ -4,8 +4,17 @@ export class HousekeepingSetHcSubscriptionComposer implements IMessageComposer<C
 {
     private _data: ConstructorParameters<typeof HousekeepingSetHcSubscriptionComposer>;
 
-    constructor(userId: number, days: number) { this._data = [userId, days]; }
+    constructor(userId: number, days: number)
+    {
+        this._data = [userId, days];
+    }
 
-    public getMessageArray() { return this._data; }
-    public dispose(): void { return; }
+    public getMessageArray()
+    {
+        return this._data;
+    }
+    public dispose(): void
+    {
+        return;
+    }
 }

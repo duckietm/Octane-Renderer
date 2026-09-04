@@ -23,5 +23,8 @@ export class HousekeepingRoomListParser implements IMessageParser
         return true;
     }
 
-    public get rooms(): HousekeepingRoomData[] { return this._rooms; }
+    public get rooms(): HousekeepingRoomData[]
+    {
+        return this._rooms;
+    }
 }

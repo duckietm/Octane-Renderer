@@ -11,6 +11,6 @@ export class TradingNoSuchItemEvent extends MessageEvent implements IMessageEven
 
     public getParser(): TradingNoSuchItemParser
     {
-        return this.parser as TradingNoSuchItemParser;
+        return this.parser;
     }
 }

@@ -10,6 +10,12 @@ export class HotelViewLandingSaveComposer implements IMessageComposer<(number | 
         this._data = [slot.id, slot.enabled, slot.type, slot.title, slot.body, slot.imageUrl, slot.buttonText, slot.link, slot.progress, slot.progressLabel, slot.configJson];
     }
 
-    public getMessageArray(): (number | string | boolean)[] { return this._data; }
-    public dispose(): void { return; }
+    public getMessageArray(): (number | string | boolean)[]
+    {
+        return this._data;
+    }
+    public dispose(): void
+    {
+        return;
+    }
 }

@@ -27,7 +27,7 @@ export class FurnitureDataLoader
         {
             responseData = await loadGamedata(url);
         }
-        catch(err)
+        catch (err)
         {
             throw new Error(`Could not load furniture data from "${ url }" — check "furnidata.url" in renderer-config.json (${ err?.message || err })`);
         }
@@ -50,7 +50,7 @@ export class FurnitureDataLoader
         {
             responseData = await loadGamedata(url);
         }
-        catch(err)
+        catch (err)
         {
             return [];
         }

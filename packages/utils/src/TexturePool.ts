@@ -100,7 +100,7 @@ export class TexturePool
 
                         this._textures[texture.width][texture.height].splice(i, 1);
 
-                        this._totalTextures--;                        
+                        this._totalTextures--;
                     }
                 }
             }

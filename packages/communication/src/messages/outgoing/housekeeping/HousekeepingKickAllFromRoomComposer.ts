@@ -4,8 +4,17 @@ export class HousekeepingKickAllFromRoomComposer implements IMessageComposer<Con
 {
     private _data: ConstructorParameters<typeof HousekeepingKickAllFromRoomComposer>;
 
-    constructor(roomId: number) { this._data = [roomId]; }
+    constructor(roomId: number)
+    {
+        this._data = [roomId];
+    }
 
-    public getMessageArray() { return this._data; }
-    public dispose(): void { return; }
+    public getMessageArray()
+    {
+        return this._data;
+    }
+    public dispose(): void
+    {
+        return;
+    }
 }

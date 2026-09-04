@@ -167,7 +167,7 @@ const waitForClients = async (
     {
         await waitFor(predicate, { timeoutMs, description });
     }
-    catch(error)
+    catch (error)
     {
         const diagnostics = clients
             .map(client => formatMessengerDiagnostics(client.label, client.log.timeline))

@@ -9,6 +9,12 @@ export class HotelViewLandingResetVotesComposer implements IMessageComposer<numb
         this._data = [slotId];
     }
 
-    public getMessageArray(): number[] { return this._data; }
-    public dispose(): void { return; }
+    public getMessageArray(): number[]
+    {
+        return this._data;
+    }
+    public dispose(): void
+    {
+        return;
+    }
 }

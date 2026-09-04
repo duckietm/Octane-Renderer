@@ -5,7 +5,7 @@ export const isWiredChestFloorItem = (typeId: number): boolean =>
 {
     const data = GetSessionDataManager().getFloorItemData(typeId);
 
-    if (!data?.className) return false;
+    if(!data?.className) return false;
 
     return data.className.startsWith('wf_storage_');
 };

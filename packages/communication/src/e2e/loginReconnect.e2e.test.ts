@@ -45,8 +45,14 @@ describe('Polaris login and reconnect', () =>
             let initError: unknown = null;
             let initialized = false;
             void manager.init()
-                .then(() => { initialized = true; })
-                .catch(error => { initError = error; });
+                .then(() =>
+                {
+                    initialized = true;
+                })
+                .catch(error =>
+                {
+                    initError = error;
+                });
 
             await waitFor(() => initialized || !!initError, {
                 timeoutMs: 30000,
@@ -76,7 +82,7 @@ describe('Polaris login and reconnect', () =>
                     description: 'Polaris reauthentication after transport loss'
                 });
             }
-            catch(error)
+            catch (error)
             {
                 throw new Error(`${ (error as Error).message }; states=${ JSON.stringify(recorder.states) }`);
             }

@@ -54,7 +54,10 @@ const attachInventoryLog = (connection: IConnection): { log: InventoryLog; dispo
         snapshots: [], removedInventoryIds: [], roomAdds: [], roomRemovals: [],
         unseenOwnedFurnitureIds: [], invalidations: 0, timeline: []
     };
-    const register = (event: IMessageEvent): void => { events.push(event); connection.addMessageEvent(event); };
+    const register = (event: IMessageEvent): void =>
+    {
+        events.push(event); connection.addMessageEvent(event);
+    };
 
     register(new FurnitureListEvent((event: FurnitureListEvent) =>
     {
@@ -103,7 +106,10 @@ const attachInventoryLog = (connection: IConnection): { log: InventoryLog; dispo
 
     return {
         log,
-        dispose: () => { for(const event of events) connection.removeMessageEvent(event); }
+        dispose: () =>
+        {
+            for(const event of events) connection.removeMessageEvent(event);
+        }
     };
 };
 
@@ -155,7 +161,7 @@ describe('Polaris inventory lifecycle', () =>
             {
                 await waitFor(predicate, { timeoutMs, description });
             }
-            catch(error)
+            catch (error)
             {
                 throw new Error(`${ (error as Error).message }; ${ formatInventoryDiagnostics(ITEM_ID, recorder.log.timeline) }`);
             }

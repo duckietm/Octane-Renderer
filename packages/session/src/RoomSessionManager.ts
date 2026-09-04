@@ -88,7 +88,8 @@ export class RoomSessionManager implements IRoomSessionManager, IRoomHandlerList
 
             this._isReconnecting = true;
         }
-        catch(e){}
+        catch (e)
+        {}
     }
 
     private createHandlers(): void
@@ -278,10 +279,14 @@ export class RoomSessionManager implements IRoomSessionManager, IRoomHandlerList
                     spawnX = parseInt(posX, 10);
                     spawnY = parseInt(posY, 10);
 
-                    if(isNaN(spawnX) || isNaN(spawnY)) { spawnX = -1; spawnY = -1; }
+                    if(isNaN(spawnX) || isNaN(spawnY))
+                    {
+                        spawnX = -1; spawnY = -1;
+                    }
                 }
             }
-            catch(e) {}
+            catch (e)
+            {}
 
             this._isReconnecting = true;
             this.createSession(roomId, password, spawnX, spawnY);
@@ -298,7 +303,7 @@ export class RoomSessionManager implements IRoomSessionManager, IRoomHandlerList
 
             return true;
         }
-        catch(e)
+        catch (e)
         {
             return false;
         }
@@ -326,7 +331,8 @@ export class RoomSessionManager implements IRoomSessionManager, IRoomHandlerList
                 this.clearPersistedRoom();
             }
         }
-        catch(e) {}
+        catch (e)
+        {}
     }
 
     private clearPersistedRoom(): void
@@ -336,7 +342,8 @@ export class RoomSessionManager implements IRoomSessionManager, IRoomHandlerList
             sessionStorage.removeItem(STORAGE_KEY_ROOM_ID);
             sessionStorage.removeItem(STORAGE_KEY_ROOM_PASSWORD);
         }
-        catch(e) {}
+        catch (e)
+        {}
     }
 
     private clearPersistedPosition(): void
@@ -346,7 +353,8 @@ export class RoomSessionManager implements IRoomSessionManager, IRoomHandlerList
             sessionStorage.removeItem(STORAGE_KEY_POS_X);
             sessionStorage.removeItem(STORAGE_KEY_POS_Y);
         }
-        catch(e) {}
+        catch (e)
+        {}
     }
 
     private snapshotSavedPosition(): void
@@ -362,7 +370,7 @@ export class RoomSessionManager implements IRoomSessionManager, IRoomHandlerList
             this._savedPosY = parseInt(posY, 10);
 
         }
-        catch(e)
+        catch (e)
         {
             this._savedPosX = -1;
             this._savedPosY = -1;
@@ -498,7 +506,7 @@ export class RoomSessionManager implements IRoomSessionManager, IRoomHandlerList
 
                 if(this._isReconnecting)
                 {
-                      if(this._savedPosX >= 0 && this._savedPosY >= 0)
+                    if(this._savedPosX >= 0 && this._savedPosY >= 0)
                     {
                         GetCommunication().connection.send(new RoomUnitWalkComposer(this._savedPosX, this._savedPosY));
                         this._savedPosX = -1;
@@ -512,7 +520,7 @@ export class RoomSessionManager implements IRoomSessionManager, IRoomHandlerList
 
                         if(this._isReconnecting)
                         {
-                             this._isReconnecting = false;
+                            this._isReconnecting = false;
                         }
                     }, 3000);
                 }

@@ -4,15 +4,37 @@ import { WiredFurniMoveStyleParser } from './WiredFurniMoveStyleParser';
 
 class TestWrapper
 {
-    constructor(private reader: BinaryReader) {}
-    readByte() { return this.reader.readByte(); }
-    readBoolean() { return this.reader.readByte() === 1; }
-    readShort() { return this.reader.readShort(); }
-    readInt() { return this.reader.readInt(); }
-    readString() { const length = this.reader.readShort(); return this.reader.readBytes(length).toString(); }
+    constructor(private reader: BinaryReader)
+    {}
+    readByte()
+    {
+        return this.reader.readByte();
+    }
+    readBoolean()
+    {
+        return this.reader.readByte() === 1;
+    }
+    readShort()
+    {
+        return this.reader.readShort();
+    }
+    readInt()
+    {
+        return this.reader.readInt();
+    }
+    readString()
+    {
+        const length = this.reader.readShort(); return this.reader.readBytes(length).toString();
+    }
     header = 0;
-    get bytesAvailable() { return this.reader.remaining() > 0; }
-    get remainingBytes() { return this.reader.remaining(); }
+    get bytesAvailable()
+    {
+        return this.reader.remaining() > 0;
+    }
+    get remainingBytes()
+    {
+        return this.reader.remaining();
+    }
 }
 
 const wrapper = (writer: BinaryWriter) => new TestWrapper(new BinaryReader(writer.getBuffer())) as any;

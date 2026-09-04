@@ -25,7 +25,7 @@ export class UserDataManager implements IUserDataManager
     {
         if(this._roomUserListSnapshot) return this._roomUserListSnapshot;
 
-        this._roomUserListSnapshot = Object.freeze<IRoomUserData[]>([ ...this._userDataByRoomIndex.values() ]) as ReadonlyArray<IRoomUserData>;
+        this._roomUserListSnapshot = Object.freeze<IRoomUserData[]>([ ...this._userDataByRoomIndex.values() ]);
 
         return this._roomUserListSnapshot;
     }

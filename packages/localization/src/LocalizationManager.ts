@@ -32,7 +32,7 @@ export class LocalizationManager implements ILocalizationManager
                 {
                     data = await loadGamedata(url);
                 }
-                catch(err)
+                catch (err)
                 {
                     throw new Error(`Could not load localization file "${ url }" — check "external.texts.url" in ui-config.json (${ err?.message || err })`);
                 }

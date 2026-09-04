@@ -4,8 +4,17 @@ export class HousekeepingRoomStateComposer implements IMessageComposer<Construct
 {
     private _data: ConstructorParameters<typeof HousekeepingRoomStateComposer>;
 
-    constructor(roomId: number, open: boolean) { this._data = [roomId, open]; }
+    constructor(roomId: number, open: boolean)
+    {
+        this._data = [roomId, open];
+    }
 
-    public getMessageArray() { return this._data; }
-    public dispose(): void { return; }
+    public getMessageArray()
+    {
+        return this._data;
+    }
+    public dispose(): void
+    {
+        return;
+    }
 }

@@ -9,7 +9,13 @@ export class SoundboardCatalogReorderComposer implements IMessageComposer<number
         this._data = [ orderedIds.length, ...orderedIds ];
     }
 
-    public getMessageArray(): number[] { return this._data; }
+    public getMessageArray(): number[]
+    {
+        return this._data;
+    }
 
-    public dispose(): void { return; }
+    public dispose(): void
+    {
+        return;
+    }
 }

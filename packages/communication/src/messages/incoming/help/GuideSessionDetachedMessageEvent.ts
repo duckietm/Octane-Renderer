@@ -11,6 +11,6 @@ export class GuideSessionDetachedMessageEvent extends MessageEvent implements IM
 
     public getParser(): GuideSessionDetachedMessageParser
     {
-        return this.parser as GuideSessionDetachedMessageParser;
+        return this.parser;
     }
 }

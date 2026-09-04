@@ -45,5 +45,8 @@ export class WheelAdminPrizesParser implements IMessageParser
         return true;
     }
 
-    public get prizes(): IWheelAdminPrize[] { return this._prizes; }
+    public get prizes(): IWheelAdminPrize[]
+    {
+        return this._prizes;
+    }
 }

@@ -4,19 +4,22 @@ import { describe, expect, it } from 'vitest';
 import { ObjectMoveUpdateMessage } from '../../messages';
 import { MovingObjectLogic } from './MovingObjectLogic';
 
-const createObject = () => {
+const createObject = () =>
+{
     const location = new Vector3d();
     const direction = new Vector3d();
 
     return {
         location,
         getLocation: () => location,
-        setLocation: (vector: IVector3D) => {
+        setLocation: (vector: IVector3D) =>
+        {
             location.assign(vector);
         },
         getDirection: () => direction,
-        setDirection: (vector: IVector3D) => {
-            if (vector) direction.assign(vector);
+        setDirection: (vector: IVector3D) =>
+        {
+            if(vector) direction.assign(vector);
         },
         setLogic: () => null,
         model: null
@@ -28,7 +31,8 @@ const slide = (fromX: number, toX: number, duration: number = 500) =>
 
 // Drives the logic at ~60fps, delivering each message right after the first
 // tick at/past its arrival time, and samples x after every tick.
-const simulate = (arrivals: { time: number, message: ObjectMoveUpdateMessage }[], totalTime: number) => {
+const simulate = (arrivals: { time: number, message: ObjectMoveUpdateMessage }[], totalTime: number) =>
+{
     const object = createObject();
     const logic = new MovingObjectLogic();
 
@@ -37,10 +41,12 @@ const simulate = (arrivals: { time: number, message: ObjectMoveUpdateMessage }[]
     const samples: { time: number, x: number }[] = [];
     const pending = [...arrivals];
 
-    for (let time = 16; time <= totalTime; time += 16) {
+    for(let time = 16; time <= totalTime; time += 16)
+    {
         logic.update(time);
 
-        while (pending.length && (pending[0].time <= time)) {
+        while(pending.length && (pending[0].time <= time))
+        {
             logic.processUpdateMessage(pending.shift().message);
         }
 
@@ -53,8 +59,10 @@ const simulate = (arrivals: { time: number, message: ObjectMoveUpdateMessage }[]
 const stallsBetween = (samples: { time: number, x: number }[], from: number, to: number) =>
     samples.filter((sample, index) => (index > 0) && (sample.time > from) && (sample.time <= to) && (sample.x === samples[index - 1].x)).length;
 
-describe('MovingObjectLogic slide chaining', () => {
-    it('moves continuously through a fast roller chain after the first hop', () => {
+describe('MovingObjectLogic slide chaining', () =>
+{
+    it('moves continuously through a fast roller chain after the first hop', () =>
+    {
         // 500ms server cadence with realistic delivery jitter
         const samples = simulate(
             [
@@ -77,7 +85,8 @@ describe('MovingObjectLogic slide chaining', () => {
         expect(samples[samples.length - 1].x).toBeCloseTo(9, 5);
     });
 
-    it('keeps the classic move-then-rest look for slow roller cadences', () => {
+    it('keeps the classic move-then-rest look for slow roller cadences', () =>
+    {
         // 1000ms cadence: each 500ms hop should complete and rest
         const samples = simulate(
             [
@@ -93,7 +102,8 @@ describe('MovingObjectLogic slide chaining', () => {
         expect(samples[samples.length - 1].x).toBeCloseTo(8, 5);
     });
 
-    it('keeps the exact duration of one-shot slides (wired choreography)', () => {
+    it('keeps the exact duration of one-shot slides (wired choreography)', () =>
+    {
         const samples = simulate([{ time: 16, message: slide(5, 6, 800) }], 1400);
 
         const arrivedAt = samples.find((sample) => Math.abs(sample.x - 6) < 1e-9);
@@ -104,7 +114,8 @@ describe('MovingObjectLogic slide chaining', () => {
         expect(arrivedAt.time).toBeLessThanOrEqual(848);
     });
 
-    it('does not teleport to the hop end when a chained pulse arrives mid-interpolation', () => {
+    it('does not teleport to the hop end when a chained pulse arrives mid-interpolation', () =>
+    {
         const samples = simulate(
             [
                 { time: 16, message: slide(5, 6) },
@@ -114,7 +125,8 @@ describe('MovingObjectLogic slide chaining', () => {
         );
 
         // x must never jump by more than one smooth step per frame
-        for (let index = 1; index < samples.length; index++) {
+        for(let index = 1; index < samples.length; index++)
+        {
             expect(Math.abs(samples[index].x - samples[index - 1].x)).toBeLessThan(0.12);
         }
 

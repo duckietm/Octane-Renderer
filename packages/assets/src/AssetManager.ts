@@ -144,14 +144,14 @@ export class AssetManager implements IAssetManager
                             return resource.texture;
                         });
 
-                    await this.processAsset(nitroBundle.texture, nitroBundle.jsonFile as IAssetData);
+                    await this.processAsset(nitroBundle.texture, nitroBundle.jsonFile);
 
                     const retainedResource = decodedResources.pop();
 
                     for(const resource of decodedResources) resource.dispose();
                     if(retainedResource) this.setImageResource(url, retainedResource);
                 }
-                catch(error)
+                catch (error)
                 {
                     for(const resource of decodedResources) resource.dispose();
                     throw error;
@@ -166,7 +166,7 @@ export class AssetManager implements IAssetManager
                 {
                     data = await this._dependencies.parseAssetData(response, url);
                 }
-                catch(error)
+                catch (error)
                 {
                     throw new Error(`Invalid asset data "${ url }" - JSON/JSONC parse failed (${ errorMessage(error) })`);
                 }
@@ -185,7 +185,7 @@ export class AssetManager implements IAssetManager
                     await this.processAsset(resource.texture, data);
                     this.setImageResource(url, resource);
                 }
-                catch(error)
+                catch (error)
                 {
                     resource.dispose();
                     throw error;
@@ -200,7 +200,7 @@ export class AssetManager implements IAssetManager
 
             return true;
         }
-        catch(error)
+        catch (error)
         {
             throw new Error(`Asset loading failed for "${ url }": ${ errorMessage(error) }`);
         }
@@ -238,7 +238,7 @@ export class AssetManager implements IAssetManager
         {
             response = await this._dependencies.fetch(url);
         }
-        catch(error)
+        catch (error)
         {
             throw new Error(`Could not fetch "${ url }" - is the URL correct and the server reachable? (${ errorMessage(error) })`);
         }

@@ -29,14 +29,44 @@ export class HousekeepingActionLogEntryData
         this._success = wrapper.readBoolean();
     }
 
-    public get id(): number { return this._id; }
-    public get timestamp(): number { return this._timestamp; }
-    public get actorId(): number { return this._actorId; }
-    public get actorName(): string { return this._actorName; }
-    public get targetType(): string { return this._targetType; }
-    public get targetId(): number { return this._targetId; }
-    public get targetLabel(): string { return this._targetLabel; }
-    public get action(): string { return this._action; }
-    public get detail(): string { return this._detail; }
-    public get success(): boolean { return this._success; }
+    public get id(): number
+    {
+        return this._id;
+    }
+    public get timestamp(): number
+    {
+        return this._timestamp;
+    }
+    public get actorId(): number
+    {
+        return this._actorId;
+    }
+    public get actorName(): string
+    {
+        return this._actorName;
+    }
+    public get targetType(): string
+    {
+        return this._targetType;
+    }
+    public get targetId(): number
+    {
+        return this._targetId;
+    }
+    public get targetLabel(): string
+    {
+        return this._targetLabel;
+    }
+    public get action(): string
+    {
+        return this._action;
+    }
+    public get detail(): string
+    {
+        return this._detail;
+    }
+    public get success(): boolean
+    {
+        return this._success;
+    }
 }

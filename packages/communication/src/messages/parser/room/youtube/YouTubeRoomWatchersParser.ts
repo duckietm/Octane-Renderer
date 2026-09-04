@@ -23,5 +23,8 @@ export class YouTubeRoomWatchersParser implements IMessageParser
         return true;
     }
 
-    public get watcherIds(): number[] { return this._watcherIds; }
+    public get watcherIds(): number[]
+    {
+        return this._watcherIds;
+    }
 }

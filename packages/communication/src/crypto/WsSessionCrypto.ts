@@ -1,10 +1,10 @@
-export const HANDSHAKE_MAGIC   = 0xC0DEC0DE | 0;
+export const HANDSHAKE_MAGIC = 0xC0DEC0DE | 0;
 export const TYPE_SERVER_HELLO = 0x01;
 export const TYPE_CLIENT_HELLO = 0x02;
-export const HKDF_INFO         = 'nitro-ws-v1';
-export const AES_KEY_BITS      = 256;
-export const NONCE_LEN         = 12;
-export const GCM_TAG_LEN       = 16;
+export const HKDF_INFO = 'nitro-ws-v1';
+export const AES_KEY_BITS = 256;
+export const NONCE_LEN = 12;
+export const GCM_TAG_LEN = 16;
 
 export async function generateEphemeralKeyPair(): Promise<CryptoKeyPair>
 {
@@ -74,22 +74,22 @@ export interface ParsedServerHello
 
 export function parseServerHello(frame: ArrayBuffer): ParsedServerHello
 {
-    if (frame.byteLength < 7) throw new Error('server_hello frame too short');
+    if(frame.byteLength < 7) throw new Error('server_hello frame too short');
     const dv = new DataView(frame);
     const magic = dv.getUint32(0, false);
-    if (magic >>> 0 !== (HANDSHAKE_MAGIC >>> 0)) throw new Error('server_hello magic mismatch');
+    if(magic >>> 0 !== (HANDSHAKE_MAGIC >>> 0)) throw new Error('server_hello magic mismatch');
     const type = dv.getUint8(4);
-    if (type !== TYPE_SERVER_HELLO) throw new Error(`expected server_hello, got type=0x${ type.toString(16) }`);
+    if(type !== TYPE_SERVER_HELLO) throw new Error(`expected server_hello, got type=0x${ type.toString(16) }`);
 
     const keyLen = dv.getUint16(5, false);
-    if (keyLen <= 0 || keyLen > frame.byteLength - 7) throw new Error(`invalid server key length ${ keyLen }`);
+    if(keyLen <= 0 || keyLen > frame.byteLength - 7) throw new Error(`invalid server key length ${ keyLen }`);
     const pubkeySpki = frame.slice(7, 7 + keyLen);
 
     const remaining = frame.byteLength - (7 + keyLen);
-    if (remaining === 0) return { pubkeySpki, signature: null };
-    if (remaining < 2) throw new Error('truncated signature trailer');
+    if(remaining === 0) return { pubkeySpki, signature: null };
+    if(remaining < 2) throw new Error('truncated signature trailer');
     const sigLen = dv.getUint16(7 + keyLen, false);
-    if (sigLen <= 0 || 7 + keyLen + 2 + sigLen !== frame.byteLength) throw new Error(`invalid signature length ${ sigLen }`);
+    if(sigLen <= 0 || 7 + keyLen + 2 + sigLen !== frame.byteLength) throw new Error(`invalid signature length ${ sigLen }`);
     const signature = frame.slice(7 + keyLen + 2, 7 + keyLen + 2 + sigLen);
     return { pubkeySpki, signature };
 }
@@ -98,7 +98,7 @@ export async function importSigningPublicKeyFromBase64(spkiBase64: string): Prom
 {
     const bin = atob(spkiBase64.replace(/-/g, '+').replace(/_/g, '/'));
     const bytes = new Uint8Array(bin.length);
-    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    for(let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
     return window.crypto.subtle.importKey(
         'spki',
         bytes.buffer,

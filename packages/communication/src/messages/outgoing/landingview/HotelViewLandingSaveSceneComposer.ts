@@ -26,6 +26,12 @@ export class HotelViewLandingSaveSceneComposer implements IMessageComposer<(stri
         ];
     }
 
-    public getMessageArray(): (string | number | boolean)[] { return this._data; }
-    public dispose(): void { return; }
+    public getMessageArray(): (string | number | boolean)[]
+    {
+        return this._data;
+    }
+    public dispose(): void
+    {
+        return;
+    }
 }

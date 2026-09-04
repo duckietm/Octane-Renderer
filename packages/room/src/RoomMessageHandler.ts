@@ -1542,7 +1542,8 @@ export class RoomMessageHandler
                     sessionStorage.setItem('nitro.session.lastPosX', status.x.toString());
                     sessionStorage.setItem('nitro.session.lastPosY', status.y.toString());
                 }
-                catch(e) { /* ignore */ }
+                catch (e)
+                { /* ignore */ }
             }
 
             let isPosture = true;

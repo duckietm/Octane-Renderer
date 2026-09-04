@@ -61,7 +61,7 @@ export class FurnitureChestVisualization extends FurnitureAnimatedVisualization
 
     protected updateModel(scale: number): boolean
     {
-        let needsUpdate = super.updateModel(scale);
+        const needsUpdate = super.updateModel(scale);
 
         // Only an open chest shows what is inside it, which the official reads off the state being
         // odd -- for a furni chest that is the raised lid, and for a coin chest the piles of gold.

@@ -11,6 +11,6 @@ export class WiredSaveSuccessEvent extends MessageEvent implements IMessageEvent
 
     public getParser(): WiredSaveSuccessParser
     {
-        return this.parser as WiredSaveSuccessParser;
+        return this.parser;
     }
 }

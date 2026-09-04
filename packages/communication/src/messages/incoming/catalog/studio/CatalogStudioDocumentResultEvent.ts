@@ -4,6 +4,12 @@ import { CatalogStudioDocumentResultMessageParser } from '../../../parser/catalo
 
 export class CatalogStudioDocumentResultEvent extends MessageEvent implements IMessageEvent
 {
-    constructor(callback: Function) { super(callback, CatalogStudioDocumentResultMessageParser); }
-    public getParser(): CatalogStudioDocumentResultMessageParser { return this.parser as CatalogStudioDocumentResultMessageParser; }
+    constructor(callback: Function)
+    {
+        super(callback, CatalogStudioDocumentResultMessageParser);
+    }
+    public getParser(): CatalogStudioDocumentResultMessageParser
+    {
+        return this.parser as CatalogStudioDocumentResultMessageParser;
+    }
 }

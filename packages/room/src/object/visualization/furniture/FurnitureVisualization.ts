@@ -157,7 +157,7 @@ export class FurnitureVisualization extends RoomObjectSpriteVisualization
         this._cacheScale = scale;
         this._cacheSize = this.getValidSize(scale);
 
-        if (typeof window !== 'undefined' && (window as unknown as { NitroFurniSizeDebug?: boolean }).NitroFurniSizeDebug)
+        if(typeof window !== 'undefined' && (window as unknown as { NitroFurniSizeDebug?: boolean }).NitroFurniSizeDebug)
         {
             const note = scale === 32 ? (this._cacheSize === 32 ? ' ✓ size-32' : ' fallback -> size-' + this._cacheSize) : '';
             console.log(`[FurniSize] ${this._type}: geometry ${scale} -> sprite size ${this._cacheSize}${note}`);

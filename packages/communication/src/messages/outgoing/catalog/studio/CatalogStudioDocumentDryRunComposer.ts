@@ -9,6 +9,12 @@ export class CatalogStudioDocumentDryRunComposer implements IMessageComposer<(st
         const encoded = encodeCatalogStudioDocument(document);
         this._data = [ operationId, draftVersionId, expectedRevision, format, encoded.encoding, encoded.chunks.length, ...encoded.chunks ];
     }
-    public dispose(): void { this._data = null; }
-    public getMessageArray() { return this._data; }
+    public dispose(): void
+    {
+        this._data = null;
+    }
+    public getMessageArray()
+    {
+        return this._data;
+    }
 }

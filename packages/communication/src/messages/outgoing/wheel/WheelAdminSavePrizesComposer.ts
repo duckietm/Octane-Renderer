@@ -27,6 +27,12 @@ export class WheelAdminSavePrizesComposer implements IMessageComposer<(number | 
         this._data = data;
     }
 
-    public getMessageArray(): (number | string)[] { return this._data; }
-    public dispose(): void { return; }
+    public getMessageArray(): (number | string)[]
+    {
+        return this._data;
+    }
+    public dispose(): void
+    {
+        return;
+    }
 }

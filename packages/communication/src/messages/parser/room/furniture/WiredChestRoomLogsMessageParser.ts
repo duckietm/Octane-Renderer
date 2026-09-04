@@ -82,9 +82,24 @@ export class WiredChestRoomLogsMessageParser implements IMessageParser
         return true;
     }
 
-    public get page(): number { return this._page; }
-    public get pageCount(): number { return this._pageCount; }
-    public get totalRows(): number { return this._totalRows; }
-    public get filter(): number { return this._filter; }
-    public get rows(): IWiredChestTransactionRow[] { return this._rows; }
+    public get page(): number
+    {
+        return this._page;
+    }
+    public get pageCount(): number
+    {
+        return this._pageCount;
+    }
+    public get totalRows(): number
+    {
+        return this._totalRows;
+    }
+    public get filter(): number
+    {
+        return this._filter;
+    }
+    public get rows(): IWiredChestTransactionRow[]
+    {
+        return this._rows;
+    }
 }

@@ -223,6 +223,14 @@ export class FurnitureBadgeDisplayVisualization extends FurnitureAnimatedVisuali
         return offset;
     }
 
+    // Normalizes a badge texture's backing resource to a mutable 2D canvas.
+    //
+    // The asset pipeline decodes badge images via `createImageBitmap` (see
+    // StaticImageDecoder), so `tex.source.resource` is an ImageBitmap (or, on the
+    // fallback path, an HTMLImageElement) — neither of which has `getContext`. This
+    // furni needs a canvas it can draw GIF frames into, so bake the immutable bitmap
+    // into a canvas once and swap it in as the source's resource. Returns null for
+    // sources that have no readable CPU resource (e.g. GPU-only rendered group badges).
     private getBadgeCanvas(tex: Texture): HTMLCanvasElement
     {
         const source = tex.source as any;
@@ -248,6 +256,8 @@ export class FurnitureBadgeDisplayVisualization extends FurnitureAnimatedVisuali
 
             ctx.drawImage(resource, 0, 0);
 
+            // Point the texture at the mutable canvas so later getContext()/drawImage()
+            // and source.update() calls operate on real, readable canvas pixels.
             source.resource = canvas;
 
             return canvas;
@@ -267,6 +277,8 @@ export class FurnitureBadgeDisplayVisualization extends FurnitureAnimatedVisuali
 
         const badgeCanvas = this.getBadgeCanvas(tex);
 
+        // Group/rendered badges are GPU-only (no readable canvas resource) and static, so
+        // they can't be driven through the animated-GIF canvas path — add them as-is.
         if(!badgeCanvas)
         {
             this.asset.addAsset(badgeId, tex, true, 0, 0, false, false);
@@ -376,7 +388,7 @@ export class FurnitureBadgeDisplayVisualization extends FurnitureAnimatedVisuali
                     }
                 }
             }
-            catch(err)
+            catch (err)
             {
                 console.error('Failed to parse GIF, using static image:', err);
 
