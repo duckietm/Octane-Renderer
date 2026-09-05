@@ -1,4 +1,4 @@
-import { IMessageDataWrapper } from '@nitrots/api';
+import { IMessageDataWrapper } from '@octane/api';
 import { RoomDataParser } from '../../room';
 import { OfficialRoomEntryData } from './OfficialRoomEntryData';
 

@@ -1,5 +1,5 @@
-import { GetConfiguration } from '@nitrots/configuration';
-import { GetEventDispatcher, NitroEventType } from '@nitrots/events';
+import { GetConfiguration } from '@octane/configuration';
+import { GetEventDispatcher, OctaneEventType } from '@octane/events';
 import { afterEach, describe, expect, it } from 'vitest';
 import { CommunicationManager } from '../CommunicationManager';
 import { GetCommunication } from '../GetCommunication';
@@ -38,7 +38,7 @@ describe('Polaris login and reconnect', () =>
 
         const recorder = recordConnectionStates(
             () => manager.connection.connectionState,
-            listener => GetEventDispatcher().subscribe(NitroEventType.CONNECTION_STATE_CHANGED, listener));
+            listener => GetEventDispatcher().subscribe(OctaneEventType.CONNECTION_STATE_CHANGED, listener));
 
         try
         {

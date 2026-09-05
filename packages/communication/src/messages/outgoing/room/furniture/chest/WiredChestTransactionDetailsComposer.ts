@@ -1,4 +1,4 @@
-import { IMessageComposer } from '@nitrots/api';
+import { IMessageComposer } from '@octane/api';
 
 /**
  * Requests the furni breakdown of one logged chest transaction. [transactionId].

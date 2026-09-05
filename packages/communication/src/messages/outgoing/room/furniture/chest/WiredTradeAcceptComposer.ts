@@ -1,4 +1,4 @@
-import { IMessageComposer } from '@nitrots/api';
+import { IMessageComposer } from '@octane/api';
 
 /**
  * Both halves of agreeing, told apart by one flag. [confirm].

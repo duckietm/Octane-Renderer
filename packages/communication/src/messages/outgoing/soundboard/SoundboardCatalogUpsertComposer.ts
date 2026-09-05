@@ -1,4 +1,4 @@
-import { IMessageComposer } from '@nitrots/api';
+import { IMessageComposer } from '@octane/api';
 
 type SoundboardCatalogUpsertData = [ number, string, string, number, boolean, string ];
 

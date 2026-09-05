@@ -1,4 +1,4 @@
-import { IMessageDataWrapper, IMessageParser } from '@nitrots/api';
+import { IMessageDataWrapper, IMessageParser } from '@octane/api';
 export class MessengerMessageAckParser implements IMessageParser
 {
     private _confirmationId=0; private _conversationId=0; private _messageId=0; private _createdAt=0;

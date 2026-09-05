@@ -1,4 +1,4 @@
-import { IMessageDataWrapper, IMessageParser } from '@nitrots/api';
+import { IMessageDataWrapper, IMessageParser } from '@octane/api';
 import { UserChatlogData } from './UserChatlogData';
 
 export class UserChatlogMessageParser implements IMessageParser

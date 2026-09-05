@@ -1,4 +1,4 @@
-import { IMessageComposer } from '@nitrots/api';
+import { IMessageComposer } from '@octane/api';
 
 export class RoomUsersClassificationMessageComposer implements IMessageComposer<ConstructorParameters<typeof RoomUsersClassificationMessageComposer>>
 {

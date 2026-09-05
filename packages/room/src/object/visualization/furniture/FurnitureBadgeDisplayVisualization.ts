@@ -1,6 +1,6 @@
-import { IGraphicAsset, IRoomObjectSprite, RoomObjectVariable } from '@nitrots/api';
-import { GetConfiguration } from '@nitrots/configuration';
-import { GetSessionDataManager } from '@nitrots/session';
+import { IGraphicAsset, IRoomObjectSprite, RoomObjectVariable } from '@octane/api';
+import { GetConfiguration } from '@octane/configuration';
+import { GetSessionDataManager } from '@octane/session';
 import { AnimatedSprite, Texture } from 'pixi.js';
 import { parseGIF, decompressFrames } from 'gifuct-js';
 import { FurnitureAnimatedVisualization } from './FurnitureAnimatedVisualization';

@@ -1,5 +1,5 @@
-import { IAdvancedMap, IRoomObjectController, IRoomObjectManager } from '@nitrots/api';
-import { AdvancedMap } from '@nitrots/utils';
+import { IAdvancedMap, IRoomObjectController, IRoomObjectManager } from '@octane/api';
+import { AdvancedMap } from '@octane/utils';
 import { RoomObject } from './object';
 
 export class RoomObjectManager implements IRoomObjectManager

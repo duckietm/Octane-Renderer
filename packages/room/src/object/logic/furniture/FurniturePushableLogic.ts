@@ -1,5 +1,5 @@
-import { LegacyDataType } from '@nitrots/api';
-import { Vector3d } from '@nitrots/utils';
+import { LegacyDataType } from '@octane/api';
+import { Vector3d } from '@octane/utils';
 import { ObjectDataUpdateMessage, ObjectMoveUpdateMessage, RoomObjectUpdateMessage } from '../../../messages';
 import { MovingObjectLogic } from '../MovingObjectLogic';
 import { FurnitureMultiStateLogic } from './FurnitureMultiStateLogic';

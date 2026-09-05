@@ -1,6 +1,6 @@
-import { IGraphicAsset } from '@nitrots/api';
-import { GetAssetManager } from '@nitrots/assets';
-import { TextureUtils } from '@nitrots/utils';
+import { IGraphicAsset } from '@octane/api';
+import { GetAssetManager } from '@octane/assets';
+import { TextureUtils } from '@octane/utils';
 import { Matrix, Sprite, Texture } from 'pixi.js';
 import { FurnitureBBVisualization } from './FurnitureBBVisualization';
 import { FurnitureBrandedImageVisualization } from './FurnitureBrandedImageVisualization';

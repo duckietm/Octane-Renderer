@@ -1,6 +1,6 @@
-import { IConnection, IRoomHandlerListener } from '@nitrots/api';
-import { GetCommunication, OpenPetPackageRequestedMessageEvent, OpenPetPackageResultMessageEvent } from '@nitrots/communication';
-import { GetEventDispatcher, RoomSessionPetPackageEvent } from '@nitrots/events';
+import { IConnection, IRoomHandlerListener } from '@octane/api';
+import { GetCommunication, OpenPetPackageRequestedMessageEvent, OpenPetPackageResultMessageEvent } from '@octane/communication';
+import { GetEventDispatcher, RoomSessionPetPackageEvent } from '@octane/events';
 import { BaseHandler } from './BaseHandler';
 
 export class PetPackageHandler extends BaseHandler

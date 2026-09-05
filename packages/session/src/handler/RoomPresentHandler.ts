@@ -1,6 +1,6 @@
-import { IConnection, IRoomHandlerListener } from '@nitrots/api';
-import { PresentOpenedMessageEvent } from '@nitrots/communication';
-import { GetEventDispatcher, RoomSessionPresentEvent } from '@nitrots/events';
+import { IConnection, IRoomHandlerListener } from '@octane/api';
+import { PresentOpenedMessageEvent } from '@octane/communication';
+import { GetEventDispatcher, RoomSessionPresentEvent } from '@octane/events';
 import { BaseHandler } from './BaseHandler';
 
 export class RoomPresentHandler extends BaseHandler

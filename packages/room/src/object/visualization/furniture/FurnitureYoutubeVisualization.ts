@@ -1,4 +1,4 @@
-import { RoomObjectVariable } from '@nitrots/api';
+import { RoomObjectVariable } from '@octane/api';
 import { FurnitureDynamicThumbnailVisualization } from './FurnitureDynamicThumbnailVisualization';
 
 export class FurnitureYoutubeVisualization extends FurnitureDynamicThumbnailVisualization

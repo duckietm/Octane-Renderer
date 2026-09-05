@@ -1,5 +1,5 @@
-import { IAssetPlaneVisualizationAnimatedLayerItem, IGraphicAssetCollection } from '@nitrots/api';
-import { TextureUtils } from '@nitrots/utils';
+import { IAssetPlaneVisualizationAnimatedLayerItem, IGraphicAssetCollection } from '@octane/api';
+import { TextureUtils } from '@octane/utils';
 import { RenderTexture, Sprite } from 'pixi.js';
 import { AnimationItem } from './AnimationItem';
 

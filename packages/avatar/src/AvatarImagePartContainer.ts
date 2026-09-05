@@ -1,4 +1,4 @@
-﻿import { IActionDefinition, IPartColor } from '@nitrots/api';
+﻿import { IActionDefinition, IPartColor } from '@octane/api';
 import { AvatarAnimationFrame } from './structure';
 
 export class AvatarImagePartContainer

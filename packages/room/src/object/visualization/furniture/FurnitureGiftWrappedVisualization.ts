@@ -1,4 +1,4 @@
-import { IRoomGeometry, RoomObjectVariable } from '@nitrots/api';
+import { IRoomGeometry, RoomObjectVariable } from '@octane/api';
 import { FurnitureVisualization } from './FurnitureVisualization';
 
 export class FurnitureGiftWrappedVisualization extends FurnitureVisualization

@@ -1,4 +1,4 @@
-﻿import { IGraphicAsset, IVector3D } from '@nitrots/api';
+﻿import { IGraphicAsset, IVector3D } from '@octane/api';
 import { PlaneMaskVisualization } from './PlaneMaskVisualization';
 
 export class PlaneMask

@@ -1,4 +1,4 @@
-import { IMessageDataWrapper } from '@nitrots/api';
+import { IMessageDataWrapper } from '@octane/api';
 import { PopularTagData } from './PopularTagData';
 
 export class PopularRoomTagsData

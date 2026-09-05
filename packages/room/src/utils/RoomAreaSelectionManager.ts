@@ -1,5 +1,5 @@
-import { IRoomAreaSelectionManager, IRoomEngine, IRoomObject } from '@nitrots/api';
-import { GetEventDispatcher, RoomEngineObjectEvent, RoomObjectMouseEvent, RoomObjectTileMouseEvent } from '@nitrots/events';
+import { IRoomAreaSelectionManager, IRoomEngine, IRoomObject } from '@octane/api';
+import { GetEventDispatcher, RoomEngineObjectEvent, RoomObjectMouseEvent, RoomObjectTileMouseEvent } from '@octane/events';
 import { ColorMatrixFilter } from 'pixi.js';
 import { FurnitureVisualization, RoomVisualization } from '../object';
 

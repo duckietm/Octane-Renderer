@@ -1,4 +1,4 @@
-﻿import { IRoomObject } from '@nitrots/api';
+﻿import { IRoomObject } from '@octane/api';
 import { RoomObjectMouseEvent } from './RoomObjectMouseEvent';
 
 export class RoomObjectTileMouseEvent extends RoomObjectMouseEvent

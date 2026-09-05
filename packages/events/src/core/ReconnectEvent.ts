@@ -1,6 +1,6 @@
-import { NitroEvent } from './NitroEvent';
+import { OctaneEvent } from './OctaneEvent';
 
-export class ReconnectEvent extends NitroEvent
+export class ReconnectEvent extends OctaneEvent
 {
     private _attempt: number;
     private _maxAttempts: number;

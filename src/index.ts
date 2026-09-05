@@ -1,5 +1,5 @@
-import { GetRoomEngine } from '@nitrots/room';
-import { GetDesiredScaleMode, GetRenderer, StartDprRenderingModeWatcher } from '@nitrots/utils';
+import { GetRoomEngine } from '@octane/room';
+import { GetDesiredScaleMode, GetRenderer, StartDprRenderingModeWatcher } from '@octane/utils';
 import { BrowserAdapter, DOMAdapter, HelloSystem, TextureSource } from 'pixi.js';
 
 HelloSystem.defaultOptions.hello = true;
@@ -8,7 +8,7 @@ DOMAdapter.set(BrowserAdapter);
 
 if(typeof window !== 'undefined')
 {
-    (window as any).__nitroRenderDebug = (): string =>
+    (window as any).__octaneRenderDebug = (): string =>
     {
         const out: any = {
             dpr: window.devicePixelRatio,
@@ -32,7 +32,7 @@ if(typeof window !== 'undefined')
 
             for(const source of (renderer?.texture?.managedTextures ?? []))
             {
-                const key = `${ source?.style?.scaleMode ?? '?' }${ (source as any)?.nitroFixedScaleMode ? '/fixed' : '' }`;
+                const key = `${ source?.style?.scaleMode ?? '?' }${ (source as any)?.octaneFixedScaleMode ? '/fixed' : '' }`;
 
                 census[key] = (census[key] ?? 0) + 1;
             }
@@ -60,17 +60,17 @@ if(typeof window !== 'undefined')
     };
 }
 
-export * from '@nitrots/api';
-export * from '@nitrots/assets';
-export * from '@nitrots/avatar';
-export * from '@nitrots/camera';
-export * from '@nitrots/communication';
-export * from '@nitrots/configuration';
-export * from '@nitrots/events';
-export * from '@nitrots/localization';
-export * from '@nitrots/room';
-export * from '@nitrots/session';
-export * from '@nitrots/sound';
-export * from '@nitrots/utils';
+export * from '@octane/api';
+export * from '@octane/assets';
+export * from '@octane/avatar';
+export * from '@octane/camera';
+export * from '@octane/communication';
+export * from '@octane/configuration';
+export * from '@octane/events';
+export * from '@octane/localization';
+export * from '@octane/room';
+export * from '@octane/session';
+export * from '@octane/sound';
+export * from '@octane/utils';
 export * from './DevTools';
 export * from './pixi-proxy';

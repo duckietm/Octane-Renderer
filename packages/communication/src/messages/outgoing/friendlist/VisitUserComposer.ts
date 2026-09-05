@@ -1,4 +1,4 @@
-import { IMessageComposer } from '@nitrots/api';
+import { IMessageComposer } from '@octane/api';
 
 export class VisitUserComposer implements IMessageComposer<ConstructorParameters<typeof VisitUserComposer>>
 {

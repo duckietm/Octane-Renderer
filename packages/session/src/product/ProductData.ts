@@ -1,4 +1,4 @@
-﻿import { IProductData } from '@nitrots/api';
+﻿import { IProductData } from '@octane/api';
 
 export class ProductData implements IProductData
 {

@@ -1,5 +1,5 @@
-import { AvatarScaleType, IAssetData, IAvatarEffectListener, IAvatarImage, IAvatarImageListener, IObjectVisualizationData } from '@nitrots/api';
-import { GetAvatarRenderManager } from '@nitrots/avatar';
+import { AvatarScaleType, IAssetData, IAvatarEffectListener, IAvatarImage, IAvatarImageListener, IObjectVisualizationData } from '@octane/api';
+import { GetAvatarRenderManager } from '@octane/avatar';
 
 export class AvatarVisualizationData implements IObjectVisualizationData
 {

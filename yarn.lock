@@ -353,22 +353,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nitrots/api@npm:1.0.0, @nitrots/api@workspace:packages/api":
+"@octane/api@npm:1.0.0, @octane/api@workspace:packages/api":
   version: 0.0.0-use.local
-  resolution: "@nitrots/api@workspace:packages/api"
+  resolution: "@octane/api@workspace:packages/api"
   dependencies:
     pixi.js: "npm:^8.19.0"
     typescript: "npm:^6.0.3"
   languageName: unknown
   linkType: soft
 
-"@nitrots/assets@npm:1.0.0, @nitrots/assets@workspace:packages/assets":
+"@octane/assets@npm:1.0.0, @octane/assets@workspace:packages/assets":
   version: 0.0.0-use.local
-  resolution: "@nitrots/assets@workspace:packages/assets"
+  resolution: "@octane/assets@workspace:packages/assets"
   dependencies:
     "@jsquash/avif": "npm:^2.1.1"
-    "@nitrots/api": "npm:1.0.0"
-    "@nitrots/utils": "npm:1.0.0"
+    "@octane/api": "npm:1.0.0"
+    "@octane/utils": "npm:1.0.0"
     "@pixi/gif": "npm:^3.0.1"
     apng-js: "npm:^1.1.5"
     pixi.js: "npm:^8.19.0"
@@ -377,40 +377,40 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@nitrots/avatar@npm:1.0.0, @nitrots/avatar@workspace:packages/avatar":
+"@octane/avatar@npm:1.0.0, @octane/avatar@workspace:packages/avatar":
   version: 0.0.0-use.local
-  resolution: "@nitrots/avatar@workspace:packages/avatar"
+  resolution: "@octane/avatar@workspace:packages/avatar"
   dependencies:
-    "@nitrots/api": "npm:1.0.0"
-    "@nitrots/assets": "npm:1.0.0"
-    "@nitrots/events": "npm:1.0.0"
-    "@nitrots/utils": "npm:1.0.0"
+    "@octane/api": "npm:1.0.0"
+    "@octane/assets": "npm:1.0.0"
+    "@octane/events": "npm:1.0.0"
+    "@octane/utils": "npm:1.0.0"
     pixi.js: "npm:^8.19.0"
     typescript: "npm:^6.0.3"
   languageName: unknown
   linkType: soft
 
-"@nitrots/camera@workspace:packages/camera":
+"@octane/camera@workspace:packages/camera":
   version: 0.0.0-use.local
-  resolution: "@nitrots/camera@workspace:packages/camera"
+  resolution: "@octane/camera@workspace:packages/camera"
   dependencies:
-    "@nitrots/api": "npm:1.0.0"
-    "@nitrots/assets": "npm:1.0.0"
-    "@nitrots/configuration": "npm:1.0.0"
-    "@nitrots/events": "npm:1.0.0"
-    "@nitrots/utils": "npm:1.0.0"
+    "@octane/api": "npm:1.0.0"
+    "@octane/assets": "npm:1.0.0"
+    "@octane/configuration": "npm:1.0.0"
+    "@octane/events": "npm:1.0.0"
+    "@octane/utils": "npm:1.0.0"
     pixi.js: "npm:^8.19.0"
     typescript: "npm:^6.0.3"
   languageName: unknown
   linkType: soft
 
-"@nitrots/communication@npm:1.0.0, @nitrots/communication@workspace:packages/communication":
+"@octane/communication@npm:1.0.0, @octane/communication@workspace:packages/communication":
   version: 0.0.0-use.local
-  resolution: "@nitrots/communication@workspace:packages/communication"
+  resolution: "@octane/communication@workspace:packages/communication"
   dependencies:
-    "@nitrots/api": "npm:1.0.0"
-    "@nitrots/events": "npm:1.0.0"
-    "@nitrots/utils": "npm:1.0.0"
+    "@octane/api": "npm:1.0.0"
+    "@octane/events": "npm:1.0.0"
+    "@octane/utils": "npm:1.0.0"
     "@thumbmarkjs/thumbmarkjs": "npm:^1.9.0"
     pako: "npm:^3.0.1"
     pixi.js: "npm:^8.19.0"
@@ -418,44 +418,44 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@nitrots/configuration@npm:1.0.0, @nitrots/configuration@workspace:packages/configuration":
+"@octane/configuration@npm:1.0.0, @octane/configuration@workspace:packages/configuration":
   version: 0.0.0-use.local
-  resolution: "@nitrots/configuration@workspace:packages/configuration"
+  resolution: "@octane/configuration@workspace:packages/configuration"
   dependencies:
-    "@nitrots/api": "npm:1.0.0"
-    "@nitrots/utils": "npm:1.0.0"
+    "@octane/api": "npm:1.0.0"
+    "@octane/utils": "npm:1.0.0"
     typescript: "npm:^6.0.3"
   languageName: unknown
   linkType: soft
 
-"@nitrots/events@npm:1.0.0, @nitrots/events@workspace:packages/events":
+"@octane/events@npm:1.0.0, @octane/events@workspace:packages/events":
   version: 0.0.0-use.local
-  resolution: "@nitrots/events@workspace:packages/events"
+  resolution: "@octane/events@workspace:packages/events"
   dependencies:
-    "@nitrots/api": "npm:1.0.0"
-    "@nitrots/utils": "npm:1.0.0"
+    "@octane/api": "npm:1.0.0"
+    "@octane/utils": "npm:1.0.0"
     pixi.js: "npm:^8.19.0"
     typescript: "npm:^6.0.3"
   languageName: unknown
   linkType: soft
 
-"@nitrots/localization@npm:1.0.0, @nitrots/localization@workspace:packages/localization":
+"@octane/localization@npm:1.0.0, @octane/localization@workspace:packages/localization":
   version: 0.0.0-use.local
-  resolution: "@nitrots/localization@workspace:packages/localization"
+  resolution: "@octane/localization@workspace:packages/localization"
   dependencies:
-    "@nitrots/api": "npm:1.0.0"
-    "@nitrots/communication": "npm:1.0.0"
-    "@nitrots/configuration": "npm:1.0.0"
-    "@nitrots/events": "npm:1.0.0"
-    "@nitrots/utils": "npm:1.0.0"
+    "@octane/api": "npm:1.0.0"
+    "@octane/communication": "npm:1.0.0"
+    "@octane/configuration": "npm:1.0.0"
+    "@octane/events": "npm:1.0.0"
+    "@octane/utils": "npm:1.0.0"
     pixi.js: "npm:^8.19.0"
     typescript: "npm:^6.0.3"
   languageName: unknown
   linkType: soft
 
-"@nitrots/nitro-renderer@workspace:.":
+"@octane/renderer@workspace:.":
   version: 0.0.0-use.local
-  resolution: "@nitrots/nitro-renderer@workspace:."
+  resolution: "@octane/renderer@workspace:."
   dependencies:
     "@eslint/js": "npm:^10.0.1"
     "@rollup/plugin-typescript": "npm:^12.3.0"
@@ -479,54 +479,54 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@nitrots/room@workspace:packages/room":
+"@octane/room@workspace:packages/room":
   version: 0.0.0-use.local
-  resolution: "@nitrots/room@workspace:packages/room"
+  resolution: "@octane/room@workspace:packages/room"
   dependencies:
-    "@nitrots/api": "npm:1.0.0"
-    "@nitrots/assets": "npm:1.0.0"
-    "@nitrots/avatar": "npm:1.0.0"
-    "@nitrots/communication": "npm:1.0.0"
-    "@nitrots/configuration": "npm:1.0.0"
-    "@nitrots/events": "npm:1.0.0"
-    "@nitrots/session": "npm:1.0.0"
+    "@octane/api": "npm:1.0.0"
+    "@octane/assets": "npm:1.0.0"
+    "@octane/avatar": "npm:1.0.0"
+    "@octane/communication": "npm:1.0.0"
+    "@octane/configuration": "npm:1.0.0"
+    "@octane/events": "npm:1.0.0"
+    "@octane/session": "npm:1.0.0"
     pixi.js: "npm:^8.19.0"
     typescript: "npm:^6.0.3"
   languageName: unknown
   linkType: soft
 
-"@nitrots/session@npm:1.0.0, @nitrots/session@workspace:packages/session":
+"@octane/session@npm:1.0.0, @octane/session@workspace:packages/session":
   version: 0.0.0-use.local
-  resolution: "@nitrots/session@workspace:packages/session"
+  resolution: "@octane/session@workspace:packages/session"
   dependencies:
-    "@nitrots/api": "npm:1.0.0"
-    "@nitrots/assets": "npm:1.0.0"
-    "@nitrots/communication": "npm:1.0.0"
-    "@nitrots/configuration": "npm:1.0.0"
-    "@nitrots/events": "npm:1.0.0"
-    "@nitrots/localization": "npm:1.0.0"
-    "@nitrots/utils": "npm:1.0.0"
+    "@octane/api": "npm:1.0.0"
+    "@octane/assets": "npm:1.0.0"
+    "@octane/communication": "npm:1.0.0"
+    "@octane/configuration": "npm:1.0.0"
+    "@octane/events": "npm:1.0.0"
+    "@octane/localization": "npm:1.0.0"
+    "@octane/utils": "npm:1.0.0"
     pixi.js: "npm:^8.19.0"
     typescript: "npm:^6.0.3"
   languageName: unknown
   linkType: soft
 
-"@nitrots/sound@workspace:packages/sound":
+"@octane/sound@workspace:packages/sound":
   version: 0.0.0-use.local
-  resolution: "@nitrots/sound@workspace:packages/sound"
+  resolution: "@octane/sound@workspace:packages/sound"
   dependencies:
-    "@nitrots/api": "npm:1.0.0"
-    "@nitrots/communication": "npm:1.0.0"
+    "@octane/api": "npm:1.0.0"
+    "@octane/communication": "npm:1.0.0"
     pixi.js: "npm:^8.19.0"
     typescript: "npm:^6.0.3"
   languageName: unknown
   linkType: soft
 
-"@nitrots/utils@npm:1.0.0, @nitrots/utils@workspace:packages/utils":
+"@octane/utils@npm:1.0.0, @octane/utils@workspace:packages/utils":
   version: 0.0.0-use.local
-  resolution: "@nitrots/utils@workspace:packages/utils"
+  resolution: "@octane/utils@workspace:packages/utils"
   dependencies:
-    "@nitrots/api": "npm:1.0.0"
+    "@octane/api": "npm:1.0.0"
     pako: "npm:^3.0.1"
     pixi.js: "npm:^8.19.0"
     strip-json-comments: "npm:^5.0.3"

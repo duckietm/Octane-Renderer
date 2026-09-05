@@ -1,6 +1,6 @@
-import { BinaryReader, BinaryWriter } from '@nitrots/utils';
+import { BinaryReader, BinaryWriter } from '@octane/utils';
 import { describe, expect, it } from 'vitest';
-import { NitroMessages } from '../../../../NitroMessages';
+import { OctaneMessages } from '../../../../OctaneMessages';
 import { IncomingHeader } from '../../../incoming/IncomingHeader';
 import { OutgoingHeader } from '../../../outgoing/OutgoingHeader';
 import { CatalogProductMetadataComposer } from '../../../outgoing/catalog/metadata';
@@ -53,7 +53,7 @@ describe('catalog product metadata packet contract', () =>
 {
     it('registers a separate optional request and response on header 10081', () =>
     {
-        const messages = new NitroMessages();
+        const messages = new OctaneMessages();
 
         expect(OutgoingHeader.CATALOG_PRODUCT_METADATA).toBe(10081);
         expect(IncomingHeader.CATALOG_PRODUCT_METADATA).toBe(10081);

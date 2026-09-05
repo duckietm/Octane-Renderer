@@ -1,6 +1,6 @@
-import { IAssetData, IRoomGeometry, IRoomObjectModel, IVector3D, MouseEventType, PetFigureData, PetType, RoomObjectVariable } from '@nitrots/api';
-import { RoomObjectMouseEvent, RoomObjectMoveEvent, RoomSpriteMouseEvent } from '@nitrots/events';
-import { Vector3d } from '@nitrots/utils';
+import { IAssetData, IRoomGeometry, IRoomObjectModel, IVector3D, MouseEventType, PetFigureData, PetType, RoomObjectVariable } from '@octane/api';
+import { RoomObjectMouseEvent, RoomObjectMoveEvent, RoomSpriteMouseEvent } from '@octane/events';
+import { Vector3d } from '@octane/utils';
 import { ObjectAvatarChatUpdateMessage, ObjectAvatarExperienceUpdateMessage, ObjectAvatarFigureUpdateMessage, ObjectAvatarPetGestureUpdateMessage, ObjectAvatarPostureUpdateMessage, ObjectAvatarSelectedMessage, ObjectAvatarSleepUpdateMessage, ObjectAvatarUpdateMessage, RoomObjectUpdateMessage } from '../../messages';
 import { MovingObjectLogic } from './MovingObjectLogic';
 

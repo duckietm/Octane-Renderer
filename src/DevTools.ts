@@ -1,17 +1,17 @@
-import { GetRoomEngine, RoomEngine } from '@nitrots/room';
+import { GetRoomEngine, RoomEngine } from '@octane/room';
 export { };
 
 declare global
 {
 	interface Window
 	{
-		NitroDevTools?:
+		OctaneDevTools?:
 		{
             roomEngine: RoomEngine;
 		};
 	}
 }
 
-window.NitroDevTools = {
+window.OctaneDevTools = {
     roomEngine: GetRoomEngine()
 };

@@ -1,5 +1,5 @@
-import { IAssetManager, IAvatarAssetDownloadLibrary } from '@nitrots/api';
-import { AvatarRenderLibraryEvent, GetEventDispatcher, NitroEventType } from '@nitrots/events';
+import { IAssetManager, IAvatarAssetDownloadLibrary } from '@octane/api';
+import { AvatarRenderLibraryEvent, GetEventDispatcher, OctaneEventType } from '@octane/events';
 
 export class AvatarAssetDownloadLibrary implements IAvatarAssetDownloadLibrary
 {
@@ -39,7 +39,7 @@ export class AvatarAssetDownloadLibrary implements IAvatarAssetDownloadLibrary
             if(!status) throw new Error('Could not download asset');
         }
 
-        if(this.checkIsLoaded()) GetEventDispatcher().dispatchEvent(new AvatarRenderLibraryEvent(NitroEventType.AVATAR_ASSET_DOWNLOADED, this));
+        if(this.checkIsLoaded()) GetEventDispatcher().dispatchEvent(new AvatarRenderLibraryEvent(OctaneEventType.AVATAR_ASSET_DOWNLOADED, this));
     }
 
     private checkIsLoaded(): boolean

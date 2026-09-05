@@ -1,4 +1,4 @@
-﻿import { IPlaneDrawingData } from '@nitrots/api';
+﻿import { IPlaneDrawingData } from '@octane/api';
 import { Point } from 'pixi.js';
 
 export class PlaneDrawingData implements IPlaneDrawingData

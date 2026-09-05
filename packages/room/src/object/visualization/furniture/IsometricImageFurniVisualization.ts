@@ -1,5 +1,5 @@
-import { IGraphicAsset } from '@nitrots/api';
-import { GetRenderer } from '@nitrots/utils';
+import { IGraphicAsset } from '@octane/api';
+import { GetRenderer } from '@octane/utils';
 import { Container, Matrix, Sprite, Texture, RenderTexture } from 'pixi.js';
 import { FurnitureAnimatedVisualization } from './FurnitureAnimatedVisualization';
 

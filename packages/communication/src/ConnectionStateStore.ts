@@ -1,4 +1,4 @@
-import { IConnectionStateSnapshot } from '@nitrots/api';
+import { IConnectionStateSnapshot } from '@octane/api';
 
 export class ConnectionStateStore
 {

@@ -1,8 +1,8 @@
-import { GetAssetManager } from '@nitrots/assets';
-import { GetCommunication, GroupBadgePartsEvent } from '@nitrots/communication';
-import { GetConfiguration } from '@nitrots/configuration';
-import { BadgeImageReadyEvent, GetEventDispatcher } from '@nitrots/events';
-import { NitroLogger, TextureUtils } from '@nitrots/utils';
+import { GetAssetManager } from '@octane/assets';
+import { GetCommunication, GroupBadgePartsEvent } from '@octane/communication';
+import { GetConfiguration } from '@octane/configuration';
+import { BadgeImageReadyEvent, GetEventDispatcher } from '@octane/events';
+import { OctaneLogger, TextureUtils } from '@octane/utils';
 import { Container, Sprite, Texture } from 'pixi.js';
 import { BadgeInfo } from './BadgeInfo';
 import { GroupBadge } from './GroupBadge';
@@ -74,7 +74,7 @@ export class BadgeImageManager
 
                 catch (err)
                 {
-                    NitroLogger.error(err);
+                    OctaneLogger.error(err);
                 }
             };
 
@@ -138,7 +138,7 @@ export class BadgeImageManager
                 })
                 .catch(err =>
                 {
-                    NitroLogger.error(err);
+                    OctaneLogger.error(err);
 
                     return false;
                 })

@@ -1,4 +1,4 @@
-import { IRoomObject } from '@nitrots/api';
+import { IRoomObject } from '@octane/api';
 import { RoomObjectEvent } from './RoomObjectEvent';
 
 export class RoomObjectSamplePlaybackEvent extends RoomObjectEvent

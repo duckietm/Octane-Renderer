@@ -1,4 +1,4 @@
-import { IMessageDataWrapper } from '@nitrots/api';
+import { IMessageDataWrapper } from '@octane/api';
 
 export interface MessengerConversationData { id: number; type: number; participantId: number; name: string; lastMessageId: number; unreadCount: number; updatedAt: number; }
 export interface MessengerMessageData { id: number; conversationId: number; senderId: number; type: number; message: string; metadata: string; createdAt: number; }

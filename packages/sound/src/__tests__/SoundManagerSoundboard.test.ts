@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { NitroSettingsEvent, RoomEngineEvent } from '@nitrots/events';
+import { OctaneSettingsEvent, RoomEngineEvent } from '@octane/events';
 import { SoundManager } from '../SoundManager';
 
 vi.mock('../music/MusicController', () => ({
@@ -27,7 +27,7 @@ describe('SoundManager Soundboard channel', () =>
     {
         const manager = new SoundManager();
         const first = manager.getVolumesSnapshot();
-        const settings = new NitroSettingsEvent();
+        const settings = new OctaneSettingsEvent();
         settings.volumeSystem = 50;
         settings.volumeFurni = 50;
         settings.volumeTrax = 50;

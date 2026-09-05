@@ -1,7 +1,7 @@
-import { IAdvancedMap, IMusicController, INitroEvent, ISoundManager, ISoundVolumesSnapshot } from '@nitrots/api';
-import { GetConfiguration } from '@nitrots/configuration';
-import { GetEventDispatcher, NitroEvent, NitroEventType, NitroSettingsEvent, NitroSoundEvent, RoomEngineEvent, RoomEngineObjectEvent, RoomEngineSamplePlaybackEvent } from '@nitrots/events';
-import { AdvancedMap, NitroLogger } from '@nitrots/utils';
+import { IAdvancedMap, IMusicController, IOctaneEvent, ISoundManager, ISoundVolumesSnapshot } from '@octane/api';
+import { GetConfiguration } from '@octane/configuration';
+import { GetEventDispatcher, OctaneEvent, OctaneEventType, OctaneSettingsEvent, OctaneSoundEvent, RoomEngineEvent, RoomEngineObjectEvent, RoomEngineSamplePlaybackEvent } from '@octane/events';
+import { AdvancedMap, OctaneLogger } from '@octane/utils';
 import { MusicController } from './music/MusicController';
 import { SoundboardChannel } from './SoundboardChannel';
 
@@ -19,20 +19,20 @@ export class SoundManager implements ISoundManager
 
     private _musicController: IMusicController = new MusicController();
     private _soundboardChannel = new SoundboardChannel();
-    private _eventCallback: (event: INitroEvent) => void = null;
+    private _eventCallback: (event: IOctaneEvent) => void = null;
 
     public async init(): Promise<void>
     {
         this._musicController.init();
 
         // Store callback for cleanup
-        this._eventCallback = (event: INitroEvent) => this.onEvent(event);
+        this._eventCallback = (event: IOctaneEvent) => this.onEvent(event);
 
         GetEventDispatcher().addEventListener<RoomEngineSamplePlaybackEvent>(RoomEngineSamplePlaybackEvent.PLAY_SAMPLE, this._eventCallback);
         GetEventDispatcher().addEventListener<RoomEngineObjectEvent>(RoomEngineObjectEvent.REMOVED, this._eventCallback);
         GetEventDispatcher().addEventListener<RoomEngineEvent>(RoomEngineEvent.DISPOSED, this._eventCallback);
-        GetEventDispatcher().addEventListener<NitroSettingsEvent>(NitroSettingsEvent.SETTINGS_UPDATED, this._eventCallback);
-        GetEventDispatcher().addEventListener<NitroSoundEvent>(NitroSoundEvent.PLAY_SOUND, this._eventCallback);
+        GetEventDispatcher().addEventListener<OctaneSettingsEvent>(OctaneSettingsEvent.SETTINGS_UPDATED, this._eventCallback);
+        GetEventDispatcher().addEventListener<OctaneSoundEvent>(OctaneSoundEvent.PLAY_SOUND, this._eventCallback);
     }
 
     public dispose(): void
@@ -42,8 +42,8 @@ export class SoundManager implements ISoundManager
             GetEventDispatcher().removeEventListener(RoomEngineSamplePlaybackEvent.PLAY_SAMPLE, this._eventCallback);
             GetEventDispatcher().removeEventListener(RoomEngineObjectEvent.REMOVED, this._eventCallback);
             GetEventDispatcher().removeEventListener(RoomEngineEvent.DISPOSED, this._eventCallback);
-            GetEventDispatcher().removeEventListener(NitroSettingsEvent.SETTINGS_UPDATED, this._eventCallback);
-            GetEventDispatcher().removeEventListener(NitroSoundEvent.PLAY_SOUND, this._eventCallback);
+            GetEventDispatcher().removeEventListener(OctaneSettingsEvent.SETTINGS_UPDATED, this._eventCallback);
+            GetEventDispatcher().removeEventListener(OctaneSoundEvent.PLAY_SOUND, this._eventCallback);
             this._eventCallback = null;
         }
 
@@ -60,7 +60,7 @@ export class SoundManager implements ISoundManager
         this.stopSoundboard();
     }
 
-    private onEvent(event: INitroEvent)
+    private onEvent(event: IOctaneEvent)
     {
         switch(event.type)
         {
@@ -84,8 +84,8 @@ export class SoundManager implements ISoundManager
                 this.stopSoundboard();
                 return;
             }
-            case NitroSettingsEvent.SETTINGS_UPDATED: {
-                const castedEvent = (event as NitroSettingsEvent);
+            case OctaneSettingsEvent.SETTINGS_UPDATED: {
+                const castedEvent = (event as OctaneSettingsEvent);
 
                 const nextSystem = (castedEvent.volumeSystem / 100);
                 const nextFurni = (castedEvent.volumeFurni / 100);
@@ -114,8 +114,8 @@ export class SoundManager implements ISoundManager
 
                 return;
             }
-            case NitroSoundEvent.PLAY_SOUND: {
-                const castedEvent = (event as NitroSoundEvent);
+            case OctaneSoundEvent.PLAY_SOUND: {
+                const castedEvent = (event as OctaneSoundEvent);
 
                 this.playInternalSample(castedEvent.sampleCode);
                 return;
@@ -134,7 +134,7 @@ export class SoundManager implements ISoundManager
         }
         catch (e)
         {
-            NitroLogger.error(e);
+            OctaneLogger.error(e);
         }
     }
 
@@ -188,7 +188,7 @@ export class SoundManager implements ISoundManager
         }
         catch (e)
         {
-            NitroLogger.error(e);
+            OctaneLogger.error(e);
         }
     }
 
@@ -210,7 +210,7 @@ export class SoundManager implements ISoundManager
         }
         catch (e)
         {
-            NitroLogger.error(e);
+            OctaneLogger.error(e);
         }
     }
 
@@ -269,7 +269,7 @@ export class SoundManager implements ISoundManager
     {
         this._volumesSnapshot = null;
 
-        GetEventDispatcher().dispatchEvent(new NitroEvent(NitroEventType.SOUND_VOLUMES_UPDATED));
+        GetEventDispatcher().dispatchEvent(new OctaneEvent(OctaneEventType.SOUND_VOLUMES_UPDATED));
     }
 
     public getVolumesSnapshot(): Readonly<ISoundVolumesSnapshot>

@@ -1,4 +1,4 @@
-import { IMessageDataWrapper, IMessageParser } from '@nitrots/api';
+import { IMessageDataWrapper, IMessageParser } from '@octane/api';
 
 /**
  * The negotiation settled. Carries nothing: what changed hands arrives through the inventory and

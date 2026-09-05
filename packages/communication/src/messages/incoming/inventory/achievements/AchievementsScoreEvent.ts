@@ -1,5 +1,5 @@
-﻿import { IMessageEvent } from '@nitrots/api';
-import { MessageEvent } from '@nitrots/events';
+﻿import { IMessageEvent } from '@octane/api';
+import { MessageEvent } from '@octane/events';
 import { AchievementsScoreParser } from '../../../parser';
 
 export class AchievementsScoreEvent extends MessageEvent implements IMessageEvent

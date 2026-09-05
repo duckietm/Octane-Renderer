@@ -1,6 +1,6 @@
-import { NitroEvent } from '../core';
+import { OctaneEvent } from '../core';
 
-export class RoomContentLoadedEvent extends NitroEvent
+export class RoomContentLoadedEvent extends OctaneEvent
 {
     public static RCLE_SUCCESS: string = 'RCLE_SUCCESS';
     public static RCLE_FAILURE: string = 'RCLE_FAILURE';

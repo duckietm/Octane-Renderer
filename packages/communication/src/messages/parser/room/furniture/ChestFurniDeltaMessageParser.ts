@@ -1,4 +1,4 @@
-import { IMessageDataWrapper, IMessageParser } from '@nitrots/api';
+import { IMessageDataWrapper, IMessageParser } from '@octane/api';
 import { ChestFurniStoredItemParser, IChestFurniStoredItem } from './ChestFurniStoredItemParser';
 
 /** Furni-chest incremental update (official Sola wire shape, header 9323). */

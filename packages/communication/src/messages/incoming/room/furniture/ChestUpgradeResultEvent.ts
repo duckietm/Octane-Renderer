@@ -1,5 +1,5 @@
-import { IMessageEvent } from '@nitrots/api';
-import { MessageEvent } from '@nitrots/events';
+import { IMessageEvent } from '@octane/api';
+import { MessageEvent } from '@octane/events';
 import { ChestUpgradeResultMessageParser } from '../../../parser';
 
 export class ChestUpgradeResultEvent extends MessageEvent implements IMessageEvent

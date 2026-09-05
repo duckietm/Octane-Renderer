@@ -1,6 +1,6 @@
-import { NitroEvent } from '@nitrots/events';
+import { OctaneEvent } from '@octane/events';
 
-export class SoundManagerEvent extends NitroEvent
+export class SoundManagerEvent extends OctaneEvent
 {
     public static TRAX_SONG_COMPLETE: string = 'SME_TRAX_SONG_COMPLETE';
 

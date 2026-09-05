@@ -1,4 +1,4 @@
-import { FriendFurniEngravingWidgetType } from '@nitrots/api';
+import { FriendFurniEngravingWidgetType } from '@octane/api';
 import { FurnitureFriendFurniLogic } from './FurnitureFriendFurniLogic';
 
 export class FurnitureLoveLockLogic extends FurnitureFriendFurniLogic

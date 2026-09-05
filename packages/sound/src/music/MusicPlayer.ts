@@ -1,5 +1,5 @@
-import { GetEventDispatcher, SoundManagerEvent } from '@nitrots/events';
-import { NitroLogger } from '@nitrots/utils';
+import { GetEventDispatcher, SoundManagerEvent } from '@octane/events';
+import { OctaneLogger } from '@octane/utils';
 import { Howl, Howler } from 'howler';
 import { TraxData } from '../trax/TraxData';
 
@@ -195,7 +195,7 @@ export class MusicPlayer
 
             sample.once('loaderror', () =>
             {
-                NitroLogger.error('failed to load sample ' + songId);
+                OctaneLogger.error('failed to load sample ' + songId);
                 reject(new Error('failed to load sample ' + songId));
             });
         });

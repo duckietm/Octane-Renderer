@@ -1,6 +1,6 @@
-import { RoomObjectVariable, StringDataType } from '@nitrots/api';
-import { RoomObjectBadgeAssetEvent, RoomObjectWidgetRequestEvent } from '@nitrots/events';
-import { GetTickerTime } from '@nitrots/utils';
+import { RoomObjectVariable, StringDataType } from '@octane/api';
+import { RoomObjectBadgeAssetEvent, RoomObjectWidgetRequestEvent } from '@octane/events';
+import { GetTickerTime } from '@octane/utils';
 import { ObjectDataUpdateMessage, ObjectGroupBadgeUpdateMessage, RoomObjectUpdateMessage } from '../../../messages';
 import { FurnitureLogic } from './FurnitureLogic';
 

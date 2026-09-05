@@ -1,5 +1,5 @@
-import { IRoomObjectController, IRoomObjectModel, IRoomObjectUpdateMessage, IVector3D, RoomObjectVariable } from '@nitrots/api';
-import { Vector3d } from '@nitrots/utils';
+import { IRoomObjectController, IRoomObjectModel, IRoomObjectUpdateMessage, IVector3D, RoomObjectVariable } from '@octane/api';
+import { Vector3d } from '@octane/utils';
 import { ObjectMoveUpdateMessage } from '../../messages';
 import { RoomObjectLogicBase } from './RoomObjectLogicBase';
 

@@ -1,5 +1,5 @@
-import { IAssetData, RoomObjectVariable } from '@nitrots/api';
-import { RoomObjectWidgetRequestEvent } from '@nitrots/events';
+import { IAssetData, RoomObjectVariable } from '@octane/api';
+import { RoomObjectWidgetRequestEvent } from '@octane/events';
 import { FurnitureMultiStateLogic } from './FurnitureMultiStateLogic';
 
 export class FurnitureExternalImageLogic extends FurnitureMultiStateLogic

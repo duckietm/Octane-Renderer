@@ -1,4 +1,4 @@
-import { IMessageDataWrapper, IMessageParser } from '@nitrots/api';
+import { IMessageDataWrapper, IMessageParser } from '@octane/api';
 import { ungzip } from 'pako';
 
 const SNAPSHOT_ENCODING = 'GZIP_BASE64_JSON';

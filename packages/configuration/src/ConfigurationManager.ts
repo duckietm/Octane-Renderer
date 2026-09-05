@@ -1,4 +1,4 @@
-﻿import { NitroLogger, NitroVersion, parseConfigJsonFromResponse } from '@nitrots/utils';
+﻿import { OctaneLogger, OctaneVersion, parseConfigJsonFromResponse } from '@octane/utils';
 import { IConfigurationManager } from './IConfigurationManager';
 
 export class ConfigurationManager implements IConfigurationManager
@@ -9,7 +9,7 @@ export class ConfigurationManager implements IConfigurationManager
 
     constructor()
     {
-        NitroVersion.sayHello();
+        OctaneVersion.sayHello();
     }
 
     public async init(): Promise<void>
@@ -25,13 +25,13 @@ export class ConfigurationManager implements IConfigurationManager
 
             const defaultConfig = this.getDefaultConfig();
 
-            if(!defaultConfig) throw new Error('Missing NitroConfig: make sure window.NitroConfig is defined in index.html');
+            if(!defaultConfig) throw new Error('Missing OctaneConfig: make sure window.OctaneConfig is defined in index.html');
 
             this.parseConfiguration(defaultConfig, true);
 
             const configurationUrls = this.getValue<string[]>('config.urls').slice();
 
-            if(!configurationUrls || !configurationUrls.length) throw new Error('No config.urls defined in NitroConfig — expected an array like ["/renderer-config.json", "/ui-config.json"]');
+            if(!configurationUrls || !configurationUrls.length) throw new Error('No config.urls defined in OctaneConfig — expected an array like ["/renderer-config.json", "/ui-config.json"]');
 
             for(const url of configurationUrls)
             {
@@ -107,7 +107,7 @@ export class ConfigurationManager implements IConfigurationManager
 
         catch (e)
         {
-            NitroLogger.error(e.stack);
+            OctaneLogger.error(e.stack);
 
             return false;
         }
@@ -152,7 +152,7 @@ export class ConfigurationManager implements IConfigurationManager
 
             this._missingKeys.push(key);
 
-            NitroLogger.warn(`Missing configuration key: ${key}`);
+            OctaneLogger.warn(`Missing configuration key: ${key}`);
 
             existing = value;
         }
@@ -187,7 +187,7 @@ export class ConfigurationManager implements IConfigurationManager
 
     public getDefaultConfig(): { [index: string]: any }
     {
-        return window.NitroConfig;
+        return window.OctaneConfig;
     }
 
     public get definitions(): Map<string, unknown>

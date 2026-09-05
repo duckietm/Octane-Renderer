@@ -1,6 +1,6 @@
 {
-  "name": "@nitrots/api",
-  "description": "Nitro api module",
+  "name": "@octane/api",
+  "description": "Octane api module",
   "version": "1.0.0",
   "type": "module",
   "publishConfig": {

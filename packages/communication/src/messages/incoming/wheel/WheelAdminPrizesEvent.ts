@@ -1,5 +1,5 @@
-import { IMessageEvent } from '@nitrots/api';
-import { MessageEvent } from '@nitrots/events';
+import { IMessageEvent } from '@octane/api';
+import { MessageEvent } from '@octane/events';
 import { WheelAdminPrizesParser } from '../../parser';
 
 export class WheelAdminPrizesEvent extends MessageEvent implements IMessageEvent

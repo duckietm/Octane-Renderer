@@ -1,4 +1,4 @@
-import { IDisposable, IMessageDataWrapper } from '@nitrots/api';
+import { IDisposable, IMessageDataWrapper } from '@octane/api';
 import { INamed } from '../moderation';
 import { CallForHelpTopicData } from './CallForHelpTopicData';
 

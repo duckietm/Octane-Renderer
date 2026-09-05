@@ -1,6 +1,6 @@
-﻿import { NitroEvent } from '../core';
+﻿import { OctaneEvent } from '../core';
 
-export class PerksUpdatedEvent extends NitroEvent
+export class PerksUpdatedEvent extends OctaneEvent
 {
     public static PERKS_UPDATED: string = 'PUE_perks_updated';
 

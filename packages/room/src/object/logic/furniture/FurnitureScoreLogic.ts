@@ -1,4 +1,4 @@
-import { GetTickerTime } from '@nitrots/utils';
+import { GetTickerTime } from '@octane/utils';
 import { ObjectDataUpdateMessage, RoomObjectUpdateMessage } from '../../../messages';
 import { FurnitureLogic } from './FurnitureLogic';
 

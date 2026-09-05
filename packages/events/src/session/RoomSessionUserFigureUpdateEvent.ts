@@ -1,4 +1,4 @@
-﻿import { IRoomSession } from '@nitrots/api';
+﻿import { IRoomSession } from '@octane/api';
 import { RoomSessionEvent } from './RoomSessionEvent';
 
 export class RoomSessionUserFigureUpdateEvent extends RoomSessionEvent

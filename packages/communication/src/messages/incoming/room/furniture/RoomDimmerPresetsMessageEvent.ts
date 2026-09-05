@@ -1,5 +1,5 @@
-import { IMessageEvent } from '@nitrots/api';
-import { MessageEvent } from '@nitrots/events';
+import { IMessageEvent } from '@octane/api';
+import { MessageEvent } from '@octane/events';
 import { RoomDimmerPresetsMessageParser } from '../../../parser';
 
 export class RoomDimmerPresetsEvent extends MessageEvent implements IMessageEvent

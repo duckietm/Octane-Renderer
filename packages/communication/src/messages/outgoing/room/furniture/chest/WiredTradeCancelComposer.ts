@@ -1,4 +1,4 @@
-import { IMessageComposer } from '@nitrots/api';
+import { IMessageComposer } from '@octane/api';
 
 /** Walk away from a negotiation. Carries nothing; everything on the table goes back. */
 export class WiredTradeCancelComposer implements IMessageComposer<ConstructorParameters<typeof WiredTradeCancelComposer>>

@@ -1,5 +1,5 @@
-import { IEventDispatcher, INitroEvent } from '@nitrots/api';
-import { NitroLogger } from '@nitrots/utils';
+import { IEventDispatcher, IOctaneEvent } from '@octane/api';
+import { OctaneLogger } from '@octane/utils';
 
 export class EventDispatcher implements IEventDispatcher
 {
@@ -10,7 +10,7 @@ export class EventDispatcher implements IEventDispatcher
         this.removeAllListeners();
     }
 
-    public addEventListener<T extends INitroEvent>(type: string, callback: (event: T) => void): void
+    public addEventListener<T extends IOctaneEvent>(type: string, callback: (event: T) => void): void
     {
         if(!type || !callback) return;
 
@@ -23,7 +23,7 @@ export class EventDispatcher implements IEventDispatcher
             return;
         }
 
-        NitroLogger.events('Added Event Listener', type);
+        OctaneLogger.events('Added Event Listener', type);
 
         existing.push(callback);
     }
@@ -48,7 +48,7 @@ export class EventDispatcher implements IEventDispatcher
         }
     }
 
-    public dispatchEvent<T extends INitroEvent>(event: T): boolean
+    public dispatchEvent<T extends IOctaneEvent>(event: T): boolean
     {
         if(!event) return false;
 
@@ -57,14 +57,14 @@ export class EventDispatcher implements IEventDispatcher
             const listenerCount = this._listeners.get(event.type)?.length ?? 0;
         }
 
-        NitroLogger.events('Dispatched Event', event.type);
+        OctaneLogger.events('Dispatched Event', event.type);
 
         this.processEvent(event);
 
         return true;
     }
 
-    private processEvent<T extends INitroEvent>(event: T): void
+    private processEvent<T extends IOctaneEvent>(event: T): void
     {
         const existing = this._listeners.get(event.type);
 
@@ -90,7 +90,7 @@ export class EventDispatcher implements IEventDispatcher
 
             catch (err)
             {
-                NitroLogger.error(err.stack);
+                OctaneLogger.error(err.stack);
 
                 return;
             }
@@ -102,7 +102,7 @@ export class EventDispatcher implements IEventDispatcher
         this._listeners.clear();
     }
 
-    public subscribe<T extends INitroEvent>(type: string | string[], callback: (event: T) => void): () => void
+    public subscribe<T extends IOctaneEvent>(type: string | string[], callback: (event: T) => void): () => void
     {
         if(!type || !callback) return () =>
         {};

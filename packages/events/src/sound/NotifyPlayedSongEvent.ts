@@ -1,6 +1,6 @@
-import { NitroEvent } from '@nitrots/events';
+import { OctaneEvent } from '@octane/events';
 
-export class NotifyPlayedSongEvent extends NitroEvent
+export class NotifyPlayedSongEvent extends OctaneEvent
 {
     public static readonly NOTIFY_PLAYED_SONG = 'UIEW_NOTIFY_PLAYED_SONG';
 

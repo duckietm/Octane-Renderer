@@ -1,5 +1,5 @@
-import { IMessageEvent } from '@nitrots/api';
-import { MessageEvent } from '@nitrots/events';
+import { IMessageEvent } from '@octane/api';
+import { MessageEvent } from '@octane/events';
 import { RelationshipStatusInfoMessageParser } from '../../../parser';
 
 export class RelationshipStatusInfoEvent extends MessageEvent implements IMessageEvent

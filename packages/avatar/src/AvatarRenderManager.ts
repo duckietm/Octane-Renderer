@@ -1,8 +1,8 @@
-import { AvatarSetType, IAssetManager, IAvatarEffectListener, IAvatarFigureContainer, IAvatarImage, IAvatarImageListener, IAvatarRenderManager, IFigureData, IFigurePartSet, IGraphicAsset, IStructureData } from '@nitrots/api';
-import { GetAssetManager } from '@nitrots/assets';
-import { GetConfiguration } from '@nitrots/configuration';
-import { GetEventDispatcher, NitroEventType } from '@nitrots/events';
-import { loadGamedata } from '@nitrots/utils';
+import { AvatarSetType, IAssetManager, IAvatarEffectListener, IAvatarFigureContainer, IAvatarImage, IAvatarImageListener, IAvatarRenderManager, IFigureData, IFigurePartSet, IGraphicAsset, IStructureData } from '@octane/api';
+import { GetAssetManager } from '@octane/assets';
+import { GetConfiguration } from '@octane/configuration';
+import { GetEventDispatcher, OctaneEventType } from '@octane/events';
+import { loadGamedata } from '@octane/utils';
 import { AvatarAssetDownloadManager } from './AvatarAssetDownloadManager';
 import { AvatarFigureContainer } from './AvatarFigureContainer';
 import { AvatarImage } from './AvatarImage';
@@ -41,8 +41,8 @@ export class AvatarRenderManager implements IAvatarRenderManager
 
         // Store callback for cleanup
         this._aliasResetCallback = () => this._aliasCollection.reset();
-        GetEventDispatcher().addEventListener(NitroEventType.AVATAR_ASSET_LOADED, this._aliasResetCallback);
-        GetEventDispatcher().addEventListener(NitroEventType.AVATAR_EFFECT_LOADED, this._aliasResetCallback);
+        GetEventDispatcher().addEventListener(OctaneEventType.AVATAR_ASSET_LOADED, this._aliasResetCallback);
+        GetEventDispatcher().addEventListener(OctaneEventType.AVATAR_EFFECT_LOADED, this._aliasResetCallback);
 
         await this._avatarAssetDownloadManager.init();
         await this._effectAssetDownloadManager.init();
@@ -53,8 +53,8 @@ export class AvatarRenderManager implements IAvatarRenderManager
         // Remove event listeners
         if(this._aliasResetCallback)
         {
-            GetEventDispatcher().removeEventListener(NitroEventType.AVATAR_ASSET_LOADED, this._aliasResetCallback);
-            GetEventDispatcher().removeEventListener(NitroEventType.AVATAR_EFFECT_LOADED, this._aliasResetCallback);
+            GetEventDispatcher().removeEventListener(OctaneEventType.AVATAR_ASSET_LOADED, this._aliasResetCallback);
+            GetEventDispatcher().removeEventListener(OctaneEventType.AVATAR_EFFECT_LOADED, this._aliasResetCallback);
             this._aliasResetCallback = null;
         }
 

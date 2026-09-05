@@ -1,4 +1,4 @@
-import { AlphaTolerance } from '@nitrots/api';
+import { AlphaTolerance } from '@octane/api';
 
 export const normalizeOpacityMultiplier = (value: number, fallback = 1): number =>
 {

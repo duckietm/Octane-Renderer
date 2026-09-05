@@ -1,4 +1,4 @@
-import { AvatarAction, RoomObjectCategory, RoomObjectVariable } from '@nitrots/api';
+import { AvatarAction, RoomObjectCategory, RoomObjectVariable } from '@octane/api';
 import { Point, Rectangle } from 'pixi.js';
 import { describe, expect, it, vi } from 'vitest';
 import { RoomPreviewer } from './RoomPreviewer';

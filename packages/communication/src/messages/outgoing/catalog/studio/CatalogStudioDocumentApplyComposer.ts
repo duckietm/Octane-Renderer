@@ -1,4 +1,4 @@
-import { IMessageComposer } from '@nitrots/api';
+import { IMessageComposer } from '@octane/api';
 import { encodeCatalogStudioDocument } from '../../../catalog/studio/CatalogStudioDocumentWireCodec';
 
 export class CatalogStudioDocumentApplyComposer implements IMessageComposer<(string | number)[]>

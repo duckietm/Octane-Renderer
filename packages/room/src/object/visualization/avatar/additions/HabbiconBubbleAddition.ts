@@ -1,4 +1,4 @@
-import { AvatarAction, IRoomObjectSprite } from '@nitrots/api';
+import { AvatarAction, IRoomObjectSprite } from '@octane/api';
 import { Texture } from 'pixi.js';
 import { AvatarVisualization } from '../AvatarVisualization';
 import { HabbiconAssetManager, HabbiconRuntimeAsset } from './HabbiconAssetManager';

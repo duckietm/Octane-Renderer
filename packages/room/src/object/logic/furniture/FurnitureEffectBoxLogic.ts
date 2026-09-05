@@ -1,5 +1,5 @@
-import { ContextMenuEnum } from '@nitrots/api';
-import { RoomObjectWidgetRequestEvent } from '@nitrots/events';
+import { ContextMenuEnum } from '@octane/api';
+import { RoomObjectWidgetRequestEvent } from '@octane/events';
 import { FurnitureLogic } from './FurnitureLogic';
 
 export class FurnitureEffectBoxLogic extends FurnitureLogic

@@ -1,4 +1,4 @@
-import { IAvatarEffectListener, IAvatarImage, IAvatarImageListener } from '@nitrots/api';
+import { IAvatarEffectListener, IAvatarImage, IAvatarImageListener } from '@octane/api';
 import { AvatarVisualizationData } from '../avatar';
 import { FurnitureVisualizationData } from './FurnitureVisualizationData';
 

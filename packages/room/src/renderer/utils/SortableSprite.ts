@@ -1,4 +1,4 @@
-﻿import { IRoomObjectSprite, ISortableSprite } from '@nitrots/api';
+﻿import { IRoomObjectSprite, ISortableSprite } from '@octane/api';
 
 export class SortableSprite implements ISortableSprite
 {

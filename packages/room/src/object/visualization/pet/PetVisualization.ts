@@ -1,5 +1,5 @@
-import { IGraphicAsset, IObjectVisualizationData, IRoomGeometry, RoomObjectVariable, RoomObjectVisualizationType } from '@nitrots/api';
-import { GetAssetManager } from '@nitrots/assets';
+import { IGraphicAsset, IObjectVisualizationData, IRoomGeometry, RoomObjectVariable, RoomObjectVisualizationType } from '@octane/api';
+import { GetAssetManager } from '@octane/assets';
 import { AnimationData, AnimationStateData, DirectionData, LayerData } from '../data';
 import { FurnitureAnimatedVisualization, FurnitureVisualizationData } from '../furniture';
 import { ExperienceData } from './ExperienceData';

@@ -1,4 +1,4 @@
-import { IMessageDataWrapper } from '@nitrots/api';
+import { IMessageDataWrapper } from '@octane/api';
 import { CatalogPageMessageProductData } from './CatalogPageMessageProductData';
 
 export class CatalogPageMessageOfferData

@@ -1,7 +1,7 @@
-import { ICodec, IConnection, IConnectionStateSnapshot, IMessageComposer, IMessageConfiguration, IMessageDataWrapper, IMessageEvent, IMessageParser, WebSocketEventEnum } from '@nitrots/api';
-import { GetConfiguration } from '@nitrots/configuration';
-import { GetEventDispatcher, NitroEvent, NitroEventType, ReconnectEvent } from '@nitrots/events';
-import { NitroLogger } from '@nitrots/utils';
+import { ICodec, IConnection, IConnectionStateSnapshot, IMessageComposer, IMessageConfiguration, IMessageDataWrapper, IMessageEvent, IMessageParser, WebSocketEventEnum } from '@octane/api';
+import { GetConfiguration } from '@octane/configuration';
+import { GetEventDispatcher, OctaneEvent, OctaneEventType, ReconnectEvent } from '@octane/events';
+import { OctaneLogger } from '@octane/utils';
 import { EvaWireFormat } from './codec';
 import { aesGcmDecrypt, aesGcmEncrypt, buildClientHello, deriveAesKey, deriveSharedSecret, exportPublicKeySpki, generateEphemeralKeyPair, importPublicKeySpki, importSigningPublicKeyFromBase64, NONCE_LEN, parseServerHello, randomNonce, verifyEphemeralSignature } from './crypto';
 import { ConnectionStateStore } from './ConnectionStateStore';
@@ -71,7 +71,7 @@ export class SocketConnection implements IConnection
         const cryptoEnabled = !!GetConfiguration().getValue<boolean>('crypto.ws.enabled', false);
         if(cryptoEnabled && !this.subtleCryptoAvailable())
         {
-            NitroLogger.error('[ws-crypto] crypto.ws.enabled=true but window.crypto.subtle is unavailable. '
+            OctaneLogger.error('[ws-crypto] crypto.ws.enabled=true but window.crypto.subtle is unavailable. '
                 + 'This page must be served from a secure context - HTTPS, localhost, or 127.0.0.1. '
                 + 'Current origin: ' + (typeof window !== 'undefined' ? window.location.origin : 'unknown'));
             this._cryptoState = 'error';
@@ -116,7 +116,7 @@ export class SocketConnection implements IConnection
             this.handleServerHello(data)
                 .catch(err =>
                 {
-                    NitroLogger.error('[ws-crypto] handshake failed', err);
+                    OctaneLogger.error('[ws-crypto] handshake failed', err);
                     this._cryptoState = 'error';
                     this._intentionalClose = true;
                     if(this._socket) this._socket.close();
@@ -140,7 +140,7 @@ export class SocketConnection implements IConnection
                 }
                 catch (err)
                 {
-                    NitroLogger.error('[ws-crypto] decrypt failed', err);
+                    OctaneLogger.error('[ws-crypto] decrypt failed', err);
                     this._cryptoState = 'error';
                     this._intentionalClose = true;
                     if(this._socket) this._socket.close();
@@ -308,18 +308,18 @@ export class SocketConnection implements IConnection
 
             this.setConnectionState({ phase: 'reauthenticating', reconnectAttempt: 0, authenticated: false });
 
-            GetEventDispatcher().dispatchEvent(new NitroEvent(NitroEventType.SOCKET_RECONNECTED));
+            GetEventDispatcher().dispatchEvent(new OctaneEvent(OctaneEventType.SOCKET_RECONNECTED));
         }
         else
         {
             this.setConnectionState({ phase: 'authenticating', authenticated: false });
-            GetEventDispatcher().dispatchEvent(new NitroEvent(NitroEventType.SOCKET_OPENED));
+            GetEventDispatcher().dispatchEvent(new OctaneEvent(OctaneEventType.SOCKET_OPENED));
         }
     }
 
     private onSocketClosed(event: CloseEvent): void
     {
-        NitroLogger.log('[SocketConnection] Socket closed, code: ' + (event?.code ?? 'unknown') + ', reason: ' + (event?.reason || 'none'));
+        OctaneLogger.log('[SocketConnection] Socket closed, code: ' + (event?.code ?? 'unknown') + ', reason: ' + (event?.reason || 'none'));
 
         const code = event?.code ?? 0;
         const closeReason = event?.reason || '';
@@ -337,7 +337,7 @@ export class SocketConnection implements IConnection
                 closeReason
             });
 
-            GetEventDispatcher().dispatchEvent(new NitroEvent(NitroEventType.SOCKET_CLOSED));
+            GetEventDispatcher().dispatchEvent(new OctaneEvent(OctaneEventType.SOCKET_CLOSED));
             return;
         }
 
@@ -367,7 +367,7 @@ export class SocketConnection implements IConnection
 
         if(!this._wasAuthenticated && !this._isAuthenticated)
         {
-            GetEventDispatcher().dispatchEvent(new NitroEvent(NitroEventType.SOCKET_ERROR));
+            GetEventDispatcher().dispatchEvent(new OctaneEvent(OctaneEventType.SOCKET_ERROR));
         }
     }
 
@@ -385,12 +385,12 @@ export class SocketConnection implements IConnection
             });
 
             GetEventDispatcher().dispatchEvent(new ReconnectEvent(
-                NitroEventType.SOCKET_RECONNECT_FAILED,
+                OctaneEventType.SOCKET_RECONNECT_FAILED,
                 this._reconnectAttempt,
                 SocketConnection.MAX_RECONNECT_ATTEMPTS
             ));
 
-            GetEventDispatcher().dispatchEvent(new NitroEvent(NitroEventType.SOCKET_CLOSED));
+            GetEventDispatcher().dispatchEvent(new OctaneEvent(OctaneEventType.SOCKET_CLOSED));
 
             return;
         }
@@ -410,7 +410,7 @@ export class SocketConnection implements IConnection
         );
 
         GetEventDispatcher().dispatchEvent(new ReconnectEvent(
-            NitroEventType.SOCKET_RECONNECTING,
+            OctaneEventType.SOCKET_RECONNECTING,
             this._reconnectAttempt,
             SocketConnection.MAX_RECONNECT_ATTEMPTS
         ));
@@ -513,7 +513,7 @@ export class SocketConnection implements IConnection
     {
         if(!this._connectionState.update(patch)) return;
 
-        GetEventDispatcher().dispatchEvent(new NitroEvent(NitroEventType.CONNECTION_STATE_CHANGED));
+        GetEventDispatcher().dispatchEvent(new OctaneEvent(OctaneEventType.CONNECTION_STATE_CHANGED));
     }
 
     public send(...composers: IMessageComposer<unknown[]>[]): boolean
@@ -537,7 +537,7 @@ export class SocketConnection implements IConnection
 
             if(header === -1)
             {
-                NitroLogger.packets('Unknown Composer', composer.constructor.name);
+                OctaneLogger.packets('Unknown Composer', composer.constructor.name);
 
                 continue;
             }
@@ -547,12 +547,12 @@ export class SocketConnection implements IConnection
 
             if(!encoded)
             {
-                NitroLogger.packets('Encoding Failed', composer.constructor.name);
+                OctaneLogger.packets('Encoding Failed', composer.constructor.name);
 
                 continue;
             }
 
-            NitroLogger.packets('OutgoingComposer', header, composer.constructor.name, message);
+            OctaneLogger.packets('OutgoingComposer', header, composer.constructor.name, message);
 
             this.write(encoded.getBuffer());
         }
@@ -572,7 +572,7 @@ export class SocketConnection implements IConnection
 
         if(this._cryptoState === 'ready')
         {
-            this.encryptAndSend(buffer).catch(err => NitroLogger.error('[ws-crypto] encrypt failed', err));
+            this.encryptAndSend(buffer).catch(err => OctaneLogger.error('[ws-crypto] encrypt failed', err));
             return;
         }
 
@@ -592,7 +592,7 @@ export class SocketConnection implements IConnection
 
         catch (err)
         {
-            NitroLogger.error(err);
+            OctaneLogger.error(err);
         }
     }
 
@@ -626,7 +626,7 @@ export class SocketConnection implements IConnection
 
             if(!messages || !messages.length) continue;
 
-            NitroLogger.packets('IncomingMessage', wrapper.header, messages[0].constructor.name, messages[0].parser);
+            OctaneLogger.packets('IncomingMessage', wrapper.header, messages[0].constructor.name, messages[0].parser);
 
             this.handleMessages(...messages);
         }
@@ -647,7 +647,7 @@ export class SocketConnection implements IConnection
 
         if(!events || !events.length)
         {
-            NitroLogger.packets('IncomingMessage', wrapper.header, 'UNREGISTERED', wrapper);
+            OctaneLogger.packets('IncomingMessage', wrapper.header, 'UNREGISTERED', wrapper);
 
             return null;
         }
@@ -663,7 +663,7 @@ export class SocketConnection implements IConnection
 
         catch (e)
         {
-            NitroLogger.error('Error parsing message', e, events[0].constructor.name);
+            OctaneLogger.error('Error parsing message', e, events[0].constructor.name);
 
             return null;
         }

@@ -1,4 +1,4 @@
-import { IGraphicAsset } from '@nitrots/api';
+import { IGraphicAsset } from '@octane/api';
 
 export interface ParticleSystemParticle
 {

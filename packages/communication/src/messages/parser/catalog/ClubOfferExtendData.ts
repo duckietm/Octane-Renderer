@@ -1,4 +1,4 @@
-import { IMessageDataWrapper } from '@nitrots/api';
+import { IMessageDataWrapper } from '@octane/api';
 import { ClubOfferData } from './ClubOfferData';
 
 export class ClubOfferExtendData extends ClubOfferData

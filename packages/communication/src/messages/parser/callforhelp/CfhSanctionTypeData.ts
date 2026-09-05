@@ -1,4 +1,4 @@
-import { IMessageDataWrapper } from '@nitrots/api';
+import { IMessageDataWrapper } from '@octane/api';
 import { INamed } from '../moderation';
 
 export class CfhSanctionTypeData implements INamed

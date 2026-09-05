@@ -1,6 +1,6 @@
-import { NitroEvent } from '@nitrots/events';
+import { OctaneEvent } from '@octane/events';
 
-export class SongInfoReceivedEvent extends NitroEvent
+export class SongInfoReceivedEvent extends OctaneEvent
 {
     public static readonly SIR_TRAX_SONG_INFO_RECEIVED = 'SIR_TRAX_SONG_INFO_RECEIVED';
 

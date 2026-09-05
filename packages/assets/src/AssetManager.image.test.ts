@@ -14,7 +14,7 @@ const createManager = (overrides: Record<string, unknown> = {}) =>
         fetch: vi.fn(),
         parseAssetData: vi.fn(),
         loadImageResource: vi.fn(),
-        loadNitroBundle: vi.fn(),
+        loadOctaneBundle: vi.fn(),
         ...overrides
     };
     const manager = new AssetManager(dependencies);
@@ -97,7 +97,7 @@ describe('AssetManager modern image loading', () =>
         expect(manager.getTexture(source)).toBe(second.texture);
     });
 
-    it('decodes a static WebP texture embedded in a Nitro bundle', async () =>
+    it('decodes a static WebP texture embedded in a Octane bundle', async () =>
     {
         const resource = createResource();
         const imageBytes = new Uint8Array([
@@ -111,7 +111,7 @@ describe('AssetManager modern image loading', () =>
                 arrayBuffer: vi.fn().mockResolvedValue(new ArrayBuffer(0))
             }),
             loadImageResource: vi.fn().mockResolvedValue(resource),
-            loadNitroBundle: vi.fn().mockImplementation(async (_buffer, decodeTexture) => ({
+            loadOctaneBundle: vi.fn().mockImplementation(async (_buffer, decodeTexture) => ({
                 texture: await decodeTexture(imageBytes.buffer, 'chair.webp'),
                 jsonFile: { name: 'chair' }
             }))
@@ -130,7 +130,7 @@ describe('AssetManager modern image loading', () =>
         expect(manager.getTexture('https://cdn.example/chair.NITRO?v=3')).toBe(resource.texture);
     });
 
-    it('rejects SVG texture entries inside Nitro bundles', async () =>
+    it('rejects SVG texture entries inside Octane bundles', async () =>
     {
         const svgBytes = new TextEncoder().encode('<svg xmlns="http://www.w3.org/2000/svg"/>');
         const { manager, dependencies } = createManager({
@@ -139,13 +139,13 @@ describe('AssetManager modern image loading', () =>
                 status: 200,
                 arrayBuffer: vi.fn().mockResolvedValue(new ArrayBuffer(0))
             }),
-            loadNitroBundle: vi.fn().mockImplementation(async (_buffer, decodeTexture) => ({
+            loadOctaneBundle: vi.fn().mockImplementation(async (_buffer, decodeTexture) => ({
                 texture: await decodeTexture(svgBytes.buffer, 'unsafe.svg'),
                 jsonFile: { name: 'unsafe' }
             }))
         });
 
-        await expect(manager.downloadAsset('https://cdn.example/unsafe.nitro')).rejects.toThrow(/SVG.*Nitro bundle/i);
+        await expect(manager.downloadAsset('https://cdn.example/unsafe.nitro')).rejects.toThrow(/SVG.*Octane bundle/i);
         expect(dependencies.loadImageResource).not.toHaveBeenCalled();
     });
 });

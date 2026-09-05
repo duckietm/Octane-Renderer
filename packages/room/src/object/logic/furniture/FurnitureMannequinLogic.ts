@@ -1,5 +1,5 @@
-import { MapDataType, RoomObjectVariable } from '@nitrots/api';
-import { RoomObjectWidgetRequestEvent } from '@nitrots/events';
+import { MapDataType, RoomObjectVariable } from '@octane/api';
+import { RoomObjectWidgetRequestEvent } from '@octane/events';
 import { ObjectDataUpdateMessage, RoomObjectUpdateMessage } from '../../../messages';
 import { FurnitureLogic } from './FurnitureLogic';
 

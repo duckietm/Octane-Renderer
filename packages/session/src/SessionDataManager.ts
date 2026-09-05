@@ -1,11 +1,11 @@
-import { IFurnitureData, IGroupInformationManager, IMessageComposer, IMessageEvent, IProductData, ISessionDataManager, IUserDataSnapshot, NoobnessLevelEnum, SecurityLevel } from '@nitrots/api';
-import { AccountSafetyLockStatusChangeMessageEvent, AccountSafetyLockStatusChangeParser, AvailabilityStatusMessageEvent, ChangeUserNameResultMessageEvent, EmailStatusResultEvent, FigureUpdateEvent, FurnitureDataReloadEvent, GetCommunication, GetUserTagsComposer, InClientLinkEvent, MysteryBoxKeysEvent, NoobnessLevelMessageEvent, PetRespectComposer, PetScratchFailedMessageEvent, RoomReadyMessageEvent, RoomUnitChatComposer, UserInfoEvent, UserNameChangeMessageEvent, UserPermissionsEvent, UserRespectComposer, UserTagsMessageEvent } from '@nitrots/communication';
-import type { FurnidataDeltaEntry } from '@nitrots/communication';
+import { IFurnitureData, IGroupInformationManager, IMessageComposer, IMessageEvent, IProductData, ISessionDataManager, IUserDataSnapshot, NoobnessLevelEnum, SecurityLevel } from '@octane/api';
+import { AccountSafetyLockStatusChangeMessageEvent, AccountSafetyLockStatusChangeParser, AvailabilityStatusMessageEvent, ChangeUserNameResultMessageEvent, EmailStatusResultEvent, FigureUpdateEvent, FurnitureDataReloadEvent, GetCommunication, GetUserTagsComposer, InClientLinkEvent, MysteryBoxKeysEvent, NoobnessLevelMessageEvent, PetRespectComposer, PetScratchFailedMessageEvent, RoomReadyMessageEvent, RoomUnitChatComposer, UserInfoEvent, UserNameChangeMessageEvent, UserPermissionsEvent, UserRespectComposer, UserTagsMessageEvent } from '@octane/communication';
+import type { FurnidataDeltaEntry } from '@octane/communication';
 import { applyFurnidataDeltaTo } from './furniture/applyFurnidataDelta';
-import { GetConfiguration } from '@nitrots/configuration';
-import { GetLocalizationManager } from '@nitrots/localization';
-import { GetEventDispatcher, MysteryBoxKeysUpdateEvent, NitroEvent, NitroEventType, NitroSettingsEvent, SessionDataPreferencesEvent, UserNameUpdateEvent } from '@nitrots/events';
-import { CreateLinkEvent, HabboWebTools, parseConfigJsonFromResponse } from '@nitrots/utils';
+import { GetConfiguration } from '@octane/configuration';
+import { GetLocalizationManager } from '@octane/localization';
+import { GetEventDispatcher, MysteryBoxKeysUpdateEvent, OctaneEvent, OctaneEventType, OctaneSettingsEvent, SessionDataPreferencesEvent, UserNameUpdateEvent } from '@octane/events';
+import { CreateLinkEvent, HabboWebTools, parseConfigJsonFromResponse } from '@octane/utils';
 import { Texture } from 'pixi.js';
 import { GroupInformationManager } from './GroupInformationManager';
 import { IgnoredUsersManager } from './IgnoredUsersManager';
@@ -16,7 +16,7 @@ import { ProductDataLoader } from './product/ProductDataLoader';
 export class SessionDataManager implements ISessionDataManager
 {
     private _messageEvents: IMessageEvent[] = [];
-    private _settingsEventCallback: (event: NitroSettingsEvent) => void = null;
+    private _settingsEventCallback: (event: OctaneSettingsEvent) => void = null;
     private _userId: number;
     private _name: string;
     private _figure: string;
@@ -73,14 +73,14 @@ export class SessionDataManager implements ISessionDataManager
     {
         this._userDataSnapshot = null;
 
-        GetEventDispatcher().dispatchEvent(new NitroEvent(NitroEventType.SESSION_DATA_UPDATED));
+        GetEventDispatcher().dispatchEvent(new OctaneEvent(OctaneEventType.SESSION_DATA_UPDATED));
     }
 
     private invalidatePermissionsSnapshot(): void
     {
         this._permissionsSnapshot = null;
 
-        GetEventDispatcher().dispatchEvent(new NitroEvent(NitroEventType.USER_PERMISSIONS_UPDATED));
+        GetEventDispatcher().dispatchEvent(new OctaneEvent(OctaneEventType.USER_PERMISSIONS_UPDATED));
     }
 
     /**
@@ -189,7 +189,7 @@ export class SessionDataManager implements ISessionDataManager
         );
 
         // Store event dispatcher callback for cleanup
-        this._settingsEventCallback = (event: NitroSettingsEvent) =>
+        this._settingsEventCallback = (event: OctaneSettingsEvent) =>
         {
             this._isRoomCameraFollowDisabled = event.cameraFollow;
             this._uiFlags = event.flags;
@@ -199,7 +199,7 @@ export class SessionDataManager implements ISessionDataManager
             this.invalidateUserDataSnapshot();
         };
 
-        GetEventDispatcher().addEventListener<NitroSettingsEvent>(NitroSettingsEvent.SETTINGS_UPDATED, this._settingsEventCallback);
+        GetEventDispatcher().addEventListener<OctaneSettingsEvent>(OctaneSettingsEvent.SETTINGS_UPDATED, this._settingsEventCallback);
     }
 
     public dispose(): void
@@ -223,7 +223,7 @@ export class SessionDataManager implements ISessionDataManager
         // Remove event dispatcher listener
         if(this._settingsEventCallback)
         {
-            GetEventDispatcher().removeEventListener(NitroSettingsEvent.SETTINGS_UPDATED, this._settingsEventCallback);
+            GetEventDispatcher().removeEventListener(OctaneSettingsEvent.SETTINGS_UPDATED, this._settingsEventCallback);
             this._settingsEventCallback = null;
         }
     }
@@ -261,7 +261,7 @@ export class SessionDataManager implements ISessionDataManager
         // applyFurnidataDelta uses. SESSION_DATA_UPDATED only drives the userData
         // snapshot and, dispatched here without invalidateUserDataSnapshot(), was
         // a no-op (the snapshot ref never changed, so consumers bailed out).
-        if(added && added.length && (typeof window !== 'undefined')) window.dispatchEvent(new CustomEvent('nitro-localization-updated'));
+        if(added && added.length && (typeof window !== 'undefined')) window.dispatchEvent(new CustomEvent('octane-localization-updated'));
 
         return added;
     }
@@ -600,7 +600,7 @@ export class SessionDataManager implements ISessionDataManager
     public async applyFurnidataReloadHint(): Promise<void>
     {
         await this._furnitureData.init();
-        if(typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('nitro-localization-updated'));
+        if(typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('octane-localization-updated'));
     }
 
     public getBadgeUrl(name: string): string

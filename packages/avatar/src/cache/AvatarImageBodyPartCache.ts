@@ -1,4 +1,4 @@
-﻿import { IActiveActionData } from '@nitrots/api';
+﻿import { IActiveActionData } from '@octane/api';
 import { AvatarImageActionCache } from './AvatarImageActionCache';
 
 export class AvatarImageBodyPartCache

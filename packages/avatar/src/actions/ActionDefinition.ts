@@ -1,4 +1,4 @@
-import { IActionDefinition } from '@nitrots/api';
+import { IActionDefinition } from '@octane/api';
 import { ActionType } from './ActionType';
 
 export class ActionDefinition implements IActionDefinition

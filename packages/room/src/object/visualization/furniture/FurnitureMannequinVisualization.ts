@@ -1,4 +1,4 @@
-import { AvatarSetType, IAvatarImage, IAvatarImageListener, IGraphicAsset, IObjectVisualizationData, RoomObjectVariable } from '@nitrots/api';
+import { AvatarSetType, IAvatarImage, IAvatarImageListener, IGraphicAsset, IObjectVisualizationData, RoomObjectVariable } from '@octane/api';
 import { Texture } from 'pixi.js';
 import { FurnitureMannequinVisualizationData } from './FurnitureMannequinVisualizationData';
 import { FurnitureVisualization } from './FurnitureVisualization';

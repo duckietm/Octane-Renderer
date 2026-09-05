@@ -1,5 +1,5 @@
-﻿import { IImageResult } from '@nitrots/api';
-import { TextureUtils } from '@nitrots/utils';
+﻿import { IImageResult } from '@octane/api';
+import { TextureUtils } from '@octane/utils';
 import { Texture } from 'pixi.js';
 
 export class ImageResult implements IImageResult

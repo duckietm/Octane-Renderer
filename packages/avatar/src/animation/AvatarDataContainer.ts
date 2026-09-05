@@ -1,4 +1,4 @@
-﻿import { IAssetAnimationAvatar, IAvatarDataContainer } from '@nitrots/api';
+﻿import { IAssetAnimationAvatar, IAvatarDataContainer } from '@octane/api';
 import { AdjustmentFilter } from 'pixi-filters';
 
 export class AvatarDataContainer implements IAvatarDataContainer

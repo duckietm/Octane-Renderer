@@ -1,4 +1,4 @@
-import { RoomObjectStateChangedEvent } from '@nitrots/events';
+import { RoomObjectStateChangedEvent } from '@octane/events';
 import { FurnitureLogic } from './FurnitureLogic';
 
 export class FurnitureRandomStateLogic extends FurnitureLogic

@@ -1,5 +1,5 @@
-﻿import { IRoomGeometry, IRoomObject, IVector3D } from '@nitrots/api';
-import { Vector3d } from '@nitrots/utils';
+﻿import { IRoomGeometry, IRoomObject, IVector3D } from '@octane/api';
+import { Vector3d } from '@octane/utils';
 
 export class RoomObjectLocationCacheItem
 {

@@ -1,1 +1,1 @@
-export * from './NitroCommunicationDemoEvent';
+export * from './OctaneCommunicationDemoEvent';

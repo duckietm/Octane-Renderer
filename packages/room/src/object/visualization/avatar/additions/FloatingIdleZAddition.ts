@@ -1,6 +1,6 @@
-import { AvatarAction, IRoomObjectSprite } from '@nitrots/api';
-import { GetAssetManager } from '@nitrots/assets';
-import { GetTickerTime } from '@nitrots/utils';
+import { AvatarAction, IRoomObjectSprite } from '@octane/api';
+import { GetAssetManager } from '@octane/assets';
+import { GetTickerTime } from '@octane/utils';
 import { Texture } from 'pixi.js';
 import { AvatarVisualization } from '../AvatarVisualization';
 import { IAvatarAddition } from './IAvatarAddition';

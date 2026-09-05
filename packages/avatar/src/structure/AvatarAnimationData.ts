@@ -1,4 +1,4 @@
-import { IActionDefinition, IFigureSetData } from '@nitrots/api';
+import { IActionDefinition, IFigureSetData } from '@octane/api';
 import { AnimationAction } from './animation';
 
 export class AvatarAnimationData implements IFigureSetData

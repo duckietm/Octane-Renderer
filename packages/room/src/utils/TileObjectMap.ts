@@ -1,5 +1,5 @@
-﻿import { IRoomObject, ITileObjectMap, RoomObjectVariable } from '@nitrots/api';
-import { NitroLogger } from '@nitrots/utils';
+﻿import { IRoomObject, ITileObjectMap, RoomObjectVariable } from '@octane/api';
+import { OctaneLogger } from '@octane/utils';
 
 export class TileObjectMap implements ITileObjectMap
 {
@@ -66,7 +66,7 @@ export class TileObjectMap implements ITileObjectMap
     {
         if(!object.isReady)
         {
-            NitroLogger.log('Assigning non initialized object to tile object map!');
+            OctaneLogger.log('Assigning non initialized object to tile object map!');
 
             return;
         }

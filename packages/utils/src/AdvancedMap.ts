@@ -1,4 +1,4 @@
-﻿import { IAdvancedMap } from '@nitrots/api';
+﻿import { IAdvancedMap } from '@octane/api';
 
 export class AdvancedMap<T, U> implements IAdvancedMap<T, U>
 {

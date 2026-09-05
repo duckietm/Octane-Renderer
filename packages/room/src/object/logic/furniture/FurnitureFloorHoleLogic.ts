@@ -1,6 +1,6 @@
-import { RoomObjectVariable } from '@nitrots/api';
-import { RoomObjectFloorHoleEvent } from '@nitrots/events';
-import { Vector3d } from '@nitrots/utils';
+import { RoomObjectVariable } from '@octane/api';
+import { RoomObjectFloorHoleEvent } from '@octane/events';
+import { Vector3d } from '@octane/utils';
 import { ObjectDataUpdateMessage, RoomObjectUpdateMessage } from '../../../messages';
 import { FurnitureMultiStateLogic } from './FurnitureMultiStateLogic';
 

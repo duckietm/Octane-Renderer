@@ -1,4 +1,4 @@
-import { IMessageDataWrapper, IMessageParser } from '@nitrots/api';
+import { IMessageDataWrapper, IMessageParser } from '@octane/api';
 import { IWiredTradeNode, readWiredTradeNode } from './WiredTradeRuleParser';
 
 export const WIRED_TRADE_STATE_READY = 0;

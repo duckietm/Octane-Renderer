@@ -1,4 +1,4 @@
-import { IMessageDataWrapper, IMessageParser } from '@nitrots/api';
+import { IMessageDataWrapper, IMessageParser } from '@octane/api';
 export class MessengerReadCursorParser implements IMessageParser
 {
     private _conversationId=0;private _readerId=0;private _messageId=0; public flush()

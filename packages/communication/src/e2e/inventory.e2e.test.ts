@@ -1,6 +1,6 @@
-import { IConnection, IMessageEvent, RoomObjectCategory } from '@nitrots/api';
-import { GetConfiguration } from '@nitrots/configuration';
-import { GetEventDispatcher } from '@nitrots/events';
+import { IConnection, IMessageEvent, RoomObjectCategory } from '@octane/api';
+import { GetConfiguration } from '@octane/configuration';
+import { GetEventDispatcher } from '@octane/events';
 import { RoomSessionManager } from '../../../session/src/RoomSessionManager';
 import { afterEach, describe, expect, it } from 'vitest';
 import { CommunicationManager } from '../CommunicationManager';

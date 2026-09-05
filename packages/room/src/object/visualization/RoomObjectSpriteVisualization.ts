@@ -1,5 +1,5 @@
-import { IGraphicAssetCollection, IObjectVisualizationData, IRoomGeometry, IRoomObjectController, IRoomObjectSprite, IRoomObjectSpriteVisualization, RoomObjectSpriteData } from '@nitrots/api';
-import { TextureUtils } from '@nitrots/utils';
+import { IGraphicAssetCollection, IObjectVisualizationData, IRoomGeometry, IRoomObjectController, IRoomObjectSprite, IRoomObjectSpriteVisualization, RoomObjectSpriteData } from '@octane/api';
+import { TextureUtils } from '@octane/utils';
 import { Container, Point, Rectangle, Sprite, Texture } from 'pixi.js';
 import { RoomObjectSprite } from './RoomObjectSprite';
 

@@ -1,4 +1,4 @@
-import { IRoomObject, IRoomRenderer, IRoomRenderingCanvas, IRoomSpriteCanvasContainer } from '@nitrots/api';
+import { IRoomObject, IRoomRenderer, IRoomRenderingCanvas, IRoomSpriteCanvasContainer } from '@octane/api';
 import { RoomSpriteCanvas } from './RoomSpriteCanvas';
 
 export class RoomRenderer implements IRoomRenderer, IRoomSpriteCanvasContainer

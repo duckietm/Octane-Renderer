@@ -1,4 +1,4 @@
-import { IRoomObjectModel } from '@nitrots/api';
+import { IRoomObjectModel } from '@octane/api';
 
 export class RoomObjectModel implements IRoomObjectModel
 {

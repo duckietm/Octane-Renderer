@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { BinaryReader, BinaryWriter } from '@nitrots/utils';
+import { BinaryReader, BinaryWriter } from '@octane/utils';
 import { FriendIsTypingParser } from '../FriendIsTypingParser';
 
 class TestWrapper

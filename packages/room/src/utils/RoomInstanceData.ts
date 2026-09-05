@@ -1,4 +1,4 @@
-import { IFurnitureStackingHeightMap, ILegacyWallGeometry, ISelectedRoomObjectData, ITileObjectMap } from '@nitrots/api';
+import { IFurnitureStackingHeightMap, ILegacyWallGeometry, ISelectedRoomObjectData, ITileObjectMap } from '@octane/api';
 import { LegacyWallGeometry } from './LegacyWallGeometry';
 import { RoomCamera } from './RoomCamera';
 import { RoomFurnitureData } from './RoomFurnitureData';

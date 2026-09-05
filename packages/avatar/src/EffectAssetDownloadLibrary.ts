@@ -1,5 +1,5 @@
-import { IAssetAnimation, IAssetManager, IEffectAssetDownloadLibrary } from '@nitrots/api';
-import { AvatarRenderEffectLibraryEvent, GetEventDispatcher, NitroEventType } from '@nitrots/events';
+import { IAssetAnimation, IAssetManager, IEffectAssetDownloadLibrary } from '@octane/api';
+import { AvatarRenderEffectLibraryEvent, GetEventDispatcher, OctaneEventType } from '@octane/events';
 
 export class EffectAssetDownloadLibrary implements IEffectAssetDownloadLibrary
 {
@@ -42,7 +42,7 @@ export class EffectAssetDownloadLibrary implements IEffectAssetDownloadLibrary
             if(!status) throw new Error('Could not download asset');
         }
 
-        if(this.checkIsLoaded()) GetEventDispatcher().dispatchEvent(new AvatarRenderEffectLibraryEvent(NitroEventType.AVATAR_EFFECT_DOWNLOADED, this));
+        if(this.checkIsLoaded()) GetEventDispatcher().dispatchEvent(new AvatarRenderEffectLibraryEvent(OctaneEventType.AVATAR_EFFECT_DOWNLOADED, this));
     }
 
     private checkIsLoaded(): boolean

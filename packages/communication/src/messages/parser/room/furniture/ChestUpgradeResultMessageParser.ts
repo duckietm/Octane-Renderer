@@ -1,4 +1,4 @@
-import { IMessageDataWrapper, IMessageParser } from '@nitrots/api';
+import { IMessageDataWrapper, IMessageParser } from '@octane/api';
 
 /**
  * The answer to a capacity purchase. Wire layout: int chestId, int resultCode.

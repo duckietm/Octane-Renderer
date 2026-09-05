@@ -1,4 +1,4 @@
-﻿import { IAnimation, IAssetAnimationSprite, ISpriteDataContainer } from '@nitrots/api';
+﻿import { IAnimation, IAssetAnimationSprite, ISpriteDataContainer } from '@octane/api';
 
 export class SpriteDataContainer implements ISpriteDataContainer
 {

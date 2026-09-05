@@ -1,6 +1,6 @@
 {
-  "name": "@nitrots/room",
-  "description": "Nitro room module",
+  "name": "@octane/room",
+  "description": "Octane room module",
   "version": "1.0.0",
   "type": "module",
   "license": "GPL-3.0",
@@ -9,13 +9,13 @@
   },
   "main": "./index",
   "dependencies": {
-    "@nitrots/api": "1.0.0",
-    "@nitrots/assets": "1.0.0",
-    "@nitrots/avatar": "1.0.0",
-    "@nitrots/communication": "1.0.0",
-    "@nitrots/configuration": "1.0.0",
-    "@nitrots/events": "1.0.0",
-    "@nitrots/session": "1.0.0",
+    "@octane/api": "1.0.0",
+    "@octane/assets": "1.0.0",
+    "@octane/avatar": "1.0.0",
+    "@octane/communication": "1.0.0",
+    "@octane/configuration": "1.0.0",
+    "@octane/events": "1.0.0",
+    "@octane/session": "1.0.0",
     "pixi.js": "^8.19.0"
   },
   "devDependencies": {

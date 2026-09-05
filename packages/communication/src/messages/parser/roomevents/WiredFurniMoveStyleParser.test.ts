@@ -1,4 +1,4 @@
-import { BinaryReader, BinaryWriter } from '@nitrots/utils';
+import { BinaryReader, BinaryWriter } from '@octane/utils';
 import { describe, expect, it } from 'vitest';
 import { WiredFurniMoveStyleParser } from './WiredFurniMoveStyleParser';
 

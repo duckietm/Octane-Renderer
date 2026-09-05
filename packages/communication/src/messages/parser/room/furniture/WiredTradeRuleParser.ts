@@ -1,4 +1,4 @@
-import { IMessageDataWrapper } from '@nitrots/api';
+import { IMessageDataWrapper } from '@octane/api';
 
 export const WIRED_TRADE_NODE_CURRENCY = 0;
 export const WIRED_TRADE_NODE_FURNI = 1;

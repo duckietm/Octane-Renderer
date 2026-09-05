@@ -1,4 +1,4 @@
-import { IRoomInstance, IRoomInstanceContainer, IRoomObject, IRoomObjectController, IRoomObjectManager, IRoomObjectModel, IRoomRendererBase } from '@nitrots/api';
+import { IRoomInstance, IRoomInstanceContainer, IRoomObject, IRoomObjectController, IRoomObjectManager, IRoomObjectModel, IRoomRendererBase } from '@octane/api';
 import { RoomObjectModel } from './object';
 
 export class RoomInstance implements IRoomInstance

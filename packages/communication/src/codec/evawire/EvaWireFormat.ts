@@ -1,5 +1,5 @@
-import { IBinaryWriter, ICodec, IConnection, IMessageDataWrapper } from '@nitrots/api';
-import { BinaryReader, BinaryWriter } from '@nitrots/utils';
+import { IBinaryWriter, ICodec, IConnection, IMessageDataWrapper } from '@octane/api';
+import { BinaryReader, BinaryWriter } from '@octane/utils';
 import { Byte } from '../Byte';
 import { Short } from '../Short';
 import { EvaWireDataWrapper } from './EvaWireDataWrapper';

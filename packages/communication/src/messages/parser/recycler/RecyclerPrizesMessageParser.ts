@@ -1,4 +1,4 @@
-import { IMessageDataWrapper, IMessageParser } from '@nitrots/api';
+import { IMessageDataWrapper, IMessageParser } from '@octane/api';
 
 const MAX_LEVELS = 50;
 const MAX_PRODUCTS_PER_LEVEL = 500;

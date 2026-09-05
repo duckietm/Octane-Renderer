@@ -1,6 +1,6 @@
 {
-  "name": "@nitrots/assets",
-  "description": "Nitro assets module",
+  "name": "@octane/assets",
+  "description": "Octane assets module",
   "version": "1.0.0",
   "type": "module",
   "publishConfig": {
@@ -13,8 +13,8 @@
   "main": "./index",
   "dependencies": {
     "@jsquash/avif": "^2.1.1",
-    "@nitrots/api": "1.0.0",
-    "@nitrots/utils": "1.0.0",
+    "@octane/api": "1.0.0",
+    "@octane/utils": "1.0.0",
     "@pixi/gif": "^3.0.1",
     "apng-js": "^1.1.5",
     "pixi.js": "^8.19.0",

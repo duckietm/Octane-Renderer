@@ -1,6 +1,6 @@
 # Communication end-to-end tests
 
-These tests use the real Nitro communication stack against a disposable Polaris instance and MariaDB schema. They cover three user-visible paths:
+These tests use the real Octane communication stack against a disposable Polaris instance and MariaDB schema. They cover three user-visible paths:
 
 1. initial login and authenticated transport;
 2. room entry plus automatic reconnect after Polaris drops the active transport;

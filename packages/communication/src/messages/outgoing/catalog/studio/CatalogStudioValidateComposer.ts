@@ -1,4 +1,4 @@
-import { IMessageComposer } from '@nitrots/api';
+import { IMessageComposer } from '@octane/api';
 
 export class CatalogStudioValidateComposer implements IMessageComposer<ConstructorParameters<typeof CatalogStudioValidateComposer>>
 {

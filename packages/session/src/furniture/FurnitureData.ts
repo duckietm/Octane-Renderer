@@ -1,4 +1,4 @@
-import { FurnitureType, IFurnitureData } from '@nitrots/api';
+import { FurnitureType, IFurnitureData } from '@octane/api';
 
 export class FurnitureData implements IFurnitureData
 {

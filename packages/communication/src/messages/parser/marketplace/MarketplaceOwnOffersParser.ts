@@ -1,4 +1,4 @@
-import { IMessageDataWrapper, IMessageParser, IObjectData, LegacyDataType, ObjectDataFactory } from '@nitrots/api';
+import { IMessageDataWrapper, IMessageParser, IObjectData, LegacyDataType, ObjectDataFactory } from '@octane/api';
 import { MarketplaceOffer } from './MarketplaceOffer';
 
 export class MarketplaceOwnOffersParser implements IMessageParser

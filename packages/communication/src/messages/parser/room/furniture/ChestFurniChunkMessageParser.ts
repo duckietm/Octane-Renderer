@@ -1,4 +1,4 @@
-import { IMessageDataWrapper, IMessageParser } from '@nitrots/api';
+import { IMessageDataWrapper, IMessageParser } from '@octane/api';
 import { ChestFurniStoredItemParser, IChestFurniStoredItem } from './ChestFurniStoredItemParser';
 
 /** Furni-chest storage chunk (official Sebahew wire shape, header 9322). */

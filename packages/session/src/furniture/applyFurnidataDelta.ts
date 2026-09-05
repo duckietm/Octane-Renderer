@@ -1,9 +1,9 @@
-import type { FurnidataDeltaEntry } from '@nitrots/communication';
+import type { FurnidataDeltaEntry } from '@octane/communication';
 
 /**
  * Pure, testable furnidata-delta patcher. Mutates the FurnitureData objects in
  * the given maps (by id) and the localization keys, then dispatches the
- * `nitro-localization-updated` window event so subscribed React surfaces refresh.
+ * `octane-localization-updated` window event so subscribed React surfaces refresh.
  */
 export function applyFurnidataDeltaTo(
     entries: FurnidataDeltaEntry[],
@@ -42,8 +42,8 @@ export function applyFurnidataDeltaTo(
     if(win && typeof win.dispatchEvent === 'function')
     {
         const evt = (typeof CustomEvent !== 'undefined')
-            ? new CustomEvent('nitro-localization-updated')
-            : { type: 'nitro-localization-updated' } as any;
+            ? new CustomEvent('octane-localization-updated')
+            : { type: 'octane-localization-updated' } as any;
         win.dispatchEvent(evt);
     }
 }

@@ -1,4 +1,4 @@
-import { IPetColorResult } from '@nitrots/api';
+import { IPetColorResult } from '@octane/api';
 
 export class PetColorResult implements IPetColorResult
 {

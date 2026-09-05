@@ -1,4 +1,4 @@
-﻿import { IRoomSession } from '@nitrots/api';
+﻿import { IRoomSession } from '@octane/api';
 import { RoomSessionDimmerPresetsEventPresetItem } from './RoomSessionDimmerPresetsEventPresetItem';
 import { RoomSessionEvent } from './RoomSessionEvent';
 

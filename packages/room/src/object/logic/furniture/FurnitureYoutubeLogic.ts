@@ -1,5 +1,5 @@
-import { RoomObjectVariable } from '@nitrots/api';
-import { RoomObjectDataRequestEvent, RoomObjectWidgetRequestEvent } from '@nitrots/events';
+import { RoomObjectVariable } from '@octane/api';
+import { RoomObjectDataRequestEvent, RoomObjectWidgetRequestEvent } from '@octane/events';
 import { FurnitureLogic } from './FurnitureLogic';
 
 export class FurnitureYoutubeLogic extends FurnitureLogic

@@ -1,5 +1,5 @@
-import { IConnection, IRoomHandlerListener, RoomControllerLevel } from '@nitrots/api';
-import { RoomRightsClearEvent, RoomRightsEvent, RoomRightsOwnerEvent } from '@nitrots/communication';
+import { IConnection, IRoomHandlerListener, RoomControllerLevel } from '@octane/api';
+import { RoomRightsClearEvent, RoomRightsEvent, RoomRightsOwnerEvent } from '@octane/communication';
 import { BaseHandler } from './BaseHandler';
 
 export class RoomPermissionsHandler extends BaseHandler

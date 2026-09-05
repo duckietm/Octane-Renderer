@@ -1,7 +1,7 @@
-import { FurnitureType, IFurnitureData } from '@nitrots/api';
-import { GetConfiguration } from '@nitrots/configuration';
-import { GetLocalizationManager } from '@nitrots/localization';
-import { loadGamedata } from '@nitrots/utils';
+import { FurnitureType, IFurnitureData } from '@octane/api';
+import { GetConfiguration } from '@octane/configuration';
+import { GetLocalizationManager } from '@octane/localization';
+import { loadGamedata } from '@octane/utils';
 import { FurnitureData } from './FurnitureData';
 
 export class FurnitureDataLoader

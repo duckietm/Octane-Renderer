@@ -1,4 +1,4 @@
-import { IMessageDataWrapper, IMessageParser } from '@nitrots/api';
+import { IMessageDataWrapper, IMessageParser } from '@octane/api';
 import { LeaderboardEntry } from './LeaderboardEntry';
 
 export class Game2WeeklyLeaderboardParser implements IMessageParser

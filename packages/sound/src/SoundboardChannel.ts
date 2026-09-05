@@ -1,4 +1,4 @@
-import { NitroLogger } from '@nitrots/utils';
+import { OctaneLogger } from '@octane/utils';
 
 type AudioFactory = (url: string) => HTMLAudioElement;
 
@@ -30,7 +30,7 @@ export class SoundboardChannel
         }
         catch (error)
         {
-            NitroLogger.error(error);
+            OctaneLogger.error(error);
             this.release(audio);
 
             return false;
@@ -73,7 +73,7 @@ export class SoundboardChannel
         }
         catch (error)
         {
-            NitroLogger.error(error);
+            OctaneLogger.error(error);
         }
     }
 
@@ -88,7 +88,7 @@ export class SoundboardChannel
 
         try
         {
-            const parsed = new URL(url.trim(), 'https://nitro.invalid');
+            const parsed = new URL(url.trim(), 'https://octane.invalid');
 
             return (parsed.protocol === 'http:') || (parsed.protocol === 'https:');
         }

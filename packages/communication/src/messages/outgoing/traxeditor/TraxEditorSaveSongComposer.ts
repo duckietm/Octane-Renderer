@@ -1,4 +1,4 @@
-import { IMessageComposer } from '@nitrots/api';
+import { IMessageComposer } from '@octane/api';
 
 export class TraxEditorSaveSongComposer implements IMessageComposer<[ number, string, string ]>
 {

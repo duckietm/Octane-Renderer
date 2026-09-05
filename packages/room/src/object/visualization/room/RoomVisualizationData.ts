@@ -1,4 +1,4 @@
-import { IAssetData, IGraphicAssetCollection, IObjectVisualizationData } from '@nitrots/api';
+import { IAssetData, IGraphicAssetCollection, IObjectVisualizationData } from '@octane/api';
 import { PlaneMaskManager } from './mask';
 
 export class RoomVisualizationData implements IObjectVisualizationData

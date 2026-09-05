@@ -1,4 +1,4 @@
-import { IMessageDataWrapper, IPetCustomPart, IPetFigureData, PetCustomPart } from '@nitrots/api';
+import { IMessageDataWrapper, IPetCustomPart, IPetFigureData, PetCustomPart } from '@octane/api';
 
 export class PetFigureDataParser implements IPetFigureData
 {

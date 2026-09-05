@@ -1,8 +1,8 @@
-import { ICommunicationManager, IConnection, IMessageConfiguration, IMessageEvent } from '@nitrots/api';
-import { GetConfiguration } from '@nitrots/configuration';
-import { GetEventDispatcher, NitroEventType, SocketReauthenticatedEvent } from '@nitrots/events';
-import { GetTickerTime, NitroLogger } from '@nitrots/utils';
-import { NitroMessages } from './NitroMessages';
+import { ICommunicationManager, IConnection, IMessageConfiguration, IMessageEvent } from '@octane/api';
+import { GetConfiguration } from '@octane/configuration';
+import { GetEventDispatcher, OctaneEventType, SocketReauthenticatedEvent } from '@octane/events';
+import { GetTickerTime, OctaneLogger } from '@octane/utils';
+import { OctaneMessages } from './OctaneMessages';
 import { SocketConnection } from './SocketConnection';
 import { AuthenticatedEvent, ClientHelloMessageComposer, ClientPingEvent, InfoRetrieveMessageComposer, PongMessageComposer, SSOTicketMessageComposer, UniqueIDMessageComposer } from './messages';
 import { Thumbmark } from '@thumbmarkjs/thumbmarkjs';
@@ -10,7 +10,7 @@ import { Thumbmark } from '@thumbmarkjs/thumbmarkjs';
 export class CommunicationManager implements ICommunicationManager
 {
     private _connection: IConnection = new SocketConnection();
-    private _messages: IMessageConfiguration = new NitroMessages();
+    private _messages: IMessageConfiguration = new OctaneMessages();
 
     private _pongInterval: any = null;
     private _messageEvents: IMessageEvent[] = [];
@@ -33,7 +33,7 @@ export class CommunicationManager implements ICommunicationManager
         }
         catch (error)
         {
-            NitroLogger.warn('[CommunicationManager] Failed to generate machine ID', error);
+            OctaneLogger.warn('[CommunicationManager] Failed to generate machine ID', error);
 
             return 'FAILED';
         }
@@ -67,18 +67,18 @@ export class CommunicationManager implements ICommunicationManager
         {
             this.stopPong();
         };
-        GetEventDispatcher().addEventListener(NitroEventType.SOCKET_CLOSED, this._socketClosedCallback);
+        GetEventDispatcher().addEventListener(OctaneEventType.SOCKET_CLOSED, this._socketClosedCallback);
 
         // Handle reconnection - re-authenticate when socket reconnects
         this._socketReconnectedCallback = () =>
         {
-            NitroLogger.log('[CommunicationManager] Socket reconnected, re-authenticating...');
+            OctaneLogger.log('[CommunicationManager] Socket reconnected, re-authenticating...');
 
             if(GetConfiguration().getValue<boolean>('system.pong.manually', false)) this.startPong();
 
             void this.sendHandshake();
         };
-        GetEventDispatcher().addEventListener(NitroEventType.SOCKET_RECONNECTED, this._socketReconnectedCallback);
+        GetEventDispatcher().addEventListener(OctaneEventType.SOCKET_RECONNECTED, this._socketReconnectedCallback);
 
         return new Promise((resolve, reject) =>
         {
@@ -89,14 +89,14 @@ export class CommunicationManager implements ICommunicationManager
 
                 void this.sendHandshake();
             };
-            GetEventDispatcher().addEventListener(NitroEventType.SOCKET_OPENED, this._socketOpenedCallback);
+            GetEventDispatcher().addEventListener(OctaneEventType.SOCKET_OPENED, this._socketOpenedCallback);
 
             // Store callback for cleanup
             this._socketErrorCallback = () =>
             {
                 if(!this._initResolved) reject(new Error('Socket error before init resolved'));
             };
-            GetEventDispatcher().addEventListener(NitroEventType.SOCKET_ERROR, this._socketErrorCallback);
+            GetEventDispatcher().addEventListener(OctaneEventType.SOCKET_ERROR, this._socketErrorCallback);
 
             // Store message events for cleanup
             const pingEvent = new ClientPingEvent((event: ClientPingEvent) => this.sendPong());
@@ -107,7 +107,7 @@ export class CommunicationManager implements ICommunicationManager
 
                 this._recoveryToken = parser.recoveryToken;
 
-                NitroLogger.log('[CommunicationManager] AuthenticatedEvent received (isReconnect=' + isReconnect + ')');
+                OctaneLogger.log('[CommunicationManager] AuthenticatedEvent received (isReconnect=' + isReconnect + ')');
 
                 this._connection.authenticated();
 
@@ -126,9 +126,9 @@ export class CommunicationManager implements ICommunicationManager
 
                 if(isReconnect)
                 {
-                    NitroLogger.log('[CommunicationManager] Dispatching SOCKET_REAUTHENTICATED');
+                    OctaneLogger.log('[CommunicationManager] Dispatching SOCKET_REAUTHENTICATED');
                     GetEventDispatcher().dispatchEvent(new SocketReauthenticatedEvent(
-                        NitroEventType.SOCKET_REAUTHENTICATED,
+                        OctaneEventType.SOCKET_REAUTHENTICATED,
                         parser.sessionResumed,
                         parser.roomId));
                 }
@@ -150,25 +150,25 @@ export class CommunicationManager implements ICommunicationManager
         // Remove event dispatcher listeners
         if(this._socketClosedCallback)
         {
-            GetEventDispatcher().removeEventListener(NitroEventType.SOCKET_CLOSED, this._socketClosedCallback);
+            GetEventDispatcher().removeEventListener(OctaneEventType.SOCKET_CLOSED, this._socketClosedCallback);
             this._socketClosedCallback = null;
         }
 
         if(this._socketOpenedCallback)
         {
-            GetEventDispatcher().removeEventListener(NitroEventType.SOCKET_OPENED, this._socketOpenedCallback);
+            GetEventDispatcher().removeEventListener(OctaneEventType.SOCKET_OPENED, this._socketOpenedCallback);
             this._socketOpenedCallback = null;
         }
 
         if(this._socketErrorCallback)
         {
-            GetEventDispatcher().removeEventListener(NitroEventType.SOCKET_ERROR, this._socketErrorCallback);
+            GetEventDispatcher().removeEventListener(OctaneEventType.SOCKET_ERROR, this._socketErrorCallback);
             this._socketErrorCallback = null;
         }
 
         if(this._socketReconnectedCallback)
         {
-            GetEventDispatcher().removeEventListener(NitroEventType.SOCKET_RECONNECTED, this._socketReconnectedCallback);
+            GetEventDispatcher().removeEventListener(OctaneEventType.SOCKET_RECONNECTED, this._socketReconnectedCallback);
             this._socketReconnectedCallback = null;
         }
 

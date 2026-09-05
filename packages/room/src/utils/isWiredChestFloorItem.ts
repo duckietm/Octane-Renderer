@@ -1,4 +1,4 @@
-import { GetSessionDataManager } from '@nitrots/session';
+import { GetSessionDataManager } from '@octane/session';
 
 /** True for player-facing wired storage chest floor furni (wf_storage_*). */
 export const isWiredChestFloorItem = (typeId: number): boolean =>

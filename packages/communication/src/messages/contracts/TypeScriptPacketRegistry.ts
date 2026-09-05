@@ -60,7 +60,7 @@ export class TypeScriptPacketRegistry
         const eventSources = indexClasses(join(root, 'messages/incoming'));
         const parserSources = indexClasses(join(root, 'messages/parser'));
         const composerSources = indexClasses(join(root, 'messages/outgoing'));
-        const registrations = parse(join(root, 'NitroMessages.ts'));
+        const registrations = parse(join(root, 'OctaneMessages.ts'));
         const discovered: RegisteredTypeScriptPacket[] = [];
 
         visit(registrations, node =>

@@ -1,6 +1,6 @@
 export * from './CommunicationManager';
 export * from './GetCommunication';
-export * from './NitroMessages';
+export * from './OctaneMessages';
 export * from './SocketConnection';
 export * from './codec';
 export * from './codec/evawire';

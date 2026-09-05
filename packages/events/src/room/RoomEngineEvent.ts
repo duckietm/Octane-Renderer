@@ -1,6 +1,6 @@
-import { NitroEvent } from '../core';
+import { OctaneEvent } from '../core';
 
-export class RoomEngineEvent extends NitroEvent
+export class RoomEngineEvent extends OctaneEvent
 {
     public static INITIALIZED: string = 'REE_INITIALIZED';
     public static ENGINE_INITIALIZED: string = 'REE_ENGINE_INITIALIZED';

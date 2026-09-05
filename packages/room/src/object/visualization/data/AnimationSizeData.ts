@@ -1,4 +1,4 @@
-import { IAssetVisualAnimation } from '@nitrots/api';
+import { IAssetVisualAnimation } from '@octane/api';
 import { AnimationData } from './AnimationData';
 import { AnimationFrame } from './AnimationFrame';
 import { SizeData } from './SizeData';

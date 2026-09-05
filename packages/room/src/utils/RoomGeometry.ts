@@ -1,5 +1,5 @@
-import { IRoomGeometry, IVector3D } from '@nitrots/api';
-import { Vector3d } from '@nitrots/utils';
+import { IRoomGeometry, IVector3D } from '@octane/api';
+import { Vector3d } from '@octane/utils';
 import { Point } from 'pixi.js';
 
 export class RoomGeometry implements IRoomGeometry

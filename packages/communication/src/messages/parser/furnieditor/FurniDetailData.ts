@@ -1,4 +1,4 @@
-import { IMessageDataWrapper } from '@nitrots/api';
+import { IMessageDataWrapper } from '@octane/api';
 import { FurniItemData } from './FurniItemData';
 
 export class FurniDetailData extends FurniItemData

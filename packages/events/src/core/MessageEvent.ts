@@ -1,4 +1,4 @@
-import { IConnection, IMessageEvent, IMessageParser } from '@nitrots/api';
+import { IConnection, IMessageEvent, IMessageParser } from '@octane/api';
 
 export class MessageEvent implements IMessageEvent
 {

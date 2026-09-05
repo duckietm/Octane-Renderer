@@ -1,6 +1,6 @@
-import { IConnection, IMessageEvent } from '@nitrots/api';
-import { GetConfiguration } from '@nitrots/configuration';
-import { GetEventDispatcher } from '@nitrots/events';
+import { IConnection, IMessageEvent } from '@octane/api';
+import { GetConfiguration } from '@octane/configuration';
+import { GetEventDispatcher } from '@octane/events';
 import { afterEach, describe, expect, it } from 'vitest';
 import { CommunicationManager } from '../CommunicationManager';
 import {

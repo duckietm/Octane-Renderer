@@ -1,7 +1,7 @@
 import { Texture } from 'pixi.js';
-import { NitroEvent } from '../core';
+import { OctaneEvent } from '../core';
 
-export class BadgeImageReadyEvent extends NitroEvent
+export class BadgeImageReadyEvent extends OctaneEvent
 {
     public static IMAGE_READY: string = 'BIME_BADGE_IMAGE_READY';
 

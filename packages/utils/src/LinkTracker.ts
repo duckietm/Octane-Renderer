@@ -1,4 +1,4 @@
-import { ILinkEventTracker } from '@nitrots/api';
+import { ILinkEventTracker } from '@octane/api';
 
 const linkTrackers: ILinkEventTracker[] = [];
 

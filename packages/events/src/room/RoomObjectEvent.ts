@@ -1,7 +1,7 @@
-import { IRoomObject } from '@nitrots/api';
-import { NitroEvent } from '../core';
+import { IRoomObject } from '@octane/api';
+import { OctaneEvent } from '../core';
 
-export class RoomObjectEvent extends NitroEvent
+export class RoomObjectEvent extends OctaneEvent
 {
     private _object: IRoomObject;
 

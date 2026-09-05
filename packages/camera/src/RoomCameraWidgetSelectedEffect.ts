@@ -1,4 +1,4 @@
-import { IRoomCameraWidgetEffect } from '@nitrots/api';
+import { IRoomCameraWidgetEffect } from '@octane/api';
 
 export class RoomCameraWidgetSelectedEffect
 {

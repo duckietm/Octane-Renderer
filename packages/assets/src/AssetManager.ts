@@ -1,5 +1,5 @@
-import { IAssetData, IAssetManager, IGraphicAsset, IGraphicAssetCollection } from '@nitrots/api';
-import { NitroBundle, NitroBundleTextureDecoder, parseConfigJsonFromResponse } from '@nitrots/utils';
+import { IAssetData, IAssetManager, IGraphicAsset, IGraphicAssetCollection } from '@octane/api';
+import { OctaneBundle, OctaneBundleTextureDecoder, parseConfigJsonFromResponse } from '@octane/utils';
 import { Spritesheet, SpritesheetData, Texture } from 'pixi.js';
 import { assetImageFallbackUrl, isAssetJsonUrl } from './AssetJsonUrl';
 import { GraphicAssetCollection } from './GraphicAssetCollection';
@@ -10,14 +10,14 @@ export interface AssetManagerDependencies
     fetch(url: string): Promise<Response>;
     parseAssetData(response: Response, source: string): Promise<IAssetData>;
     loadImageResource(request: ImageLoadRequest): Promise<LoadedImageResource>;
-    loadNitroBundle(buffer: ArrayBuffer, textureDecoder: NitroBundleTextureDecoder): Promise<NitroBundle>;
+    loadOctaneBundle(buffer: ArrayBuffer, textureDecoder: OctaneBundleTextureDecoder): Promise<OctaneBundle>;
 }
 
 const DEFAULT_DEPENDENCIES: AssetManagerDependencies = {
     fetch: url => globalThis.fetch(url),
     parseAssetData: (response, source) => parseConfigJsonFromResponse<IAssetData>(response, source),
     loadImageResource,
-    loadNitroBundle: (buffer, textureDecoder) => NitroBundle.from(buffer, textureDecoder)
+    loadOctaneBundle: (buffer, textureDecoder) => OctaneBundle.from(buffer, textureDecoder)
 };
 
 export class AssetManager implements IAssetManager
@@ -124,14 +124,14 @@ export class AssetManager implements IAssetManager
 
                 try
                 {
-                    const nitroBundle = await this._dependencies.loadNitroBundle(
+                    const octaneBundle = await this._dependencies.loadOctaneBundle(
                         await response.arrayBuffer(),
                         async (bytes, entryName) =>
                         {
                             const detected = detectImageFormat(new Uint8Array(bytes), undefined, entryName);
 
                             if(detected.format === 'svg')
-                                throw new Error(`SVG texture entry "${ entryName }" is not supported inside a Nitro bundle`);
+                                throw new Error(`SVG texture entry "${ entryName }" is not supported inside a Octane bundle`);
 
                             const resource = await this._dependencies.loadImageResource({
                                 source: entryName,
@@ -144,7 +144,7 @@ export class AssetManager implements IAssetManager
                             return resource.texture;
                         });
 
-                    await this.processAsset(nitroBundle.texture, nitroBundle.jsonFile);
+                    await this.processAsset(octaneBundle.texture, octaneBundle.jsonFile);
 
                     const retainedResource = decodedResources.pop();
 

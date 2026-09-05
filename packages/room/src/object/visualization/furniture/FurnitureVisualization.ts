@@ -1,5 +1,5 @@
-import { AlphaTolerance, IGraphicAsset, IObjectVisualizationData, IRoomGeometry, IRoomObjectSprite, RoomObjectVariable, RoomObjectVisualizationType } from '@nitrots/api';
-import { ChooserSelectionFilter } from '@nitrots/utils';
+import { AlphaTolerance, IGraphicAsset, IObjectVisualizationData, IRoomGeometry, IRoomObjectSprite, RoomObjectVariable, RoomObjectVisualizationType } from '@octane/api';
+import { ChooserSelectionFilter } from '@octane/utils';
 import { BLEND_MODES, Filter, Texture } from 'pixi.js';
 import { RoomObjectSpriteVisualization } from '../RoomObjectSpriteVisualization';
 import { ColorData, LayerData } from '../data';
@@ -157,7 +157,7 @@ export class FurnitureVisualization extends RoomObjectSpriteVisualization
         this._cacheScale = scale;
         this._cacheSize = this.getValidSize(scale);
 
-        if(typeof window !== 'undefined' && (window as unknown as { NitroFurniSizeDebug?: boolean }).NitroFurniSizeDebug)
+        if(typeof window !== 'undefined' && (window as unknown as { OctaneFurniSizeDebug?: boolean }).OctaneFurniSizeDebug)
         {
             const note = scale === 32 ? (this._cacheSize === 32 ? ' ✓ size-32' : ' fallback -> size-' + this._cacheSize) : '';
             console.log(`[FurniSize] ${this._type}: geometry ${scale} -> sprite size ${this._cacheSize}${note}`);

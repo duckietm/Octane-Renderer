@@ -1,4 +1,4 @@
-﻿import { IAssetAnimationDirection } from '@nitrots/api';
+﻿import { IAssetAnimationDirection } from '@octane/api';
 
 export class DirectionDataContainer
 {

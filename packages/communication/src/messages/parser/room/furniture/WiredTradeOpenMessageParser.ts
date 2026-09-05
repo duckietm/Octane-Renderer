@@ -1,4 +1,4 @@
-import { IMessageDataWrapper, IMessageParser } from '@nitrots/api';
+import { IMessageDataWrapper, IMessageParser } from '@octane/api';
 import { IWiredTradeRule, readWiredTradeRule } from './WiredTradeRuleParser';
 
 export const WIRED_CONTRACT_PAYMENT = 0;

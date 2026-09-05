@@ -101,7 +101,7 @@ describe('decodeNativeBrowserImage', () =>
         vi.stubGlobal('createImageBitmap', vi.fn().mockRejectedValue(new Error('bitmap decoder unavailable')));
         vi.stubGlobal('URL', {
             ...URL,
-            createObjectURL: vi.fn().mockReturnValue('blob:nitro-image'),
+            createObjectURL: vi.fn().mockReturnValue('blob:octane-image'),
             revokeObjectURL
         });
         vi.stubGlobal('Image', class
@@ -122,6 +122,6 @@ describe('decodeNativeBrowserImage', () =>
         const image = await decodeNativeBrowserImage(new Uint8Array([ 1, 2, 3 ]), 'image/png', 'fixture.png');
 
         expect(image).toMatchObject({ width: 2, height: 1 });
-        expect(revokeObjectURL).toHaveBeenCalledWith('blob:nitro-image');
+        expect(revokeObjectURL).toHaveBeenCalledWith('blob:octane-image');
     });
 });

@@ -1,4 +1,4 @@
-import { IDisposable, IMessageDataWrapper } from '@nitrots/api';
+import { IDisposable, IMessageDataWrapper } from '@octane/api';
 import { ModRoomData } from './ModRoomData';
 
 export class RoomModerationData implements IDisposable

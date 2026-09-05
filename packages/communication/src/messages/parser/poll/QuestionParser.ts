@@ -1,4 +1,4 @@
-import { IMessageDataWrapper, IMessageParser, IQuestion } from '@nitrots/api';
+import { IMessageDataWrapper, IMessageParser, IQuestion } from '@octane/api';
 
 export class QuestionParser implements IMessageParser
 {

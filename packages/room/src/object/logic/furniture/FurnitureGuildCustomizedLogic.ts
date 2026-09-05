@@ -1,6 +1,6 @@
-import { IRoomGeometry, MouseEventType, RoomObjectVariable, StringDataType } from '@nitrots/api';
-import { RoomObjectBadgeAssetEvent, RoomObjectWidgetRequestEvent, RoomSpriteMouseEvent } from '@nitrots/events';
-import { GetTickerTime } from '@nitrots/utils';
+import { IRoomGeometry, MouseEventType, RoomObjectVariable, StringDataType } from '@octane/api';
+import { RoomObjectBadgeAssetEvent, RoomObjectWidgetRequestEvent, RoomSpriteMouseEvent } from '@octane/events';
+import { GetTickerTime } from '@octane/utils';
 import { ObjectDataUpdateMessage, ObjectGroupBadgeUpdateMessage, ObjectSelectedMessage, RoomObjectUpdateMessage } from '../../../messages';
 import { FurnitureMultiStateLogic } from './FurnitureMultiStateLogic';
 

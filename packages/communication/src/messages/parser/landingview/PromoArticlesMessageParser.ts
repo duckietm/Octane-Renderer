@@ -1,4 +1,4 @@
-import { IMessageDataWrapper, IMessageParser } from '@nitrots/api';
+import { IMessageDataWrapper, IMessageParser } from '@octane/api';
 import { PromoArticleData } from './PromoArticleData';
 
 export class PromoArticlesMessageParser implements IMessageParser

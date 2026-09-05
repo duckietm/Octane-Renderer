@@ -1,6 +1,6 @@
-﻿import { NitroEvent } from '../core';
+﻿import { OctaneEvent } from '../core';
 
-export class SessionDataPreferencesEvent extends NitroEvent
+export class SessionDataPreferencesEvent extends OctaneEvent
 {
     public static UPDATED: string = 'APUE_UPDATED';
 

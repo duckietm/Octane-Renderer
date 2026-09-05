@@ -1,5 +1,5 @@
-import { IAssetData, IRoomGeometry, MouseEventType, RoomObjectVariable } from '@nitrots/api';
-import { RoomObjectWidgetRequestEvent, RoomSpriteMouseEvent } from '@nitrots/events';
+import { IAssetData, IRoomGeometry, MouseEventType, RoomObjectVariable } from '@octane/api';
+import { RoomObjectWidgetRequestEvent, RoomSpriteMouseEvent } from '@octane/events';
 import { FurnitureLogic } from './FurnitureLogic';
 
 export class FurnitureEditableInternalLinkLogic extends FurnitureLogic

@@ -1,5 +1,5 @@
-import { IAssetData, IObjectVisualizationData, IRoomObjectGraphicVisualization, IRoomObjectVisualizationFactory, RoomObjectVisualizationType } from '@nitrots/api';
-import { NitroLogger } from '@nitrots/utils';
+import { IAssetData, IObjectVisualizationData, IRoomObjectGraphicVisualization, IRoomObjectVisualizationFactory, RoomObjectVisualizationType } from '@octane/api';
+import { OctaneLogger } from '@octane/utils';
 import { AvatarVisualization, AvatarVisualizationData, FurnitureAnimatedVisualization, FurnitureAnimatedVisualizationData, FurnitureBBVisualization, FurnitureBadgeDisplayVisualization, FurnitureBottleVisualization, FurnitureBrandedImageVisualization, FurnitureChestVisualization, FurnitureBuilderPlaceholderVisualization, FurnitureCounterClockVisualization, FurnitureCuboidVisualization, FurnitureExternalImageVisualization, FurnitureFireworksVisualization, FurnitureGiftWrappedFireworksVisualization, FurnitureGiftWrappedVisualization, FurnitureGuildCustomizedVisualization, FurnitureGuildIsometricBadgeVisualization, FurnitureHabboWheelVisualization, FurnitureIsometricBBVisualization, FurnitureMannequinVisualization, FurnitureMannequinVisualizationData, FurniturePartyBeamerVisualization, FurniturePlanetSystemVisualization, FurniturePosterVisualization, FurnitureQueueTileVisualization, FurnitureResettingAnimatedVisualization, FurnitureRoomBackgroundVisualization, FurnitureScoreBoardVisualization, FurnitureSoundBlockVisualization, FurnitureStickieVisualization, FurnitureValRandomizerVisualization, FurnitureVisualization, FurnitureVisualizationData, FurnitureVoteCounterVisualization, FurnitureVoteMajorityVisualization, FurnitureWaterAreaVisualization, FurnitureYoutubeVisualization, PetVisualization, PetVisualizationData, RoomObjectSpriteVisualization, RoomVisualization, RoomVisualizationData, TileCursorVisualization } from './object';
 
 export class RoomObjectVisualizationFactory implements IRoomObjectVisualizationFactory
@@ -151,7 +151,7 @@ export class RoomObjectVisualizationFactory implements IRoomObjectVisualizationF
 
         if(!visualization)
         {
-            NitroLogger.log('Unknown Visualization', type);
+            OctaneLogger.log('Unknown Visualization', type);
 
             return null;
         }

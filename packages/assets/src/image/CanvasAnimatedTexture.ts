@@ -43,7 +43,7 @@ export const createCanvasAnimatedResource = (
 
     if(!texture) throw new Error('Animated image did not create a Pixi texture');
     if(texture.source) texture.source.scaleMode = 'linear';
-    if(texture.source) (texture.source as any).nitroFixedScaleMode = true;
+    if(texture.source) (texture.source as any).octaneFixedScaleMode = true;
 
     let frameIndex = 0;
     let completedLoops = 0;

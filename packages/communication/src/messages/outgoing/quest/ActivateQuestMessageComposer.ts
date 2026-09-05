@@ -1,4 +1,4 @@
-import { IMessageComposer } from '@nitrots/api';
+import { IMessageComposer } from '@octane/api';
 
 export class ActivateQuestMessageComposer implements IMessageComposer<ConstructorParameters<typeof ActivateQuestMessageComposer>>
 {

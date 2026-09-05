@@ -1,4 +1,4 @@
-import { AlphaTolerance, IRoomObjectSprite, RoomObjectSpriteType } from '@nitrots/api';
+import { AlphaTolerance, IRoomObjectSprite, RoomObjectSpriteType } from '@octane/api';
 import { BLEND_MODES, Filter, Texture } from 'pixi.js';
 
 export class RoomObjectSprite implements IRoomObjectSprite

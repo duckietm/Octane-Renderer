@@ -1,5 +1,5 @@
-import { RoomObjectVariable, RoomWidgetEnumItemExtradataParameter } from '@nitrots/api';
-import { RoomObjectFurnitureActionEvent, RoomObjectStateChangedEvent, RoomObjectWidgetRequestEvent } from '@nitrots/events';
+import { RoomObjectVariable, RoomWidgetEnumItemExtradataParameter } from '@octane/api';
+import { RoomObjectFurnitureActionEvent, RoomObjectStateChangedEvent, RoomObjectWidgetRequestEvent } from '@octane/events';
 import { ObjectDataUpdateMessage, RoomObjectUpdateMessage } from '../../../messages';
 import { FurnitureMultiStateLogic } from './FurnitureMultiStateLogic';
 

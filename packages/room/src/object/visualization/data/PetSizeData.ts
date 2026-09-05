@@ -1,4 +1,4 @@
-import { IAssetGesture, IAssetPosture } from '@nitrots/api';
+import { IAssetGesture, IAssetPosture } from '@octane/api';
 import { AnimationSizeData } from './AnimationSizeData';
 
 export class PetSizeData extends AnimationSizeData

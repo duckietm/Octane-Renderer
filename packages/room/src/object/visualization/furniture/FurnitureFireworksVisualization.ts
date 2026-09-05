@@ -1,5 +1,5 @@
-import { IAdvancedMap, IParticleSystem, RoomObjectVariable } from '@nitrots/api';
-import { AdvancedMap, NitroLogger } from '@nitrots/utils';
+import { IAdvancedMap, IParticleSystem, RoomObjectVariable } from '@octane/api';
+import { AdvancedMap, OctaneLogger } from '@octane/utils';
 import { FurnitureAnimatedVisualization } from './FurnitureAnimatedVisualization';
 import { FurnitureParticleSystem } from './FurnitureParticleSystem';
 
@@ -32,7 +32,7 @@ export class FurnitureFireworksVisualization extends FurnitureAnimatedVisualizat
 
                 if(this._particleSystems) this._currentParticleSystem = this._particleSystems.getValue(scale);
 
-                else NitroLogger.log('ERROR Particle systems could not be read!', this.object.type);
+                else OctaneLogger.log('ERROR Particle systems could not be read!', this.object.type);
             }
             else
             {

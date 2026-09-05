@@ -1,4 +1,4 @@
-import { IMessageDataWrapper, IRoomModerationSettings } from '@nitrots/api';
+import { IMessageDataWrapper, IRoomModerationSettings } from '@octane/api';
 
 export class RoomModerationSettings implements IRoomModerationSettings
 {

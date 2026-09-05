@@ -1,5 +1,5 @@
-import { IMessageEvent } from '@nitrots/api';
-import { MessageEvent } from '@nitrots/events';
+import { IMessageEvent } from '@octane/api';
+import { MessageEvent } from '@octane/events';
 import { CommunityGoalProgressMessageParser } from '../../parser';
 
 export class CommunityGoalProgressMessageEvent extends MessageEvent implements IMessageEvent

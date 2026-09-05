@@ -1,5 +1,5 @@
-import { IMessageEvent } from '@nitrots/api';
-import { MessageEvent } from '@nitrots/events';
+import { IMessageEvent } from '@octane/api';
+import { MessageEvent } from '@octane/events';
 import { HotelWillCloseInMinutesMessageParser } from '../../parser';
 
 export class HotelWillCloseInMinutesEvent extends MessageEvent implements IMessageEvent

@@ -1,4 +1,4 @@
-import { IMessageDataWrapper, IMessageParser } from '@nitrots/api';
+import { IMessageDataWrapper, IMessageParser } from '@octane/api';
 import { CompetitionRoomsData } from './utils';
 
 export class CompetitionRoomsDataMessageParser implements IMessageParser

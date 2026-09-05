@@ -1,5 +1,5 @@
-import { IMessageComposer, IMessageConfiguration, IMessageEvent } from '@nitrots/api';
-import { MessageEvent } from '@nitrots/events';
+import { IMessageComposer, IMessageConfiguration, IMessageEvent } from '@octane/api';
+import { MessageEvent } from '@octane/events';
 
 export class MessageClassManager
 {

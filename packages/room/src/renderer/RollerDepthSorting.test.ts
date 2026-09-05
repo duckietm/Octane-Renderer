@@ -1,4 +1,4 @@
-import { Vector3d } from '@nitrots/utils';
+import { Vector3d } from '@octane/utils';
 import { describe, expect, it } from 'vitest';
 import { SizeData } from '../object/visualization/data/SizeData';
 import { RoomGeometry } from '../utils/RoomGeometry';

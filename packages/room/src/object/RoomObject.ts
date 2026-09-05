@@ -1,5 +1,5 @@
-import { IRoomObjectController, IRoomObjectEventHandler, IRoomObjectModel, IRoomObjectMouseHandler, IRoomObjectUpdateMessage, IRoomObjectVisualization, IVector3D } from '@nitrots/api';
-import { Vector3d } from '@nitrots/utils';
+import { IRoomObjectController, IRoomObjectEventHandler, IRoomObjectModel, IRoomObjectMouseHandler, IRoomObjectUpdateMessage, IRoomObjectVisualization, IVector3D } from '@octane/api';
+import { Vector3d } from '@octane/utils';
 import { RoomObjectModel } from './RoomObjectModel';
 
 export class RoomObject implements IRoomObjectController

@@ -1,4 +1,4 @@
-import { IMessageDataWrapper, IMessageParser, PetBreedingResultData } from '@nitrots/api';
+import { IMessageDataWrapper, IMessageParser, PetBreedingResultData } from '@octane/api';
 
 export class PetBreedingResultParser implements IMessageParser
 {

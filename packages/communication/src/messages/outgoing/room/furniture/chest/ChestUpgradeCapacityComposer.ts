@@ -1,4 +1,4 @@
-import { IMessageComposer } from '@nitrots/api';
+import { IMessageComposer } from '@octane/api';
 
 /**
  * Buys extra wired chest capacity. [itemId, quantity] (each unit = +5000, costs credits + diamonds).

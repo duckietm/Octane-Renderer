@@ -1,4 +1,4 @@
-import { ContextMenuEnum } from '@nitrots/api';
+import { ContextMenuEnum } from '@octane/api';
 import { FurnitureMultiStateLogic } from './FurnitureMultiStateLogic';
 
 export class FurnitureRandomTeleportLogic extends FurnitureMultiStateLogic

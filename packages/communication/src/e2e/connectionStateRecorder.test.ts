@@ -1,4 +1,4 @@
-import { IConnectionStateSnapshot } from '@nitrots/api';
+import { IConnectionStateSnapshot } from '@octane/api';
 import { describe, expect, it } from 'vitest';
 import { recordConnectionStates } from './connectionStateRecorder';
 

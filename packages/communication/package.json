@@ -1,6 +1,6 @@
 {
-  "name": "@nitrots/communication",
-  "description": "Nitro communication module",
+  "name": "@octane/communication",
+  "description": "Octane communication module",
   "version": "1.0.0",
   "type": "module",
   "license": "GPL-3.0",
@@ -9,9 +9,9 @@
   },
   "main": "./index",
   "dependencies": {
-    "@nitrots/api": "1.0.0",
-    "@nitrots/events": "1.0.0",
-    "@nitrots/utils": "1.0.0",
+    "@octane/api": "1.0.0",
+    "@octane/events": "1.0.0",
+    "@octane/utils": "1.0.0",
     "@thumbmarkjs/thumbmarkjs": "^1.9.0",
     "pako": "^3.0.1",
     "pixi.js": "^8.19.0"

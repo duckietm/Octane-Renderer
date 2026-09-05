@@ -1,5 +1,5 @@
-import { IMessageEvent } from '@nitrots/api';
-import { MessageEvent } from '@nitrots/events';
+import { IMessageEvent } from '@octane/api';
+import { MessageEvent } from '@octane/events';
 import { WiredChestLockStateMessageParser } from '../../../parser';
 
 export class WiredChestLockStateEvent extends MessageEvent implements IMessageEvent

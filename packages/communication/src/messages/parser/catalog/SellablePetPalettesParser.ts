@@ -1,4 +1,4 @@
-import { IMessageDataWrapper, IMessageParser } from '@nitrots/api';
+import { IMessageDataWrapper, IMessageParser } from '@octane/api';
 import { SellablePetPaletteData } from './SellablePetPaletteData';
 
 export class SellablePetPalettesParser implements IMessageParser

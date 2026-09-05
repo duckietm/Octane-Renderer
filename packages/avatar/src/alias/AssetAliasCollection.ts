@@ -1,4 +1,4 @@
-﻿import { IAssetManager, IGraphicAsset } from '@nitrots/api';
+﻿import { IAssetManager, IGraphicAsset } from '@octane/api';
 import { AvatarRenderManager } from '../AvatarRenderManager';
 import { AssetAlias } from './AssetAlias';
 

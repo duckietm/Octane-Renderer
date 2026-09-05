@@ -1,5 +1,5 @@
 import { Texture } from 'pixi.js';
-import { GetConfiguration } from '@nitrots/configuration';
+import { GetConfiguration } from '@octane/configuration';
 
 type HabbiconFrameData = { id: number, x: number, y: number, width: number, height: number };
 

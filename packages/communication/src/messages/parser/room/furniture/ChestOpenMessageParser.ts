@@ -1,4 +1,4 @@
-import { IMessageDataWrapper, IMessageParser } from '@nitrots/api';
+import { IMessageDataWrapper, IMessageParser } from '@octane/api';
 
 /** Server ack that a chest open was accepted (official Syhytarer / 1174 wire shape). */
 export class ChestOpenMessageParser implements IMessageParser

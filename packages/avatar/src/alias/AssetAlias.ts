@@ -1,4 +1,4 @@
-﻿import { IAssetAlias } from '@nitrots/api';
+﻿import { IAssetAlias } from '@octane/api';
 
 export class AssetAlias
 {

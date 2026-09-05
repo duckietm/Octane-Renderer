@@ -1,8 +1,8 @@
-import { IAdvancedMap, IMessageEvent, IMusicController, IPlaylistController, ISongInfo } from '@nitrots/api';
-import { GetCommunication, GetNowPlayingMessageComposer, GetSongInfoMessageComposer, GetUserSongDisksMessageComposer, TraxSongInfoMessageEvent, UserSongDisksInventoryMessageEvent } from '@nitrots/communication';
-import { GetConfiguration } from '@nitrots/configuration';
-import { GetEventDispatcher, NotifyPlayedSongEvent, NowPlayingEvent, RoomObjectSoundMachineEvent, SongDiskInventoryReceivedEvent, SongInfoReceivedEvent, SoundManagerEvent } from '@nitrots/events';
-import { AdvancedMap } from '@nitrots/utils';
+import { IAdvancedMap, IMessageEvent, IMusicController, IPlaylistController, ISongInfo } from '@octane/api';
+import { GetCommunication, GetNowPlayingMessageComposer, GetSongInfoMessageComposer, GetUserSongDisksMessageComposer, TraxSongInfoMessageEvent, UserSongDisksInventoryMessageEvent } from '@octane/communication';
+import { GetConfiguration } from '@octane/configuration';
+import { GetEventDispatcher, NotifyPlayedSongEvent, NowPlayingEvent, RoomObjectSoundMachineEvent, SongDiskInventoryReceivedEvent, SongInfoReceivedEvent, SoundManagerEvent } from '@octane/events';
+import { AdvancedMap } from '@octane/utils';
 import { GetSoundManager } from '../GetSoundManager';
 import { SongDataEntry, SongStartRequestData } from '../common';
 import { TraxData } from '../trax/TraxData';

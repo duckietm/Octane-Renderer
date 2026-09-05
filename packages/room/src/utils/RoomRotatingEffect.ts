@@ -1,4 +1,4 @@
-import { GetTickerTime } from '@nitrots/utils';
+import { GetTickerTime } from '@octane/utils';
 
 export class RoomRotatingEffect
 {

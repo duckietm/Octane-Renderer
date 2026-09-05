@@ -1,7 +1,7 @@
-import { IConnection, IRoomHandlerListener } from '@nitrots/api';
-import { DesktopViewEvent, FlatAccessDeniedMessageEvent, GoToFlatMessageComposer, RoomDoorbellAcceptedEvent, RoomEnterEvent, RoomReadyMessageEvent, YouAreSpectatorMessageEvent } from '@nitrots/communication';
-import { GetEventDispatcher, RoomSessionDoorbellEvent, RoomSessionSpectatorModeEvent } from '@nitrots/events';
-import { NitroLogger } from '@nitrots/utils';
+import { IConnection, IRoomHandlerListener } from '@octane/api';
+import { DesktopViewEvent, FlatAccessDeniedMessageEvent, GoToFlatMessageComposer, RoomDoorbellAcceptedEvent, RoomEnterEvent, RoomReadyMessageEvent, YouAreSpectatorMessageEvent } from '@octane/communication';
+import { GetEventDispatcher, RoomSessionDoorbellEvent, RoomSessionSpectatorModeEvent } from '@octane/events';
+import { OctaneLogger } from '@octane/utils';
 import { BaseHandler } from './BaseHandler';
 
 export class RoomSessionHandler extends BaseHandler
@@ -47,7 +47,7 @@ export class RoomSessionHandler extends BaseHandler
     {
         if(!(event instanceof DesktopViewEvent)) return;
 
-        NitroLogger.log('[RoomSessionHandler] DesktopViewEvent received (roomId=' + this.roomId + ')');
+        OctaneLogger.log('[RoomSessionHandler] DesktopViewEvent received (roomId=' + this.roomId + ')');
 
         if(this.listener) this.listener.sessionUpdate(this.roomId, RoomSessionHandler.RS_DISCONNECTED);
     }
@@ -88,7 +88,7 @@ export class RoomSessionHandler extends BaseHandler
 
         if(!username || !username.length)
         {
-            NitroLogger.log('[RoomSessionHandler] FlatAccessDenied (empty username) → RS_DISCONNECTED (roomId=' + this.roomId + ')');
+            OctaneLogger.log('[RoomSessionHandler] FlatAccessDenied (empty username) → RS_DISCONNECTED (roomId=' + this.roomId + ')');
             this.listener.sessionUpdate(this.roomId, RoomSessionHandler.RS_DISCONNECTED);
         }
         else

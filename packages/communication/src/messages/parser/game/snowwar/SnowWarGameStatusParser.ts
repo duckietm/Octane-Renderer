@@ -1,4 +1,4 @@
-import { IMessageDataWrapper, IMessageParser } from '@nitrots/api';
+import { IMessageDataWrapper, IMessageParser } from '@octane/api';
 import { SnowWarSubturnEventData } from './SnowWarSubturnEventData';
 
 export class SnowWarGameStatusParser implements IMessageParser

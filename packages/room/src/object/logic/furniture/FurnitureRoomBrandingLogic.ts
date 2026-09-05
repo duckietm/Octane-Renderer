@@ -1,6 +1,6 @@
-import { IAssetData, IRoomGeometry, MapDataType, MouseEventType, RoomObjectVariable, RoomWidgetEnumItemExtradataParameter } from '@nitrots/api';
-import { GetAssetManager } from '@nitrots/assets';
-import { RoomObjectRoomAdEvent, RoomSpriteMouseEvent } from '@nitrots/events';
+import { IAssetData, IRoomGeometry, MapDataType, MouseEventType, RoomObjectVariable, RoomWidgetEnumItemExtradataParameter } from '@octane/api';
+import { GetAssetManager } from '@octane/assets';
+import { RoomObjectRoomAdEvent, RoomSpriteMouseEvent } from '@octane/events';
 import { ObjectAdUpdateMessage, ObjectDataUpdateMessage, RoomObjectUpdateMessage } from '../../../messages';
 import { FurnitureLogic } from './FurnitureLogic';
 

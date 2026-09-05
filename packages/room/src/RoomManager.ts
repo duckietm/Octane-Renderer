@@ -1,6 +1,6 @@
-import { IGraphicAssetCollection, IRoomInstance, IRoomInstanceContainer, IRoomManager, IRoomManagerListener, IRoomObject, IRoomObjectController, IRoomObjectManager } from '@nitrots/api';
-import { GetEventDispatcher, RoomContentLoadedEvent } from '@nitrots/events';
-import { NitroLogger } from '@nitrots/utils';
+import { IGraphicAssetCollection, IRoomInstance, IRoomInstanceContainer, IRoomManager, IRoomManagerListener, IRoomObject, IRoomObjectController, IRoomObjectManager } from '@octane/api';
+import { GetEventDispatcher, RoomContentLoadedEvent } from '@octane/events';
+import { OctaneLogger } from '@octane/utils';
 import { GetRoomContentLoader } from './GetRoomContentLoader';
 import { GetRoomObjectLogicFactory } from './GetRoomObjectLogicFactory';
 import { GetRoomObjectVisualizationFactory } from './GetRoomObjectVisualizationFactory';
@@ -294,7 +294,7 @@ export class RoomManager implements IRoomManager, IRoomInstanceContainer
                     this._listener.initalizeTemporaryObjectsByType(type, false);
                 }
 
-                NitroLogger.log('Invalid Collection', type);
+                OctaneLogger.log('Invalid Collection', type);
 
                 continue;
             }

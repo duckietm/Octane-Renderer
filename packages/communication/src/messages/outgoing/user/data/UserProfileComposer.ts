@@ -1,4 +1,4 @@
-import { IMessageComposer } from '@nitrots/api';
+import { IMessageComposer } from '@octane/api';
 
 export class UserProfileComposer implements IMessageComposer<ConstructorParameters<typeof UserProfileComposer>>
 {

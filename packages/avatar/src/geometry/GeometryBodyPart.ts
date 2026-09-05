@@ -1,5 +1,5 @@
-import { IAvatarImage } from '@nitrots/api';
-import { Matrix4x4, Node3D, Vector3d } from '@nitrots/utils';
+import { IAvatarImage } from '@octane/api';
+import { Matrix4x4, Node3D, Vector3d } from '@octane/utils';
 import { GeometryItem } from './GeometryItem';
 
 export class GeometryBodyPart extends Node3D

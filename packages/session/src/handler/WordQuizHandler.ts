@@ -1,6 +1,6 @@
-import { IConnection, IRoomHandlerListener } from '@nitrots/api';
-import { QuestionAnsweredEvent, QuestionEvent, QuestionFinishedEvent } from '@nitrots/communication';
-import { GetEventDispatcher, RoomSessionWordQuizEvent } from '@nitrots/events';
+import { IConnection, IRoomHandlerListener } from '@octane/api';
+import { QuestionAnsweredEvent, QuestionEvent, QuestionFinishedEvent } from '@octane/communication';
+import { GetEventDispatcher, RoomSessionWordQuizEvent } from '@octane/events';
 import { BaseHandler } from './BaseHandler';
 
 export class WordQuizHandler extends BaseHandler

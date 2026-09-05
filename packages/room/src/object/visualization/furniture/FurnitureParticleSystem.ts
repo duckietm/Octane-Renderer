@@ -1,5 +1,5 @@
-import { IAdvancedMap, IGraphicAsset, IParticleSystem, IRoomObjectSprite } from '@nitrots/api';
-import { AdvancedMap, TextureUtils, Vector3d } from '@nitrots/utils';
+import { IAdvancedMap, IGraphicAsset, IParticleSystem, IRoomObjectSprite } from '@octane/api';
+import { AdvancedMap, TextureUtils, Vector3d } from '@octane/utils';
 import { AlphaFilter, Graphics, Matrix, Point, Sprite, Texture } from 'pixi.js';
 import { FurnitureAnimatedVisualization } from './FurnitureAnimatedVisualization';
 import { FurnitureParticleSystemEmitter } from './FurnitureParticleSystemEmitter';

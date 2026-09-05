@@ -1,5 +1,5 @@
-import { RoomObjectVariable } from '@nitrots/api';
-import { RoomObjectWidgetRequestEvent } from '@nitrots/events';
+import { RoomObjectVariable } from '@octane/api';
+import { RoomObjectWidgetRequestEvent } from '@octane/events';
 import { FurnitureGuildCustomizedLogic } from './FurnitureGuildCustomizedLogic';
 
 export class FurnitureGroupForumTerminalLogic extends FurnitureGuildCustomizedLogic

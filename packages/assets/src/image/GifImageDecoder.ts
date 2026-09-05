@@ -20,7 +20,7 @@ export const decodeGifImage = (
 
     if(!texture) throw new Error('The GIF decoder returned no texture');
     if(texture.source) texture.source.scaleMode = 'linear';
-    if(texture.source) (texture.source as any).nitroFixedScaleMode = true;
+    if(texture.source) (texture.source as any).octaneFixedScaleMode = true;
 
     let disposed = false;
 

@@ -1,4 +1,4 @@
-import { ISongInfo } from '@nitrots/api';
+import { ISongInfo } from '@octane/api';
 
 export class SongDataEntry implements ISongInfo
 {

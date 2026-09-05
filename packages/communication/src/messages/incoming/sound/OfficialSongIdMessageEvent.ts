@@ -1,5 +1,5 @@
-import { IMessageEvent } from '@nitrots/api';
-import { MessageEvent } from '@nitrots/events';
+import { IMessageEvent } from '@octane/api';
+import { MessageEvent } from '@octane/events';
 import { OfficialSongIdMessageParser } from '../../parser';
 
 export class OfficialSongIdMessageEvent extends MessageEvent implements IMessageEvent

@@ -1,6 +1,6 @@
 {
-  "name": "@nitrots/utils",
-  "description": "Nitro utils module",
+  "name": "@octane/utils",
+  "description": "Octane utils module",
   "version": "1.0.0",
   "type": "module",
   "license": "GPL-3.0",
@@ -9,7 +9,7 @@
   },
   "main": "./index",
   "dependencies": {
-    "@nitrots/api": "1.0.0",
+    "@octane/api": "1.0.0",
     "pako": "^3.0.1",
     "pixi.js": "^8.19.0",
     "strip-json-comments": "^5.0.3"

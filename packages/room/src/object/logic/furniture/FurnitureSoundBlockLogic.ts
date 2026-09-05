@@ -1,5 +1,5 @@
-import { IAssetData, RoomObjectVariable } from '@nitrots/api';
-import { RoomObjectSamplePlaybackEvent } from '@nitrots/events';
+import { IAssetData, RoomObjectVariable } from '@octane/api';
+import { RoomObjectSamplePlaybackEvent } from '@octane/events';
 import { ObjectDataUpdateMessage, RoomObjectUpdateMessage } from '../../../messages';
 import { FurnitureMultiStateLogic } from './FurnitureMultiStateLogic';
 

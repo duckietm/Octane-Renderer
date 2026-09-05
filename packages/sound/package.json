@@ -1,6 +1,6 @@
 {
-  "name": "@nitrots/sound",
-  "description": "Nitro sound module",
+  "name": "@octane/sound",
+  "description": "Octane sound module",
   "version": "1.0.0",
   "type": "module",
   "license": "GPL-3.0",
@@ -9,8 +9,8 @@
   },
   "main": "./index",
   "dependencies": {
-    "@nitrots/api": "1.0.0",
-    "@nitrots/communication": "1.0.0",
+    "@octane/api": "1.0.0",
+    "@octane/communication": "1.0.0",
     "pixi.js": "^8.19.0"
   },
   "devDependencies": {

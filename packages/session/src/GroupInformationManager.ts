@@ -1,6 +1,6 @@
-import { IGroupInformationManager } from '@nitrots/api';
-import { GetCommunication, GetHabboGroupBadgesMessageComposer, HabboGroupBadgesMessageEvent, RoomReadyMessageEvent } from '@nitrots/communication';
-import { GetEventDispatcher, NitroEvent, NitroEventType } from '@nitrots/events';
+import { IGroupInformationManager } from '@octane/api';
+import { GetCommunication, GetHabboGroupBadgesMessageComposer, HabboGroupBadgesMessageEvent, RoomReadyMessageEvent } from '@octane/communication';
+import { GetEventDispatcher, OctaneEvent, OctaneEventType } from '@octane/events';
 
 export class GroupInformationManager implements IGroupInformationManager
 {
@@ -39,7 +39,7 @@ export class GroupInformationManager implements IGroupInformationManager
     {
         this._groupBadgesSnapshot = null;
 
-        GetEventDispatcher().dispatchEvent(new NitroEvent(NitroEventType.GROUP_BADGES_UPDATED));
+        GetEventDispatcher().dispatchEvent(new OctaneEvent(OctaneEventType.GROUP_BADGES_UPDATED));
     }
 
     public getGroupBadge(groupId: number): string

@@ -37,7 +37,7 @@ const patchGlTextureSystem = (r: Renderer): void =>
             {
                 source = Texture.EMPTY.source;
             }
-            else if(!source.nitroFixedScaleMode)
+            else if(!source.octaneFixedScaleMode)
             {
                 const scaleMode = GetDesiredScaleMode();
 

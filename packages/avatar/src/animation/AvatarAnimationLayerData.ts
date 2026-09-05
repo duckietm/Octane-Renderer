@@ -1,4 +1,4 @@
-﻿import { IActionDefinition, IActiveActionData, IAnimationLayerData, IAssetAnimationFramePart } from '@nitrots/api';
+﻿import { IActionDefinition, IActiveActionData, IAnimationLayerData, IAssetAnimationFramePart } from '@octane/api';
 import { ActiveActionData } from '../actions';
 
 export class AvatarAnimationLayerData implements IAnimationLayerData

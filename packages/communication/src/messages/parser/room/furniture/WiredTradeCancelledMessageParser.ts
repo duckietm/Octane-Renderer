@@ -1,4 +1,4 @@
-import { IMessageDataWrapper, IMessageParser } from '@nitrots/api';
+import { IMessageDataWrapper, IMessageParser } from '@octane/api';
 
 /** The player walked away themselves; the window says nothing about it. */
 export const WIRED_TRADE_FAILURE_SILENT = 0;

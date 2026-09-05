@@ -1,4 +1,4 @@
-import { IAssetData, IAssetLogicPlanetSystem, RoomObjectVariable } from '@nitrots/api';
+import { IAssetData, IAssetLogicPlanetSystem, RoomObjectVariable } from '@octane/api';
 import { FurnitureLogic } from './FurnitureLogic';
 
 export class FurniturePlanetSystemLogic extends FurnitureLogic

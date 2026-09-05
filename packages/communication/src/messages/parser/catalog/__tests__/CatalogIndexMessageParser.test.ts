@@ -1,4 +1,4 @@
-import { BinaryReader } from '@nitrots/utils';
+import { BinaryReader } from '@octane/utils';
 import { describe, expect, it } from 'vitest';
 import { EvaWireDataWrapper } from '../../../../codec/evawire/EvaWireDataWrapper';
 import { CatalogIndexMessageParser } from '../CatalogIndexMessageParser';

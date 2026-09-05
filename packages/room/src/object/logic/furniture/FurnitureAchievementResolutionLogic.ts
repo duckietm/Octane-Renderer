@@ -1,5 +1,5 @@
-import { RoomObjectVariable } from '@nitrots/api';
-import { RoomObjectBadgeAssetEvent, RoomObjectEvent, RoomObjectWidgetRequestEvent } from '@nitrots/events';
+import { RoomObjectVariable } from '@octane/api';
+import { RoomObjectBadgeAssetEvent, RoomObjectEvent, RoomObjectWidgetRequestEvent } from '@octane/events';
 import { ObjectGroupBadgeUpdateMessage, ObjectSelectedMessage, RoomObjectUpdateMessage } from '../../../messages';
 import { FurnitureBadgeDisplayLogic } from './FurnitureBadgeDisplayLogic';
 

@@ -1,5 +1,5 @@
-import { IEventDispatcher, IRoomGeometry, IRoomObjectController, IRoomObjectEventHandler, IRoomObjectUpdateMessage } from '@nitrots/api';
-import { RoomSpriteMouseEvent } from '@nitrots/events';
+import { IEventDispatcher, IRoomGeometry, IRoomObjectController, IRoomObjectEventHandler, IRoomObjectUpdateMessage } from '@octane/api';
+import { RoomSpriteMouseEvent } from '@octane/events';
 
 export class RoomObjectLogicBase implements IRoomObjectEventHandler
 {

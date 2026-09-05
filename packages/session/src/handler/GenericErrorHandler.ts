@@ -1,6 +1,6 @@
-import { GenericErrorEnum, IConnection, IRoomHandlerListener } from '@nitrots/api';
-import { GenericErrorEvent } from '@nitrots/communication';
-import { GetEventDispatcher, RoomSessionErrorMessageEvent } from '@nitrots/events';
+import { GenericErrorEnum, IConnection, IRoomHandlerListener } from '@octane/api';
+import { GenericErrorEvent } from '@octane/communication';
+import { GetEventDispatcher, RoomSessionErrorMessageEvent } from '@octane/events';
 import { BaseHandler } from './BaseHandler';
 
 export class GenericErrorHandler extends BaseHandler

@@ -1,4 +1,4 @@
-﻿import { IAnimation, IAssetAnimation, IAssetAnimationFrame } from '@nitrots/api';
+﻿import { IAnimation, IAssetAnimation, IAssetAnimationFrame } from '@octane/api';
 import { AvatarStructure } from '../AvatarStructure';
 import { AddDataContainer } from './AddDataContainer';
 import { AvatarAnimationLayerData } from './AvatarAnimationLayerData';

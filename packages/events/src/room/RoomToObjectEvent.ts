@@ -1,6 +1,6 @@
-﻿import { NitroEvent } from '../core';
+﻿import { OctaneEvent } from '../core';
 
-export class RoomToObjectEvent extends NitroEvent
+export class RoomToObjectEvent extends OctaneEvent
 {
     public constructor(type: string)
     {

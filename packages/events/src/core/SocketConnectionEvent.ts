@@ -1,7 +1,7 @@
-import { IConnection } from '@nitrots/api';
-import { NitroEvent } from './NitroEvent';
+import { IConnection } from '@octane/api';
+import { OctaneEvent } from './OctaneEvent';
 
-export class SocketConnectionEvent extends NitroEvent
+export class SocketConnectionEvent extends OctaneEvent
 {
     public static CONNECTION_OPENED = 'SCE_OPEN';
     public static CONNECTION_CLOSED = 'SCE_CLOSED';

@@ -1,4 +1,4 @@
-import { IActionDefinition, IActiveActionData } from '@nitrots/api';
+import { IActionDefinition, IActiveActionData } from '@octane/api';
 
 export class ActiveActionData implements IActiveActionData
 {

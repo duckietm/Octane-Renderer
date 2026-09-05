@@ -1,4 +1,4 @@
-import { IMessageComposer } from '@nitrots/api';
+import { IMessageComposer } from '@octane/api';
 import { IHotelViewLandingSlot } from '../../parser';
 
 export class HotelViewLandingSaveComposer implements IMessageComposer<(number | string | boolean)[]>

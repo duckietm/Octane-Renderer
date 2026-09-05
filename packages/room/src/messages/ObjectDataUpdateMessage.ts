@@ -1,4 +1,4 @@
-import { IObjectData } from '@nitrots/api';
+import { IObjectData } from '@octane/api';
 import { RoomObjectUpdateMessage } from './RoomObjectUpdateMessage';
 
 export class ObjectDataUpdateMessage extends RoomObjectUpdateMessage

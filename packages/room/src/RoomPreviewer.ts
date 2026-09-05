@@ -1,7 +1,7 @@
-import { AvatarAction, IGetImageListener, IImageResult, IObjectData, IRoomEngine, IRoomObjectController, IRoomRenderingCanvas, IVector3D, LegacyDataType, RoomObjectCategory, RoomObjectUserType, RoomObjectVariable } from '@nitrots/api';
-import { FloorHeightMapMessageParser, RoomEntryTileMessageParser } from '@nitrots/communication';
-import { GetEventDispatcher, RoomEngineEvent, RoomEngineObjectEvent } from '@nitrots/events';
-import { GetTickerTime, RoomId, Vector3d } from '@nitrots/utils';
+import { AvatarAction, IGetImageListener, IImageResult, IObjectData, IRoomEngine, IRoomObjectController, IRoomRenderingCanvas, IVector3D, LegacyDataType, RoomObjectCategory, RoomObjectUserType, RoomObjectVariable } from '@octane/api';
+import { FloorHeightMapMessageParser, RoomEntryTileMessageParser } from '@octane/communication';
+import { GetEventDispatcher, RoomEngineEvent, RoomEngineObjectEvent } from '@octane/events';
+import { GetTickerTime, RoomId, Vector3d } from '@octane/utils';
 import { Container, Point, Rectangle, Sprite, Texture } from 'pixi.js';
 import { RoomEngine } from './RoomEngine';
 import { ObjectRoomMapUpdateMessage } from './messages';

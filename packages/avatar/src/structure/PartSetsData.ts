@@ -1,4 +1,4 @@
-import { IActionDefinition, IFigureSetData } from '@nitrots/api';
+import { IActionDefinition, IFigureSetData } from '@octane/api';
 import { ActionDefinition } from '../actions';
 import { ActivePartSet, PartDefinition } from './parts';
 

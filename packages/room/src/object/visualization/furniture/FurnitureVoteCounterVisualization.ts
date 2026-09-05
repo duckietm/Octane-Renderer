@@ -1,4 +1,4 @@
-import { RoomObjectVariable } from '@nitrots/api';
+import { RoomObjectVariable } from '@octane/api';
 import { FurnitureAnimatedVisualization } from './FurnitureAnimatedVisualization';
 
 export class FurnitureVoteCounterVisualization extends FurnitureAnimatedVisualization

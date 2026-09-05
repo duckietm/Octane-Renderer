@@ -1,5 +1,5 @@
-import { IRoomGeometry, MouseEventType, NumberDataType, RoomObjectVariable } from '@nitrots/api';
-import { RoomObjectEvent, RoomObjectStateChangedEvent, RoomObjectWidgetRequestEvent, RoomSpriteMouseEvent } from '@nitrots/events';
+import { IRoomGeometry, MouseEventType, NumberDataType, RoomObjectVariable } from '@octane/api';
+import { RoomObjectEvent, RoomObjectStateChangedEvent, RoomObjectWidgetRequestEvent, RoomSpriteMouseEvent } from '@octane/events';
 import { ObjectDataUpdateMessage, RoomObjectUpdateMessage } from '../../../messages';
 import { FurnitureMultiStateLogic } from './FurnitureMultiStateLogic';
 

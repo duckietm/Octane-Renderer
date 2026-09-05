@@ -1,4 +1,4 @@
-import { IConnection } from '@nitrots/api';
+import { IConnection } from '@octane/api';
 import { describe, expect, it } from 'vitest';
 import { detachAuthenticatedConnection, formatMessengerDiagnostics } from './messengerE2eSupport';
 

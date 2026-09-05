@@ -1,4 +1,4 @@
-import { IMessageComposer } from '@nitrots/api';
+import { IMessageComposer } from '@octane/api';
 
 export class Game2GameChatMessageComposer implements IMessageComposer<ConstructorParameters<typeof Game2GameChatMessageComposer>>
 {

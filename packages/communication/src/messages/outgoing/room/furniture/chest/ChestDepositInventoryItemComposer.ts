@@ -1,4 +1,4 @@
-import { IMessageComposer } from '@nitrots/api';
+import { IMessageComposer } from '@octane/api';
 
 /** Deposit one inventory furni row into the active chest [chestItemId, inventoryItemId]. Header 9325. */
 export class ChestDepositInventoryItemComposer implements IMessageComposer<ConstructorParameters<typeof ChestDepositInventoryItemComposer>>

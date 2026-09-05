@@ -1,4 +1,4 @@
-﻿import { IVector3D } from '@nitrots/api';
+﻿import { IVector3D } from '@octane/api';
 import { Vector3d } from './Vector3d';
 
 export class Matrix4x4

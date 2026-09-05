@@ -1,4 +1,4 @@
-import { FurnitureType, IMessageDataWrapper } from '@nitrots/api';
+import { FurnitureType, IMessageDataWrapper } from '@octane/api';
 
 export class CatalogPageMessageProductData
 {

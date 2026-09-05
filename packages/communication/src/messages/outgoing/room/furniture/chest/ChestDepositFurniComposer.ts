@@ -1,4 +1,4 @@
-import { IMessageComposer } from '@nitrots/api';
+import { IMessageComposer } from '@octane/api';
 
 /**
  * Player deposits floor furni from inventory into a wired furni chest (Scrigno furni).

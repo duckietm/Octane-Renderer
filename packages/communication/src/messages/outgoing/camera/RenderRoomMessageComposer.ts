@@ -1,5 +1,5 @@
-import { IMessageComposer } from '@nitrots/api';
-import { NitroLogger, TextureUtils } from '@nitrots/utils';
+import { IMessageComposer } from '@octane/api';
+import { OctaneLogger, TextureUtils } from '@octane/utils';
 import { RenderTexture } from 'pixi.js';
 
 const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
@@ -42,13 +42,13 @@ export class RenderRoomMessageComposer implements IMessageComposer<ConstructorPa
     {
         if(!base64 || !base64.includes(','))
         {
-            NitroLogger.error('Camera: invalid base64 data URL');
+            OctaneLogger.error('Camera: invalid base64 data URL');
             return;
         }
 
         if(!base64.startsWith('data:image/png'))
         {
-            NitroLogger.error('Camera: rejected non-PNG image data');
+            OctaneLogger.error('Camera: rejected non-PNG image data');
             return;
         }
 
@@ -56,7 +56,7 @@ export class RenderRoomMessageComposer implements IMessageComposer<ConstructorPa
 
         if(!base64Data || !base64Data.length)
         {
-            NitroLogger.error('Camera: empty base64 payload');
+            OctaneLogger.error('Camera: empty base64 payload');
             return;
         }
 
@@ -68,13 +68,13 @@ export class RenderRoomMessageComposer implements IMessageComposer<ConstructorPa
         }
         catch (e)
         {
-            NitroLogger.error('Camera: failed to decode base64 data');
+            OctaneLogger.error('Camera: failed to decode base64 data');
             return;
         }
 
         if(binaryData.byteLength > MAX_IMAGE_BYTES)
         {
-            NitroLogger.error(`Camera: image too large (${binaryData.byteLength} bytes, max ${MAX_IMAGE_BYTES})`);
+            OctaneLogger.error(`Camera: image too large (${binaryData.byteLength} bytes, max ${MAX_IMAGE_BYTES})`);
             return;
         }
 
@@ -84,7 +84,7 @@ export class RenderRoomMessageComposer implements IMessageComposer<ConstructorPa
             || binaryData[2] !== PNG_MAGIC_BYTES[2]
             || binaryData[3] !== PNG_MAGIC_BYTES[3])
         {
-            NitroLogger.error('Camera: binary data does not have valid PNG header');
+            OctaneLogger.error('Camera: binary data does not have valid PNG header');
             return;
         }
 

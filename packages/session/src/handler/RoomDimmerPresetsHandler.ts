@@ -1,6 +1,6 @@
-﻿import { IConnection, IRoomHandlerListener } from '@nitrots/api';
-import { RoomDimmerPresetsEvent } from '@nitrots/communication';
-import { GetEventDispatcher, RoomSessionDimmerPresetsEvent } from '@nitrots/events';
+﻿import { IConnection, IRoomHandlerListener } from '@octane/api';
+import { RoomDimmerPresetsEvent } from '@octane/communication';
+import { GetEventDispatcher, RoomSessionDimmerPresetsEvent } from '@octane/events';
 import { BaseHandler } from './BaseHandler';
 
 export class RoomDimmerPresetsHandler extends BaseHandler

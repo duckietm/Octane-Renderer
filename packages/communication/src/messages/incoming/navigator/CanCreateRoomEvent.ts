@@ -1,5 +1,5 @@
-import { IMessageEvent } from '@nitrots/api';
-import { MessageEvent } from '@nitrots/events';
+import { IMessageEvent } from '@octane/api';
+import { MessageEvent } from '@octane/events';
 import { CanCreateRoomMessageParser } from '../../parser';
 
 export class CanCreateRoomEvent extends MessageEvent implements IMessageEvent

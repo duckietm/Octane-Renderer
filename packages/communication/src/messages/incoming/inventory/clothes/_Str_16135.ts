@@ -1,5 +1,5 @@
-﻿import { IMessageEvent } from '@nitrots/api';
-import { MessageEvent } from '@nitrots/events';
+﻿import { IMessageEvent } from '@octane/api';
+import { MessageEvent } from '@octane/events';
 import { _Str_8728 } from '../../../parser';
 
 export class _Str_16135 extends MessageEvent implements IMessageEvent

@@ -1,4 +1,4 @@
-import { IMessageDataWrapper, IMessageParser } from '@nitrots/api';
+import { IMessageDataWrapper, IMessageParser } from '@octane/api';
 
 export const CHEST_TRANSACTION_DEPOSIT = 0;
 export const CHEST_TRANSACTION_WITHDRAW = 1;

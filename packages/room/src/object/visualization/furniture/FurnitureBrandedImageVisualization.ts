@@ -1,5 +1,5 @@
-import { RoomObjectVariable } from '@nitrots/api';
-import { GetAssetManager } from '@nitrots/assets';
+import { RoomObjectVariable } from '@octane/api';
+import { GetAssetManager } from '@octane/assets';
 import { Texture } from 'pixi.js';
 import { FurnitureVisualization } from './FurnitureVisualization';
 

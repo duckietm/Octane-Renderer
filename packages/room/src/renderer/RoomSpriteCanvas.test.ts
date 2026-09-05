@@ -1,4 +1,4 @@
-import { IRoomObject, IRoomObjectSprite, IRoomObjectSpriteVisualization } from '@nitrots/api';
+import { IRoomObject, IRoomObjectSprite, IRoomObjectSpriteVisualization } from '@octane/api';
 import { describe, expect, it, vi } from 'vitest';
 import { RoomObjectCache } from './cache';
 import { RoomSpriteCanvas } from './RoomSpriteCanvas';
@@ -18,13 +18,13 @@ const { TestVector3d } = vi.hoisted(() => ({
     }
 }));
 
-vi.mock('@nitrots/utils', () => ({
+vi.mock('@octane/utils', () => ({
     GetTicker: () => ({ deltaTime: 1 }),
     TextureUtils: {},
     Vector3d: TestVector3d
 }));
 
-vi.mock('@nitrots/configuration', () => ({
+vi.mock('@octane/configuration', () => ({
     GetConfiguration: () => ({ getValue: (_key: string, fallback: unknown) => fallback })
 }));
 

@@ -1,4 +1,4 @@
-﻿import { BreedingPetInfo, IMessageDataWrapper, IMessageParser, RarityCategoryData } from '@nitrots/api';
+﻿import { BreedingPetInfo, IMessageDataWrapper, IMessageParser, RarityCategoryData } from '@octane/api';
 
 export class ConfirmBreedingRequestParser implements IMessageParser
 {

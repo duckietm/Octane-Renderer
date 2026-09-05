@@ -1,6 +1,6 @@
-import { NitroEvent } from '@nitrots/events';
+import { OctaneEvent } from '@octane/events';
 
-export class NowPlayingEvent extends NitroEvent
+export class NowPlayingEvent extends OctaneEvent
 {
     public static readonly NPE_USER_PLAY_SONG = 'NPE_USER_PLAY_SONG';
     public static readonly NPW_USER_STOP_SONG = 'NPW_USER_STOP_SONG';

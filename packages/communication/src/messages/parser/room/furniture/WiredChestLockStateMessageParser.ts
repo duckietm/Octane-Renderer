@@ -1,4 +1,4 @@
-import { IMessageDataWrapper, IMessageParser } from '@nitrots/api';
+import { IMessageDataWrapper, IMessageParser } from '@octane/api';
 
 /**
  * Result of a lock / unlock request. Wire layout: bool locked, bool all, int affected.

@@ -1,4 +1,4 @@
-import { IRoomObject } from '@nitrots/api';
+import { IRoomObject } from '@octane/api';
 import { RoomObjectFurnitureActionEvent } from './RoomObjectFurnitureActionEvent';
 
 export class RoomObjectPlaySoundIdEvent extends RoomObjectFurnitureActionEvent

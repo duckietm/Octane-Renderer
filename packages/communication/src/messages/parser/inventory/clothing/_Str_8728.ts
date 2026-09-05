@@ -1,4 +1,4 @@
-﻿import { IMessageDataWrapper, IMessageParser } from '@nitrots/api';
+﻿import { IMessageDataWrapper, IMessageParser } from '@octane/api';
 
 export class _Str_8728 implements IMessageParser
 {

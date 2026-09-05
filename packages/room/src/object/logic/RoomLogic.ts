@@ -1,7 +1,7 @@
-import { IRoomGeometry, IRoomObjectModel, MouseEventType, RoomObjectVariable } from '@nitrots/api';
-import { GetConfiguration } from '@nitrots/configuration';
-import { RoomObjectEvent, RoomObjectMouseEvent, RoomObjectTileMouseEvent, RoomObjectWallMouseEvent, RoomSpriteMouseEvent } from '@nitrots/events';
-import { ColorConverter, Vector3d } from '@nitrots/utils';
+import { IRoomGeometry, IRoomObjectModel, MouseEventType, RoomObjectVariable } from '@octane/api';
+import { GetConfiguration } from '@octane/configuration';
+import { RoomObjectEvent, RoomObjectMouseEvent, RoomObjectTileMouseEvent, RoomObjectWallMouseEvent, RoomSpriteMouseEvent } from '@octane/events';
+import { ColorConverter, Vector3d } from '@octane/utils';
 import { Point } from 'pixi.js';
 import { ObjectRoomColorUpdateMessage, ObjectRoomFloorHoleUpdateMessage, ObjectRoomMapUpdateMessage, ObjectRoomMaskUpdateMessage, ObjectRoomPlanePropertyUpdateMessage, ObjectRoomPlaneVisibilityUpdateMessage, ObjectRoomUpdateMessage, RoomObjectUpdateMessage } from '../../messages';
 import { RoomMapData } from '../RoomMapData';

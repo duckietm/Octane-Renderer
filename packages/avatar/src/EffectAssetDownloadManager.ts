@@ -1,7 +1,7 @@
-import { IAssetManager, IAvatarEffectListener } from '@nitrots/api';
-import { GetConfiguration } from '@nitrots/configuration';
-import { AvatarRenderEffectLibraryEvent, GetEventDispatcher, NitroEvent, NitroEventType } from '@nitrots/events';
-import { loadGamedata } from '@nitrots/utils';
+import { IAssetManager, IAvatarEffectListener } from '@octane/api';
+import { GetConfiguration } from '@octane/configuration';
+import { AvatarRenderEffectLibraryEvent, GetEventDispatcher, OctaneEvent, OctaneEventType } from '@octane/events';
+import { loadGamedata } from '@octane/utils';
 import { AvatarStructure } from './AvatarStructure';
 import { EffectAssetDownloadLibrary } from './EffectAssetDownloadLibrary';
 
@@ -47,7 +47,7 @@ export class EffectAssetDownloadManager
 
         // Store callback for cleanup
         this._libraryLoadedCallback = (event: AvatarRenderEffectLibraryEvent) => this.onLibraryLoaded(event);
-        GetEventDispatcher().addEventListener(NitroEventType.AVATAR_EFFECT_DOWNLOADED, this._libraryLoadedCallback);
+        GetEventDispatcher().addEventListener(OctaneEventType.AVATAR_EFFECT_DOWNLOADED, this._libraryLoadedCallback);
 
         await this.processMissingLibraries();
     }
@@ -56,7 +56,7 @@ export class EffectAssetDownloadManager
     {
         if(this._libraryLoadedCallback)
         {
-            GetEventDispatcher().removeEventListener(NitroEventType.AVATAR_EFFECT_DOWNLOADED, this._libraryLoadedCallback);
+            GetEventDispatcher().removeEventListener(OctaneEventType.AVATAR_EFFECT_DOWNLOADED, this._libraryLoadedCallback);
             this._libraryLoadedCallback = null;
         }
 
@@ -151,7 +151,7 @@ export class EffectAssetDownloadManager
 
                 this._effectListeners.delete(id);
 
-                GetEventDispatcher().dispatchEvent(new NitroEvent(NitroEventType.AVATAR_EFFECT_LOADED));
+                GetEventDispatcher().dispatchEvent(new OctaneEvent(OctaneEventType.AVATAR_EFFECT_LOADED));
             }
         }
 

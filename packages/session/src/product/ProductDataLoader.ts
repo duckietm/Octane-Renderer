@@ -1,6 +1,6 @@
-﻿import { IProductData } from '@nitrots/api';
-import { GetConfiguration } from '@nitrots/configuration';
-import { loadGamedata } from '@nitrots/utils';
+﻿import { IProductData } from '@octane/api';
+import { GetConfiguration } from '@octane/configuration';
+import { loadGamedata } from '@octane/utils';
 import { ProductData } from './ProductData';
 
 export class ProductDataLoader

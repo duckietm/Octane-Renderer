@@ -1,6 +1,6 @@
-import { NitroEvent } from './NitroEvent';
+import { OctaneEvent } from './OctaneEvent';
 
-export class ConfigurationEvent extends NitroEvent
+export class ConfigurationEvent extends OctaneEvent
 {
     public static LOADED: string = 'NCE_LOADED';
     public static FAILED: string = 'NCE_FAILED';

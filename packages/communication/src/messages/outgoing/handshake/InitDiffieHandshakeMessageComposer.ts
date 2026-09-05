@@ -1,4 +1,4 @@
-import { IMessageComposer } from '@nitrots/api';
+import { IMessageComposer } from '@octane/api';
 
 export class InitDiffieHandshakeMessageComposer implements IMessageComposer<ConstructorParameters<typeof InitDiffieHandshakeMessageComposer>>
 {

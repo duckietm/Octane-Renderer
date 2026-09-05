@@ -1,5 +1,5 @@
-import { IMessageDataWrapper, IMessageParser, ObjectRolling } from '@nitrots/api';
-import { Vector3d } from '@nitrots/utils';
+import { IMessageDataWrapper, IMessageParser, ObjectRolling } from '@octane/api';
+import { Vector3d } from '@octane/utils';
 
 function parseLocaleFloat(value: string): number
 {

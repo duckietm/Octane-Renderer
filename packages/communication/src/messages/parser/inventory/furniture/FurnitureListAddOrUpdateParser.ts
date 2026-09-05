@@ -1,4 +1,4 @@
-import { IMessageDataWrapper, IMessageParser } from '@nitrots/api';
+import { IMessageDataWrapper, IMessageParser } from '@octane/api';
 import { FurnitureListItemParser } from './FurnitureListItemParser';
 
 export class FurnitureListAddOrUpdateParser implements IMessageParser

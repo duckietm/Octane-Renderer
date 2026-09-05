@@ -1,5 +1,5 @@
-import { RoomObjectVariable, VoteDataType } from '@nitrots/api';
-import { GetTickerTime } from '@nitrots/utils';
+import { RoomObjectVariable, VoteDataType } from '@octane/api';
+import { GetTickerTime } from '@octane/utils';
 import { ObjectDataUpdateMessage, RoomObjectUpdateMessage } from '../../../messages';
 import { FurnitureMultiStateLogic } from './FurnitureMultiStateLogic';
 

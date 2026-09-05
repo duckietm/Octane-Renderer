@@ -1,7 +1,7 @@
-import { IAvatarAssetDownloadLibrary } from '@nitrots/api';
-import { NitroEvent } from '../core';
+import { IAvatarAssetDownloadLibrary } from '@octane/api';
+import { OctaneEvent } from '../core';
 
-export class AvatarRenderLibraryEvent extends NitroEvent
+export class AvatarRenderLibraryEvent extends OctaneEvent
 {
     public static DOWNLOAD_COMPLETE: string = 'ARLE_DOWNLOAD_COMPLETE';
 

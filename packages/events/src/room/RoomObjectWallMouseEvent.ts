@@ -1,5 +1,5 @@
-﻿import { IRoomObject, IVector3D } from '@nitrots/api';
-import { Vector3d } from '@nitrots/utils';
+﻿import { IRoomObject, IVector3D } from '@octane/api';
+import { Vector3d } from '@octane/utils';
 import { RoomObjectMouseEvent } from './RoomObjectMouseEvent';
 
 export class RoomObjectWallMouseEvent extends RoomObjectMouseEvent

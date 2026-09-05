@@ -1,8 +1,8 @@
-import type { IRoomCameraWidgetEffect, IRoomCameraWidgetManager, IRoomCameraWidgetSelectedEffect, RoomCameraWidgetBlendMode } from '@nitrots/api';
-import { GetAssetManager } from '@nitrots/assets';
-import { GetConfiguration } from '@nitrots/configuration';
-import { GetEventDispatcher, RoomCameraWidgetManagerEvent } from '@nitrots/events';
-import { TextureUtils } from '@nitrots/utils';
+import type { IRoomCameraWidgetEffect, IRoomCameraWidgetManager, IRoomCameraWidgetSelectedEffect, RoomCameraWidgetBlendMode } from '@octane/api';
+import { GetAssetManager } from '@octane/assets';
+import { GetConfiguration } from '@octane/configuration';
+import { GetEventDispatcher, RoomCameraWidgetManagerEvent } from '@octane/events';
+import { TextureUtils } from '@octane/utils';
 import 'pixi.js/advanced-blend-modes';
 import { ColorMatrixFilter, Container, RenderTexture, Sprite } from 'pixi.js';
 import type { ColorMatrix, Texture } from 'pixi.js';

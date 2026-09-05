@@ -1,5 +1,5 @@
-import { AlphaTolerance } from '@nitrots/api';
-import { GetRenderer, TextureUtils } from '@nitrots/utils';
+import { AlphaTolerance } from '@octane/api';
+import { GetRenderer, TextureUtils } from '@octane/utils';
 import { Point, Sprite, Texture, TextureSource, WebGLRenderer, WebGPURenderer } from 'pixi.js';
 
 const BYTES_PER_PIXEL = 4;

@@ -1,4 +1,4 @@
-import { IConnection } from '@nitrots/api';
+import { IConnection } from '@octane/api';
 
 export interface DetachableCommunicationManager
 {

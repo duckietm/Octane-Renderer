@@ -1,4 +1,4 @@
-import { IMessageDataWrapper, IMessageParser } from '@nitrots/api';
+import { IMessageDataWrapper, IMessageParser } from '@octane/api';
 import { SnowWarLevelItemData } from './SnowWarLevelItemData';
 import { SnowWarMachineData } from './SnowWarMachineData';
 import { SnowWarPlayerData } from './SnowWarPlayerData';

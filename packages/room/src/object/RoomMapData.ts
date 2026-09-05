@@ -1,4 +1,4 @@
-import { IRoomMapData } from '@nitrots/api';
+import { IRoomMapData } from '@octane/api';
 
 export class RoomMapData implements IRoomMapData
 {

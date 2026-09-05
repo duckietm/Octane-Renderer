@@ -1,6 +1,6 @@
-import { NitroEvent } from '../core';
+import { OctaneEvent } from '../core';
 
-export class RoomCameraWidgetManagerEvent extends NitroEvent
+export class RoomCameraWidgetManagerEvent extends OctaneEvent
 {
     public static INITIALIZED: string = 'RCWM_INITIALIZED';
 

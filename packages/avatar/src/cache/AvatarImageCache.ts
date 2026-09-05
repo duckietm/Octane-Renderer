@@ -1,6 +1,6 @@
-import { AvatarDirectionAngle, AvatarFigurePartType, AvatarScaleType, GeometryType, IActiveActionData, IAvatarImage, IGraphicAsset } from '@nitrots/api';
-import { GraphicAsset } from '@nitrots/assets';
-import { GetRenderer, GetTickerTime } from '@nitrots/utils';
+import { AvatarDirectionAngle, AvatarFigurePartType, AvatarScaleType, GeometryType, IActiveActionData, IAvatarImage, IGraphicAsset } from '@octane/api';
+import { GraphicAsset } from '@octane/assets';
+import { GetRenderer, GetTickerTime } from '@octane/utils';
 import { Container, Matrix, Point, Rectangle, RenderTexture, Sprite, Texture } from 'pixi.js';
 import { AvatarImageBodyPartContainer } from '../AvatarImageBodyPartContainer';
 import { AvatarImagePartContainer } from '../AvatarImagePartContainer';

@@ -1,4 +1,4 @@
-import { IBinaryWriter } from '@nitrots/api';
+import { IBinaryWriter } from '@octane/api';
 
 export class BinaryWriter implements IBinaryWriter
 {

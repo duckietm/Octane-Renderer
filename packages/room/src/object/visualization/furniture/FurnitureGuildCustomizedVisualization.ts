@@ -1,5 +1,5 @@
-import { IGraphicAsset, IRoomObjectSprite, RoomObjectVariable } from '@nitrots/api';
-import { GetSessionDataManager } from '@nitrots/session';
+import { IGraphicAsset, IRoomObjectSprite, RoomObjectVariable } from '@octane/api';
+import { GetSessionDataManager } from '@octane/session';
 import { FurnitureAnimatedVisualization } from './FurnitureAnimatedVisualization';
 
 export class FurnitureGuildCustomizedVisualization extends FurnitureAnimatedVisualization

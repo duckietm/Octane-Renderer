@@ -1,4 +1,4 @@
-import { IMessageComposer } from '@nitrots/api';
+import { IMessageComposer } from '@octane/api';
 
 /**
  * Saves a wired chest's notification prefs. [itemId, full, donation, withdraw, empty, wired, mode].

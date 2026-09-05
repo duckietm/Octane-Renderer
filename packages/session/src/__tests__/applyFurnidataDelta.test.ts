@@ -22,7 +22,7 @@ describe('applyFurnidataDeltaTo', () =>
         expect(floor._description).toBe('New desc');
         expect(setValue).toHaveBeenCalledWith('roomItem.name.5', 'New');
         expect(setValue).toHaveBeenCalledWith('roomItem.desc.5', 'New desc');
-        expect(dispatched).toContain('nitro-localization-updated');
+        expect(dispatched).toContain('octane-localization-updated');
     });
 
     it('patches wall items by id', () =>

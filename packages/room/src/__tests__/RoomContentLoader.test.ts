@@ -1,4 +1,4 @@
-import { FurnitureType, RoomObjectCategory } from '@nitrots/api';
+import { FurnitureType, RoomObjectCategory } from '@octane/api';
 import { describe, expect, it } from 'vitest';
 import { RoomContentLoader } from '../RoomContentLoader';
 

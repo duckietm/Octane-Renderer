@@ -1,5 +1,5 @@
-import { IAdvancedMap, IMessageDataWrapper, IMessageParser } from '@nitrots/api';
-import { AdvancedMap } from '@nitrots/utils';
+import { IAdvancedMap, IMessageDataWrapper, IMessageParser } from '@octane/api';
+import { AdvancedMap } from '@octane/utils';
 
 export class JukeboxSongDisksMessageParser implements IMessageParser
 {

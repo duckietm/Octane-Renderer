@@ -1,4 +1,4 @@
-import { RoomObjectWidgetRequestEvent } from '@nitrots/events';
+import { RoomObjectWidgetRequestEvent } from '@octane/events';
 import { FurnitureLogic } from './FurnitureLogic';
 
 export class FurniturePlaceholderLogic extends FurnitureLogic

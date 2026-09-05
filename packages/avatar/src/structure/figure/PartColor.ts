@@ -1,4 +1,4 @@
-import { IFigureDataColor, IPartColor } from '@nitrots/api';
+import { IFigureDataColor, IPartColor } from '@octane/api';
 
 export class PartColor implements IPartColor
 {

@@ -1,5 +1,5 @@
-import { IAdvancedMap, IFigureDataPalette, IPalette, IPartColor } from '@nitrots/api';
-import { AdvancedMap } from '@nitrots/utils';
+import { IAdvancedMap, IFigureDataPalette, IPalette, IPartColor } from '@octane/api';
+import { AdvancedMap } from '@octane/utils';
 import { PartColor } from './PartColor';
 
 export class Palette implements IPalette

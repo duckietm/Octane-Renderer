@@ -1,4 +1,4 @@
-import { IMessageDataWrapper, IObjectData } from '@nitrots/api';
+import { IMessageDataWrapper, IObjectData } from '@octane/api';
 import { FurnitureDataParser } from '../../room';
 import { IFurnitureItemData } from './IFurnitureItemData';
 

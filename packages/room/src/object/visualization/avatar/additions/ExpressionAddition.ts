@@ -1,4 +1,4 @@
-import { IRoomObjectSprite } from '@nitrots/api';
+import { IRoomObjectSprite } from '@octane/api';
 import { AvatarVisualization } from '../AvatarVisualization';
 import { IExpressionAddition } from './IExpressionAddition';
 

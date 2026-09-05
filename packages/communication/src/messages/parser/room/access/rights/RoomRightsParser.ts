@@ -1,4 +1,4 @@
-import { IMessageDataWrapper, IMessageParser, RoomControllerLevel } from '@nitrots/api';
+import { IMessageDataWrapper, IMessageParser, RoomControllerLevel } from '@octane/api';
 
 export class RoomRightsParser implements IMessageParser
 {

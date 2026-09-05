@@ -1,7 +1,7 @@
-import { BinaryReader, BinaryWriter } from '@nitrots/utils';
+import { BinaryReader, BinaryWriter } from '@octane/utils';
 import { gzip } from 'pako';
 import { describe, expect, it } from 'vitest';
-import { NitroMessages } from '../../../../NitroMessages';
+import { OctaneMessages } from '../../../../OctaneMessages';
 import { IncomingHeader } from '../../../incoming/IncomingHeader';
 import { OutgoingHeader } from '../../../outgoing/OutgoingHeader';
 import {
@@ -65,7 +65,7 @@ describe('catalog studio packet contract', () =>
 {
     it('uses the emulator headers and registers every request and response', () =>
     {
-        const messages = new NitroMessages();
+        const messages = new OctaneMessages();
 
         [ 10067, 10071, 10072, 10073, 10078, 10079, 10080 ].forEach(header =>
             expect(messages.composers.has(header)).toBe(true));

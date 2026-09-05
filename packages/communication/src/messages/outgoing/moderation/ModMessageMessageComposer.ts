@@ -1,4 +1,4 @@
-import { IMessageComposer } from '@nitrots/api';
+import { IMessageComposer } from '@octane/api';
 import { ModBanMessageComposer } from './ModBanMessageComposer';
 
 export class ModMessageMessageComposer implements IMessageComposer<any>

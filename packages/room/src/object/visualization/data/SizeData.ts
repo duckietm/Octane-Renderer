@@ -1,4 +1,4 @@
-import { IAssetColor, IAssetVisualizationDirection, IAssetVisualizationLayer } from '@nitrots/api';
+import { IAssetColor, IAssetVisualizationDirection, IAssetVisualizationLayer } from '@octane/api';
 import { BLEND_MODES } from 'pixi.js';
 import { ColorData } from './ColorData';
 import { DirectionData } from './DirectionData';

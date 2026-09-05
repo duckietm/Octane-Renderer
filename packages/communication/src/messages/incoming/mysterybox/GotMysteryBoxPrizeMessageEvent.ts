@@ -1,5 +1,5 @@
-import { IMessageEvent } from '@nitrots/api';
-import { MessageEvent } from '@nitrots/events';
+import { IMessageEvent } from '@octane/api';
+import { MessageEvent } from '@octane/events';
 import { GotMysteryBoxPrizeMessageParser } from '../../parser/mysterybox';
 
 export class GotMysteryBoxPrizeMessageEvent extends MessageEvent implements IMessageEvent

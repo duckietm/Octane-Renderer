@@ -1,10 +1,10 @@
-import { IEventDispatcher, INitroEvent } from '../../../common';
+import { IEventDispatcher, IOctaneEvent } from '../../../common';
 import { IRoomObjectEventHandler } from './IRoomObjectEventHandler';
 
 export interface IRoomObjectLogicFactory
 {
     getLogic(type: string): IRoomObjectEventHandler;
-    registerEventFunction(func: (event: INitroEvent) => void): void;
-    removeEventFunction(func: (event: INitroEvent) => void): void;
+    registerEventFunction(func: (event: IOctaneEvent) => void): void;
+    removeEventFunction(func: (event: IOctaneEvent) => void): void;
     events: IEventDispatcher;
 }

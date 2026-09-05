@@ -1,4 +1,4 @@
-import { IDisposable, IMessageDataWrapper } from '@nitrots/api';
+import { IDisposable, IMessageDataWrapper } from '@octane/api';
 
 export class CommunityGoalData implements IDisposable
 {

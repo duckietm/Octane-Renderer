@@ -1,5 +1,5 @@
-import { AlphaTolerance, IRoomObjectSprite } from '@nitrots/api';
-import { GetTexturePool } from '@nitrots/utils';
+import { AlphaTolerance, IRoomObjectSprite } from '@octane/api';
+import { GetTexturePool } from '@octane/utils';
 import { Texture } from 'pixi.js';
 import { IAvatarAddition } from './IAvatarAddition';
 

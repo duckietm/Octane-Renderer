@@ -1,4 +1,4 @@
-import { AvatarAction, IRoomObject, RoomObjectVariable } from '@nitrots/api';
+import { AvatarAction, IRoomObject, RoomObjectVariable } from '@octane/api';
 
 // Sort-depth weight per unit of object altitude. The geometry's depth vector is
 // nearly horizontal (0.5° vertical angle), so altitude alone contributes almost

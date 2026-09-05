@@ -1,4 +1,4 @@
-import { IMessageComposer } from '@nitrots/api';
+import { IMessageComposer } from '@octane/api';
 import { NewUserExperienceGetGiftsSelection } from './NewUserExperienceGetGiftsSelection';
 
 export class NewUserExperienceGetGiftsComposer implements IMessageComposer<ConstructorParameters<typeof NewUserExperienceGetGiftsComposer>>

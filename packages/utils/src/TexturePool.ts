@@ -1,4 +1,4 @@
-import { NitroLogger, TextureUtils } from '@nitrots/utils';
+import { OctaneLogger, TextureUtils } from '@octane/utils';
 import { Texture } from 'pixi.js';
 
 export class TexturePool

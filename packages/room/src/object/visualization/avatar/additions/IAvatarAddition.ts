@@ -1,4 +1,4 @@
-import { IRoomObjectSprite } from '@nitrots/api';
+import { IRoomObjectSprite } from '@octane/api';
 
 export interface IAvatarAddition
 {

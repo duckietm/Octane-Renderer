@@ -1,4 +1,4 @@
-﻿import { IRoomObjectSprite, RoomObjectSpriteData, RoomObjectSpriteType } from '@nitrots/api';
+﻿import { IRoomObjectSprite, RoomObjectSpriteData, RoomObjectSpriteType } from '@octane/api';
 import { SortableSprite } from '../utils';
 import { RoomObjectCacheItem } from './RoomObjectCacheItem';
 

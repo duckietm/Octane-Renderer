@@ -1,7 +1,7 @@
-﻿import { ILocalizationManager } from '@nitrots/api';
-import { BadgePointLimitsEvent, GetCommunication } from '@nitrots/communication';
-import { GetConfiguration } from '@nitrots/configuration';
-import { loadGamedata } from '@nitrots/utils';
+﻿import { ILocalizationManager } from '@octane/api';
+import { BadgePointLimitsEvent, GetCommunication } from '@octane/communication';
+import { GetConfiguration } from '@octane/configuration';
+import { loadGamedata } from '@octane/utils';
 import { BadgeBaseAndLevel } from './BadgeBaseAndLevel';
 
 export class LocalizationManager implements ILocalizationManager

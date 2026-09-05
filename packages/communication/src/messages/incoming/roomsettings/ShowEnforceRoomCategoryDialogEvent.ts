@@ -1,5 +1,5 @@
-import { IMessageEvent } from '@nitrots/api';
-import { MessageEvent } from '@nitrots/events';
+import { IMessageEvent } from '@octane/api';
+import { MessageEvent } from '@octane/events';
 import { ShowEnforceRoomCategoryDialogParser } from '../../parser';
 
 export class ShowEnforceRoomCategoryDialogEvent extends MessageEvent implements IMessageEvent

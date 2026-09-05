@@ -1,4 +1,4 @@
-﻿import { IVector3D } from '@nitrots/api';
+﻿import { IVector3D } from '@octane/api';
 import { RoomToObjectEvent } from './RoomToObjectEvent';
 
 export class RoomToObjectOwnAvatarMoveEvent extends RoomToObjectEvent

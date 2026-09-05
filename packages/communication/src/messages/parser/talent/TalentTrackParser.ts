@@ -1,4 +1,4 @@
-import { IMessageDataWrapper, IMessageParser } from '@nitrots/api';
+import { IMessageDataWrapper, IMessageParser } from '@octane/api';
 import { TalentTrackLevel } from './TalentTrackLevel';
 import { TalentTrackRewardProduct } from './TalentTrackRewardProduct';
 import { TalentTrackTask } from './TalentTrackTask';

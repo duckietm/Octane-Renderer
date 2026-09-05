@@ -1,6 +1,6 @@
-import { IConnection, IRoomHandlerListener, SystemChatStyleEnum } from '@nitrots/api';
-import { FloodControlEvent, PetRespectNoficationEvent, PetSupplementTypeEnum, PetSupplementedNotificationEvent, RemainingMuteEvent, RespectReceivedEvent, RoomUnitChatEvent, RoomUnitChatShoutEvent, RoomUnitChatWhisperEvent, RoomUnitHandItemReceivedEvent } from '@nitrots/communication';
-import { GetEventDispatcher, RoomSessionChatEvent } from '@nitrots/events';
+import { IConnection, IRoomHandlerListener, SystemChatStyleEnum } from '@octane/api';
+import { FloodControlEvent, PetRespectNoficationEvent, PetSupplementTypeEnum, PetSupplementedNotificationEvent, RemainingMuteEvent, RespectReceivedEvent, RoomUnitChatEvent, RoomUnitChatShoutEvent, RoomUnitChatWhisperEvent, RoomUnitHandItemReceivedEvent } from '@octane/communication';
+import { GetEventDispatcher, RoomSessionChatEvent } from '@octane/events';
 import { BaseHandler } from './BaseHandler';
 
 export class RoomChatHandler extends BaseHandler

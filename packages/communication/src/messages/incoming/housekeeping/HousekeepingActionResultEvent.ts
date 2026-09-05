@@ -1,5 +1,5 @@
-import { IMessageEvent } from '@nitrots/api';
-import { MessageEvent } from '@nitrots/events';
+import { IMessageEvent } from '@octane/api';
+import { MessageEvent } from '@octane/events';
 import { HousekeepingActionResultParser } from '../../parser';
 
 export class HousekeepingActionResultEvent extends MessageEvent implements IMessageEvent

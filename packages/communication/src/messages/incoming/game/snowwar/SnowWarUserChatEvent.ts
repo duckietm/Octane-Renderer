@@ -1,5 +1,5 @@
-import { IMessageEvent } from '@nitrots/api';
-import { MessageEvent } from '@nitrots/events';
+import { IMessageEvent } from '@octane/api';
+import { MessageEvent } from '@octane/events';
 import { SnowWarUserChatParser } from '../../../parser';
 
 export class SnowWarUserChatEvent extends MessageEvent implements IMessageEvent

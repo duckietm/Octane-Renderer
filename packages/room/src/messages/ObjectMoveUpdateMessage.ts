@@ -1,4 +1,4 @@
-import { IRoomObjectController, IVector3D } from '@nitrots/api';
+import { IRoomObjectController, IVector3D } from '@octane/api';
 import { RoomObjectUpdateMessage } from './RoomObjectUpdateMessage';
 
 export class ObjectMoveUpdateMessage extends RoomObjectUpdateMessage

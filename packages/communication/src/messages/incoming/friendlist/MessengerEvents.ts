@@ -1,5 +1,5 @@
-import { IMessageEvent, IMessageParser } from '@nitrots/api';
-import { MessageEvent } from '@nitrots/events';
+import { IMessageEvent, IMessageParser } from '@octane/api';
+import { MessageEvent } from '@octane/events';
 import { MessengerConversationsParser, MessengerHistoryParser, MessengerMessageAckParser, MessengerMessageFailedParser, MessengerMessageParser, MessengerReadCursorParser } from '../../parser';
 
 abstract class TypedMessengerEvent<T extends IMessageParser> extends MessageEvent implements IMessageEvent

@@ -1,5 +1,5 @@
-﻿import { IMessageDataWrapper, IObjectData } from '@nitrots/api';
-import { GetTickerTime } from '@nitrots/utils';
+﻿import { IMessageDataWrapper, IObjectData } from '@octane/api';
+import { GetTickerTime } from '@octane/utils';
 import { FurnitureDataParser } from '../../room';
 import { IFurnitureItemData } from '../furniture';
 

@@ -1,4 +1,4 @@
-import { RoomObjectFurnitureActionEvent } from '@nitrots/events';
+import { RoomObjectFurnitureActionEvent } from '@octane/events';
 import { FurnitureLogic } from './FurnitureLogic';
 
 export class FurnitureHabboWheelLogic extends FurnitureLogic

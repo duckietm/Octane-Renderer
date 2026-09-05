@@ -1,4 +1,4 @@
-import { IMessageComposer } from '@nitrots/api';
+import { IMessageComposer } from '@octane/api';
 
 /**
  * The three switches on the chest window itself: [itemId, locked, autoLock, capacity].

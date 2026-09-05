@@ -1,4 +1,4 @@
-import { IBinaryReader } from '@nitrots/api';
+import { IBinaryReader } from '@octane/api';
 
 export class BinaryReader implements IBinaryReader
 {

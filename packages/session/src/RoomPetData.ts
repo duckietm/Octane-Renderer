@@ -1,4 +1,4 @@
-﻿import { IRoomPetData } from '@nitrots/api';
+﻿import { IRoomPetData } from '@octane/api';
 
 export class RoomPetData implements IRoomPetData
 {

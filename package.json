@@ -1,6 +1,6 @@
 {
-  "name": "@nitrots/nitro-renderer",
-  "description": "Javascript library for rendering Nitro in the browser using PixiJS",
+  "name": "@octane/renderer",
+  "description": "Javascript library for rendering Octane in the browser using PixiJS",
   "version": "2.1.0",
   "private": true,
   "packageManager": "yarn@4.18.0",

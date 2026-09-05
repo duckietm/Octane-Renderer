@@ -1,5 +1,5 @@
-import { IMessageEvent } from '@nitrots/api';
-import { MessageEvent } from '@nitrots/events';
+import { IMessageEvent } from '@octane/api';
+import { MessageEvent } from '@octane/events';
 import { HabboSearchResultParser } from '../../parser';
 
 export class HabboSearchResultEvent extends MessageEvent implements IMessageEvent

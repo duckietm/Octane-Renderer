@@ -1,4 +1,4 @@
-import { IMessageDataWrapper, IMessageParser } from '@nitrots/api';
+import { IMessageDataWrapper, IMessageParser } from '@octane/api';
 import { WiredActionDefinition } from './WiredActionDefinition';
 
 export class WiredFurniActionParser implements IMessageParser

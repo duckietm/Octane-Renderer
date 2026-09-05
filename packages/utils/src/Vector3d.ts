@@ -1,4 +1,4 @@
-﻿import { IVector3D } from '@nitrots/api';
+﻿import { IVector3D } from '@octane/api';
 
 export class Vector3d implements IVector3D
 {

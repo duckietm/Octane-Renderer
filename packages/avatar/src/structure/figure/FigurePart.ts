@@ -1,4 +1,4 @@
-import { IFigureDataPart, IFigurePart } from '@nitrots/api';
+import { IFigureDataPart, IFigurePart } from '@octane/api';
 
 export class FigurePart implements IFigurePart
 {

@@ -1,9 +1,9 @@
-import { FurnitureType, IEventDispatcher, IFurnitureData, IGraphicAssetCollection, IPetColorResult, IRoomContentListener, IRoomContentLoader, IRoomObject, RoomObjectCategory, RoomObjectUserType, RoomObjectVariable, RoomObjectVisualizationType } from '@nitrots/api';
-import { GetAssetManager } from '@nitrots/assets';
-import { GetConfiguration } from '@nitrots/configuration';
-import { GetEventDispatcher, RoomContentLoadedEvent } from '@nitrots/events';
-import { GetSessionDataManager } from '@nitrots/session';
-import { NitroLogger } from '@nitrots/utils';
+import { FurnitureType, IEventDispatcher, IFurnitureData, IGraphicAssetCollection, IPetColorResult, IRoomContentListener, IRoomContentLoader, IRoomObject, RoomObjectCategory, RoomObjectUserType, RoomObjectVariable, RoomObjectVisualizationType } from '@octane/api';
+import { GetAssetManager } from '@octane/assets';
+import { GetConfiguration } from '@octane/configuration';
+import { GetEventDispatcher, RoomContentLoadedEvent } from '@octane/events';
+import { GetSessionDataManager } from '@octane/session';
+import { OctaneLogger } from '@octane/utils';
 import { Texture } from 'pixi.js';
 import { PetColorResult } from './PetColorResult';
 
@@ -327,7 +327,7 @@ export class RoomContentLoader implements IRoomContentLoader
             {
                 image.onload = null;
 
-                NitroLogger.error('Failed to download asset', url);
+                OctaneLogger.error('Failed to download asset', url);
 
                 this._iconListener.onRoomContentLoaded(id, [type, param].join('_'), false);
             };

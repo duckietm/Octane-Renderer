@@ -1,4 +1,4 @@
-import { IAvatarFigureContainer } from '@nitrots/api';
+import { IAvatarFigureContainer } from '@octane/api';
 
 export class AvatarFigureContainer implements IAvatarFigureContainer
 {

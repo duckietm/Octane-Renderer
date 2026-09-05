@@ -1,4 +1,4 @@
-import { IBinaryReader, IMessageDataWrapper } from '@nitrots/api';
+import { IBinaryReader, IMessageDataWrapper } from '@octane/api';
 
 export class EvaWireDataWrapper implements IMessageDataWrapper
 {

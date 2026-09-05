@@ -1,4 +1,4 @@
-import { ConnectionStatePhase, IConnectionStateSnapshot } from '@nitrots/api';
+import { ConnectionStatePhase, IConnectionStateSnapshot } from '@octane/api';
 import { describe, expect, it } from 'vitest';
 import { SocketConnection } from './SocketConnection';
 

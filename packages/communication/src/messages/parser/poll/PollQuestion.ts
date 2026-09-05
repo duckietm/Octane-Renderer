@@ -1,4 +1,4 @@
-import { IPollQuestion } from '@nitrots/api';
+import { IPollQuestion } from '@octane/api';
 import { PollChoice } from './PollChoice';
 
 export class PollQuestion implements IPollQuestion

@@ -30,7 +30,7 @@ describe('TypeScript packet registry', () =>
         }`);
         write(root, 'messages/outgoing/OutgoingHeader.ts',
             'export class OutgoingHeader { static SEND = 200; }');
-        write(root, 'NitroMessages.ts', `class NitroMessages { register() {
+        write(root, 'OctaneMessages.ts', `class OctaneMessages { register() {
             this._events.set(IncomingHeader.OPEN, OpenEvent);
             this._composers.set(OutgoingHeader.SEND, SendComposer);
         }}`);
@@ -53,7 +53,7 @@ describe('TypeScript packet registry', () =>
             static FIRST = 100; static SECOND = 100;
         }`);
         write(root, 'messages/outgoing/OutgoingHeader.ts', 'export class OutgoingHeader {}');
-        write(root, 'NitroMessages.ts', `class NitroMessages { register() {
+        write(root, 'OctaneMessages.ts', `class OctaneMessages { register() {
             this._events.set(IncomingHeader.FIRST, FirstEvent);
             this._events.set(IncomingHeader.SECOND, SecondEvent);
         }}`);
@@ -75,7 +75,7 @@ describe('TypeScript packet registry', () =>
             static ACTIVE = 100; static STALE = 100;
         }`);
         write(root, 'messages/outgoing/OutgoingHeader.ts', 'export class OutgoingHeader {}');
-        write(root, 'NitroMessages.ts', `class NitroMessages { register() {
+        write(root, 'OctaneMessages.ts', `class OctaneMessages { register() {
             this._events.set(IncomingHeader.ACTIVE, ActiveEvent);
         }}`);
         write(root, 'messages/incoming/test/ActiveEvent.ts',
@@ -93,7 +93,7 @@ describe('TypeScript packet registry', () =>
             static ACTIVE = 100; static COMPATIBILITY = IncomingHeader.ACTIVE;
         }`);
         write(root, 'messages/outgoing/OutgoingHeader.ts', 'export class OutgoingHeader {}');
-        write(root, 'NitroMessages.ts', `class NitroMessages { register() {
+        write(root, 'OctaneMessages.ts', `class OctaneMessages { register() {
             this._events.set(IncomingHeader.COMPATIBILITY, ActiveEvent);
         }}`);
         write(root, 'messages/incoming/test/ActiveEvent.ts',
@@ -110,7 +110,7 @@ describe('TypeScript packet registry', () =>
         write(root, 'messages/incoming/IncomingHeader.ts',
             'export class IncomingHeader { static UNSUPPORTED = -1; }');
         write(root, 'messages/outgoing/OutgoingHeader.ts', 'export class OutgoingHeader {}');
-        write(root, 'NitroMessages.ts', 'class NitroMessages {}');
+        write(root, 'OctaneMessages.ts', 'class OctaneMessages {}');
 
         expect(() => TypeScriptPacketRegistry.discover(root))
             .toThrow('non-positive server_to_client header UNSUPPORTED=-1');
@@ -122,7 +122,7 @@ describe('TypeScript packet registry', () =>
         write(root, 'messages/incoming/IncomingHeader.ts',
             'export class IncomingHeader { static MISSING = 100; }');
         write(root, 'messages/outgoing/OutgoingHeader.ts', 'export class OutgoingHeader {}');
-        write(root, 'NitroMessages.ts', `class NitroMessages { register() {
+        write(root, 'OctaneMessages.ts', `class OctaneMessages { register() {
             this._events.set(IncomingHeader.MISSING, MissingEvent);
         }}`);
         write(root, 'messages/incoming/test/MissingEvent.ts',

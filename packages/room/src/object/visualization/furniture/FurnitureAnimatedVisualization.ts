@@ -1,4 +1,4 @@
-import { IObjectVisualizationData, RoomObjectVariable, RoomObjectVisualizationType } from '@nitrots/api';
+import { IObjectVisualizationData, RoomObjectVariable, RoomObjectVisualizationType } from '@octane/api';
 import { AnimationData, AnimationFrame, AnimationStateData } from '../data';
 import { FurnitureAnimatedVisualizationData } from './FurnitureAnimatedVisualizationData';
 import { FurnitureVisualization } from './FurnitureVisualization';

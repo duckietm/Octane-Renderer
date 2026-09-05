@@ -1,6 +1,6 @@
-import { IConnection, IRoomHandlerListener } from '@nitrots/api';
-import { PollContentsEvent, PollErrorEvent, PollOfferEvent, RoomPollResultEvent, StartRoomPollEvent } from '@nitrots/communication';
-import { GetEventDispatcher, RoomSessionPollEvent, RoomSessionVoteEvent } from '@nitrots/events';
+import { IConnection, IRoomHandlerListener } from '@octane/api';
+import { PollContentsEvent, PollErrorEvent, PollOfferEvent, RoomPollResultEvent, StartRoomPollEvent } from '@octane/communication';
+import { GetEventDispatcher, RoomSessionPollEvent, RoomSessionVoteEvent } from '@octane/events';
 import { BaseHandler } from './BaseHandler';
 
 export class PollHandler extends BaseHandler

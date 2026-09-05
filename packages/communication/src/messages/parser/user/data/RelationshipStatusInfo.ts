@@ -1,4 +1,4 @@
-import { IMessageDataWrapper, RelationshipStatusEnum } from '@nitrots/api';
+import { IMessageDataWrapper, RelationshipStatusEnum } from '@octane/api';
 
 export class RelationshipStatusInfo
 {

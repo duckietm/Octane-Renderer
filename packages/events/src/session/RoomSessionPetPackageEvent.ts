@@ -1,4 +1,4 @@
-﻿import { IRoomSession, PetFigureData } from '@nitrots/api';
+﻿import { IRoomSession, PetFigureData } from '@octane/api';
 import { RoomSessionEvent } from './RoomSessionEvent';
 
 export class RoomSessionPetPackageEvent extends RoomSessionEvent

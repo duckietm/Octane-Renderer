@@ -1,6 +1,6 @@
-﻿import { IIgnoredUsersManager } from '@nitrots/api';
-import { GetCommunication, GetIgnoredUsersComposer, IgnoreResultEvent, IgnoreUserComposer, IgnoreUserIdComposer, IgnoredUsersEvent, UnignoreUserComposer } from '@nitrots/communication';
-import { GetEventDispatcher, NitroEvent, NitroEventType } from '@nitrots/events';
+﻿import { IIgnoredUsersManager } from '@octane/api';
+import { GetCommunication, GetIgnoredUsersComposer, IgnoreResultEvent, IgnoreUserComposer, IgnoreUserIdComposer, IgnoredUsersEvent, UnignoreUserComposer } from '@octane/communication';
+import { GetEventDispatcher, OctaneEvent, OctaneEventType } from '@octane/events';
 
 export class IgnoredUsersManager implements IIgnoredUsersManager
 {
@@ -11,7 +11,7 @@ export class IgnoredUsersManager implements IIgnoredUsersManager
     {
         this._ignoredUsersSnapshot = null;
 
-        GetEventDispatcher().dispatchEvent(new NitroEvent(NitroEventType.IGNORED_USERS_UPDATED));
+        GetEventDispatcher().dispatchEvent(new OctaneEvent(OctaneEventType.IGNORED_USERS_UPDATED));
     }
 
     public getIgnoredUsersSnapshot(): ReadonlyArray<string>

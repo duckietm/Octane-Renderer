@@ -1,5 +1,5 @@
 import { ConfigJsonError, fetchConfigJson, isMissingResource, JsonMode, resolveJsonMode } from './JsonParser';
-import { NitroLogger } from './NitroLogger';
+import { OctaneLogger } from './OctaneLogger';
 
 export const DEFAULT_TIERS = [ 'core', 'custom', 'seasonal' ] as const;
 export type GamedataTier = typeof DEFAULT_TIERS[number] | string;
@@ -88,7 +88,7 @@ const arrayItemsLookKeyed = (arr: any[], idKeys: readonly string[], sourceLabel?
         // Surface this so operators don't get silent duplicates after merge.
         if(have > 0 && have / arr.length >= 0.8)
         {
-            NitroLogger.warn(`mergeGamedata: ${ sourceLabel ? `${ sourceLabel }: ` : '' }array looks keyed by "${ key }" (${ have }/${ arr.length } items) but some entries are missing it — falling back to concat which may produce duplicates`);
+            OctaneLogger.warn(`mergeGamedata: ${ sourceLabel ? `${ sourceLabel }: ` : '' }array looks keyed by "${ key }" (${ have }/${ arr.length } items) but some entries are missing it — falling back to concat which may produce duplicates`);
         }
     }
 

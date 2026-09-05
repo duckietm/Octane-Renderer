@@ -7,20 +7,20 @@ Octane originated as a fork of [Nitro React](https://github.com/billsonnn/nitro-
 npm
 
 ```
-npm install @nitrots/nitro-renderer
+npm install @octane/renderer
 ```
 
 yarn
 
 ```
-yarn add @nitrots/nitro-renderer
+yarn add @octane/renderer
 ```
 
 ## JSON / JSONC configuration parser
 
 Every configuration file and gamedata file loaded by the renderer (figuredata,
 furnidata, productdata, effectmap, avatar actions, etc.) goes through
-`@nitrots/utils` → `JsonParser.ts`. The parser supports three modes, selected at
+`@octane/utils` → `JsonParser.ts`. The parser supports three modes, selected at
 the **host build time** through the compile-time constant `__NITRO_JSON_MODE__`:
 
 | Mode     | Behaviour                                                                 |
@@ -53,7 +53,7 @@ mode values are not mapped; single-quoted strings and unquoted keys must be conv
 ### Using the parser directly
 
 ```ts
-import { parseConfigJson, fetchConfigJson } from '@nitrots/utils';
+import { parseConfigJson, fetchConfigJson } from '@octane/utils';
 
 const data  = parseConfigJson<MyConfig>(rawText, '/configuration/ui-config.json');
 const data2 = await fetchConfigJson<MyConfig>('/configuration/ui-config.jsonc');
@@ -64,7 +64,7 @@ JSONC — making misconfigurations easy to diagnose in production logs.
 
 ## Split-aware gamedata loader
 
-`@nitrots/utils` also exports `loadGamedata`, the loader that backs every
+`@octane/utils` also exports `loadGamedata`, the loader that backs every
 gamedata consumer in the renderer (FurnitureDataLoader, ProductDataLoader,
 EffectAssetDownloadManager, AvatarRenderManager, LocalizationManager). It
 accepts either a **single-file URL** (legacy) or a **directory URL** (split
@@ -110,7 +110,7 @@ Recognised id keys (in priority order): `id`, `classname`, `name`. Pass
 ### Programmatic usage
 
 ```ts
-import { loadGamedata, mergeGamedata } from '@nitrots/utils';
+import { loadGamedata, mergeGamedata } from '@octane/utils';
 
 // host code never needs to care whether the URL is split or not
 const furnidata = await loadGamedata('https://example.com/gamedata/furnidata/');

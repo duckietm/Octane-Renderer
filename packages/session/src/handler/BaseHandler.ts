@@ -1,4 +1,4 @@
-import { IConnection, IRoomHandlerListener } from '@nitrots/api';
+import { IConnection, IRoomHandlerListener } from '@octane/api';
 
 export class BaseHandler
 {

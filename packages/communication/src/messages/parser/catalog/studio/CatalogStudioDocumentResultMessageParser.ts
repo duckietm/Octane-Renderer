@@ -1,4 +1,4 @@
-import { IMessageDataWrapper, IMessageParser } from '@nitrots/api';
+import { IMessageDataWrapper, IMessageParser } from '@octane/api';
 import { CATALOG_STUDIO_DOCUMENT_ENCODING, CATALOG_STUDIO_DOCUMENT_MAX_CHUNKS, decodeCatalogStudioDocument } from '../../../catalog/studio/CatalogStudioDocumentWireCodec';
 
 export interface CatalogStudioDocumentChange

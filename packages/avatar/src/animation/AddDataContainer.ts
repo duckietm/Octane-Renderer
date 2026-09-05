@@ -1,4 +1,4 @@
-﻿import { IAssetAnimationAdd } from '@nitrots/api';
+﻿import { IAssetAnimationAdd } from '@octane/api';
 
 export class AddDataContainer
 {

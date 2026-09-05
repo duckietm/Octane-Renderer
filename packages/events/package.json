@@ -1,6 +1,6 @@
 {
-  "name": "@nitrots/events",
-  "description": "Nitro events module",
+  "name": "@octane/events",
+  "description": "Octane events module",
   "version": "1.0.0",
   "type": "module",
   "license": "GPL-3.0",
@@ -9,8 +9,8 @@
   },
   "main": "./index",
   "dependencies": {
-    "@nitrots/api": "1.0.0",
-    "@nitrots/utils": "1.0.0",
+    "@octane/api": "1.0.0",
+    "@octane/utils": "1.0.0",
     "pixi.js": "^8.19.0"
   },
   "devDependencies": {

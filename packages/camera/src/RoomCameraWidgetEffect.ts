@@ -1,4 +1,4 @@
-import type { IRoomCameraWidgetEffect, RoomCameraWidgetBlendMode } from '@nitrots/api';
+import type { IRoomCameraWidgetEffect, RoomCameraWidgetBlendMode } from '@octane/api';
 import type { ColorMatrix, Texture } from 'pixi.js';
 
 export class RoomCameraWidgetEffect implements IRoomCameraWidgetEffect

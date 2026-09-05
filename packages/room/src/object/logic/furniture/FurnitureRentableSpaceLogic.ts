@@ -1,5 +1,5 @@
-import { RoomObjectVariable, RoomWidgetEnum } from '@nitrots/api';
-import { RoomObjectDataRequestEvent } from '@nitrots/events';
+import { RoomObjectVariable, RoomWidgetEnum } from '@octane/api';
+import { RoomObjectDataRequestEvent } from '@octane/events';
 import { FurnitureLogic } from './FurnitureLogic';
 
 export class FurnitureRentableSpaceLogic extends FurnitureLogic

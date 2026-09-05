@@ -1,5 +1,5 @@
-import { IGraphicAsset, IRoomObjectSprite, RoomObjectVariable } from '@nitrots/api';
-import { TextureUtils } from '@nitrots/utils';
+import { IGraphicAsset, IRoomObjectSprite, RoomObjectVariable } from '@octane/api';
+import { TextureUtils } from '@octane/utils';
 import { Matrix, Sprite, Texture } from 'pixi.js';
 import { IsometricImageFurniVisualization } from './IsometricImageFurniVisualization';
 

@@ -1,6 +1,6 @@
-﻿import { NitroEvent } from '../core';
+﻿import { OctaneEvent } from '../core';
 
-export class MysteryBoxKeysUpdateEvent extends NitroEvent
+export class MysteryBoxKeysUpdateEvent extends OctaneEvent
 {
     public static MYSTERY_BOX_KEYS_UPDATE: string = 'mbke_update';
 

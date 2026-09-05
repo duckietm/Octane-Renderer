@@ -1,6 +1,6 @@
 # Octane Renderer — Claude project context
 
-Pure-TypeScript renderer library for the Nitro retro Habbo client.
+Pure-TypeScript renderer library for the Octane retro Habbo client.
 Wraps **PixiJS v8** for room/avatar rendering and provides the WebSocket
 + event-bus infrastructure that the React client (`../octane`) sits on
 top of.
@@ -30,7 +30,7 @@ packages/
   camera           in-room camera widget
   communication    WebSocket + composer/parser pipeline
   configuration    runtime config loader
-  events           EventDispatcher + NitroEventType + per-domain events
+  events           EventDispatcher + OctaneEventType + per-domain events
   localization     LocalizationManager
   room             RoomEngine + RoomVisualization
   session          SessionDataManager + RoomSessionManager + handlers
@@ -38,8 +38,8 @@ packages/
   utils            shared utilities (BinaryReader, Logger, …)
 ```
 
-Root `index.ts` re-exports everything from `@nitrots/*` so the React
-client gets a flat `import { … } from '@nitrots/nitro-renderer'`.
+Root `index.ts` re-exports everything from `@octane/*` so the React
+client gets a flat `import { … } from '@octane/renderer'`.
 
 ## React-friendly API additions (v2.1.0)
 
@@ -74,12 +74,12 @@ dispatches an invalidation event. The React side reads via
 | `UserDataManager` | `getRoomUserListSnapshot(): ReadonlyArray<IRoomUserData>` | `ROOM_USER_LIST_UPDATED` (inner IRoomUserData kept mutable — don't deep-clone) |
 | `SoundManager` | `getVolumesSnapshot(): Readonly<ISoundVolumesSnapshot>` | `SOUND_VOLUMES_UPDATED` (only when a volume actually changes) |
 
-Snapshot interface contracts live under `packages/api/src/nitro/session/`
-and `packages/api/src/nitro/sound/`. When adding a new snapshot, the
+Snapshot interface contracts live under `packages/api/src/octane/session/`
+and `packages/api/src/octane/sound/`. When adding a new snapshot, the
 checklist is:
-1. Define the `Ixxx Snapshot` interface in `packages/api/src/nitro/...`
+1. Define the `Ixxx Snapshot` interface in `packages/api/src/octane/...`
    and export it from the matching `index.ts`.
-2. Add a `XXX_UPDATED` member to `packages/events/src/NitroEventType.ts`.
+2. Add a `XXX_UPDATED` member to `packages/events/src/OctaneEventType.ts`.
 3. Add `getXxxSnapshot()` to the interface AND impl; cache + invalidate
    on every mutation path (don't forget batch operations like queue
    truncation — invalidate AFTER the full batch, not mid-way).
@@ -170,7 +170,7 @@ unchanged.
 - `TextureUtils.generateImage` casts the extractor's `ImageLike`
   union return to `HTMLImageElement` (the default backend produces
   one).
-- `Window.NitroConfig` declaration in `NitroConfig.ts` realigned to
+- `Window.OctaneConfig` declaration in `OctaneConfig.ts` realigned to
   the client's `Record<string, unknown>` type so the merged decls
   agree.
 - Empty-tuple composers (`WiredRoomSettingsRequestComposer`,
@@ -234,7 +234,7 @@ yarn test:coverage      # vitest with v8 coverage
 `../octane` consumes this library via `link:../octane-renderer`
 (yarn 4 node-modules linker). DO NOT use `yarn link` — it confuses
 vite's asset resolution. The client's `vite.config.js` then maps each
-`@nitrots/*` package directly to its source `index.ts` so there's no
+`@octane/*` package directly to its source `index.ts` so there's no
 build step needed for development.
 
 When making changes to renderer APIs the React client uses, the
@@ -276,7 +276,7 @@ for the React-side bridge code.
 
 - `../octane` — React 19 client (consumes this lib via link)
 - `../Arcturus-Morningstar-Extended` — Java emulator (server side)
-- `../NitroV3-Housekeeping` — Next.js + Prisma admin CMS
+- `../OctaneV3-Housekeeping` — Next.js + Prisma admin CMS
 
 ## Live furnidata updates: `FurnitureDataReload` (incoming header 10047)
 
@@ -284,27 +284,27 @@ Server-pushed furni name/description changes (pairs with Arcturus'
 `FurnitureDataReloadComposer`). `SessionDataManager.applyFurnidataDelta` (pure
 `applyFurnidataDeltaTo` in `packages/session/src/furniture/`) patches
 `_floorItems`/`_wallItems` by id + the `roomItem/wallItem.name/desc.{id}`
-localization keys, then dispatches the window event `nitro-localization-updated`
+localization keys, then dispatches the window event `octane-localization-updated`
 so the client's already-subscribed surfaces refresh. `mode` 0 = delta, 1 =
 reload-hint (re-runs `FurnitureDataLoader.init()`). Kept SEPARATE from the
 furni-editor's `applyLiveFurnitureNameUpdate`.
 
 **Adding an incoming packet:** id in `IncomingHeader.ts` -> map in
-`NitroMessages.ts` (`this._events.set(IncomingHeader.X, XEvent)`) -> Event +
+`OctaneMessages.ts` (`this._events.set(IncomingHeader.X, XEvent)`) -> Event +
 Parser under `messages/incoming/<area>` + `messages/parser/<area>` -> wire the
 barrel chain (`<area>/index.ts` -> parent `index.ts` -> package `src/index.ts`).
 
 **Adding an outgoing composer:** id in `OutgoingHeader.ts` -> register in
-`NitroMessages.ts` (`this._composers.set(OutgoingHeader.X, XComposer)`) -> Composer
+`OctaneMessages.ts` (`this._composers.set(OutgoingHeader.X, XComposer)`) -> Composer
 under `messages/outgoing/<area>` -> wire the barrel chain. An unregistered composer
 makes `getComposerId()` return -1, logs "Unknown Composer", and the packet is
 silently DROPPED — the request never reaches the server.
 
-**A feature usually needs BOTH directions registered.** `NitroMessages` holds two
+**A feature usually needs BOTH directions registered.** `OctaneMessages` holds two
 maps — `_events` (incoming) and `_composers` (outgoing). When a panel is "dead",
 audit BOTH, not just `_events`: the inventory Prefixes panel was broken because
 `UserPrefixesEvent` (7001, incoming) AND `RequestPrefixesComposer` (7011, outgoing)
-were both defined+exported but never `set()` in `NitroMessages`.
+were both defined+exported but never `set()` in `OctaneMessages`.
 
 **Gotchas:**
 - A branch based on `origin/Dev` may NOT contain the furni-editor slice

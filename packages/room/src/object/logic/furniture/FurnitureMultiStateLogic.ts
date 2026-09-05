@@ -1,5 +1,5 @@
-import { IRoomGeometry, MouseEventType } from '@nitrots/api';
-import { RoomObjectFurnitureActionEvent, RoomSpriteMouseEvent } from '@nitrots/events';
+import { IRoomGeometry, MouseEventType } from '@octane/api';
+import { RoomObjectFurnitureActionEvent, RoomSpriteMouseEvent } from '@octane/events';
 import { FurnitureLogic } from './FurnitureLogic';
 
 export class FurnitureMultiStateLogic extends FurnitureLogic

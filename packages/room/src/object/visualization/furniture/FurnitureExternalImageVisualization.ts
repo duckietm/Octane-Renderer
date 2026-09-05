@@ -1,4 +1,4 @@
-import { IGraphicAsset, RoomObjectVariable } from '@nitrots/api';
+import { IGraphicAsset, RoomObjectVariable } from '@octane/api';
 import { Matrix, RenderTexture, Texture } from 'pixi.js';
 import { FurnitureDynamicThumbnailVisualization } from './FurnitureDynamicThumbnailVisualization';
 

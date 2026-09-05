@@ -1,6 +1,6 @@
-import { IRoomUserData, IUserDataManager } from '@nitrots/api';
-import { GetCommunication, RequestPetInfoComposer, UserCurrentBadgesComposer } from '@nitrots/communication';
-import { GetEventDispatcher, NitroEvent, NitroEventType } from '@nitrots/events';
+import { IRoomUserData, IUserDataManager } from '@octane/api';
+import { GetCommunication, RequestPetInfoComposer, UserCurrentBadgesComposer } from '@octane/communication';
+import { GetEventDispatcher, OctaneEvent, OctaneEventType } from '@octane/events';
 
 export class UserDataManager implements IUserDataManager
 {
@@ -18,7 +18,7 @@ export class UserDataManager implements IUserDataManager
     {
         this._roomUserListSnapshot = null;
 
-        GetEventDispatcher().dispatchEvent(new NitroEvent(NitroEventType.ROOM_USER_LIST_UPDATED));
+        GetEventDispatcher().dispatchEvent(new OctaneEvent(OctaneEventType.ROOM_USER_LIST_UPDATED));
     }
 
     public getRoomUserListSnapshot(): ReadonlyArray<IRoomUserData>

@@ -39,8 +39,8 @@ declare global
 
 export class LegacyExternalInterface
 {
-    private static readonly MESSAGE_KEY = 'Nitro_LegacyExternalInterface';
-    private static readonly GAME_MESSAGE_KEY = 'Nitro_LegacyExternalGameInterface';
+    private static readonly MESSAGE_KEY = 'Octane_LegacyExternalInterface';
+    private static readonly GAME_MESSAGE_KEY = 'Octane_LegacyExternalGameInterface';
     private static _isListeningForPostMessages = false;
     private static _messageListener: (ev: MessageEvent) => void = null;
 

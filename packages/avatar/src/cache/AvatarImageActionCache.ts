@@ -1,4 +1,4 @@
-﻿import { GetTickerTime } from '@nitrots/utils';
+﻿import { GetTickerTime } from '@octane/utils';
 import { AvatarImageDirectionCache } from './AvatarImageDirectionCache';
 
 export class AvatarImageActionCache

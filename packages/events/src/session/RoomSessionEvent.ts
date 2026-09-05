@@ -1,7 +1,7 @@
-import { IRoomSession } from '@nitrots/api';
-import { NitroEvent } from '../core';
+import { IRoomSession } from '@octane/api';
+import { OctaneEvent } from '../core';
 
-export class RoomSessionEvent extends NitroEvent
+export class RoomSessionEvent extends OctaneEvent
 {
     public static CREATED: string = 'RSE_CREATED';
     public static STARTED: string = 'RSE_STARTED';

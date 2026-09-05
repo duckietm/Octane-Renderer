@@ -1,4 +1,4 @@
-import { IMessageComposer } from '@nitrots/api';
+import { IMessageComposer } from '@octane/api';
 
 /**
  * Player withdraws currency from a wired chest (Scrigno). [itemId, currencyType, amount].

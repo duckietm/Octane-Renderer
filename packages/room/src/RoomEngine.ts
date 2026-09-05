@@ -1,9 +1,9 @@
-import { IFurnitureStackingHeightMap, IGetImageListener, IImageResult, ILegacyWallGeometry, IObjectData, IPetColorResult, IPetCustomPart, IRoomAreaSelectionManager, IRoomContentListener, IRoomContentLoader, IRoomCreator, IRoomEngine, IRoomEngineServices, IRoomGeometry, IRoomInstance, IRoomManager, IRoomManagerListener, IRoomObject, IRoomObjectController, IRoomRenderer, IRoomRenderingCanvas, IRoomSessionManager, ISelectedRoomObjectData, ISessionDataManager, ITileObjectMap, IUpdateReceiver, IVector3D, LegacyDataType, MouseEventType, ObjectDataFactory, PetFigureData, RoomControllerLevel, RoomObjectCategory, RoomObjectOperationType, RoomObjectUserType, RoomObjectVariable, ToolbarIconEnum } from '@nitrots/api';
-import { GetCommunication, RenderRoomMessageComposer, RenderRoomThumbnailMessageComposer } from '@nitrots/communication';
-import { GetConfiguration } from '@nitrots/configuration';
-import { BadgeImageReadyEvent, GetEventDispatcher, NitroToolbarAnimateIconEvent, RoomBackgroundColorEvent, RoomDragEvent, RoomEngineAreaHideStateEvent, RoomEngineEvent, RoomEngineObjectEvent, RoomObjectEvent, RoomObjectFurnitureActionEvent, RoomObjectMouseEvent, RoomSessionEvent, RoomToObjectOwnAvatarMoveEvent } from '@nitrots/events';
-import { GetRoomSessionManager, GetSessionDataManager } from '@nitrots/session';
-import { FurniId, GetTickerTime, NitroLogger, NumberBank, TextureUtils, Vector3d } from '@nitrots/utils';
+import { IFurnitureStackingHeightMap, IGetImageListener, IImageResult, ILegacyWallGeometry, IObjectData, IPetColorResult, IPetCustomPart, IRoomAreaSelectionManager, IRoomContentListener, IRoomContentLoader, IRoomCreator, IRoomEngine, IRoomEngineServices, IRoomGeometry, IRoomInstance, IRoomManager, IRoomManagerListener, IRoomObject, IRoomObjectController, IRoomRenderer, IRoomRenderingCanvas, IRoomSessionManager, ISelectedRoomObjectData, ISessionDataManager, ITileObjectMap, IUpdateReceiver, IVector3D, LegacyDataType, MouseEventType, ObjectDataFactory, PetFigureData, RoomControllerLevel, RoomObjectCategory, RoomObjectOperationType, RoomObjectUserType, RoomObjectVariable, ToolbarIconEnum } from '@octane/api';
+import { GetCommunication, RenderRoomMessageComposer, RenderRoomThumbnailMessageComposer } from '@octane/communication';
+import { GetConfiguration } from '@octane/configuration';
+import { BadgeImageReadyEvent, GetEventDispatcher, OctaneToolbarAnimateIconEvent, RoomBackgroundColorEvent, RoomDragEvent, RoomEngineAreaHideStateEvent, RoomEngineEvent, RoomEngineObjectEvent, RoomObjectEvent, RoomObjectFurnitureActionEvent, RoomObjectMouseEvent, RoomSessionEvent, RoomToObjectOwnAvatarMoveEvent } from '@octane/events';
+import { GetRoomSessionManager, GetSessionDataManager } from '@octane/session';
+import { FurniId, GetTickerTime, OctaneLogger, NumberBank, TextureUtils, Vector3d } from '@octane/utils';
 import { Container, Matrix, Point, Rectangle, RenderTexture, Sprite, Texture, Ticker } from 'pixi.js';
 import { GetRoomContentLoader } from './GetRoomContentLoader';
 import { GetRoomManager } from './GetRoomManager';
@@ -187,7 +187,7 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
 
         if(!roomMap)
         {
-            NitroLogger.warn('Room property messages');
+            OctaneLogger.warn('Room property messages');
 
             return;
         }
@@ -1723,7 +1723,7 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
                             (async () =>
                             {
                                 const image = await TextureUtils.generateImage(icon);
-                                const event = new NitroToolbarAnimateIconEvent(image, screenLocation.x, screenLocation.y);
+                                const event = new OctaneToolbarAnimateIconEvent(image, screenLocation.x, screenLocation.y);
 
                                 event.iconName = ToolbarIconEnum.INVENTORY;
 
@@ -1770,7 +1770,7 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
 
                             if(GetEventDispatcher())
                             {
-                                const event = new NitroToolbarAnimateIconEvent(image, screenLocation.x, screenLocation.y);
+                                const event = new OctaneToolbarAnimateIconEvent(image, screenLocation.x, screenLocation.y);
 
                                 event.iconName = ToolbarIconEnum.INVENTORY;
 

@@ -46,7 +46,7 @@ export const normalizedSourceExtension = (sourceName?: string): string =>
 
     try
     {
-        pathname = new URL(sourceName, 'https://nitro.invalid/').pathname;
+        pathname = new URL(sourceName, 'https://octane.invalid/').pathname;
     }
     catch
     {

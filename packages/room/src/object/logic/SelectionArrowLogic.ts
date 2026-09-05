@@ -1,4 +1,4 @@
-import { IAssetData, RoomObjectVariable } from '@nitrots/api';
+import { IAssetData, RoomObjectVariable } from '@octane/api';
 import { ObjectVisibilityUpdateMessage, RoomObjectUpdateMessage } from '../../messages';
 import { RoomObjectLogicBase } from './RoomObjectLogicBase';
 

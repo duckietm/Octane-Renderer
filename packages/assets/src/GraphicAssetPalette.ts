@@ -1,5 +1,5 @@
-import { IGraphicAssetPalette } from '@nitrots/api';
-import { GetRenderer } from '@nitrots/utils';
+import { IGraphicAssetPalette } from '@octane/api';
+import { GetRenderer } from '@octane/utils';
 import { Texture } from 'pixi.js';
 
 export class GraphicAssetPalette implements IGraphicAssetPalette

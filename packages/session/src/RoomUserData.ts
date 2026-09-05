@@ -1,4 +1,4 @@
-import { IRoomUserData } from '@nitrots/api';
+import { IRoomUserData } from '@octane/api';
 
 export class RoomUserData implements IRoomUserData
 {

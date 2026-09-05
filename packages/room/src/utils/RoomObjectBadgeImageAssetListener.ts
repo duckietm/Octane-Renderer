@@ -1,4 +1,4 @@
-import { IRoomObjectController } from '@nitrots/api';
+import { IRoomObjectController } from '@octane/api';
 
 export class RoomObjectBadgeImageAssetListener
 {

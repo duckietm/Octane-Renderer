@@ -1,4 +1,4 @@
-import { IAssetData, IAssetVisualizationData, IObjectVisualizationData } from '@nitrots/api';
+import { IAssetData, IAssetVisualizationData, IObjectVisualizationData } from '@octane/api';
 import { BLEND_MODES } from 'pixi.js';
 import { RoomGeometry } from '../../../utils';
 import { ColorData, LayerData, SizeData } from '../data';

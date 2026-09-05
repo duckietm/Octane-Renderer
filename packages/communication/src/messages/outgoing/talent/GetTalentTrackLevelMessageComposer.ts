@@ -1,4 +1,4 @@
-import { IMessageComposer } from '@nitrots/api';
+import { IMessageComposer } from '@octane/api';
 
 export class GetTalentTrackLevelMessageComposer implements IMessageComposer<ConstructorParameters<typeof GetTalentTrackLevelMessageComposer>>
 {

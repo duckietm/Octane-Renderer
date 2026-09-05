@@ -1,5 +1,5 @@
-﻿import { IAssetAvatarCanvas, IAvatarImage } from '@nitrots/api';
-import { Matrix4x4, Vector3d } from '@nitrots/utils';
+﻿import { IAssetAvatarCanvas, IAvatarImage } from '@octane/api';
+import { Matrix4x4, Vector3d } from '@octane/utils';
 import { AvatarCanvas } from '../structure';
 import { AvatarSet } from './AvatarSet';
 import { GeometryBodyPart } from './GeometryBodyPart';

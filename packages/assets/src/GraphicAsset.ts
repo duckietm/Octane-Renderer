@@ -1,4 +1,4 @@
-import { IGraphicAsset } from '@nitrots/api';
+import { IGraphicAsset } from '@octane/api';
 import { Rectangle, Texture } from 'pixi.js';
 
 export class GraphicAsset implements IGraphicAsset
