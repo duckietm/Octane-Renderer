@@ -699,7 +699,9 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
 
             if(extendedSprite.blendMode !== objectSprite.blendMode) extendedSprite.blendMode = objectSprite.blendMode;
 
-            if(extendedSprite.texture !== objectSprite.texture) extendedSprite.setTexture(objectSprite.texture);
+            const objectTexture = ((objectSprite.texture && !objectSprite.texture.destroyed && objectSprite.texture.source) ? objectSprite.texture : Texture.EMPTY);
+
+            if(extendedSprite.texture !== objectTexture) extendedSprite.setTexture(objectTexture);
 
 
             // Per-sprite zoom (objectSprite.scale, default 1) combined with flip.

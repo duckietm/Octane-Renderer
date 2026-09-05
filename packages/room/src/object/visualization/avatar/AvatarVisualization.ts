@@ -544,9 +544,19 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
                 {
                     if(this._cachedAvatarEffects.length >= AvatarVisualization.MAX_EFFECT_CACHE)
                     {
-                        const cached = this._cachedAvatarEffects.remove(this._cachedAvatarEffects.getKey(0));
+                        for(let i = 0; i < this._cachedAvatarEffects.length; i++)
+                        {
+                            const key = this._cachedAvatarEffects.getKey(i);
+                            const candidate = this._cachedAvatarEffects.getValue(key);
 
-                        if(cached) cached.dispose();
+                            if(candidate === this._avatarImage) continue;
+
+                            this._cachedAvatarEffects.remove(key);
+
+                            if(candidate) candidate.dispose();
+
+                            break;
+                        }
                     }
 
                     this._cachedAvatarEffects.add(imageName, cachedImage);

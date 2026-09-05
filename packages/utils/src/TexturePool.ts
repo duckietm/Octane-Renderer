@@ -50,11 +50,10 @@ export class TexturePool
 
     public putTexture(texture: Texture)
     {
-        if(!texture) return;
+        if(!texture || texture.destroyed || !texture.source) return;
 
         if(this._totalTextures >= TexturePool.MAX_POOL_SIZE)
         {
-            //@ts-ignore
             delete texture.source.hitMap;
 
             if(!texture.destroyed) texture.destroy(true);
@@ -66,7 +65,6 @@ export class TexturePool
 
         if(!this._textures[texture.width][texture.height]) this._textures[texture.width][texture.height] = [];
 
-        //@ts-ignore
         delete texture.source.hitMap;
 
         this._textures[texture.width][texture.height].push(texture);

@@ -29,7 +29,7 @@ export class ExtendedSprite extends Sprite
 
     public setTexture(texture: Texture): void
     {
-        if(!texture) texture = Texture.EMPTY;
+        if(!texture || texture.destroyed || !texture.source) texture = Texture.EMPTY;
 
         if(texture === this.texture) return;
 

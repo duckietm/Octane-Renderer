@@ -247,9 +247,6 @@ export class AvatarImage implements IAvatarImage, IAvatarEffectListener
 
                     container.addChild(partContainer);
 
-                    // Cacheable parts stay owned by AvatarImageCache. Non-cacheable ones are
-                    // rendered fresh every time and never stored, so this is the only reference
-                    // that will ever exist — the render path has to destroy them itself.
                     if(!part.isCacheable) this._transientBodyParts.push(part);
                 }
             }
@@ -293,26 +290,37 @@ export class AvatarImage implements IAvatarImage, IAvatarEffectListener
 
         if(!avatarCanvas) return null;
 
+        const container = this.buildAvatarContainer(avatarCanvas, setType);
+
+        if(!container) return null;
+
+        let previousTexture: Texture = null;
+
         if(this._activeTexture && ((this._activeTexture.width !== avatarCanvas.width) || (this._activeTexture.height !== avatarCanvas.height)))
         {
-            GetTexturePool().putTexture(this._activeTexture);
+            previousTexture = this._activeTexture;
 
             this._activeTexture = null;
         }
 
         if(!this._activeTexture) this._activeTexture = GetTexturePool().getTexture(avatarCanvas.width, avatarCanvas.height);
 
-        if(!this._activeTexture) return null;
+        if(!this._activeTexture)
+        {
+            this._activeTexture = previousTexture;
 
-        const container = this.buildAvatarContainer(avatarCanvas, setType);
-
-        if(!container) return null;
+            return null;
+        }
 
         GetRenderer().render({
             target: this._activeTexture,
             container: container,
             clear: true
         });
+
+        // Only now is the old texture safe to recycle — the caller is about to
+        // receive the freshly rendered replacement.
+        if(previousTexture) GetTexturePool().putTexture(previousTexture);
 
         for(const child of container.children)
         {
