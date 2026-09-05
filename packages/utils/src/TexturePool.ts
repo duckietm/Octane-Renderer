@@ -55,6 +55,7 @@ export class TexturePool
         if(this._totalTextures >= TexturePool.MAX_POOL_SIZE)
         {
             delete texture.source.hitMap;
+            delete texture.source.hitMapDirty;
 
             if(!texture.destroyed) texture.destroy(true);
 
@@ -66,6 +67,7 @@ export class TexturePool
         if(!this._textures[texture.width][texture.height]) this._textures[texture.width][texture.height] = [];
 
         delete texture.source.hitMap;
+        delete texture.source.hitMapDirty;
 
         this._textures[texture.width][texture.height].push(texture);
 
@@ -91,8 +93,8 @@ export class TexturePool
 
                     if((source._touched > -1) && (this._runCount - source._touched) > TexturePool.MAX_IDLE)
                     {
-                        //@ts-ignore
                         delete texture.source.hitMap;
+                        delete texture.source.hitMapDirty;
 
                         if(!source.destroyed) texture.destroy(true);
 

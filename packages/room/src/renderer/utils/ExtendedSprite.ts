@@ -53,10 +53,10 @@ export class ExtendedSprite extends Sprite
         const texture = this.texture;
         const textureSource = this.texture.source;
 
-        //@ts-ignore
         if((!textureSource || !textureSource.hitMap) && !ExtendedSprite.generateHitMapForTextureSource(textureSource)) return false;
 
-        //@ts-ignore
+        if(textureSource.hitMapDirty && ((Date.now() - (textureSource.hitMapTime ?? 0)) > 100)) ExtendedSprite.generateHitMapForTextureSource(textureSource);
+
         const hitMap = (textureSource.hitMap as Uint8Array);
 
         if(!hitMap) return false;
@@ -118,8 +118,9 @@ export class ExtendedSprite extends Sprite
 
         if(!pixels) return false;
 
-        //@ts-ignore
         textureSource.hitMap = pixels;
+        textureSource.hitMapDirty = false;
+        textureSource.hitMapTime = Date.now();
 
         return true;
     }

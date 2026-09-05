@@ -254,25 +254,20 @@ export class AvatarImage implements IAvatarImage, IAvatarEffectListener
             partCount--;
         }
 
-        container.filters = [];
-
         if(this._avatarSpriteData)
         {
-            if(this._avatarSpriteData.colorTransform)
-            {
-                if(container.filters === undefined || container.filters === null) container.filters = [ this._avatarSpriteData.colorTransform ];
-                else container.filters = [ ...(container.filters), this._avatarSpriteData.colorTransform ];
-            }
+            const filters: Filter[] = [];
+
+            if(this._avatarSpriteData.colorTransform) filters.push(this._avatarSpriteData.colorTransform);
 
             if(this._avatarSpriteData.paletteIsGrayscale)
             {
                 this.convertToGrayscale(container);
 
-                const paletteMapFilter = this.getPaletteMapFilter(this._avatarSpriteData);
-
-                if(container.filters === undefined || container.filters === null) container.filters = [ paletteMapFilter ];
-                else container.filters = [ ...(container.filters), paletteMapFilter ];
+                filters.push(this.getPaletteMapFilter(this._avatarSpriteData));
             }
+
+            if(filters.length) container.filters = filters;
         }
 
         return container;
@@ -318,8 +313,6 @@ export class AvatarImage implements IAvatarImage, IAvatarEffectListener
             clear: true
         });
 
-        // Only now is the old texture safe to recycle — the caller is about to
-        // receive the freshly rendered replacement.
         if(previousTexture) GetTexturePool().putTexture(previousTexture);
 
         for(const child of container.children)
@@ -331,8 +324,7 @@ export class AvatarImage implements IAvatarImage, IAvatarEffectListener
 
         this.disposeTransientBodyParts();
 
-        //@ts-ignore
-        this._activeTexture.source.hitMap = null;
+        this._activeTexture.source.hitMapDirty = true;
 
         this._changes = false;
 
