@@ -1,5 +1,5 @@
 import { AnimationFrame, AnimationSizeData, SizeData } from '../data';
-import { RoomGeometry } from '../../../utils';
+import { RoomGeometry } from '../../../utils/RoomGeometry';
 import { FurnitureVisualizationData } from './FurnitureVisualizationData';
 
 export class FurnitureAnimatedVisualizationData extends FurnitureVisualizationData
