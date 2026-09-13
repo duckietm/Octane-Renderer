@@ -4,11 +4,13 @@ import { GetRoomSessionManager, GetSessionDataManager } from '@octane/session';
 import { Vector3d } from '@octane/utils';
 import { FloorHeightMapMessageParser } from '@octane/communication';
 import { ItemRemoveMultipleEvent, ItemsStateUpdateEvent, ObjectRemoveMultipleEvent } from '@octane/communication';
+import { VariableFxConfigRemoveEvent, VariableFxConfigUpdateEvent, VariableFxStatusRemoveEvent, VariableFxStatusUpdateEvent } from '@octane/communication';
 import { GetRoomEngine } from './GetRoomEngine';
 import { RoomVariableEnum } from './RoomVariableEnum';
 import { ObjectRoomMapUpdateMessage } from './messages';
 import { RoomPlaneParser } from './object/RoomPlaneParser';
 import { FurnitureStackingHeightMap, LegacyWallGeometry } from './utils';
+import { VariableFxStore } from './VariableFxStore';
 
 const ROOM_OWN_OBJECT_ID = -1;
 
@@ -45,6 +47,7 @@ export class RoomMessageHandler
     private _activeAreaHideControllers = new Map<number, AreaHideControllerState>();
     private _areaHideReapplyTimeouts: ReturnType<typeof setTimeout>[] = [];
     private _isConfInvisControlActive = false;
+    private _variableFxStore = new VariableFxStore();
 
     private _currentRoomId: number = 0;
     private _ownUserId: number = 0;
@@ -109,7 +112,11 @@ export class RoomMessageHandler
             new IgnoreResultEvent(this.onIgnoreResultEvent.bind(this)),
             new GuideSessionStartedMessageEvent(this.onGuideSessionStartedMessageEvent.bind(this)),
             new GuideSessionEndedMessageEvent(this.onGuideSessionEndedMessageEvent.bind(this)),
-            new GuideSessionErrorMessageEvent(this.onGuideSessionErrorMessageEvent.bind(this))
+            new GuideSessionErrorMessageEvent(this.onGuideSessionErrorMessageEvent.bind(this)),
+            new VariableFxConfigUpdateEvent(this.onVariableFxConfigUpdateEvent.bind(this)),
+            new VariableFxConfigRemoveEvent(this.onVariableFxConfigRemoveEvent.bind(this)),
+            new VariableFxStatusUpdateEvent(this.onVariableFxStatusUpdateEvent.bind(this)),
+            new VariableFxStatusRemoveEvent(this.onVariableFxStatusRemoveEvent.bind(this))
         ];
 
         for(const event of this._messageEvents)
@@ -146,6 +153,7 @@ export class RoomMessageHandler
         this._activeAreaHideControllers.clear();
         this.clearAreaHideReapplyTimeouts();
         this._isConfInvisControlActive = false;
+        this._variableFxStore = new VariableFxStore();
     }
 
     public setRoomId(id: number): void
@@ -166,6 +174,7 @@ export class RoomMessageHandler
         this._activeAreaHideControllers.clear();
         this.clearAreaHideReapplyTimeouts();
         this._isConfInvisControlActive = false;
+        this._variableFxStore = new VariableFxStore();
     }
 
     public clearRoomId(): void
@@ -181,6 +190,7 @@ export class RoomMessageHandler
         this._activeAreaHideControllers.clear();
         this.clearAreaHideReapplyTimeouts();
         this._isConfInvisControlActive = false;
+        this._variableFxStore = new VariableFxStore();
     }
 
     private onUserInfoEvent(event: UserInfoEvent): void
@@ -1894,6 +1904,50 @@ export class RoomMessageHandler
         this.removeGuideMarker();
     }
 
+    private onVariableFxConfigUpdateEvent(event: VariableFxConfigUpdateEvent): void
+    {
+        if(!(event instanceof VariableFxConfigUpdateEvent) || !event.connection) return;
+
+        const parser = event.getParser();
+
+        if(!parser) return;
+
+        this._variableFxStore.applyConfigs(parser.configs);
+    }
+
+    private onVariableFxConfigRemoveEvent(event: VariableFxConfigRemoveEvent): void
+    {
+        if(!(event instanceof VariableFxConfigRemoveEvent) || !event.connection) return;
+
+        const parser = event.getParser();
+
+        if(!parser) return;
+
+        this._variableFxStore.removeConfigs(parser.configIds);
+    }
+
+    private onVariableFxStatusUpdateEvent(event: VariableFxStatusUpdateEvent): void
+    {
+        if(!(event instanceof VariableFxStatusUpdateEvent) || !event.connection) return;
+
+        const parser = event.getParser();
+
+        if(!parser) return;
+
+        this._variableFxStore.applyStatuses(parser.initializeAll, parser.statuses);
+    }
+
+    private onVariableFxStatusRemoveEvent(event: VariableFxStatusRemoveEvent): void
+    {
+        if(!(event instanceof VariableFxStatusRemoveEvent) || !event.connection) return;
+
+        const parser = event.getParser();
+
+        if(!parser) return;
+
+        this._variableFxStore.removeStatuses(parser.statusKeys);
+    }
+
     private updateGuideMarker(): void
     {
         const userId = GetSessionDataManager().userId;
@@ -1927,5 +1981,10 @@ export class RoomMessageHandler
     public get currentRoomId(): number
     {
         return this._currentRoomId;
+    }
+
+    public get variableFxStore(): VariableFxStore
+    {
+        return this._variableFxStore;
     }
 }

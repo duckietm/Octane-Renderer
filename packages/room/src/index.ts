@@ -37,3 +37,4 @@ export * from './RoomPreviewer';
 export * from './RoomPreviewCapabilities';
 export * from './RoomVariableEnum';
 export * from './utils';
+export * from './VariableFxStore';
