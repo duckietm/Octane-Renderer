@@ -327,6 +327,8 @@ export class OutgoingHeader
     public static WIRED_USER_INSPECT_MOVE = 10027;
     public static WIRED_FURNI_RUNTIME_STATE_REQUEST = 10028;
     public static WIRED_FEATURE_CAPABILITIES = 10029;
+    public static WIRED_ARRAY_INSPECTION_REQUEST = 10034;
+    public static WIRED_ARRAY_INSPECTION_UPDATE = 10035;
     // AIR 13 wired leftovers, all on their official ids.
     public static WIRED_USER_SELECTED = 3122;
     public static WIRED_MENU_PERMISSIONS_SAVE = 1936;

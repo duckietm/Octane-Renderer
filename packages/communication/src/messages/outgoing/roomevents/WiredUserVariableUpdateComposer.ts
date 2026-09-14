@@ -4,9 +4,10 @@ export class WiredUserVariableUpdateComposer implements IMessageComposer<Constru
 {
     private _data: ConstructorParameters<typeof WiredUserVariableUpdateComposer>;
 
-    constructor(targetType: number, targetId: number, variableItemId: number, value: number)
+    constructor(targetType: number, targetId: number, variableItemId: number, value: number, variableToken?: string)
     {
         this._data = [ targetType, targetId, variableItemId, value ];
+        if(variableToken !== undefined) this._data.push(variableToken);
     }
 
     public getMessageArray()

@@ -152,6 +152,7 @@ const extractOutgoing = (packetClass: ts.ClassDeclaration): TypeScriptExtraction
         }
     }
     if(!array) return unsupported('Outgoing composer message array cannot be resolved statically');
+    const optionalPush = constructor && returnedName ? trailingOptionalPush(constructor, returnedName) : undefined;
     if(returnedName)
     {
         let mutator: string | undefined;
@@ -160,7 +161,7 @@ const extractOutgoing = (packetClass: ts.ClassDeclaration): TypeScriptExtraction
             if(mutator || !ts.isCallExpression(node) || !ts.isPropertyAccessExpression(node.expression)) return;
             const methodName = node.expression.name.text;
             if(!['push', 'unshift', 'splice'].includes(methodName)) return;
-            if(propertyName(node.expression.expression) === returnedName) mutator = methodName;
+            if(propertyName(node.expression.expression) === returnedName && node !== optionalPush) mutator = methodName;
         });
         if(mutator) return unsupported(`Outgoing message array ${ returnedName } is mutated with ${ mutator }`);
     }
@@ -174,7 +175,32 @@ const extractOutgoing = (packetClass: ts.ClassDeclaration): TypeScriptExtraction
         if(typeof inferred === 'string') return unsupported(inferred);
         fields.push(inferred);
     }
+    if(optionalPush)
+    {
+        const field = outgoingField(optionalPush.arguments[0], parameters);
+        if(typeof field === 'string') return unsupported(field);
+        fields.push({ type: 'optional', controller: field.name, fields: [field] });
+    }
     return { fields };
+};
+
+/** Recognize one optional scalar at the end, without accepting arbitrary packet mutation. */
+const trailingOptionalPush = (constructor: ts.ConstructorDeclaration, returnedName: string): ts.CallExpression | undefined =>
+{
+    const statement = constructor.body?.statements.at(-1);
+    if(!statement || !ts.isIfStatement(statement) || statement.elseStatement) return undefined;
+    const condition = unwrap(statement.expression);
+    if(!ts.isBinaryExpression(condition) || condition.operatorToken.kind !== ts.SyntaxKind.ExclamationEqualsEqualsToken
+        || !ts.isIdentifier(condition.left) || condition.right.getText() !== 'undefined') return undefined;
+    const parameter = constructor.parameters.find(parameter => parameter.name.getText() === condition.left.getText());
+    if(!parameter?.questionToken) return undefined;
+    const body = ts.isBlock(statement.thenStatement) ? statement.thenStatement.statements : [statement.thenStatement];
+    if(body.length !== 1 || !ts.isExpressionStatement(body[0])) return undefined;
+    const call = body[0].expression;
+    if(!ts.isCallExpression(call) || !ts.isPropertyAccessExpression(call.expression)
+        || call.expression.name.text !== 'push' || propertyName(call.expression.expression) !== returnedName
+        || call.arguments.length !== 1 || call.arguments[0].getText() !== condition.left.getText()) return undefined;
+    return call;
 };
 
 const outgoingField = (

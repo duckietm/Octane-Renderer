@@ -305,6 +305,7 @@ export class IncomingHeader
     public static WIRED_FURNI_RUNTIME_STATE = 5108;
     public static WIRED_FURNI_OPACITY = 5109;
     public static WIRED_FURNI_MOVE_STYLE = 5110;
+    public static WIRED_ARRAY_INSPECTION_DATA = 5111;
     // AIR 13 wired leftovers. 420 (WiredClickUserResponse) and 2901 (WiredUserVariablesPage)
     // are already GROUP_LIST / PET_INFO here, so those two take custom ids instead.
     public static WIRED_ENVIRONMENT = 347;

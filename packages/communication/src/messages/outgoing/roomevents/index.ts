@@ -12,6 +12,8 @@ export * from './WiredFurniRuntimeStateRequestComposer';
 export * from './WiredUserInspectMoveComposer';
 export * from './WiredUserVariableManageComposer';
 export * from './WiredUserVariablesRequestComposer';
+export * from './WiredArrayInspectionRequestComposer';
+export * from './WiredArrayInspectionUpdateComposer';
 export * from './WiredUserVariableUpdateComposer';
 export * from './WiredMenuSettingsComposer';
 export * from './SelfDonationMessageComposer';

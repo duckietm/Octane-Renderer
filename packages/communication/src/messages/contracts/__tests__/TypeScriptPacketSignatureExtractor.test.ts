@@ -42,6 +42,17 @@ describe('TypeScript packet signature extractor', () =>
         expect(types(result.fields)).toEqual(['int', 'string', 'short', 'boolean']);
     });
 
+    it('extracts a guarded optional scalar at the end of an outgoing tuple', () =>
+    {
+        const result = extractTypeScriptPacketSignature(fixture('OptionalOutgoingFixture.ts'), 'outgoing');
+
+        expect(result.unsupportedReason).toBeUndefined();
+        expect(result.fields).toEqual([
+            { type: 'int', name: 'id' },
+            { type: 'optional', controller: 'variableToken', fields: [{ type: 'string', name: 'variableToken' }] }
+        ]);
+    });
+
     it('reports the first ordered field mismatch', () =>
     {
         const expected: WireSchema[] = [

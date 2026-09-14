@@ -29,6 +29,12 @@ jobs:
           elif git ls-remote --exit-code --heads https://github.com/duckietm/Polaris-Emulator.git "$RENDERER_BRANCH" >/dev/null 2>&1; then
             echo "repository=duckietm/Polaris-Emulator" >> "$GITHUB_OUTPUT"
             echo "ref=$RENDERER_BRANCH" >> "$GITHUB_OUTPUT"
+          elif [[ "$RENDERER_BRANCH" == *-protocol ]] && git ls-remote --exit-code --heads "https://github.com/${companion_repo}.git" "${RENDERER_BRANCH%-protocol}" >/dev/null 2>&1; then
+            echo "repository=$companion_repo" >> "$GITHUB_OUTPUT"
+            echo "ref=${RENDERER_BRANCH%-protocol}" >> "$GITHUB_OUTPUT"
+          elif [[ "$RENDERER_BRANCH" == *-protocol ]] && git ls-remote --exit-code --heads https://github.com/duckietm/Polaris-Emulator.git "${RENDERER_BRANCH%-protocol}" >/dev/null 2>&1; then
+            echo "repository=duckietm/Polaris-Emulator" >> "$GITHUB_OUTPUT"
+            echo "ref=${RENDERER_BRANCH%-protocol}" >> "$GITHUB_OUTPUT"
           else
             linked_branch="${RENDERER_BRANCH%-renderer}-emulator"
           fi
