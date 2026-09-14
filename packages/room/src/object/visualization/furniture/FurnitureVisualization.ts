@@ -277,47 +277,9 @@ export class FurnitureVisualization extends RoomObjectSpriteVisualization
 
         const reflectionDebug = (typeof window !== 'undefined' && (window as unknown as { OctaneReflectionDebug?: boolean }).OctaneReflectionDebug === true);
 
-        let mirrorDirectionX = -1;
-        let mirrorDirectionY = -1;
-
-        if(this._data && (this._scale > 0))
-        {
-            const rawMirrorX = ((((8 - this._direction) % 8) + 8) % 8);
-            const rawMirrorY = ((((4 - this._direction) % 8) + 8) % 8);
-            const validMirrorX = this._data.getValidDirection(this._scale, (rawMirrorX * 45));
-            const validMirrorY = this._data.getValidDirection(this._scale, (rawMirrorY * 45));
-
-            mirrorDirectionX = ((validMirrorX === rawMirrorX) ? validMirrorX : -1);
-            mirrorDirectionY = ((validMirrorY === rawMirrorY) ? validMirrorY : -1);
-        }
-
         const layers: IWindowReflectionUnitLayer[] = [];
-        const mirrorLayersX: IWindowReflectionUnitLayer[] = [];
-        const mirrorLayersY: IWindowReflectionUnitLayer[] = [];
+        const sources: { name: string; layerId: number; alpha: number }[] = [];
         const totalSprites = this.totalSprites;
-
-        let mirrorCompleteX = ((mirrorDirectionX >= 0) && (mirrorDirectionX !== this._direction));
-        let mirrorCompleteY = ((mirrorDirectionY >= 0) && (mirrorDirectionY !== this._direction));
-
-        const buildMirrorLayer = (spriteName: string, layerId: number, direction: number, alpha: number, target: IWindowReflectionUnitLayer[]): boolean =>
-        {
-            const asset = this.getDirectionAsset(spriteName, layerId, direction);
-
-            if(!asset?.texture || asset.texture.destroyed) return false;
-
-            const flipH = !!asset.flipH;
-            const width = asset.texture.width;
-
-            target.push({
-                texture: asset.texture,
-                offsetX: (flipH ? (asset.offsetX - width) : asset.offsetX),
-                offsetY: asset.offsetY,
-                alpha,
-                flipH
-            });
-
-            return true;
-        };
 
         for(let i = 0; i < totalSprites; i++)
         {
@@ -339,8 +301,7 @@ export class FurnitureVisualization extends RoomObjectSpriteVisualization
                 flipH
             });
 
-            if(mirrorCompleteX && !buildMirrorLayer(sprite.name, i, mirrorDirectionX, layerAlpha, mirrorLayersX)) mirrorCompleteX = false;
-            if(mirrorCompleteY && !buildMirrorLayer(sprite.name, i, mirrorDirectionY, layerAlpha, mirrorLayersY)) mirrorCompleteY = false;
+            sources.push({ name: sprite.name, layerId: i, alpha: layerAlpha });
         }
 
         if(!layers.length)
@@ -355,13 +316,74 @@ export class FurnitureVisualization extends RoomObjectSpriteVisualization
             return;
         }
 
-        const layersX = ((mirrorCompleteX && (mirrorLayersX.length === layers.length)) ? mirrorLayersX : layers);
-        const layersY = ((mirrorCompleteY && (mirrorLayersY.length === layers.length)) ? mirrorLayersY : layers);
+        const worldDirection = this.object.getDirection().x;
+        const layersByDirection = new Map<number, IWindowReflectionUnitLayer[]>();
 
-        RoomWindowReflectionState.setUnit(this.object.instanceId, layersX, layersY, reflectionLocation, roomId);
+        if(this._data && (this._scale > 0))
+        {
+            const normals = RoomWindowReflectionState.getZoneNormalsNear(reflectionLocation, roomId, 1.1);
+            const cameraAngle = (Number.isFinite(this._lastCameraAngle) ? this._lastCameraAngle : -135); // engine default camera
+
+            for(const normal of normals)
+            {
+                const mirrorDegrees = RoomWindowReflectionState.reflectDirection(worldDirection, normal.x, normal.y);
+
+                if(layersByDirection.has(mirrorDegrees)) continue;
+
+                const offsetDirection = ((((mirrorDegrees - (cameraAngle + 135)) % 360) + 360) % 360);
+                const exactDirection = (((Math.round(offsetDirection / 45) % 8) + 8) % 8);
+
+                let mirrorDirection = exactDirection;
+                let mirrorLayers = ((exactDirection !== this._direction) ? this.buildMirrorLayers(sources, exactDirection) : null);
+
+                if(!mirrorLayers && (exactDirection !== this._direction))
+                {
+                    mirrorDirection = this._data.getValidDirection(this._scale, offsetDirection);
+
+                    if(mirrorDirection !== this._direction) mirrorLayers = this.buildMirrorLayers(sources, mirrorDirection);
+                }
+
+                if(mirrorLayers) layersByDirection.set(mirrorDegrees, mirrorLayers);
+
+                if(reflectionDebug) console.log(`[Reflection] unit ${this.object.instanceId}: world ${worldDirection}° mirrored across (${normal.x.toFixed(2)}, ${normal.y.toFixed(2)}) -> ${mirrorDegrees}° (sprite dir ${mirrorDirection}, exact ${exactDirection}, live ${this._direction}, ${mirrorLayers ? mirrorLayers.length + ' layers' : 'live layers'})`);
+            }
+        }
+
+        RoomWindowReflectionState.setUnit(this.object.instanceId, layers, layersByDirection, worldDirection, reflectionLocation, location, roomId, sizeX, sizeY);
 
         this._windowReflectionPushed = true;
         this._windowReflectionLocation.assign(location);
+    }
+
+    private buildMirrorLayers(sources: { name: string; layerId: number; alpha: number }[], direction: number): IWindowReflectionUnitLayer[]
+    {
+        if(!this._data) return null;
+
+        const result: IWindowReflectionUnitLayer[] = [];
+        const sizeScale = (((this._cacheSize >= 32) && (this._scale > 0)) ? (this._scale / this._cacheSize) : 1);
+
+        for(const source of sources)
+        {
+            const asset = this.getDirectionAsset(source.name, source.layerId, direction);
+
+            if(!asset?.texture || asset.texture.destroyed) return null;
+
+            const flipH = !!asset.flipH;
+            const width = asset.texture.width;
+
+            const offsetX = ((asset.offsetX + this._data.getLayerXOffset(this._scale, direction, source.layerId)) * sizeScale);
+            const offsetY = ((asset.offsetY + this._data.getLayerYOffset(this._scale, direction, source.layerId)) * sizeScale);
+
+            result.push({
+                texture: asset.texture,
+                offsetX: (flipH ? (offsetX - width) : offsetX),
+                offsetY,
+                alpha: source.alpha,
+                flipH
+            });
+        }
+
+        return (result.length ? result : null);
     }
 
     private getDirectionAsset(assetName: string, layerId: number, direction: number): IGraphicAsset

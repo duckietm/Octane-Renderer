@@ -2,17 +2,6 @@ import { IVector3D } from '@octane/api';
 import { Vector3d } from '@octane/utils';
 import { Texture } from 'pixi.js';
 
-interface IWindowReflectionAvatarState
-{
-    id: number;
-    texture: Texture;
-    location: IVector3D;
-    verticalOffset: number;
-    direction: number;
-    oppositeTexture: Texture;
-    roomId: string;
-}
-
 export interface IWindowReflectionUnitLayer
 {
     texture: Texture;
@@ -25,10 +14,27 @@ export interface IWindowReflectionUnitLayer
 export interface IWindowReflectionUnitState
 {
     id: number;
-    layersX: IWindowReflectionUnitLayer[];
-    layersY: IWindowReflectionUnitLayer[];
+    layers: IWindowReflectionUnitLayer[];
+    layersByDirection: ReadonlyMap<number, IWindowReflectionUnitLayer[]>;
+    direction: number;
     location: IVector3D;
+    origin: IVector3D;
+    sizeX: number;
+    sizeY: number;
     roomId: string;
+    version: number;
+}
+
+export interface IWindowReflectionAvatarState
+{
+    id: number;
+    texture: Texture;
+    mirrors: ReadonlyMap<number, Texture>;
+    direction: number;
+    location: IVector3D;
+    verticalOffset: number;
+    roomId: string;
+    version: number;
 }
 
 export class RoomWindowReflectionState
@@ -37,6 +43,7 @@ export class RoomWindowReflectionState
     private static _units: Map<string, IWindowReflectionUnitState> = new Map();
     private static _zones: Map<object, { location: IVector3D; normal: IVector3D; roomId: string }> = new Map();
     private static _updateId: number = 0;
+    private static _version: number = 0;
 
     private static key(id: number, roomId: string): string
     {
@@ -88,6 +95,53 @@ export class RoomWindowReflectionState
         return false;
     }
 
+    public static getZoneNormalsNear(location: IVector3D, roomId: string = null, range: number = 0.8): IVector3D[]
+    {
+        const result: IVector3D[] = [];
+
+        if(!location || !this._zones.size) return result;
+
+        for(const zone of this._zones.values())
+        {
+            if(!this.matchesRoom(zone.roomId, roomId)) continue;
+
+            if(this.planeDistance(location, zone.location, zone.normal) > range) continue;
+
+            const length = Math.hypot(zone.normal.x, zone.normal.y);
+
+            if(length <= 0.0001) continue;
+
+            const nx = (zone.normal.x / length);
+            const ny = (zone.normal.y / length);
+
+            if(result.some(existing => (Math.abs((existing.x * nx) + (existing.y * ny)) > 0.99))) continue;
+
+            result.push(new Vector3d(nx, ny, 0));
+        }
+
+        return result;
+    }
+
+    public static reflectDirection(directionDeg: number, normalX: number, normalY: number): number
+    {
+        const snapped = ((((Math.round((directionDeg || 0) / 45) * 45) % 360) + 360) % 360);
+        const length = Math.hypot(normalX, normalY);
+
+        if(length <= 0.0001) return snapped;
+
+        const nx = (normalX / length);
+        const ny = (normalY / length);
+        const radians = (((snapped - 90) * Math.PI) / 180);
+        const fx = Math.cos(radians);
+        const fy = Math.sin(radians);
+        const dot = ((fx * nx) + (fy * ny));
+        const rx = (fx - (2 * dot * nx));
+        const ry = (fy - (2 * dot * ny));
+        const degrees = (((Math.atan2(ry, rx) * 180) / Math.PI) + 90);
+
+        return ((((Math.round(degrees / 45) * 45) % 360) + 360) % 360);
+    }
+
     public static hasEntryNear(planeLocation: IVector3D, normal: IVector3D, roomId: string = null, range: number = 0.8): boolean
     {
         if(!planeLocation || !normal) return false;
@@ -109,11 +163,38 @@ export class RoomWindowReflectionState
         return false;
     }
 
-    public static setUnit(id: number, layersX: IWindowReflectionUnitLayer[], layersY: IWindowReflectionUnitLayer[], location: IVector3D, roomId: string = null): void
+    public static getSignatureNear(planeLocation: IVector3D, normal: IVector3D, roomId: string = null, range: number = 0.8): string
     {
-        if(!layersX?.length || !layersY?.length || !location) return;
+        if(!planeLocation || !normal) return '';
 
-        this._units.set(this.key(id, roomId), { id, layersX, layersY, location, roomId });
+        let signature = '';
+
+        for(const avatar of this._avatars.values())
+        {
+            if(!avatar.location || !this.matchesRoom(avatar.roomId, roomId)) continue;
+
+            if(this.planeDistance(avatar.location, planeLocation, normal) <= range) signature += ('a' + avatar.id + ':' + avatar.version + ';');
+        }
+
+        for(const unit of this._units.values())
+        {
+            if(!unit.location || !this.matchesRoom(unit.roomId, roomId)) continue;
+
+            if(this.planeDistance(unit.location, planeLocation, normal) <= range) signature += ('u' + unit.id + ':' + unit.version + ';');
+        }
+
+        return signature;
+    }
+
+    public static setUnit(id: number, layers: IWindowReflectionUnitLayer[], layersByDirection: ReadonlyMap<number, IWindowReflectionUnitLayer[]>, direction: number, location: IVector3D, origin: IVector3D, roomId: string = null, sizeX: number = 1, sizeY: number = 1): void
+    {
+        if(!layers?.length || !location) return;
+
+        const storedOrigin = new Vector3d();
+
+        storedOrigin.assign(origin || location);
+
+        this._units.set(this.key(id, roomId), { id, layers, layersByDirection: (layersByDirection || new Map()), direction: (direction || 0), location, origin: storedOrigin, sizeX: Math.max(1, (sizeX || 1)), sizeY: Math.max(1, (sizeY || 1)), roomId, version: ++this._version });
 
         this._updateId++;
     }
@@ -138,7 +219,7 @@ export class RoomWindowReflectionState
         return ((this._avatars.get(this.key(id, roomId)) || this._avatars.get(this.key(id, null)))?.location || null);
     }
 
-    public static setAvatar(id: number, texture: Texture, location: IVector3D, verticalOffset: number = 0, direction: number = 0, oppositeTexture: Texture = null, roomId: string = null): void
+    public static setAvatar(id: number, texture: Texture, mirrors: ReadonlyMap<number, Texture>, direction: number, location: IVector3D, verticalOffset: number = 0, roomId: string = null): void
     {
         if(!texture || !location) return;
 
@@ -149,11 +230,12 @@ export class RoomWindowReflectionState
         this._avatars.set(this.key(id, roomId), {
             id,
             texture,
+            mirrors: (mirrors || new Map()),
+            direction: (direction || 0),
             location: storedLocation,
             verticalOffset,
-            direction,
-            oppositeTexture: (oppositeTexture || texture),
-            roomId
+            roomId,
+            version: ++this._version
         });
 
         this._updateId++;

@@ -20569,14 +20569,6 @@
     {
       "direction": "client_to_server",
       "side": "typescript",
-      "header": 768,
-      "symbol": "WIRED_OPEN",
-      "path": "packages/communication/src/messages/outgoing/roomevents/OpenMessageComposer.ts",
-      "reason": "Header is registered only by the Octane Renderer packet registry"
-    },
-    {
-      "direction": "client_to_server",
-      "side": "typescript",
       "header": 790,
       "symbol": "TRY_PHONE_NUMBER",
       "path": "packages/communication/src/messages/outgoing/gifts/TryPhoneNumberMessageComposer.ts",
