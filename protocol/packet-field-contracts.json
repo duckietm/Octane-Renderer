@@ -20218,6 +20218,28 @@
       ]
     },
     {
+      "name": "WIRED_OPEN",
+      "direction": "client_to_server",
+      "header": 768,
+      "java": {
+        "symbol": "WiredOpenEvent",
+        "className": "WiredOpenEvent",
+        "path": "Emulator/src/main/java/com/eu/habbo/messages/incoming/wired/WiredOpenEvent.java"
+      },
+      "typescript": {
+        "symbol": "WIRED_OPEN",
+        "className": "OpenMessageComposer",
+        "path": "packages/communication/src/messages/outgoing/roomevents/OpenMessageComposer.ts"
+      },
+      "fields": [
+        {
+          "kind": "scalar",
+          "type": "int",
+          "name": "stuffId"
+        }
+      ]
+    },
+    {
       "name": "WIRED_ARRAY_INSPECTION_REQUEST",
       "direction": "client_to_server",
       "header": 10034,
