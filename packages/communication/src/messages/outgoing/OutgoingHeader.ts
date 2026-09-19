@@ -434,6 +434,14 @@ export class OutgoingHeader
     public static GET_REWARD_TRACKS = 9450;
     public static CLAIM_REWARD_TRACK_PRIZE = 1111;
     public static PURCHASE_REWARD_TRACK_PREMIUM = 3022;
+    // Reward track staff editor (custom, 10100-10199).
+    public static GET_REWARD_TRACK_ADMIN_DATA = 10100;
+    public static SAVE_REWARD_TRACK = 10101;
+    public static SAVE_REWARD_TRACK_TASK = 10102;
+    public static SAVE_REWARD_TRACK_PRIZE = 10103;
+    public static DELETE_REWARD_TRACK_ENTITY = 10104;
+    public static SEARCH_REWARD_TRACK_FURNI = 10106;
+    public static SAVE_REWARD_TRACK_TEXTS = 10108;
     public static GET_BONUS_RARE_INFO = 957;
     public static CRAFT = 3591;
     public static CRAFT_SECRET = 1251;
