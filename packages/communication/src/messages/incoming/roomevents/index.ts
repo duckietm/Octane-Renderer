@@ -21,3 +21,7 @@ export * from './WiredVariableHoldersPageEvent';
 export * from './WiredVariableHoldersEvent';
 export * from './WiredAllVariablesHashEvent';
 export * from './WiredAllVariablesDiffEvent';
+export * from './VariableFxConfigUpdateEvent';
+export * from './VariableFxConfigRemoveEvent';
+export * from './VariableFxStatusUpdateEvent';
+export * from './VariableFxStatusRemoveEvent';

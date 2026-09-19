@@ -2,6 +2,9 @@ export class IncomingHeader
 {
     // These packets do not belong to this revision, so these are custom packet ids
     public static AREA_HIDE = 6001;
+    // Variable FX config/status remove; official ids 1200 and 3388 are taken (see Outgoing).
+    public static VARIABLE_FX_CONFIG_REMOVE = 9490;
+    public static VARIABLE_FX_STATUS_REMOVE = 9491;
 
     // MENTIONS
     public static MENTION_RECEIVED = 4801;
@@ -313,6 +316,9 @@ export class IncomingHeader
     public static WIRED_LOG_PAGE = 918;
     public static WIRED_ALL_VARIABLES_HASH = 1646;
     public static WIRED_ALL_VARIABLES_DIFF = 2498;
+    // Variable FX drawing configuration and live status (server -> client), official numbers.
+    public static VARIABLE_FX_CONFIG_UPDATE = 267;
+    public static VARIABLE_FX_STATUS_UPDATE = 3889;
     public static WIRED_CLICK_USER_RESPONSE = 9460;
     public static WIRED_VARIABLE_HOLDERS_PAGE = 9461;
     public static WIRED_VARIABLE_HOLDERS = 9462;
