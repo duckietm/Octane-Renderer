@@ -15270,6 +15270,11 @@
           "kind": "scalar",
           "type": "boolean",
           "name": ""
+        },
+        {
+          "kind": "scalar",
+          "type": "int",
+          "name": ""
         }
       ]
     },
@@ -20855,6 +20860,28 @@
           "name": ""
         }
       ]
+    },
+    {
+      "name": "REQUEST_PROFILE_ACHIEVEMENTS",
+      "direction": "client_to_server",
+      "header": 7023,
+      "java": {
+        "symbol": "RequestProfileAchievementsEvent",
+        "className": "RequestProfileAchievementsEvent",
+        "path": "Emulator/src/main/java/com/eu/habbo/messages/incoming/users/RequestProfileAchievementsEvent.java"
+      },
+      "typescript": {
+        "symbol": "REQUEST_PROFILE_ACHIEVEMENTS",
+        "className": "RequestProfileAchievementsComposer",
+        "path": "packages/communication/src/messages/outgoing/user/data/RequestProfileAchievementsComposer.ts"
+      },
+      "fields": [
+        {
+          "kind": "scalar",
+          "type": "int",
+          "name": "userId"
+        }
+      ]
     }
   ],
   "unpaired": [
@@ -22218,7 +22245,7 @@
         "className": "RoomUnitChatWhisperComposer",
         "path": "packages/communication/src/messages/outgoing/room/unit/chat/RoomUnitChatWhisperComposer.ts"
       },
-      "reason": "Java analyzer: Packet fields delegated to external constructor RoomChatMessage inside handle; TypeScript analyzer: Outgoing value recipientName + \u0027 \u0027 + message has no statically resolvable wire type"
+      "reason": "Java analyzer: Packet fields delegated to external constructor RoomChatMessage inside handle; TypeScript analyzer: Outgoing value recipientName + ' ' + message has no statically resolvable wire type"
     },
     {
       "name": "MARKETPLACE_SELL_MULTIPLE_ITEMS",
@@ -23210,7 +23237,7 @@
         "className": "ClientHelloMessageComposer",
         "path": "packages/communication/src/messages/outgoing/handshake/ClientHelloMessageComposer.ts"
       },
-      "reason": "TypeScript analyzer: Outgoing value `NITRO-${OctaneVersion.RENDERER_VERSION.replaceAll(\u0027.\u0027, \u0027-\u0027)}` has no statically resolvable wire type"
+      "reason": "TypeScript analyzer: Outgoing value `NITRO-${OctaneVersion.RENDERER_VERSION.replaceAll('.', '-')}` has no statically resolvable wire type"
     },
     {
       "name": "SNOWWAR_LOAD_STAGE_READY",
@@ -28265,6 +28292,22 @@
         "symbol": "REWARD_TRACK_TEXTS",
         "className": "RewardTrackTextsMessageParser",
         "path": "packages/communication/src/messages/parser/quest/RewardTrackTextsMessageParser.ts"
+      },
+      "reason": "Java analyzer: Data-dependent packet operations in ForEachStmt inside composeInternal; TypeScript analyzer: Data-dependent packet operations in ForStatement inside parse"
+    },
+    {
+      "name": "PROFILE_ACHIEVEMENTS",
+      "direction": "server_to_client",
+      "header": 7006,
+      "java": {
+        "symbol": "ProfileAchievementsComposer",
+        "className": "ProfileAchievementsComposer",
+        "path": "Emulator/src/main/java/com/eu/habbo/messages/outgoing/users/ProfileAchievementsComposer.java"
+      },
+      "typescript": {
+        "symbol": "PROFILE_ACHIEVEMENTS",
+        "className": "ProfileAchievementsParser",
+        "path": "packages/communication/src/messages/parser/user/data/ProfileAchievementsParser.ts"
       },
       "reason": "Java analyzer: Data-dependent packet operations in ForEachStmt inside composeInternal; TypeScript analyzer: Data-dependent packet operations in ForStatement inside parse"
     }

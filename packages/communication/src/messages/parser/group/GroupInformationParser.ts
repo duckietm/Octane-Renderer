@@ -20,6 +20,7 @@ export class GroupInformationParser implements IMessageParser
     private _canMembersDecorate: boolean;
     private _pendingRequestsCount: number;
     private _hasForum: boolean;
+    private _onlineMembersCount: number;
 
     public flush(): boolean
     {
@@ -41,6 +42,7 @@ export class GroupInformationParser implements IMessageParser
         this._canMembersDecorate = false;
         this._pendingRequestsCount = 0;
         this._hasForum = false;
+        this._onlineMembersCount = -1;
 
         return true;
     }
@@ -68,6 +70,9 @@ export class GroupInformationParser implements IMessageParser
         this._canMembersDecorate = wrapper.readBoolean();
         this._pendingRequestsCount = wrapper.readInt();
         this._hasForum = wrapper.readBoolean();
+
+        // Trailing extension: members online right now. Older servers do not send it.
+        this._onlineMembersCount = wrapper.bytesAvailable ? wrapper.readInt() : -1;
 
         return true;
     }
@@ -160,5 +165,11 @@ export class GroupInformationParser implements IMessageParser
     public get hasForum(): boolean
     {
         return this._hasForum;
+    }
+
+    /** Members online right now, or -1 when the server does not report it. */
+    public get onlineMembersCount(): number
+    {
+        return this._onlineMembersCount;
     }
 }

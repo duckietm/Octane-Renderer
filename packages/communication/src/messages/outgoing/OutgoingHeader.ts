@@ -627,6 +627,7 @@ export class OutgoingHeader
     public static PURCHASE_NICK_ICON = 7016;
     public static SET_ACTIVE_NICK_ICON = 7017;
     public static PURCHASE_CATALOG_PREFIX = 7018;
+    public static REQUEST_PROFILE_ACHIEVEMENTS = 7023;
     public static SET_DISPLAY_ORDER = 7019;
     public static ROOM_REMOVE_BACKGROUND = 7020;
     public static ROOM_REMOVE_PAINT = 7021;

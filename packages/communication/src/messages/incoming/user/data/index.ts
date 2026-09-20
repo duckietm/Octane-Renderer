@@ -1,3 +1,4 @@
+export * from './ProfileAchievementsEvent';
 export * from './RelationshipStatusInfoEvent';
 export * from './UserCurrentBadgesEvent';
 export * from './UserInfoEvent';

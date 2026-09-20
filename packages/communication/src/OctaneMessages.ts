@@ -1,5 +1,6 @@
 import { IMessageConfiguration } from '@octane/api';
 import { GoToBreedingNestFailureEvent, GroupMemberUpdateEvent, GroupMembersRefreshEvent } from './messages';
+import { ProfileAchievementsEvent, RequestProfileAchievementsComposer } from './messages';
 import { UnsupportedOutgoingHeader } from './messages/outgoing/UnsupportedOutgoingHeader';
 import { UserSettingsPrivacyComposer } from './messages/outgoing/user/settings/UserSettingsPrivacyComposer';
 import { UserSettingsChatPreferencesComposer } from './messages/outgoing/user/settings/UserSettingsChatPreferencesComposer';
@@ -799,6 +800,7 @@ export class OctaneMessages implements IMessageConfiguration
 
         // Nick Icons
         this._events.set(IncomingHeader.USER_NICK_ICONS, UserNickIconsEvent);
+        this._events.set(IncomingHeader.PROFILE_ACHIEVEMENTS, ProfileAchievementsEvent);
         this._events.set(IncomingHeader.USER_PREFIXES, UserPrefixesEvent);
         this._events.set(IncomingHeader.PREFIX_RECEIVED, PrefixReceivedEvent);
         this._events.set(IncomingHeader.ACTIVE_PREFIX_UPDATED, ActivePrefixUpdatedEvent);
@@ -1593,6 +1595,7 @@ export class OctaneMessages implements IMessageConfiguration
 
         // Nick Icons
         this._composers.set(OutgoingHeader.REQUEST_NICK_ICONS, RequestNickIconsComposer);
+        this._composers.set(OutgoingHeader.REQUEST_PROFILE_ACHIEVEMENTS, RequestProfileAchievementsComposer);
         this._composers.set(OutgoingHeader.PURCHASE_NICK_ICON, PurchaseNickIconComposer);
         this._composers.set(OutgoingHeader.SET_ACTIVE_NICK_ICON, SetActiveNickIconComposer);
         this._composers.set(OutgoingHeader.REQUEST_PREFIXES, RequestPrefixesComposer);
