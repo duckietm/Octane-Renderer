@@ -6,7 +6,6 @@ export * from './GetUserTagsComposer';
 export * from './IgnoreUserComposer';
 export * from './IgnoreUserIdComposer';
 export * from './ReplenishRespectComposer';
-export * from './RequestProfileAchievementsComposer';
 export * from './UnblockUserComposer';
 export * from './UnignoreUserComposer';
 export * from './UserCurrentBadgesComposer';

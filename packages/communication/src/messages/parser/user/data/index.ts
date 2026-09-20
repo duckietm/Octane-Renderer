@@ -1,4 +1,3 @@
-export * from './ProfileAchievementsParser';
 export * from './RelationshipStatusInfo';
 export * from './RelationshipStatusInfoMessageParser';
 export * from './UserCurrentBadgesParser';
