@@ -15270,11 +15270,6 @@
           "kind": "scalar",
           "type": "boolean",
           "name": ""
-        },
-        {
-          "kind": "scalar",
-          "type": "int",
-          "name": ""
         }
       ]
     },

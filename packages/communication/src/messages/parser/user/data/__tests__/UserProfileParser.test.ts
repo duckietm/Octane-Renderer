@@ -84,8 +84,6 @@ describe('UserProfileParser presence and level block', () =>
         const writer = new BinaryWriter();
         writeBaseProfile(writer);
         writer.writeByte(1);
-        writer.writeInt(512);
-        writer.writeString('Lobby');
         writer.writeInt(3);
         writer.writeInt(300);
         writer.writeInt(600);
@@ -93,8 +91,6 @@ describe('UserProfileParser presence and level block', () =>
         const parser = parse(writer);
         expect(parser.totalBadges).toBe(35);
         expect(parser.onlineStatus).toBe(1);
-        expect(parser.currentRoomId).toBe(512);
-        expect(parser.currentRoomName).toBe('Lobby');
         expect(parser.level).toBe(3);
         expect(parser.levelStart).toBe(300);
         expect(parser.nextLevelStart).toBe(600);
@@ -105,8 +101,6 @@ describe('UserProfileParser presence and level block', () =>
         const parser = parse((() => { const writer = new BinaryWriter(); writeBaseProfile(writer); return writer; })());
         expect(parser.isOnline).toBe(true);
         expect(parser.onlineStatus).toBe(0);
-        expect(parser.currentRoomId).toBe(0);
-        expect(parser.currentRoomName).toBe('');
         expect(parser.level).toBe(0);
     });
 });

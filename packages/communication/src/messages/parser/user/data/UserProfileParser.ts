@@ -29,8 +29,6 @@ export class UserProfileParser implements IMessageParser
     private _prefixFont: string;
     private _displayOrder: string;
     private _onlineStatus: number;
-    private _currentRoomId: number;
-    private _currentRoomName: string;
     private _level: number;
     private _levelStart: number;
     private _nextLevelStart: number;
@@ -63,8 +61,6 @@ export class UserProfileParser implements IMessageParser
         this._prefixFont = '';
         this._displayOrder = 'icon-prefix-name';
         this._onlineStatus = 0;
-        this._currentRoomId = 0;
-        this._currentRoomName = '';
         this._level = 0;
         this._levelStart = 0;
         this._nextLevelStart = 0;
@@ -102,7 +98,7 @@ export class UserProfileParser implements IMessageParser
         //   block 3: nick icon (1 string)
         //   block 4: prefix decoration set (6 strings)
         //   block 5: total badge count (1 int)
-        //   block 6: presence and level (1 byte, 1 int, 1 string, 3 ints)
+        //   block 6: presence and level (1 byte, 3 ints)
         // Each tier early-returns to keep the parser tolerant of older
         // servers that don't ship the later blocks. Defaults set by flush().
         if(!wrapper.bytesAvailable) return true;
@@ -136,8 +132,6 @@ export class UserProfileParser implements IMessageParser
 
         // 0 offline, 1 online, 2 hidden (only ever reported to the user themself).
         this._onlineStatus = wrapper.readByte();
-        this._currentRoomId = wrapper.readInt();
-        this._currentRoomName = wrapper.readString();
         this._level = wrapper.readInt();
         this._levelStart = wrapper.readInt();
         this._nextLevelStart = wrapper.readInt();
@@ -274,16 +268,6 @@ export class UserProfileParser implements IMessageParser
     public get onlineStatus(): number
     {
         return this._onlineStatus;
-    }
-
-    public get currentRoomId(): number
-    {
-        return this._currentRoomId;
-    }
-
-    public get currentRoomName(): string
-    {
-        return this._currentRoomName;
     }
 
     /** 0 when the server does not send a level. */
