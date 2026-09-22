@@ -1,8 +1,8 @@
 import { RoomObjectCategory } from '@octane/api';
 import { TextureUtils } from '@octane/utils';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { RoomEngine } from './RoomEngine';
-import { RoomObjectImageCache } from './RoomObjectImageCache';
+import { buildRoomObjectImageKey, RoomObjectImageCache } from './RoomObjectImageCache';
 
 vi.mock('./GetRoomMessageHandler', () => ({
     GetRoomMessageHandler: () => ({ dispose: vi.fn() })
@@ -16,43 +16,48 @@ const direction = { x: 0, y: 0, z: 0 } as any;
 
 const makeTexture = () => ({ destroyed: false, destroy: vi.fn(function (this: any) { this.destroyed = true; }) });
 
+/** A room instance backing fake whose objects each remember their own last render, so the shared fake also covers duplicate-delivery cases. */
+const makeRoomInstance = (objects: any[], renders: any[], removed: number[]) => ({
+    createRoomObjectAndInitalize: (id: number, type: string) =>
+    {
+        const model = new Map<string, any>();
+        let ownTexture: any = null;
+        const object = {
+            id,
+            type,
+            model: { setValue: (k: string, v: any) => model.set(k, v), getValue: (k: string) => model.get(k) },
+            logic: { processUpdateMessage: vi.fn() },
+            visualization: {
+                update: vi.fn(),
+                getImage: () => { if(!ownTexture) { ownTexture = makeTexture(); renders.push(ownTexture); } return ownTexture; },
+                get image() { return ownTexture; }
+            },
+            setDirection: vi.fn()
+        };
+
+        objects.push(object);
+
+        return object;
+    },
+    removeRoomObject: (id: number) => { removed.push(id); },
+    getManager: () => ({ objects: { length: objects.length, getValues: () => objects } })
+});
+
 const makeEngine = (loaded: boolean) =>
 {
     const objects: any[] = [];
     const renders: any[] = [];
     const removed: number[] = [];
 
-    const roomInstance = {
-        createRoomObjectAndInitalize: (id: number, type: string) =>
-        {
-            const model = new Map<string, any>();
-            const object = {
-                id,
-                type,
-                model: { setValue: (k: string, v: any) => model.set(k, v), getValue: (k: string) => model.get(k) },
-                logic: { processUpdateMessage: vi.fn() },
-                visualization: {
-                    update: vi.fn(),
-                    getImage: () => { const t = makeTexture(); renders.push(t); return t; },
-                    get image() { return renders[renders.length - 1]; }
-                },
-                setDirection: vi.fn()
-            };
+    const roomInstance = makeRoomInstance(objects, renders, removed);
 
-            objects.push(object);
-
-            return object;
-        },
-        removeRoomObject: (id: number) => { removed.push(id); },
-        getManager: () => ({ objects: { length: objects.length, getValues: () => objects } })
-    };
-
+    let nextId = 0;
     const engine = Object.create(RoomEngine.prototype) as RoomEngine;
 
     Object.assign(engine, {
         _roomManager: { getRoomInstance: () => roomInstance, createRoomInstance: () => roomInstance },
         _roomContentLoader: { getCollection: () => (loaded ? {} : null), getCategoryForType: () => RoomObjectCategory.FLOOR },
-        _imageObjectIdBank: { reserveNumber: () => 0, freeNumber: vi.fn() },
+        _imageObjectIdBank: { reserveNumber: () => nextId++, freeNumber: vi.fn() },
         _imageCallbacks: new Map(),
         _imageCache: new RoomObjectImageCache(8),
         getRoomObjectCategoryForType: () => RoomObjectCategory.FLOOR
@@ -66,6 +71,11 @@ describe('RoomEngine image cache wiring', () =>
     beforeEach(() =>
     {
         vi.spyOn(TextureUtils, 'generateImage').mockResolvedValue({ fake: true } as any);
+    });
+
+    afterEach(() =>
+    {
+        vi.restoreAllMocks();
     });
 
     it('renders once for two identical requests and shares the entry', () =>
@@ -90,6 +100,23 @@ describe('RoomEngine image cache wiring', () =>
         expect(renders.length).toBe(2);
     });
 
+    it('finds a cached entry only under the key for its own state', () =>
+    {
+        const { engine, renders } = makeEngine(true);
+
+        const stateZero = engine.getGenericRoomObjectImage('chair', '1', direction, 64, null, 0, null, null, 0);
+        const stateTwo = engine.getGenericRoomObjectImage('chair', '1', direction, 64, null, 0, null, null, 2);
+
+        expect(renders.length).toBe(2);
+
+        const cache: RoomObjectImageCache = engine['_imageCache'];
+
+        expect(cache.get(buildRoomObjectImageKey('chair', '1', direction, 64, null, null, 0, -1, null))).toBeDefined();
+        expect(cache.get(buildRoomObjectImageKey('chair', '1', direction, 64, null, null, 2, -1, null))).toBeDefined();
+        expect(cache.get(buildRoomObjectImageKey('chair', '1', direction, 64, null, null, 0, -1, null))?.texture).toBe(stateZero.data);
+        expect(cache.get(buildRoomObjectImageKey('chair', '1', direction, 64, null, null, 2, -1, null))?.texture).toBe(stateTwo.data);
+    });
+
     it('keeps the deferred path when the asset is not loaded', () =>
     {
         const { engine } = makeEngine(false);
@@ -102,7 +129,29 @@ describe('RoomEngine image cache wiring', () =>
         expect(result.id).toBe(1);
     });
 
-    it('stores the deferred delivery and hands the listener a shared result', () =>
+    it('stores the deferred delivery under the built key and hands the listener a shared result', () =>
+    {
+        const { engine } = makeEngine(false);
+        const listener = { imageReady: vi.fn(), imageFailed: vi.fn() };
+
+        engine.getGenericRoomObjectImage('chair', '1', direction, 64, listener);
+        engine.initalizeTemporaryObjectsByType('chair', true);
+
+        expect(listener.imageReady).toHaveBeenCalledTimes(1);
+
+        const result = listener.imageReady.mock.calls[0][0];
+        const cache: RoomObjectImageCache = engine['_imageCache'];
+
+        expect(result.id).toBe(1);
+        expect(cache.size).toBe(1);
+
+        const entry = cache.get(buildRoomObjectImageKey('chair', '1', direction, 64, null, null, -1, -1, null));
+
+        expect(entry).toBeDefined();
+        expect(entry.texture).toBe(result.data);
+    });
+
+    it('a failed content load is delivered but never cached', () =>
     {
         const { engine } = makeEngine(false);
         const listener = { imageReady: vi.fn(), imageFailed: vi.fn() };
@@ -111,50 +160,28 @@ describe('RoomEngine image cache wiring', () =>
         engine.initalizeTemporaryObjectsByType('chair', false);
 
         expect(listener.imageReady).toHaveBeenCalledTimes(1);
+        expect(listener.imageFailed).not.toHaveBeenCalled();
 
-        const result = listener.imageReady.mock.calls[0][0];
         const cache: RoomObjectImageCache = engine['_imageCache'];
-        const key = engine['_roomManager'].getRoomInstance('temporary_room');
 
-        expect(result.id).toBe(1);
-        expect(cache.size).toBe(1);
+        expect(cache.size).toBe(0);
+        expect(cache.get(buildRoomObjectImageKey('chair', '1', direction, 64, null, null, -1, -1, null))).toBeUndefined();
 
-        const entry = [ ...(cache as any)._entries.values() ][0];
+        const secondListener = { imageReady: vi.fn(), imageFailed: vi.fn() };
 
-        expect(entry.texture).toBe(result.data);
-        void key;
+        engine.getGenericRoomObjectImage('chair', '1', direction, 64, secondListener);
+
+        expect(engine['_imageCallbacks'].size).toBe(1);
+        expect(secondListener.imageReady).not.toHaveBeenCalled();
     });
 
     it('reuses one cache entry when two deferred requests for the same key are delivered together', () =>
     {
         const objects: any[] = [];
         const renders: any[] = [];
+        const removed: number[] = [];
 
-        const roomInstance = {
-            createRoomObjectAndInitalize: (id: number, type: string) =>
-            {
-                const model = new Map<string, any>();
-                let ownTexture: any = null;
-                const object = {
-                    id,
-                    type,
-                    model: { setValue: (k: string, v: any) => model.set(k, v), getValue: (k: string) => model.get(k) },
-                    logic: { processUpdateMessage: vi.fn() },
-                    visualization: {
-                        update: vi.fn(),
-                        getImage: () => { if(!ownTexture) { ownTexture = makeTexture(); renders.push(ownTexture); } return ownTexture; },
-                        get image() { return ownTexture; }
-                    },
-                    setDirection: vi.fn()
-                };
-
-                objects.push(object);
-
-                return object;
-            },
-            removeRoomObject: vi.fn(),
-            getManager: () => ({ objects: { length: objects.length, getValues: () => objects } })
-        };
+        const roomInstance = makeRoomInstance(objects, renders, removed);
 
         let nextId = 0;
 
@@ -175,7 +202,7 @@ describe('RoomEngine image cache wiring', () =>
         engine.getGenericRoomObjectImage('chair', '1', direction, 64, listenerA);
         engine.getGenericRoomObjectImage('chair', '1', direction, 64, listenerB);
 
-        engine.initalizeTemporaryObjectsByType('chair', false);
+        engine.initalizeTemporaryObjectsByType('chair', true);
 
         expect(listenerA.imageReady).toHaveBeenCalledTimes(1);
         expect(listenerB.imageReady).toHaveBeenCalledTimes(1);
@@ -194,6 +221,38 @@ describe('RoomEngine image cache wiring', () =>
         expect(renders[1].destroy).toHaveBeenCalledWith(true);
     });
 
+    it('a request through the uncached mover path does not hit or store the cache', () =>
+    {
+        const { engine, renders } = makeEngine(true);
+
+        engine.getGenericRoomObjectImage('chair', '1', direction, 64, null);
+
+        const cache: RoomObjectImageCache = engine['_imageCache'];
+
+        expect(cache.size).toBe(1);
+
+        const uncachedResult = (engine as any).getGenericRoomObjectImageUncached('chair', '1', direction, 64, null);
+
+        expect(cache.size).toBe(1);
+        expect(renders.length).toBe(2);
+        expect(uncachedResult.data).not.toBe(renders[0]);
+    });
+
+    it('a non-legacy objectData renders every time and stores nothing', () =>
+    {
+        const { engine, renders } = makeEngine(true);
+        const fakeMapData = { getLegacyString: () => '3' } as any;
+
+        engine.getGenericRoomObjectImage('chair', '1', direction, 64, null, 0, null, fakeMapData);
+        engine.getGenericRoomObjectImage('chair', '1', direction, 64, null, 0, null, fakeMapData);
+
+        expect(renders.length).toBe(2);
+
+        const cache: RoomObjectImageCache = engine['_imageCache'];
+
+        expect(cache.size).toBe(0);
+    });
+
     it('clearRoomObjectImageCache empties the cache and destroys textures', () =>
     {
         const { engine } = makeEngine(true);
@@ -201,7 +260,7 @@ describe('RoomEngine image cache wiring', () =>
         engine.getGenericRoomObjectImage('chair', '1', direction, 64, null);
 
         const cache: RoomObjectImageCache = engine['_imageCache'];
-        const entry = [ ...(cache as any)._entries.values() ][0];
+        const entry = cache.get(buildRoomObjectImageKey('chair', '1', direction, 64, null, null, -1, -1, null));
         const texture = entry.texture;
 
         engine.clearRoomObjectImageCache();
