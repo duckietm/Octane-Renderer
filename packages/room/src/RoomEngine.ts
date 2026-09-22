@@ -3325,7 +3325,16 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
 
                         if(texture)
                         {
-                            const entry = imageKey ? this._imageCache.set(imageKey, texture) : null;
+                            let entry = imageKey ? this._imageCache.get(imageKey) : null;
+
+                            if(entry)
+                            {
+                                if((texture !== entry.texture) && !(texture as unknown as { destroyed?: boolean }).destroyed) texture.destroy(true);
+                            }
+                            else if(imageKey)
+                            {
+                                entry = this._imageCache.set(imageKey, texture);
+                            }
 
                             for(const imageListener of imageListeners)
                             {

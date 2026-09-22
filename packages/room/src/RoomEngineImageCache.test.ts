@@ -125,6 +125,75 @@ describe('RoomEngine image cache wiring', () =>
         void key;
     });
 
+    it('reuses one cache entry when two deferred requests for the same key are delivered together', () =>
+    {
+        const objects: any[] = [];
+        const renders: any[] = [];
+
+        const roomInstance = {
+            createRoomObjectAndInitalize: (id: number, type: string) =>
+            {
+                const model = new Map<string, any>();
+                let ownTexture: any = null;
+                const object = {
+                    id,
+                    type,
+                    model: { setValue: (k: string, v: any) => model.set(k, v), getValue: (k: string) => model.get(k) },
+                    logic: { processUpdateMessage: vi.fn() },
+                    visualization: {
+                        update: vi.fn(),
+                        getImage: () => { if(!ownTexture) { ownTexture = makeTexture(); renders.push(ownTexture); } return ownTexture; },
+                        get image() { return ownTexture; }
+                    },
+                    setDirection: vi.fn()
+                };
+
+                objects.push(object);
+
+                return object;
+            },
+            removeRoomObject: vi.fn(),
+            getManager: () => ({ objects: { length: objects.length, getValues: () => objects } })
+        };
+
+        let nextId = 0;
+
+        const engine = Object.create(RoomEngine.prototype) as RoomEngine;
+
+        Object.assign(engine, {
+            _roomManager: { getRoomInstance: () => roomInstance, createRoomInstance: () => roomInstance },
+            _roomContentLoader: { getCollection: () => null, getCategoryForType: () => RoomObjectCategory.FLOOR },
+            _imageObjectIdBank: { reserveNumber: () => nextId++, freeNumber: vi.fn() },
+            _imageCallbacks: new Map(),
+            _imageCache: new RoomObjectImageCache(8),
+            getRoomObjectCategoryForType: () => RoomObjectCategory.FLOOR
+        });
+
+        const listenerA = { imageReady: vi.fn(), imageFailed: vi.fn() };
+        const listenerB = { imageReady: vi.fn(), imageFailed: vi.fn() };
+
+        engine.getGenericRoomObjectImage('chair', '1', direction, 64, listenerA);
+        engine.getGenericRoomObjectImage('chair', '1', direction, 64, listenerB);
+
+        engine.initalizeTemporaryObjectsByType('chair', false);
+
+        expect(listenerA.imageReady).toHaveBeenCalledTimes(1);
+        expect(listenerB.imageReady).toHaveBeenCalledTimes(1);
+
+        const resultA = listenerA.imageReady.mock.calls[0][0];
+        const resultB = listenerB.imageReady.mock.calls[0][0];
+
+        expect(resultA.data).toBe(resultB.data);
+
+        const cache: RoomObjectImageCache = engine['_imageCache'];
+
+        expect(cache.size).toBe(1);
+        expect(renders.length).toBe(2);
+        expect(resultA.data).toBe(renders[0]);
+        expect(renders[0].destroy).not.toHaveBeenCalled();
+        expect(renders[1].destroy).toHaveBeenCalledWith(true);
+    });
+
     it('clearRoomObjectImageCache empties the cache and destroys textures', () =>
     {
         const { engine } = makeEngine(true);
