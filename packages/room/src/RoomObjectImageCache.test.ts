@@ -47,6 +47,22 @@ describe('RoomObjectImageCache', () => {
         expect(cache.size).toBe(0);
     });
 
+    it('clearByType destroys only the entries keyed for that type', () => {
+        const cache = new RoomObjectImageCache(8);
+        const chairA = fakeTexture(); const chairB = fakeTexture(); const table = fakeTexture();
+        cache.set('chair|1|0,0,0|64|||-1|-1|', chairA as any);
+        cache.set('chair|2|0,0,0|64|||-1|-1|', chairB as any);
+        cache.set('table|1|0,0,0|64|||-1|-1|', table as any);
+
+        cache.clearByType('chair');
+
+        expect(chairA.destroy).toHaveBeenCalledWith(true);
+        expect(chairB.destroy).toHaveBeenCalledWith(true);
+        expect(table.destroy).not.toHaveBeenCalled();
+        expect(cache.size).toBe(1);
+        expect(cache.get('table|1|0,0,0|64|||-1|-1|')).toBeDefined();
+    });
+
     it('does not destroy a texture twice', () => {
         const cache = new RoomObjectImageCache(1);
         const a = fakeTexture(); a.destroyed = true;

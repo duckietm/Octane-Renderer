@@ -3243,13 +3243,15 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
     }
 
     /**
-     * Drops every cached room-object image. Call it after an asset or furnidata
-     * change that alters how a type renders. Textures handed out by the image API
-     * are owned by this cache and destroyed here.
+     * Drops cached room-object images. Call it after an asset or furnidata change
+     * that alters how a type renders. Textures handed out by the image API are
+     * owned by this cache and destroyed here. With `type`, only that type's
+     * entries are dropped; omitted, the whole cache is cleared.
      */
-    public clearRoomObjectImageCache(): void
+    public clearRoomObjectImageCache(type?: string): void
     {
-        this._imageCache.clear();
+        if(type) this._imageCache.clearByType(type);
+        else this._imageCache.clear();
     }
 
     public getGenericRoomObjectThumbnail(type: string, param: string, listener: IGetImageListener, extraData: string = null, stuffData: IObjectData = null): IImageResult

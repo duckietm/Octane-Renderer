@@ -43,7 +43,8 @@ export class RoomObjectImageCache
 {
     private readonly _entries = new Map<string, RoomObjectImageCacheEntry>();
 
-    constructor(private readonly _capacity: number = 512) {}
+    /** 256 cached renders by default - see the design doc's capacity note. */
+    constructor(private readonly _capacity: number = 256) {}
 
     public get size(): number { return this._entries.size; }
 
@@ -77,17 +78,37 @@ export class RoomObjectImageCache
         for(const entry of this._entries.values()) entry.destroy();
         this._entries.clear();
     }
+
+    /** Removes and destroys only the entries keyed for `type` (the `type|` key prefix). */
+    public clearByType(type: string): void
+    {
+        const prefix = `${type}|`;
+
+        for(const [ key, entry ] of this._entries)
+        {
+            if(!key.startsWith(prefix)) continue;
+
+            entry.destroy();
+            this._entries.delete(key);
+        }
+    }
 }
 
 /** An IImageResult over a cache entry: every holder of the same entry shares one extraction. */
 export class SharedImageResult implements IImageResult
 {
     public image: HTMLImageElement = null;
+    public readonly data: Texture;
 
-    constructor(private readonly _entry: RoomObjectImageCacheEntry, public id: number = 0) {}
+    constructor(private readonly _entry: RoomObjectImageCacheEntry, public id: number = 0)
+    {
+        this.data = _entry.texture;
+    }
 
-    public get data(): Texture { return this._entry.texture; }
-    public set data(_value: Texture) { /* the entry owns the texture */ }
+    public getImage(): Promise<HTMLImageElement>
+    {
+        if(this.image) return Promise.resolve(this.image);
 
-    public getImage(): Promise<HTMLImageElement> { return this._entry.getImage(); }
+        return this._entry.getImage();
+    }
 }

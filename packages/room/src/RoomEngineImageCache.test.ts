@@ -269,6 +269,23 @@ describe('RoomEngine image cache wiring', () =>
         expect(texture.destroy).toHaveBeenCalledWith(true);
     });
 
+    it('clearRoomObjectImageCache(type) only drops that type', () =>
+    {
+        const { engine } = makeEngine(true);
+
+        engine.getGenericRoomObjectImage('chair', '1', direction, 64, null);
+
+        const cache: RoomObjectImageCache = engine['_imageCache'];
+
+        engine.clearRoomObjectImageCache('table');
+
+        expect(cache.size).toBe(1);
+
+        engine.clearRoomObjectImageCache('chair');
+
+        expect(cache.size).toBe(0);
+    });
+
     it('dispose clears the cache', () =>
     {
         const { engine } = makeEngine(true);
