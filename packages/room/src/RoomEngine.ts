@@ -13,6 +13,7 @@ import { GetRoomObjectLogicFactory } from './GetRoomObjectLogicFactory';
 import { ImageResult } from './ImageResult';
 import { RoomInstance } from './RoomInstance';
 import { RoomObjectEventHandler } from './RoomObjectEventHandler';
+import { buildRoomObjectImageKey, RoomObjectImageCache, SharedImageResult } from './RoomObjectImageCache';
 import { RoomVariableEnum } from './RoomVariableEnum';
 import { ObjectAvatarCarryObjectUpdateMessage, ObjectAvatarChatUpdateMessage, ObjectAvatarDanceUpdateMessage, ObjectAvatarEffectUpdateMessage, ObjectAvatarExperienceUpdateMessage, ObjectAvatarExpressionUpdateMessage, ObjectAvatarFigureUpdateMessage, ObjectAvatarFlatControlUpdateMessage, ObjectAvatarGestureUpdateMessage, ObjectAvatarGuideStatusUpdateMessage, ObjectAvatarHabbiconUpdateMessage, ObjectAvatarMutedUpdateMessage, ObjectAvatarOwnMessage, ObjectAvatarPetGestureUpdateMessage, ObjectAvatarPlayerValueUpdateMessage, ObjectAvatarPlayingGameUpdateMessage, ObjectAvatarPostureUpdateMessage, ObjectAvatarSignUpdateMessage, ObjectAvatarSleepUpdateMessage, ObjectAvatarTypingUpdateMessage, ObjectAvatarUpdateMessage, ObjectAvatarUseObjectUpdateMessage, ObjectDataUpdateMessage, ObjectGroupBadgeUpdateMessage, ObjectHeightUpdateMessage, ObjectItemDataUpdateMessage, ObjectModelDataUpdateMessage, ObjectMoveUpdateMessage, ObjectRoomColorUpdateMessage, ObjectRoomFloorHoleUpdateMessage, ObjectRoomMaskUpdateMessage, ObjectRoomPlanePropertyUpdateMessage, ObjectRoomPlaneVisibilityUpdateMessage, ObjectRoomUpdateMessage, ObjectStateUpdateMessage, RoomObjectUpdateMessage } from './messages';
 import { RoomLogic, RoomMapData } from './object';
@@ -46,6 +47,7 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
     private _roomObjectEventHandler: RoomObjectEventHandler = new RoomObjectEventHandler(this);
     private _imageObjectIdBank: NumberBank = new NumberBank(1000);
     private _imageCallbacks: Map<string, IGetImageListener[]> = new Map();
+    private _imageCache: RoomObjectImageCache = new RoomObjectImageCache();
     private _thumbnailObjectIdBank: NumberBank = new NumberBank(1000);
     private _thumbnailCallbacks: Map<string, IGetImageListener[]> = new Map();
     private _activeRoomId: number = -1;
@@ -135,6 +137,7 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
         this._imageCallbacks.clear();
         this._thumbnailCallbacks.clear();
         this._badgeListenerObjects.clear();
+        this.clearRoomObjectImageCache();
     }
 
     public setActiveRoomId(roomId: number): void
@@ -3029,6 +3032,12 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
         return this.getGenericRoomObjectImage(type, value, direction, scale, listener, bgColor, null, null, -1, -1, posture);
     }
 
+    /**
+     * Renders (or reuses) the image of a room object built from raw parameters.
+     * The returned texture is owned by the internal image cache: consumers that
+     * need to keep it beyond the current callback should extract via `getImage()`
+     * rather than holding onto `data`.
+     */
     public getGenericRoomObjectImage(type: string, value: string, direction: IVector3D, scale: number, listener: IGetImageListener, bgColor: number = 0, extras: string = null, objectData: IObjectData = null, state: number = -1, frameCount: number = -1, posture: string = null, originalId: number = -1): IImageResult
     {
         if(!this._roomManager) return null;
@@ -3038,6 +3047,11 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
         imageResult.id = -1;
 
         if(!type) return imageResult;
+
+        const imageKey = buildRoomObjectImageKey(type, value, direction, scale, extras, objectData, state, frameCount, posture);
+        const cached = this._imageCache.get(imageKey);
+
+        if(cached) return new SharedImageResult(cached);
 
         let roomInstance = this._roomManager.getRoomInstance(RoomEngine.TEMPORARY_ROOM);
 
@@ -3154,19 +3168,37 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
             imageListeners.push(listener);
 
             model.setValue(RoomObjectVariable.IMAGE_QUERY_SCALE, scale);
-        }
-        else
-        {
-            roomInstance.removeRoomObject(objectId, objectCategory);
+            model.setValue(RoomObjectVariable.IMAGE_QUERY_KEY, imageKey);
 
-            this._imageObjectIdBank.freeNumber((objectId - 1));
+            geometry.dispose();
 
-            imageResult.id = 0;
+            return imageResult;
         }
+
+        roomInstance.removeRoomObject(objectId, objectCategory);
+
+        this._imageObjectIdBank.freeNumber((objectId - 1));
 
         geometry.dispose();
 
-        return imageResult;
+        if(!texture)
+        {
+            imageResult.id = 0;
+
+            return imageResult;
+        }
+
+        return new SharedImageResult(this._imageCache.set(imageKey, texture));
+    }
+
+    /**
+     * Drops every cached room-object image. Call it after an asset or furnidata
+     * change that alters how a type renders. Textures handed out by the image API
+     * are owned by this cache and destroyed here.
+     */
+    public clearRoomObjectImageCache(): void
+    {
+        this._imageCache.clear();
     }
 
     public getGenericRoomObjectThumbnail(type: string, param: string, listener: IGetImageListener, extraData: string = null, stuffData: IObjectData = null): IImageResult
@@ -3279,6 +3311,8 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
                         texture = visualization.image;
                     }
 
+                    const imageKey = roomObject.model.getValue<string>(RoomObjectVariable.IMAGE_QUERY_KEY);
+
                     roomInstance.removeRoomObject(objectId, objectCategory);
 
                     this._imageObjectIdBank.freeNumber((objectId - 1));
@@ -3289,12 +3323,25 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
                     {
                         this._imageCallbacks.delete(objectId.toString());
 
-                        for(const imageListener of imageListeners)
+                        if(texture)
                         {
-                            if(!imageListener) continue;
+                            const entry = imageKey ? this._imageCache.set(imageKey, texture) : null;
 
-                            if(texture) imageListener.imageReady(new ImageResult(objectId, texture));
-                            else imageListener.imageFailed(objectId);
+                            for(const imageListener of imageListeners)
+                            {
+                                if(!imageListener) continue;
+
+                                imageListener.imageReady(entry ? new SharedImageResult(entry, objectId) : new ImageResult(objectId, texture));
+                            }
+                        }
+                        else
+                        {
+                            for(const imageListener of imageListeners)
+                            {
+                                if(!imageListener) continue;
+
+                                imageListener.imageFailed(objectId);
+                            }
                         }
                     }
                 }

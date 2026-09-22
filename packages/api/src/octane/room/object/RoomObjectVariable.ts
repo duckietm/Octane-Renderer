@@ -167,6 +167,7 @@ export class RoomObjectVariable
     public static ROOM_SELECTED_Z: string = 'room_selected_z';
     public static ROOM_SELECTED_PLANE: string = 'room_selected_plane';
     public static IMAGE_QUERY_SCALE: string = 'image_query_scale';
+    public static IMAGE_QUERY_KEY: string = 'image_query_key';
     public static FURNITURE_FRIENDFURNI_ENGRAVING: string = 'furniture_friendfurni_engraving_type';
     public static SESSION_URL_PREFIX: string = 'session_url_prefix';
     public static SESSION_CURRENT_USER_ID: string = 'session_current_user_id';
