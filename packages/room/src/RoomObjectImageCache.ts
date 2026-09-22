@@ -111,4 +111,14 @@ export class SharedImageResult implements IImageResult
 
         return this._entry.getImage();
     }
+
+    /**
+     * The cache owns the texture behind this result, so releasing the result
+     * releases nothing: the texture is destroyed when its entry is evicted or
+     * the cache is cleared. A plain ImageResult disposes its own texture here.
+     */
+    public dispose(): void
+    {
+        this.image = null;
+    }
 }

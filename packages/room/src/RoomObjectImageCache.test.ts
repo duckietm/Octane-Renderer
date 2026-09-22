@@ -97,4 +97,20 @@ describe('RoomObjectImageCache', () => {
         expect(spy).toHaveBeenCalledTimes(1);
         spy.mockRestore();
     });
+
+    it('SharedImageResult.dispose releases nothing: the cache owns the texture', async () => {
+        const image = { src: 'data:' } as HTMLImageElement;
+        const spy = vi.spyOn(TextureUtils, 'generateImage').mockResolvedValue(image);
+        const cache = new RoomObjectImageCache(1);
+        const texture = fakeTexture();
+        const entry = cache.set('a', texture as any);
+        const result = new SharedImageResult(entry);
+        result.image = image;
+        result.dispose();
+        expect(result.image).toBeNull();
+        expect(texture.destroy).not.toHaveBeenCalled();
+        expect(cache.get('a')).toBe(entry);
+        expect(await result.getImage()).toBe(image);
+        spy.mockRestore();
+    });
 });
