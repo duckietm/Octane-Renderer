@@ -5,12 +5,7 @@ import { Texture } from 'pixi.js';
 export interface DisposableTexture { destroyed?: boolean; destroy(destroyBase?: boolean): void; }
 
 export const buildRoomObjectImageKey = (type: string, value: string, direction: IVector3D, scale: number, extras: string | null, objectData: IObjectData | null, state: number, frameCount: number, posture: string | null): string =>
-{
-    const directionKey = `${direction?.x ?? 0},${direction?.y ?? 0},${direction?.z ?? 0}`;
-    const objectDataKey = objectData ? [ objectData.getLegacyString() ] : [ '', '' ];
-
-    return [ type, value ?? '', directionKey, scale, extras ?? '', ...objectDataKey, state, frameCount, posture ?? '' ].join('|');
-};
+    [ type, value ?? '', `${direction?.x ?? 0},${direction?.y ?? 0},${direction?.z ?? 0}`, scale, extras ?? '', objectData?.getLegacyString() ?? '', state, frameCount, posture ?? '' ].join('|');
 
 /** One cached render: the texture and the single extraction every consumer shares. */
 export class RoomObjectImageCacheEntry

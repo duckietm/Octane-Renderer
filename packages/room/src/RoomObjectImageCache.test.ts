@@ -8,9 +8,10 @@ const direction = { x: 2, y: 0, z: 0 } as any;
 describe('buildRoomObjectImageKey', () => {
     it('joins every input that changes the render and normalises nulls', () => {
         const objectData = { getLegacyString: () => '3' } as any;
-        expect(buildRoomObjectImageKey('chair', '1', direction, 64, null, null, -1, -1, null)).toBe('chair|1|2,0,0|64||||-1|-1|');
+        expect(buildRoomObjectImageKey('chair', '1', direction, 64, null, null, -1, -1, null)).toBe('chair|1|2,0,0|64|||-1|-1|');
         expect(buildRoomObjectImageKey('chair', '1', direction, 64, 'x', objectData, 2, 3, 'sit')).toBe('chair|1|2,0,0|64|x|3|2|3|sit');
         expect(buildRoomObjectImageKey('chair', '1', { x: 4, y: 0, z: 0 } as any, 64, null, null, -1, -1, null)).not.toBe(buildRoomObjectImageKey('chair', '1', direction, 64, null, null, -1, -1, null));
+        expect(buildRoomObjectImageKey('chair', '1', direction, 64, null, null, -1, -1, null)).toBe(buildRoomObjectImageKey('chair', '1', direction, 64, null, { getLegacyString: () => '' } as any, -1, -1, null));
     });
 });
 
