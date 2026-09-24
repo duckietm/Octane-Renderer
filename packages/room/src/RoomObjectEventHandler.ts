@@ -13,6 +13,8 @@ import { resolveWiredClickBehaviour, tileBehind } from './utils/WiredClickSettin
 export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomObjectEventManager
 {
     private static readonly CLICK_USER_LOOK_DELAY_MS = 120;
+    /** Furni whose ctrl-click pickup the client confirms first (the Variables Web API add-on). */
+    public static readonly PICKUP_CONFIRM_TYPES: string[] = [ 'wf_xtra_var_web_api' ];
     private _eventIds: Map<number, Map<string, string>> = new Map();
 
     private _selectedAvatarId: number = -1;
@@ -568,7 +570,14 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
 
                             else if(event.ctrlKey && !event.altKey && !event.shiftKey)
                             {
-                                this.modifyRoomObject(roomId, event.objectId, category, RoomObjectOperationType.OBJECT_PICKUP);
+                                if(RoomObjectEventHandler.PICKUP_CONFIRM_TYPES.includes(event.objectType))
+                                {
+                                    GetEventDispatcher().dispatchEvent(new RoomEngineObjectEvent(RoomEngineObjectEvent.REQUEST_PICKUP, roomId, event.objectId, category));
+                                }
+                                else
+                                {
+                                    this.modifyRoomObject(roomId, event.objectId, category, RoomObjectOperationType.OBJECT_PICKUP);
+                                }
                             }
 
                             if(!this._roomEngine.isPlayingGame())

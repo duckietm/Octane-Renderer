@@ -685,6 +685,7 @@ export class IncomingHeader
     public static WIRED_VARIABLE_FX_CONFIGS_REMOVED = 9474;
     public static WIRED_VARIABLE_FX_STATUS = 9475;
     public static WIRED_VARIABLE_FX_STATUS_REMOVED = 9476;
+    public static WIRED_WEB_API_KEY_RESULT = 59;
     // AIR 13 treasure hunt (server -> client). Official 1631 is taken by UNIT_EXPRESSION,
     // so the first-winner packet uses the reserved custom id 9485; the other two are official.
     public static TREASURE_HUNT_FIRST_WINNER = 9485;

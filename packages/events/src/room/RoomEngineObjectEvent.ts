@@ -12,6 +12,7 @@ export class RoomEngineObjectEvent extends RoomEngineEvent
     public static REQUEST_MOVE: string = 'REOE_REQUEST_MOVE';
     public static REQUEST_ROTATE: string = 'REOE_REQUEST_ROTATE';
     public static REQUEST_MANIPULATION: string = 'REOE_REQUEST_MANIPULATION';
+    public static REQUEST_PICKUP: string = 'REOE_REQUEST_PICKUP';
     public static MOUSE_ENTER: string = 'REOE_MOUSE_ENTER';
     public static MOUSE_LEAVE: string = 'REOE_MOUSE_LEAVE';
     public static DOUBLE_CLICK: string = 'REOE_DOUBLE_CLICK';

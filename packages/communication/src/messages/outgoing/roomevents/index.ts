@@ -25,3 +25,4 @@ export * from './WiredVariableHoldersPageComposer';
 export * from './WiredVariableHoldersRequestComposer';
 export * from './WiredVariableHashesComposer';
 export * from './WiredAllVariablesRequestComposer';
+export * from './WiredGenerateWebApiKeyComposer';

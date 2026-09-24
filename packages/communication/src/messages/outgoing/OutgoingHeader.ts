@@ -338,6 +338,7 @@ export class OutgoingHeader
     public static WIRED_VARIABLE_HOLDERS_REQUEST = 2973;
     public static WIRED_VARIABLE_HASHES = 1497;
     public static WIRED_ALL_VARIABLES_REQUEST = 1735;
+    public static WIRED_GENERATE_WEB_API_KEY = 2819;
     public static TRANSLATION_LANGUAGES_REQUEST = 10032;
     public static TRANSLATION_TEXT_REQUEST = 10033;
     public static WIRED_OPEN = 768;
