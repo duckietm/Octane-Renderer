@@ -19,6 +19,14 @@ export class ExtendedSprite extends Sprite
     private _updateId1: number = -1;
     private _updateId2: number = -1;
     private _filterSource: Filter[] = null;
+    private _watchedTexture: Texture = null;
+
+    constructor(options?: ConstructorParameters<typeof Sprite>[0])
+    {
+        super(options);
+
+        this.watchTexture(this.texture);
+    }
 
     public needsUpdate(updateId1: number, updateId2: number): boolean
     {
@@ -44,15 +52,53 @@ export class ExtendedSprite extends Sprite
     {
         if(!texture || texture.destroyed || !texture.source) texture = Texture.EMPTY;
 
-        if(texture === this.texture) return;
-
-        if(texture === Texture.EMPTY)
+        if(texture !== this.texture)
         {
-            this._updateId1 = -1;
-            this._updateId2 = -1;
+            if(texture === Texture.EMPTY)
+            {
+                this._updateId1 = -1;
+                this._updateId2 = -1;
+            }
+
+            this.texture = texture;
         }
 
-        this.texture = texture;
+        this.watchTexture(texture);
+    }
+
+    public destroy(options?: Parameters<Sprite['destroy']>[0]): void
+    {
+        this.watchTexture(null);
+
+        super.destroy(options);
+    }
+
+    // A texture destroyed while a sprite still shows it would leave the sprite pointing at
+    // released GPU memory: the sprite listens for that and falls back to the empty texture.
+    // Texture.EMPTY is shared and never destroyed, so it is never subscribed to.
+    private watchTexture(texture: Texture): void
+    {
+        const watched = ((texture && (texture !== Texture.EMPTY)) ? texture : null);
+
+        if(watched === this._watchedTexture) return;
+
+        if(this._watchedTexture) this._watchedTexture.off('destroy', this.onWatchedTextureDestroyed, this);
+
+        this._watchedTexture = watched;
+
+        if(this._watchedTexture) this._watchedTexture.on('destroy', this.onWatchedTextureDestroyed, this);
+    }
+
+    private onWatchedTextureDestroyed(texture: Texture): void
+    {
+        if(texture === this.texture)
+        {
+            this.setTexture(Texture.EMPTY);
+
+            return;
+        }
+
+        this.watchTexture(this.texture);
     }
 
     // A pooled or asset texture can be destroyed while this sprite still sits in the

@@ -13,6 +13,7 @@ import { GetRoomObjectLogicFactory } from './GetRoomObjectLogicFactory';
 import { ImageResult } from './ImageResult';
 import { RoomInstance } from './RoomInstance';
 import { RoomObjectEventHandler } from './RoomObjectEventHandler';
+import { buildRoomObjectImageKey, DisposableTexture, RoomObjectImageCache, SharedImageResult } from './RoomObjectImageCache';
 import { RoomVariableEnum } from './RoomVariableEnum';
 import { ObjectAvatarCarryObjectUpdateMessage, ObjectAvatarChatUpdateMessage, ObjectAvatarDanceUpdateMessage, ObjectAvatarEffectUpdateMessage, ObjectAvatarExperienceUpdateMessage, ObjectAvatarExpressionUpdateMessage, ObjectAvatarFigureUpdateMessage, ObjectAvatarFlatControlUpdateMessage, ObjectAvatarGestureUpdateMessage, ObjectAvatarGuideStatusUpdateMessage, ObjectAvatarHabbiconUpdateMessage, ObjectAvatarMutedUpdateMessage, ObjectAvatarOwnMessage, ObjectAvatarPetGestureUpdateMessage, ObjectAvatarPlayerValueUpdateMessage, ObjectAvatarPlayingGameUpdateMessage, ObjectAvatarPostureUpdateMessage, ObjectAvatarSignUpdateMessage, ObjectAvatarSleepUpdateMessage, ObjectAvatarTypingUpdateMessage, ObjectAvatarUpdateMessage, ObjectAvatarUseObjectUpdateMessage, ObjectDataUpdateMessage, ObjectGroupBadgeUpdateMessage, ObjectHeightUpdateMessage, ObjectItemDataUpdateMessage, ObjectModelDataUpdateMessage, ObjectMoveUpdateMessage, ObjectRoomColorUpdateMessage, ObjectRoomFloorHoleUpdateMessage, ObjectRoomMaskUpdateMessage, ObjectRoomPlanePropertyUpdateMessage, ObjectRoomPlaneVisibilityUpdateMessage, ObjectRoomUpdateMessage, ObjectStateUpdateMessage, RoomObjectUpdateMessage } from './messages';
 import { RoomLogic, RoomMapData } from './object';
@@ -46,6 +47,7 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
     private _roomObjectEventHandler: RoomObjectEventHandler = new RoomObjectEventHandler(this);
     private _imageObjectIdBank: NumberBank = new NumberBank(1000);
     private _imageCallbacks: Map<string, IGetImageListener[]> = new Map();
+    private _imageCache: RoomObjectImageCache = new RoomObjectImageCache();
     private _thumbnailObjectIdBank: NumberBank = new NumberBank(1000);
     private _thumbnailCallbacks: Map<string, IGetImageListener[]> = new Map();
     private _activeRoomId: number = -1;
@@ -135,6 +137,7 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
         this._imageCallbacks.clear();
         this._thumbnailCallbacks.clear();
         this._badgeListenerObjects.clear();
+        this.clearRoomObjectImageCache();
     }
 
     public setActiveRoomId(roomId: number): void
@@ -2847,7 +2850,7 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
 
         if(isExistingObject)
         {
-            imageResult = this.getRoomObjectImage(this._activeRoomId, objectId, category, new Vector3d(), 1, null);
+            imageResult = this.getRoomObjectImageUncached(this._activeRoomId, objectId, category, new Vector3d(), 1, null);
         }
         else
         {
@@ -2873,16 +2876,16 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
 
                     const petFigureData = new PetFigureData(instanceData);
 
-                    imageResult = this.getRoomObjectPetImage(petFigureData.typeId, petFigureData.paletteId, petFigureData.color, new Vector3d(180), 64, null, true, 0, petFigureData.customParts, posture);
+                    imageResult = this.getRoomObjectPetImageUncached(petFigureData.typeId, petFigureData.paletteId, petFigureData.color, new Vector3d(180), 64, null, true, 0, petFigureData.customParts, posture);
                 }
                 else
                 {
-                    imageResult = this.getGenericRoomObjectImage(type, instanceData, new Vector3d(180), 64, null, 0, null, stuffData, state, frameNumber, posture);
+                    imageResult = this.getGenericRoomObjectImageUncached(type, instanceData, new Vector3d(180), 64, null, 0, null, stuffData, state, frameNumber, posture);
                 }
             }
             else
             {
-                imageResult = this.getGenericRoomObjectImage(type, colorIndex.toString(), new Vector3d(), 1, null, 0, instanceData, stuffData, state, frameNumber, posture);
+                imageResult = this.getGenericRoomObjectImageUncached(type, colorIndex.toString(), new Vector3d(), 1, null, 0, instanceData, stuffData, state, frameNumber, posture);
             }
         }
 
@@ -2905,10 +2908,8 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
         }
     }
 
-    public getRoomObjectImage(roomId: number, objectId: number, category: number, direction: IVector3D, scale: number, listener: IGetImageListener, bgColor: number = 0): IImageResult
+    private resolveRoomObjectImageParams(roomId: number, objectId: number, category: number): { id: number; type: string; color: string; extras: string; data: IObjectData }
     {
-        if(!this._roomManager) return null;
-
         let id = -1;
         let type: string = null;
         let data: IObjectData = null;
@@ -2952,7 +2953,26 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
             }
         }
 
+        return { id, type, color, extras, data };
+    }
+
+    public getRoomObjectImage(roomId: number, objectId: number, category: number, direction: IVector3D, scale: number, listener: IGetImageListener, bgColor: number = 0): IImageResult
+    {
+        if(!this._roomManager) return null;
+
+        const { id, type, color, extras, data } = this.resolveRoomObjectImageParams(roomId, objectId, category);
+
         return this.getGenericRoomObjectImage(type, color, direction, scale, listener, bgColor, extras, data, -1, -1, null, id);
+    }
+
+    /** Same resolution as `getRoomObjectImage`, but never reads or writes the shared image cache - used for the mover icon, whose sprite outlives an eviction. */
+    private getRoomObjectImageUncached(roomId: number, objectId: number, category: number, direction: IVector3D, scale: number, listener: IGetImageListener, bgColor: number = 0): IImageResult
+    {
+        if(!this._roomManager) return null;
+
+        const { id, type, color, extras, data } = this.resolveRoomObjectImageParams(roomId, objectId, category);
+
+        return this.getGenericRoomObjectImageUncached(type, color, direction, scale, listener, bgColor, extras, data, -1, -1, null, id);
     }
 
     public getFurnitureFloorIconUrl(typeId: number): string
@@ -3007,9 +3027,8 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
         return this.getGenericRoomObjectImage(type, color, direction, scale, listener, bgColor, extras, null, state, frameCount);
     }
 
-    public getRoomObjectPetImage(typeId: number, paletteId: number, color: number, direction: IVector3D, scale: number, listener: IGetImageListener, headOnly: boolean = false, bgColor: number = 0, customParts: IPetCustomPart[] = null, posture: string = null): IImageResult
+    private resolvePetImageParams(typeId: number, paletteId: number, color: number, headOnly: boolean, customParts: IPetCustomPart[]): { type: string; value: string }
     {
-        let type: string = null;
         let value = ((((typeId + ' ') + paletteId) + ' ') + color.toString(16));
 
         if(headOnly) value = (value + (' ' + 'head'));
@@ -3024,12 +3043,50 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
             }
         }
 
-        type = this._roomContentLoader.getPetNameForType(typeId);
+        const type = this._roomContentLoader.getPetNameForType(typeId);
+
+        return { type, value };
+    }
+
+    public getRoomObjectPetImage(typeId: number, paletteId: number, color: number, direction: IVector3D, scale: number, listener: IGetImageListener, headOnly: boolean = false, bgColor: number = 0, customParts: IPetCustomPart[] = null, posture: string = null): IImageResult
+    {
+        const { type, value } = this.resolvePetImageParams(typeId, paletteId, color, headOnly, customParts);
 
         return this.getGenericRoomObjectImage(type, value, direction, scale, listener, bgColor, null, null, -1, -1, posture);
     }
 
+    /** Same resolution as `getRoomObjectPetImage`, but never reads or writes the shared image cache - used for the mover icon. */
+    private getRoomObjectPetImageUncached(typeId: number, paletteId: number, color: number, direction: IVector3D, scale: number, listener: IGetImageListener, headOnly: boolean = false, bgColor: number = 0, customParts: IPetCustomPart[] = null, posture: string = null): IImageResult
+    {
+        const { type, value } = this.resolvePetImageParams(typeId, paletteId, color, headOnly, customParts);
+
+        return this.getGenericRoomObjectImageUncached(type, value, direction, scale, listener, bgColor, null, null, -1, -1, posture);
+    }
+
+    /**
+     * Renders (or reuses) the image of a room object built from raw parameters.
+     * The returned texture is owned by the internal image cache: consumers that
+     * need to keep it beyond the current callback should extract via `getImage()`
+     * rather than holding onto `data`.
+     */
     public getGenericRoomObjectImage(type: string, value: string, direction: IVector3D, scale: number, listener: IGetImageListener, bgColor: number = 0, extras: string = null, objectData: IObjectData = null, state: number = -1, frameCount: number = -1, posture: string = null, originalId: number = -1): IImageResult
+    {
+        return this.renderRoomObjectImage(type, value, direction, scale, listener, bgColor, extras, objectData, state, frameCount, posture, originalId, true);
+    }
+
+    /** Same render as `getGenericRoomObjectImage`, but never reads or writes the shared image cache - used for the mover icon, whose sprite outlives an eviction. */
+    private getGenericRoomObjectImageUncached(type: string, value: string, direction: IVector3D, scale: number, listener: IGetImageListener, bgColor: number = 0, extras: string = null, objectData: IObjectData = null, state: number = -1, frameCount: number = -1, posture: string = null, originalId: number = -1): IImageResult
+    {
+        return this.renderRoomObjectImage(type, value, direction, scale, listener, bgColor, extras, objectData, state, frameCount, posture, originalId, false);
+    }
+
+    /**
+     * Shared implementation behind `getGenericRoomObjectImage` and its uncached
+     * counterpart. `useCache` gates both the lookup and the store; a non-legacy
+     * `objectData` payload (one `getLegacyString()` cannot represent uniquely)
+     * also forces the uncached path regardless of `useCache`.
+     */
+    private renderRoomObjectImage(type: string, value: string, direction: IVector3D, scale: number, listener: IGetImageListener, bgColor: number, extras: string, objectData: IObjectData, state: number, frameCount: number, posture: string, originalId: number, useCache: boolean): IImageResult
     {
         if(!this._roomManager) return null;
 
@@ -3038,6 +3095,12 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
         imageResult.id = -1;
 
         if(!type) return imageResult;
+
+        const imageKey = buildRoomObjectImageKey(type, value, direction, scale, extras, objectData, state, frameCount, posture);
+        const cacheable = useCache && (!objectData || objectData instanceof LegacyDataType);
+        const cached = cacheable ? this._imageCache.get(imageKey) : undefined;
+
+        if(cached) return new SharedImageResult(cached);
 
         let roomInstance = this._roomManager.getRoomInstance(RoomEngine.TEMPORARY_ROOM);
 
@@ -3154,19 +3217,41 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
             imageListeners.push(listener);
 
             model.setValue(RoomObjectVariable.IMAGE_QUERY_SCALE, scale);
-        }
-        else
-        {
-            roomInstance.removeRoomObject(objectId, objectCategory);
+            model.setValue(RoomObjectVariable.IMAGE_QUERY_KEY, cacheable ? imageKey : null);
 
-            this._imageObjectIdBank.freeNumber((objectId - 1));
+            geometry.dispose();
 
-            imageResult.id = 0;
+            return imageResult;
         }
+
+        roomInstance.removeRoomObject(objectId, objectCategory);
+
+        this._imageObjectIdBank.freeNumber((objectId - 1));
 
         geometry.dispose();
 
+        if(!texture)
+        {
+            imageResult.id = 0;
+
+            return imageResult;
+        }
+
+        if(cacheable) return new SharedImageResult(this._imageCache.set(imageKey, texture));
+
         return imageResult;
+    }
+
+    /**
+     * Drops cached room-object images. Call it after an asset or furnidata change
+     * that alters how a type renders. Textures handed out by the image API are
+     * owned by this cache and destroyed here. With `type`, only that type's
+     * entries are dropped; omitted, the whole cache is cleared.
+     */
+    public clearRoomObjectImageCache(type?: string): void
+    {
+        if(type) this._imageCache.clearByType(type);
+        else this._imageCache.clear();
     }
 
     public getGenericRoomObjectThumbnail(type: string, param: string, listener: IGetImageListener, extraData: string = null, stuffData: IObjectData = null): IImageResult
@@ -3233,7 +3318,7 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
         return imageResult;
     }
 
-    public initalizeTemporaryObjectsByType(type: string, forceUpdate: boolean): void
+    public initalizeTemporaryObjectsByType(type: string, contentLoaded: boolean): void
     {
         const roomInstance = this._roomManager.getRoomInstance(RoomEngine.TEMPORARY_ROOM);
 
@@ -3279,6 +3364,8 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
                         texture = visualization.image;
                     }
 
+                    const imageKey = roomObject.model.getValue<string>(RoomObjectVariable.IMAGE_QUERY_KEY);
+
                     roomInstance.removeRoomObject(objectId, objectCategory);
 
                     this._imageObjectIdBank.freeNumber((objectId - 1));
@@ -3289,12 +3376,34 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
                     {
                         this._imageCallbacks.delete(objectId.toString());
 
-                        for(const imageListener of imageListeners)
+                        if(texture)
                         {
-                            if(!imageListener) continue;
+                            let entry = (contentLoaded && imageKey) ? this._imageCache.get(imageKey) : null;
 
-                            if(texture) imageListener.imageReady(new ImageResult(objectId, texture));
-                            else imageListener.imageFailed(objectId);
+                            if(entry)
+                            {
+                                if((texture !== entry.texture) && !(texture as unknown as DisposableTexture).destroyed) texture.destroy(true);
+                            }
+                            else if(contentLoaded && imageKey)
+                            {
+                                entry = this._imageCache.set(imageKey, texture);
+                            }
+
+                            for(const imageListener of imageListeners)
+                            {
+                                if(!imageListener) continue;
+
+                                imageListener.imageReady(entry ? new SharedImageResult(entry, objectId) : new ImageResult(objectId, texture));
+                            }
+                        }
+                        else
+                        {
+                            for(const imageListener of imageListeners)
+                            {
+                                if(!imageListener) continue;
+
+                                imageListener.imageFailed(objectId);
+                            }
                         }
                     }
                 }

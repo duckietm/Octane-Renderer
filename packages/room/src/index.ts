@@ -30,6 +30,7 @@ export * from './RoomInstance';
 export * from './RoomManager';
 export * from './RoomMessageHandler';
 export * from './RoomObjectEventHandler';
+export * from './RoomObjectImageCache';
 export * from './RoomObjectLogicFactory';
 export * from './RoomObjectManager';
 export * from './RoomObjectVisualizationFactory';
