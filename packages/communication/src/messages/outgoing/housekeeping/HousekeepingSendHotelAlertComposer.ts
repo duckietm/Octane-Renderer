@@ -4,9 +4,13 @@ export class HousekeepingSendHotelAlertComposer implements IMessageComposer<Cons
 {
     private _data: ConstructorParameters<typeof HousekeepingSendHotelAlertComposer>;
 
-    constructor(message: string)
+    // recipient narrows the alert: "staff", "user:<name>" or "room:<id>". Left out, it goes to
+    // the whole hotel; a server that reads only the message ignores it.
+    constructor(message: string, recipient?: string)
     {
         this._data = [message];
+
+        if(recipient !== undefined) this._data.push(recipient);
     }
 
     public getMessageArray()

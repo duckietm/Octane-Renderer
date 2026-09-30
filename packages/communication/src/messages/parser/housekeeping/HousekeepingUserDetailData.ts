@@ -1,5 +1,11 @@
 import { IMessageDataWrapper } from '@octane/api';
 
+export interface IHousekeepingWornBadge
+{
+    slot: number;
+    code: string;
+}
+
 export class HousekeepingUserDetailData
 {
     private _id: number = 0;
@@ -18,6 +24,11 @@ export class HousekeepingUserDetailData
     private _isBanned: boolean = false;
     private _isMuted: boolean = false;
     private _isTradeLocked: boolean = false;
+    private _accountCreatedAt: number = 0;
+    private _achievementScore: number = 0;
+    private _friendsCount: number = 0;
+    private _groupsCount: number = 0;
+    private _wornBadges: IHousekeepingWornBadge[] = [];
 
     constructor(wrapper: IMessageDataWrapper)
     {
@@ -38,8 +49,32 @@ export class HousekeepingUserDetailData
         this._ipLast = wrapper.readString();
         this._isBanned = wrapper.readBoolean();
 
-        if(wrapper.bytesAvailable) this._isMuted = wrapper.readBoolean();
-        if(wrapper.bytesAvailable) this._isTradeLocked = wrapper.readBoolean();
+        this.readOptionalTail(wrapper);
+    }
+
+    // One tier of trailing fields per emulator release; an older server stops early.
+    private readOptionalTail(wrapper: IMessageDataWrapper): void
+    {
+        if(!wrapper.bytesAvailable) return;
+
+        this._isMuted = wrapper.readBoolean();
+        this._isTradeLocked = wrapper.readBoolean();
+
+        if(!wrapper.bytesAvailable) return;
+
+        this._accountCreatedAt = wrapper.readInt();
+        this._achievementScore = wrapper.readInt();
+        this._friendsCount = wrapper.readInt();
+        this._groupsCount = wrapper.readInt();
+
+        let count = wrapper.readInt();
+
+        while(count > 0)
+        {
+            this._wornBadges.push({ slot: wrapper.readInt(), code: wrapper.readString() });
+
+            count--;
+        }
     }
 
     public get id(): number
@@ -105,5 +140,25 @@ export class HousekeepingUserDetailData
     public get isTradeLocked(): boolean
     {
         return this._isTradeLocked;
+    }
+    public get accountCreatedAt(): number
+    {
+        return this._accountCreatedAt;
+    }
+    public get achievementScore(): number
+    {
+        return this._achievementScore;
+    }
+    public get friendsCount(): number
+    {
+        return this._friendsCount;
+    }
+    public get groupsCount(): number
+    {
+        return this._groupsCount;
+    }
+    public get wornBadges(): IHousekeepingWornBadge[]
+    {
+        return this._wornBadges;
     }
 }

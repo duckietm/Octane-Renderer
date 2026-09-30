@@ -2,6 +2,8 @@ export * from './HousekeepingActionLogEntryData';
 export * from './HousekeepingActionLogParser';
 export * from './HousekeepingActionResultParser';
 export * from './HousekeepingDashboardParser';
+export * from './HousekeepingListParser';
+export * from './HousekeepingMaintenanceStatusParser';
 export * from './HousekeepingRoomData';
 export * from './HousekeepingRoomDetailParser';
 export * from './HousekeepingRoomListParser';
