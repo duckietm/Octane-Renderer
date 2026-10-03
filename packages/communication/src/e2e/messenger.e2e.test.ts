@@ -176,6 +176,18 @@ const waitForClients = async (
     }
 };
 
+// The server refuses a second console message from the same user within 750 ms of the last one
+// (reported as error code 7), measured on arrival, and the session probe can answer before that
+// has passed. Twice the window, so network jitter and timer rounding cannot land a send inside it.
+const CONSOLE_SEND_SPACING_MS = 1500;
+
+const waitForFloodWindow = async (sentAt: number): Promise<void> =>
+{
+    const remaining = CONSOLE_SEND_SPACING_MS - (Date.now() - sentAt);
+
+    if(remaining > 0) await new Promise(resolve => setTimeout(resolve, remaining));
+};
+
 const required = <T>(value: T | undefined, description: string): T =>
 {
     if(value === undefined) throw new Error(`Missing ${ description }`);
@@ -214,6 +226,7 @@ describe('Polaris Messenger lifecycle', () =>
         const onlineBody = `online-${ token }`;
         const offlineBody = `offline-${ token }`;
 
+        const onlineSentAt = Date.now();
         clientA.connection.send(new SendMessengerMessageComposer(
             0, environment.secondUserId, 41001, 0, onlineBody, metadata));
         await waitForClients(() =>
@@ -240,6 +253,7 @@ describe('Polaris Messenger lifecycle', () =>
             async () => (await readSessionCount(environment.probeUrl, environment.secondUserId)) === 0,
             'second user to leave the reconnect grace period', [ clientA, clientB ], 45000);
 
+        await waitForFloodWindow(onlineSentAt);
         clientA.connection.send(new SendMessengerMessageComposer(
             onlineAck.conversationId, environment.secondUserId, 41002, 0, offlineBody, metadata));
         await waitForClients(
