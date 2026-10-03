@@ -23,7 +23,7 @@ import { ConfInvisStateMessageEvent } from './messages';
 import { HanditemBlockStateMessageEvent } from './messages';
 import { TranslationLanguagesEvent, TranslationLanguagesRequestComposer, TranslationResultEvent, TranslationTextRequestComposer } from './messages';
 import { YouTubeRoomBroadcastEvent, YouTubeRoomPlayComposer, YouTubeRoomSettingsComposer, YouTubeRoomSettingsEvent, YouTubeRoomWatchersEvent, YouTubeRoomWatchingComposer } from './messages';
-import { HousekeepingActionLogEvent, HousekeepingActionResultEvent, HousekeepingBanUserComposer, HousekeepingDashboardEvent, HousekeepingDeleteRoomComposer, HousekeepingFindRoomByIdComposer, HousekeepingFindUserByIdComposer, HousekeepingFindUserByNameComposer, HousekeepingForceDisconnectUserComposer, HousekeepingGetDashboardComposer, HousekeepingGiveCreditsComposer, HousekeepingGiveCurrencyComposer, HousekeepingGrantItemComposer, HousekeepingKickAllFromRoomComposer, HousekeepingKickUserComposer, HousekeepingListActionLogComposer, HousekeepingMuteRoomComposer, HousekeepingMuteUserComposer, HousekeepingResetUserPasswordComposer, HousekeepingRoomDetailEvent, HousekeepingRoomListEvent, HousekeepingRoomStateComposer, HousekeepingSearchRoomsComposer, HousekeepingSendHotelAlertComposer, HousekeepingSetHcSubscriptionComposer, HousekeepingSetUserRankComposer, HousekeepingTradeLockUserComposer, HousekeepingTransferRoomOwnershipComposer, HousekeepingUnbanUserComposer, HousekeepingUserDetailEvent } from './messages';
+import { HousekeepingActionLogEvent, HousekeepingActionResultEvent, HousekeepingBanUserComposer, HousekeepingDashboardEvent, HousekeepingDeleteRoomComposer, HousekeepingFindRoomByIdComposer, HousekeepingFindUserByIdComposer, HousekeepingFindUserByNameComposer, HousekeepingForceDisconnectUserComposer, HousekeepingGetDashboardComposer, HousekeepingGiveCreditsComposer, HousekeepingGiveCurrencyComposer, HousekeepingGrantItemComposer, HousekeepingKickAllFromRoomComposer, HousekeepingKickUserComposer, HousekeepingListActionLogComposer, HousekeepingListEvent, HousekeepingLockdownComposer, HousekeepingMaintenanceComposer, HousekeepingMaintenanceStatusEvent, HousekeepingMuteRoomComposer, HousekeepingMuteUserComposer, HousekeepingReloadComposer, HousekeepingRequestListComposer, HousekeepingResetUserPasswordComposer, HousekeepingRevokeBanComposer, HousekeepingRoomDetailEvent, HousekeepingRoomListEvent, HousekeepingRoomStateComposer, HousekeepingSaveRoomSettingsComposer, HousekeepingSearchRoomsComposer, HousekeepingSendHotelAlertComposer, HousekeepingSetHcSubscriptionComposer, HousekeepingSetPermissionComposer, HousekeepingSetUserRankComposer, HousekeepingTradeLockUserComposer, HousekeepingTransferRoomOwnershipComposer, HousekeepingUnbanUserComposer, HousekeepingUserDetailEvent, HousekeepingUserNoteComposer, HousekeepingWordFilterComposer } from './messages';
 import { CatalogAdminReorderOffersComposer, CatalogAdminSavePageIconComposer, CatalogAdminSavePageImagesComposer, CatalogAdminSetPageEnabledComposer, CatalogAdminSetPageVisibleComposer } from './messages/outgoing/catalog';
 import { CatalogStudioDocumentApplyComposer, CatalogStudioDocumentDryRunComposer, CatalogStudioExportComposer, CatalogStudioHistoryComposer, CatalogStudioOpenSessionComposer, CatalogStudioUndoComposer, CatalogStudioValidateComposer } from './messages/outgoing/catalog/studio';
 import { CatalogStudioDocumentResultEvent, CatalogStudioHistoryEvent, CatalogStudioSessionEvent, CatalogStudioUndoEvent, CatalogStudioValidationEvent } from './messages/incoming/catalog/studio';
@@ -668,6 +668,8 @@ export class OctaneMessages implements IMessageConfiguration
         this._events.set(IncomingHeader.HOUSEKEEPING_ROOM_LIST, HousekeepingRoomListEvent);
         this._events.set(IncomingHeader.HOUSEKEEPING_DASHBOARD, HousekeepingDashboardEvent);
         this._events.set(IncomingHeader.HOUSEKEEPING_ACTION_LOG, HousekeepingActionLogEvent);
+        this._events.set(IncomingHeader.HOUSEKEEPING_LIST, HousekeepingListEvent);
+        this._events.set(IncomingHeader.HOUSEKEEPING_MAINTENANCE_STATUS, HousekeepingMaintenanceStatusEvent);
 
         // Custom features
         this._events.set(IncomingHeader.RARE_VALUES, RareValuesEvent);
@@ -1629,6 +1631,15 @@ export class OctaneMessages implements IMessageConfiguration
         this._composers.set(OutgoingHeader.HOUSEKEEPING_SEND_HOTEL_ALERT, HousekeepingSendHotelAlertComposer);
         this._composers.set(OutgoingHeader.HOUSEKEEPING_GET_DASHBOARD, HousekeepingGetDashboardComposer);
         this._composers.set(OutgoingHeader.HOUSEKEEPING_LIST_ACTION_LOG, HousekeepingListActionLogComposer);
+        this._composers.set(OutgoingHeader.HOUSEKEEPING_SAVE_ROOM_SETTINGS, HousekeepingSaveRoomSettingsComposer);
+        this._composers.set(OutgoingHeader.HOUSEKEEPING_REQUEST_LIST, HousekeepingRequestListComposer);
+        this._composers.set(OutgoingHeader.HOUSEKEEPING_RELOAD, HousekeepingReloadComposer);
+        this._composers.set(OutgoingHeader.HOUSEKEEPING_REVOKE_BAN, HousekeepingRevokeBanComposer);
+        this._composers.set(OutgoingHeader.HOUSEKEEPING_MAINTENANCE, HousekeepingMaintenanceComposer);
+        this._composers.set(OutgoingHeader.HOUSEKEEPING_WORD_FILTER, HousekeepingWordFilterComposer);
+        this._composers.set(OutgoingHeader.HOUSEKEEPING_SET_PERMISSION, HousekeepingSetPermissionComposer);
+        this._composers.set(OutgoingHeader.HOUSEKEEPING_USER_NOTE, HousekeepingUserNoteComposer);
+        this._composers.set(OutgoingHeader.HOUSEKEEPING_LOCKDOWN, HousekeepingLockdownComposer);
 
         // Custom features
         this._composers.set(OutgoingHeader.REQUEST_RARE_VALUES, RequestRareValuesComposer);

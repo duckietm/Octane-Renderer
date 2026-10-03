@@ -4,9 +4,13 @@ export class HousekeepingSetUserRankComposer implements IMessageComposer<Constru
 {
     private _data: ConstructorParameters<typeof HousekeepingSetUserRankComposer>;
 
-    constructor(userId: number, rankId: number)
+    // durationSeconds makes the rank temporary: after it the user gets their previous rank back.
+    // Left out (or 0) the rank lasts; a server that reads two ints ignores it.
+    constructor(userId: number, rankId: number, durationSeconds?: number)
     {
         this._data = [userId, rankId];
+
+        if(durationSeconds !== undefined) this._data.push(durationSeconds);
     }
 
     public getMessageArray()
