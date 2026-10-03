@@ -12,11 +12,12 @@ export class RoomObjectImageCacheEntry
 {
     private _imagePromise: Promise<HTMLImageElement> | null = null;
 
-    constructor(public readonly texture: Texture) {}
+    constructor(public readonly texture: Texture)
+    {}
 
     public getImage(): Promise<HTMLImageElement>
     {
-        if(!this._imagePromise)
+        if(this._imagePromise === null)
         {
             this._imagePromise = TextureUtils.generateImage(this.texture).then(image =>
             {
@@ -44,9 +45,13 @@ export class RoomObjectImageCache
     private readonly _entries = new Map<string, RoomObjectImageCacheEntry>();
 
     /** 256 cached renders by default - see the design doc's capacity note. */
-    constructor(private readonly _capacity: number = 256) {}
+    constructor(private readonly _capacity: number = 256)
+    {}
 
-    public get size(): number { return this._entries.size; }
+    public get size(): number
+    {
+        return this._entries.size;
+    }
 
     public get(key: string): RoomObjectImageCacheEntry | undefined
     {
@@ -60,7 +65,10 @@ export class RoomObjectImageCache
     public set(key: string, texture: Texture): RoomObjectImageCacheEntry
     {
         const existing = this._entries.get(key);
-        if(existing) { this._entries.delete(key); if(existing.texture !== texture) existing.destroy(); }
+        if(existing)
+        {
+            this._entries.delete(key); if(existing.texture !== texture) existing.destroy();
+        }
         const entry = new RoomObjectImageCacheEntry(texture);
         this._entries.set(key, entry);
         while(this._entries.size > this._capacity)

@@ -9,6 +9,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export default tseslint.config(
+    {
+        // Shadowed by src/pixi-augmentations.ts: TypeScript drops a .d.ts that shares a
+        // basename with a .ts file, so it is in no project and typed linting cannot parse it.
+        ignores: ['src/pixi-augmentations.d.ts']
+    },
     eslint.configs.recommended,
     ...tseslint.configs.recommendedTypeChecked,
     {

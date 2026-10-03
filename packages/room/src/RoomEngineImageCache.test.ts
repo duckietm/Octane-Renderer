@@ -14,7 +14,10 @@ vi.mock('./GetRoomEngine', () => ({
 
 const direction = { x: 0, y: 0, z: 0 } as any;
 
-const makeTexture = () => ({ destroyed: false, destroy: vi.fn(function (this: any) { this.destroyed = true; }) });
+const makeTexture = () => ({ destroyed: false, destroy: vi.fn(function (this: any)
+{
+    this.destroyed = true;
+}) });
 
 /** A room instance backing fake whose objects each remember their own last render, so the shared fake also covers duplicate-delivery cases. */
 const makeRoomInstance = (objects: any[], renders: any[], removed: number[]) => ({
@@ -29,8 +32,17 @@ const makeRoomInstance = (objects: any[], renders: any[], removed: number[]) => 
             logic: { processUpdateMessage: vi.fn() },
             visualization: {
                 update: vi.fn(),
-                getImage: () => { if(!ownTexture) { ownTexture = makeTexture(); renders.push(ownTexture); } return ownTexture; },
-                get image() { return ownTexture; }
+                getImage: () =>
+                {
+                    if(!ownTexture)
+                    {
+                        ownTexture = makeTexture(); renders.push(ownTexture);
+                    } return ownTexture;
+                },
+                get image()
+                {
+                    return ownTexture;
+                }
             },
             setDirection: vi.fn()
         };
@@ -39,7 +51,10 @@ const makeRoomInstance = (objects: any[], renders: any[], removed: number[]) => 
 
         return object;
     },
-    removeRoomObject: (id: number) => { removed.push(id); },
+    removeRoomObject: (id: number) =>
+    {
+        removed.push(id);
+    },
     getManager: () => ({ objects: { length: objects.length, getValues: () => objects } })
 });
 
