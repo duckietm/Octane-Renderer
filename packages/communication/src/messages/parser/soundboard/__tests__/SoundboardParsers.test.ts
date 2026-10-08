@@ -229,7 +229,33 @@ describe('Soundboard management parsers', () =>
         const parser = new SoundboardCatalogParser();
         expect(parser.parse(new TestWrapper(new BinaryReader(writer.getBuffer())) as any)).toBe(true);
         expect(parser.sounds).toEqual([
-            { id: 7, name: 'Campanella', url: '/sounds/bell.mp3', enabled: false, sortOrder: 20, minRank: 5, classname: '' }
+            { id: 7, name: 'Campanella', url: '/sounds/bell.mp3', enabled: false, sortOrder: 20, minRank: 5, classname: '', cooldownSeconds: 0 }
+        ]);
+    });
+
+    it('reads the classnames and then the cooldown of every pad', () =>
+    {
+        const writer = new BinaryWriter();
+        writer.writeInt(2);
+        for(const [ id, name ] of [ [ 7, 'Campanella' ], [ 8, 'Applauso' ] ] as const)
+        {
+            writer.writeInt(id);
+            writer.writeString(name);
+            writer.writeString('');
+            writer.writeByte(1);
+            writer.writeInt(id * 10);
+            writer.writeInt(1);
+        }
+        writer.writeString('campanella');
+        writer.writeString('applauso');
+        writer.writeInt(0);
+        writer.writeInt(45);
+
+        const parser = new SoundboardCatalogParser();
+        expect(parser.parse(new TestWrapper(new BinaryReader(writer.getBuffer())) as any)).toBe(true);
+        expect(parser.sounds.map(sound => [ sound.classname, sound.cooldownSeconds ])).toEqual([
+            [ 'campanella', 0 ],
+            [ 'applauso', 45 ]
         ]);
     });
 

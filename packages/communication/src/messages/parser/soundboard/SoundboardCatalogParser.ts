@@ -10,6 +10,8 @@ export interface ISoundboardCatalogSound
     minRank: number;
     /** Key into gamedata/SoundData.json; empty for url-addressed pads. */
     classname: string;
+    /** Seconds one player waits before playing this pad again; 0 for none. */
+    cooldownSeconds: number;
 }
 
 export class SoundboardCatalogParser implements IMessageParser
@@ -43,7 +45,8 @@ export class SoundboardCatalogParser implements IMessageParser
                 enabled: wrapper.readBoolean(),
                 sortOrder: wrapper.readInt(),
                 minRank: wrapper.readInt(),
-                classname: ''
+                classname: '',
+                cooldownSeconds: 0
             });
         }
 
@@ -51,6 +54,11 @@ export class SoundboardCatalogParser implements IMessageParser
         if(!wrapper.bytesAvailable) return true;
 
         for(let index = 0; index < count; index++) this._sounds[index].classname = wrapper.readString();
+
+        // And one cooldown per pad after the classnames, again as a block.
+        if(!wrapper.bytesAvailable) return true;
+
+        for(let index = 0; index < count; index++) this._sounds[index].cooldownSeconds = Math.max(0, wrapper.readInt());
 
         return true;
     }
