@@ -1,4 +1,4 @@
-import { IAdvancedMap, IMusicController, IOctaneEvent, ISoundManager, ISoundVolumesSnapshot } from '@octane/api';
+import { IAdvancedMap, IMusicController, IOctaneEvent, ISoundManager, ISoundVolumesSnapshot, ISoundboardPlayOptions } from '@octane/api';
 import { GetConfiguration } from '@octane/configuration';
 import { GetEventDispatcher, OctaneEvent, OctaneEventType, OctaneSettingsEvent, OctaneSoundEvent, RoomEngineEvent, RoomEngineObjectEvent, RoomEngineSamplePlaybackEvent } from '@octane/events';
 import { AdvancedMap, OctaneLogger } from '@octane/utils';
@@ -19,6 +19,7 @@ export class SoundManager implements ISoundManager
 
     private _musicController: IMusicController = new MusicController();
     private _soundboardChannel = new SoundboardChannel();
+    private _soundboardPreviewChannel = new SoundboardChannel(undefined, 1);
     private _eventCallback: (event: IOctaneEvent) => void = null;
 
     public async init(): Promise<void>
@@ -58,6 +59,7 @@ export class SoundManager implements ISoundManager
         this._furniSamples.dispose();
         this._furnitureBeingPlayed.dispose();
         this.stopSoundboard();
+        this.stopSoundboardPreview();
     }
 
     private onEvent(event: IOctaneEvent)
@@ -108,7 +110,11 @@ export class SoundManager implements ISoundManager
 
                 if(volumeTraxUpdated) this._musicController?.updateVolume(this._volumeTrax);
 
-                if(volumeSoundboardUpdated) this._soundboardChannel.setVolume(this._volumeSoundboard);
+                if(volumeSoundboardUpdated)
+                {
+                    this._soundboardChannel.setVolume(this._volumeSoundboard);
+                    this._soundboardPreviewChannel.setVolume(this._volumeSoundboard);
+                }
 
                 if(volumeSystemUpdated || volumeFurniUpdated || volumeTraxUpdated || volumeSoundboardUpdated) this.invalidateVolumesSnapshot();
 
@@ -250,14 +256,24 @@ export class SoundManager implements ISoundManager
         return this._volumeSoundboard;
     }
 
-    public playSoundboard(url: string): Promise<boolean>
+    public playSoundboard(url: string, options?: ISoundboardPlayOptions): Promise<boolean>
     {
-        return this._soundboardChannel.play(url, this._volumeSoundboard);
+        return this._soundboardChannel.play(url, this._volumeSoundboard, options);
     }
 
     public stopSoundboard(): void
     {
         this._soundboardChannel.stop();
+    }
+
+    public playSoundboardPreview(url: string): Promise<boolean>
+    {
+        return this._soundboardPreviewChannel.play(url, this._volumeSoundboard);
+    }
+
+    public stopSoundboardPreview(): void
+    {
+        this._soundboardPreviewChannel.stop();
     }
 
     public get musicController(): IMusicController

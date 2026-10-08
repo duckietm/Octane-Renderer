@@ -1,5 +1,6 @@
 import { IMusicController } from './IMusicController';
 import { ISoundVolumesSnapshot } from './ISoundVolumesSnapshot';
+import { ISoundboardPlayOptions } from './ISoundboardPlayOptions';
 
 export interface ISoundManager
 {
@@ -9,8 +10,15 @@ export interface ISoundManager
     systemVolume: number;
     furniVolume: number;
     soundboardVolume: number;
-    playSoundboard(url: string): Promise<boolean>;
+    playSoundboard(url: string, options?: ISoundboardPlayOptions): Promise<boolean>;
     stopSoundboard(): void;
+
+    /**
+     * Plays a pad for the person listening only, on a channel of its own, so trying a
+     * clip never cuts what the room is playing.
+     */
+    playSoundboardPreview(url: string): Promise<boolean>;
+    stopSoundboardPreview(): void;
 
     /**
      * Returns a referentially-stable snapshot of the three volume

@@ -31,12 +31,81 @@ describe('SoundboardChannel', () =>
         expect(factory).not.toHaveBeenCalled();
     });
 
-    it('replaces the current sound and fully unloads the previous element', async () =>
+    it('lets pads overlap up to the number of voices and cuts the oldest beyond that', async () =>
+    {
+        const voices = [createAudioStub(), createAudioStub(), createAudioStub(), createAudioStub()];
+        const factory = vi.fn();
+        voices.forEach(voice => factory.mockReturnValueOnce(voice));
+        const channel = new SoundboardChannel(factory as any, 3);
+
+        for(let index = 0; index < 3; index++) await channel.play(`/sounds/pad-${ index }.mp3`, 0.8);
+
+        expect(voices.slice(0, 3).every(voice => voice.pause.mock.calls.length === 0)).toBe(true);
+
+        await channel.play('/sounds/pad-3.mp3', 0.8);
+
+        expect(voices[0].pause).toHaveBeenCalledOnce();
+        expect(voices[1].pause).not.toHaveBeenCalled();
+        expect(voices[3].pause).not.toHaveBeenCalled();
+    });
+
+    it('cuts the pads of the same group and leaves the others sounding', async () =>
+    {
+        const bell = createAudioStub();
+        const clap = createAudioStub();
+        const chime = createAudioStub();
+        const factory = vi.fn().mockReturnValueOnce(bell).mockReturnValueOnce(clap).mockReturnValueOnce(chime);
+        const channel = new SoundboardChannel(factory as any);
+
+        await channel.play('/sounds/bell.mp3', 0.8, { group: 'bells' });
+        await channel.play('/sounds/clap.mp3', 0.8);
+        await channel.play('/sounds/chime.mp3', 0.8, { group: ' bells ' });
+
+        expect(bell.pause).toHaveBeenCalledOnce();
+        expect(clap.pause).not.toHaveBeenCalled();
+        expect(chime.pause).not.toHaveBeenCalled();
+    });
+
+    it('scales a pad by its gain and keeps the gain when the volume changes', async () =>
+    {
+        const quiet = createAudioStub();
+        const loud = createAudioStub();
+        const factory = vi.fn().mockReturnValueOnce(quiet).mockReturnValueOnce(loud);
+        const channel = new SoundboardChannel(factory as any);
+
+        await channel.play('/sounds/quiet.mp3', 0.8, { gain: 0.5 });
+        await channel.play('/sounds/loud.mp3', 0.8, { gain: 4 });
+
+        expect(quiet.volume).toBeCloseTo(0.4);
+        expect(loud.volume).toBeCloseTo(0.8);
+
+        channel.setVolume(0.5);
+
+        expect(quiet.volume).toBeCloseTo(0.25);
+        expect(loud.volume).toBeCloseTo(0.5);
+    });
+
+    it('stops every voice at once', async () =>
     {
         const first = createAudioStub();
         const second = createAudioStub();
         const factory = vi.fn().mockReturnValueOnce(first).mockReturnValueOnce(second);
         const channel = new SoundboardChannel(factory as any);
+
+        await channel.play('/sounds/first.mp3', 0.8);
+        await channel.play('/sounds/second.mp3', 0.8);
+        channel.stop();
+
+        expect(first.pause).toHaveBeenCalledOnce();
+        expect(second.pause).toHaveBeenCalledOnce();
+    });
+
+    it('replaces the current sound and fully unloads the previous element on a single voice', async () =>
+    {
+        const first = createAudioStub();
+        const second = createAudioStub();
+        const factory = vi.fn().mockReturnValueOnce(first).mockReturnValueOnce(second);
+        const channel = new SoundboardChannel(factory as any, 1);
 
         await expect(channel.play('/sounds/first.mp3', 0.8)).resolves.toBe(true);
         await expect(channel.play('https://cdn.example/second.mp3', 0.4)).resolves.toBe(true);

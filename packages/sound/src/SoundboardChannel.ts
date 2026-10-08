@@ -1,37 +1,56 @@
+import { ISoundboardPlayOptions } from '@octane/api';
 import { OctaneLogger } from '@octane/utils';
 
 type AudioFactory = (url: string) => HTMLAudioElement;
 
+interface SoundboardVoice
+{
+    audio: HTMLAudioElement;
+    group: string;
+    gain: number;
+}
+
 export class SoundboardChannel
 {
-    private _audio: HTMLAudioElement = null;
+    public static readonly DEFAULT_VOICES = 3;
 
-    constructor(private readonly _createAudio: AudioFactory = url => new Audio(url))
-    {}
+    private _voices: SoundboardVoice[] = [];
+    private readonly _maxVoices: number;
 
-    public async play(url: string, volume: number): Promise<boolean>
+    constructor(private readonly _createAudio: AudioFactory = url => new Audio(url), maxVoices: number = SoundboardChannel.DEFAULT_VOICES)
+    {
+        this._maxVoices = Math.max(1, Math.floor(maxVoices));
+    }
+
+    public async play(url: string, volume: number, options: ISoundboardPlayOptions = {}): Promise<boolean>
     {
         if(!SoundboardChannel.isSafeUrl(url)) return false;
 
-        this.stop();
+        const group = options.group?.trim() ?? '';
+
+        if(group) this._voices.filter(voice => voice.group === group).forEach(voice => this.release(voice));
+
+        while(this._voices.length >= this._maxVoices) this.release(this._voices[0]);
 
         const audio = this._createAudio(url.trim());
-        audio.volume = SoundboardChannel.clampVolume(volume);
+        const voice: SoundboardVoice = { audio, group, gain: SoundboardChannel.clampGain(options.gain) };
+
+        audio.volume = SoundboardChannel.levelOf(volume, voice.gain);
         audio.currentTime = 0;
-        audio.onended = () => this.release(audio);
-        audio.onerror = () => this.release(audio);
-        this._audio = audio;
+        audio.onended = () => this.release(voice);
+        audio.onerror = () => this.release(voice);
+        this._voices.push(voice);
 
         try
         {
             await audio.play();
 
-            return this._audio === audio;
+            return this._voices.includes(voice);
         }
         catch (error)
         {
             OctaneLogger.error(error);
-            this.release(audio);
+            this.release(voice);
 
             return false;
         }
@@ -39,24 +58,21 @@ export class SoundboardChannel
 
     public setVolume(volume: number): void
     {
-        if(this._audio) this._audio.volume = SoundboardChannel.clampVolume(volume);
+        for(const voice of this._voices) voice.audio.volume = SoundboardChannel.levelOf(volume, voice.gain);
     }
 
     public stop(): void
     {
-        const audio = this._audio;
-
-        if(!audio) return;
-
-        this._audio = null;
-        this.disposeAudio(audio);
+        [...this._voices].forEach(voice => this.release(voice));
     }
 
-    private release(audio: HTMLAudioElement): void
+    private release(voice: SoundboardVoice): void
     {
-        if(this._audio === audio) this._audio = null;
+        const index = this._voices.indexOf(voice);
 
-        this.disposeAudio(audio);
+        if(index >= 0) this._voices.splice(index, 1);
+
+        this.disposeAudio(voice.audio);
     }
 
     private disposeAudio(audio: HTMLAudioElement): void
@@ -77,9 +93,19 @@ export class SoundboardChannel
         }
     }
 
+    private static levelOf(volume: number, gain: number): number
+    {
+        return SoundboardChannel.clampVolume(volume) * gain;
+    }
+
     private static clampVolume(volume: number): number
     {
         return Math.max(0, Math.min(1, Number.isFinite(volume) ? volume : 0.8));
+    }
+
+    private static clampGain(gain: number | undefined): number
+    {
+        return Math.max(0, Math.min(1, Number.isFinite(gain) ? gain : 1));
     }
 
     private static isSafeUrl(url: string): boolean
