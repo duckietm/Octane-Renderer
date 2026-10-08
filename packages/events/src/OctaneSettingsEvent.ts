@@ -17,6 +17,10 @@ export class OctaneSettingsEvent extends OctaneEvent
     private _friendsCanFollow: boolean;
     private _friendRequestsAllowed: boolean;
     private _profileVisible: boolean = true;
+    private _wiredWhisperDisabled: boolean = false;
+    private _chatMode: number = 0;
+    private _chatBubbleWidth: number = 1;
+    private _chatScrollSpeed: number = 1;
 
     constructor()
     {
@@ -40,6 +44,10 @@ export class OctaneSettingsEvent extends OctaneEvent
         clone._friendsCanFollow = this._friendsCanFollow;
         clone._friendRequestsAllowed = this._friendRequestsAllowed;
         clone._profileVisible = this._profileVisible;
+        clone._wiredWhisperDisabled = this._wiredWhisperDisabled;
+        clone._chatMode = this._chatMode;
+        clone._chatBubbleWidth = this._chatBubbleWidth;
+        clone._chatScrollSpeed = this._chatScrollSpeed;
 
         return clone;
     }
@@ -173,5 +181,48 @@ export class OctaneSettingsEvent extends OctaneEvent
     public set profileVisible(value: boolean)
     {
         this._profileVisible = value;
+    }
+
+    public get wiredWhisperDisabled(): boolean
+    {
+        return this._wiredWhisperDisabled;
+    }
+
+    public set wiredWhisperDisabled(value: boolean)
+    {
+        this._wiredWhisperDisabled = value;
+    }
+
+    /** 0 free flow, 1 line by line (RoomChatSettings.CHAT_MODE_*). */
+    public get chatMode(): number
+    {
+        return this._chatMode;
+    }
+
+    public set chatMode(value: number)
+    {
+        this._chatMode = value;
+    }
+
+    /** 0 wide, 1 normal, 2 thin (RoomChatSettings.CHAT_BUBBLE_WIDTH_*). */
+    public get chatBubbleWidth(): number
+    {
+        return this._chatBubbleWidth;
+    }
+
+    public set chatBubbleWidth(value: number)
+    {
+        this._chatBubbleWidth = value;
+    }
+
+    /** 0 fast, 1 normal, 2 slow (RoomChatSettings.CHAT_SCROLL_SPEED_*). */
+    public get chatScrollSpeed(): number
+    {
+        return this._chatScrollSpeed;
+    }
+
+    public set chatScrollSpeed(value: number)
+    {
+        this._chatScrollSpeed = value;
     }
 }
