@@ -21,17 +21,18 @@ describe('Soundboard management composers', () =>
 
     it('keeps the authoritative upsert wire order', () =>
     {
-        expect(new SoundboardCatalogUpsertComposer(7, 'Campanella', '/sounds/bell.mp3', 5, false, 'bell').getMessageArray()).toEqual([
+        expect(new SoundboardCatalogUpsertComposer(7, 'Campanella', '/sounds/bell.mp3', 5, false, 'bell', 20).getMessageArray()).toEqual([
             7,
             'Campanella',
             '/sounds/bell.mp3',
             5,
             false,
-            'bell'
+            'bell',
+            20
         ]);
     });
 
-    it('appends an empty classname when none is given', () =>
+    it('appends an empty classname and keeps the cooldown when none is given', () =>
     {
         expect(new SoundboardCatalogUpsertComposer(7, 'Campanella', '/sounds/bell.mp3', 5, false).getMessageArray()).toEqual([
             7,
@@ -39,7 +40,8 @@ describe('Soundboard management composers', () =>
             '/sounds/bell.mp3',
             5,
             false,
-            ''
+            '',
+            -1
         ]);
     });
 
