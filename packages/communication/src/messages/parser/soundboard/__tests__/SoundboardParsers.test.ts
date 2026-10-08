@@ -102,6 +102,47 @@ describe('SoundboardSettingsParser', () =>
         ]);
     });
 
+    it('reads the room mode that closes the packet', () =>
+    {
+        const writer = new BinaryWriter();
+        writer.writeByte(1);
+        writer.writeInt(60);
+        writer.writeInt(1);
+        writer.writeInt(7);
+        writer.writeString('Campanella');
+        writer.writeString('');
+        writer.writeString('campanella');
+        writer.writeInt(2);
+
+        const parser = new SoundboardSettingsParser();
+        expect(parser.parse(new TestWrapper(new BinaryReader(writer.getBuffer())) as any)).toBe(true);
+
+        expect(parser.enabled).toBe(true);
+        expect(parser.roomMode).toBe(2);
+
+        parser.flush();
+        expect(parser.roomMode).toBe(0);
+    });
+
+    it('derives the room mode from the boolean when the server does not send one', () =>
+    {
+        const on = new BinaryWriter();
+        on.writeByte(1);
+        on.writeInt(60);
+        on.writeInt(0);
+        const off = new BinaryWriter();
+        off.writeByte(0);
+        off.writeInt(60);
+        off.writeInt(0);
+
+        const parser = new SoundboardSettingsParser();
+        parser.parse(new TestWrapper(new BinaryReader(on.getBuffer())) as any);
+        expect(parser.roomMode).toBe(1);
+
+        parser.parse(new TestWrapper(new BinaryReader(off.getBuffer())) as any);
+        expect(parser.roomMode).toBe(0);
+    });
+
     it('clamps a negative cooldown to zero', () =>
     {
         const writer = new BinaryWriter();

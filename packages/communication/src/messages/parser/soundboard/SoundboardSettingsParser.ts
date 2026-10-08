@@ -20,12 +20,14 @@ export interface ISoundboardSound
 export class SoundboardSettingsParser implements IMessageParser
 {
     private _enabled: boolean = false;
+    private _roomMode: number = 0;
     private _cooldownSeconds: number = 0;
     private _sounds: ISoundboardSound[] = [];
 
     public flush(): boolean
     {
         this._enabled = false;
+        this._roomMode = 0;
         this._cooldownSeconds = 0;
         this._sounds = [];
 
@@ -37,6 +39,7 @@ export class SoundboardSettingsParser implements IMessageParser
         if(!wrapper) return false;
 
         this._enabled = wrapper.readBoolean();
+        this._roomMode = this._enabled ? 1 : 0;
         this._cooldownSeconds = Math.max(0, wrapper.readInt());
         const count = wrapper.readInt();
         this._sounds = [];
@@ -61,12 +64,24 @@ export class SoundboardSettingsParser implements IMessageParser
 
         for(let i = 0; i < count; i++) this._sounds[i].classname = wrapper.readString();
 
+        // The room mode closes the packet. A server that predates it only
+        // knows on and off, which is what the boolean already said.
+        if(wrapper.bytesAvailable) this._roomMode = wrapper.readInt();
+
         return true;
     }
 
     public get enabled(): boolean
     {
         return this._enabled;
+    }
+    /**
+     * Who may use the soundboard in this room: 0 nobody, 1 everyone, 2 only
+     * people with rights in the room.
+     */
+    public get roomMode(): number
+    {
+        return this._roomMode;
     }
     public get cooldownSeconds(): number
     {
