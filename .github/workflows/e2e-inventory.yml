@@ -93,7 +93,7 @@ jobs:
 
       - name: Upload Polaris logs
         if: failure()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: inventory-e2e-polaris-logs
           path: /tmp/polaris-e2e-inventory/*.log
