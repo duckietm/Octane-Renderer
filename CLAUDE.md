@@ -7,9 +7,9 @@ top of.
 
 ## Stack
 
-- **TypeScript 6.0** (root) + **tsgo** (`@typescript/native-preview`,
-  TS 7 preview compiler — used by `yarn compile:fast`, ~7× faster on
-  this codebase)
+- **TypeScript 6.0** (root, `typescript`: the build and the ESLint parser) + **TypeScript 7**
+  (the `typescript7` alias of `typescript@7`, native compiler — used by `yarn compile:fast`,
+  ~7× faster on this codebase)
 - **PixiJS v8** (`pixi.js@8.22`)
 - **Vite 8** for build + bundling
 - **Vitest 4** for unit tests
@@ -222,7 +222,7 @@ also semantically wrong. Replaced with the standard
 ```
 yarn build              # vite build
 yarn compile            # tsc --project ./tsconfig.json --noEmit false
-yarn compile:fast       # tsgo (~7× faster, TS 7 preview)
+yarn compile:fast       # TypeScript 7 native compiler (~7× faster)
 yarn eslint             # lint src + packages/*/src
 yarn test               # vitest run
 yarn test:watch         # vitest watch
