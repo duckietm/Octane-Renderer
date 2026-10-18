@@ -63,7 +63,7 @@ jobs:
           cache-dependency-path: .e2e/emulator/Emulator/pom.xml
 
       - name: Set up Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: "22"
 
