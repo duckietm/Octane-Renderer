@@ -1,5 +1,5 @@
 import { BinaryReader, BinaryWriter } from '@octane/utils';
-import { gzip } from 'pako';
+import { gzipSync } from 'fflate';
 import { describe, expect, it } from 'vitest';
 import { OctaneMessages } from '../../../../OctaneMessages';
 import { IncomingHeader } from '../../../incoming/IncomingHeader';
@@ -133,7 +133,7 @@ describe('catalog studio packet contract', () =>
             pageHeadline: '', pageTeaser: '', pageSpecial: '', pageText1: '', pageText2: '',
             pageTextDetails: '', pageTextTeaser: '', roomId: 0, includes: ''
         }];
-        const encodedPages = Buffer.from(gzip(JSON.stringify(pages))).toString('base64');
+        const encodedPages = Buffer.from(gzipSync(new TextEncoder().encode(JSON.stringify(pages)))).toString('base64');
         const writer = new BinaryWriter();
         writer.writeInt(1); writer.writeInt(1); writer.writeInt(7);
         writer.writeString('2026-08-02T10:00:00Z'); writer.writeString('2026-08-02T10:05:00Z');

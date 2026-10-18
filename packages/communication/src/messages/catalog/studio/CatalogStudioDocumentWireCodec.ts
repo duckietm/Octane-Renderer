@@ -1,4 +1,4 @@
-import { gzip, ungzip } from 'pako';
+import { gzipSync, gunzipSync } from 'fflate';
 
 export const CATALOG_STUDIO_DOCUMENT_ENCODING = 'GZIP_BASE64_UTF8';
 export const CATALOG_STUDIO_DOCUMENT_CHUNK_LENGTH = 32_767;
@@ -35,7 +35,7 @@ export const encodeCatalogStudioDocument = (document: string): CatalogStudioEnco
     const documentBytes = new TextEncoder().encode(document);
     if(documentBytes.length > CATALOG_STUDIO_DOCUMENT_MAX_BYTES)
         throw new Error('Catalog Studio SQL document exceeds the decompressed size limit.');
-    const encoded = bytesToBase64(gzip(documentBytes));
+    const encoded = bytesToBase64(gzipSync(documentBytes));
     const chunks: string[] = [];
     for(let offset = 0; offset < encoded.length; offset += CATALOG_STUDIO_DOCUMENT_CHUNK_LENGTH)
         chunks.push(encoded.slice(offset, offset + CATALOG_STUDIO_DOCUMENT_CHUNK_LENGTH));
@@ -56,7 +56,7 @@ export const decodeCatalogStudioDocument = (encoding: string, chunks: string[]):
         throw new Error('Catalog Studio SQL document contains an oversized chunk.');
     if(!chunks.length) return '';
 
-    const documentBytes = ungzip(base64ToBytes(chunks.join('')));
+    const documentBytes = gunzipSync(base64ToBytes(chunks.join('')));
     if(documentBytes.length > CATALOG_STUDIO_DOCUMENT_MAX_BYTES)
         throw new Error('Catalog Studio SQL document exceeds the decompressed size limit.');
     return new TextDecoder('utf-8', { fatal: true }).decode(documentBytes);

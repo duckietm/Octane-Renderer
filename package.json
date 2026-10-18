@@ -9,7 +9,6 @@
     "packages/*"
   ],
   "resolutions": {
-    "pako": "3.0.1",
     "pixi.js": "8.21.0",
     "vite": "8.3.0",
     "vitest": "5.0.1"

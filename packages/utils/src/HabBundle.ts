@@ -1,4 +1,4 @@
-import { inflate, inflateRaw } from 'pako';
+import { unzlibSync, inflateSync } from 'fflate';
 
 /**
  * Habbo's .hab asset bundle (the HTML5 client's replacement for .swf):
@@ -73,7 +73,7 @@ export const readHabBundle = (buffer: ArrayBuffer): HabBundleContents =>
 
     if(dataStart + dataLength > buffer.byteLength) throw new Error('HAB bundle is shorter than its header says');
 
-    const indexBytes = inflate(new Uint8Array(buffer, HEADER_LENGTH, indexLength));
+    const indexBytes = unzlibSync(new Uint8Array(buffer, HEADER_LENGTH, indexLength));
 
     if(indexRawLength && indexBytes.byteLength !== indexRawLength) throw new Error('HAB index has the wrong length');
 
@@ -114,10 +114,10 @@ const inflateEntry = (stored: Uint8Array): Uint8Array =>
 {
     try
     {
-        return inflate(stored);
+        return unzlibSync(stored);
     }
     catch
     {
-        return inflateRaw(stored);
+        return inflateSync(stored);
     }
 };

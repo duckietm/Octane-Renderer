@@ -1,6 +1,6 @@
 import { IMessageComposer, IPlaneDrawingData } from '@octane/api';
 import { OctaneLogger, TextureUtils } from '@octane/utils';
-import { deflate } from 'pako';
+import { zlibSync } from 'fflate';
 import { RenderTexture } from 'pixi.js';
 import { fletcher100, makeMagicString, stringToByteArray } from './RenderRoomCrypto';
 
@@ -133,7 +133,7 @@ export class RenderRoomMessageComposer implements IMessageComposer<ConstructorPa
         this._renderDataString = value;
 
         // ByteArray.writeUTFBytes + compress('zlib').
-        const bytes = deflate(new TextEncoder().encode(value));
+        const bytes = zlibSync(new TextEncoder().encode(value));
         const buffer = bytes.buffer.slice(bytes.byteOffset, (bytes.byteOffset + bytes.byteLength));
 
         this._data = [];

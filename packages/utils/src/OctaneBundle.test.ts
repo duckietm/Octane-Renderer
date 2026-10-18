@@ -1,4 +1,4 @@
-import { deflate } from 'pako';
+import { zlibSync } from 'fflate';
 import { Texture } from 'pixi.js';
 import { describe, expect, it, vi } from 'vitest';
 import { OctaneBundle } from './OctaneBundle';
@@ -13,7 +13,7 @@ const createBundle = (entries: BundleEntry[]): ArrayBuffer =>
 {
     const encoded = entries.map(entry => ({
         name: new TextEncoder().encode(entry.name),
-        payload: deflate(entry.bytes)
+        payload: zlibSync(entry.bytes)
     }));
     const size = 2 + encoded.reduce((total, entry) => total + 2 + entry.name.length + 4 + entry.payload.length, 0);
     const bytes = new Uint8Array(size);
@@ -108,7 +108,7 @@ describe('OctaneBundle .hab', () =>
 
         for(const entry of entries)
         {
-            const stored = deflate(entry.bytes);
+            const stored = zlibSync(entry.bytes);
 
             indexEntries.push({ name: entry.name, mimeType: entry.mimeType, offset, storedLength: stored.length, originalLength: entry.bytes.length, compression: 'deflate' });
             payloads.push(stored);
@@ -116,7 +116,7 @@ describe('OctaneBundle .hab', () =>
         }
 
         const indexRaw = new TextEncoder().encode(JSON.stringify({ format: 'hab', version: 1, name, entries: indexEntries }));
-        const index = deflate(indexRaw);
+        const index = zlibSync(indexRaw);
         const bytes = new Uint8Array(20 + index.length + offset);
         const view = new DataView(bytes.buffer);
 

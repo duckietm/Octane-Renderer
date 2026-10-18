@@ -422,7 +422,7 @@ __metadata:
     "@octane/events": "npm:1.0.0"
     "@octane/utils": "npm:1.0.0"
     "@thumbmarkjs/thumbmarkjs": "npm:^1.9.0"
-    pako: "npm:^3.0.1"
+    fflate: "npm:^0.8.3"
     pixi.js: "npm:^8.22.0"
     typescript: "npm:^6.0.3"
   languageName: unknown
@@ -537,7 +537,7 @@ __metadata:
   resolution: "@octane/utils@workspace:packages/utils"
   dependencies:
     "@octane/api": "npm:1.0.0"
-    pako: "npm:^3.0.1"
+    fflate: "npm:^0.8.3"
     pixi.js: "npm:^8.22.0"
     strip-json-comments: "npm:^5.0.3"
     typescript: "npm:^6.0.3"
@@ -1488,6 +1488,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"fflate@npm:^0.8.3":
+  version: 0.8.3
+  resolution: "fflate@npm:0.8.3"
+  checksum: 10c0/eab181ca37f5348ae76d4b6f840e0026e30220e33153289ac942222d8b9638237d486507dbcc09878d724095bd354993a2ee48bbee99c8f2c6440d4448719aa7
+  languageName: node
+  linkType: hard
+
 "file-entry-cache@npm:11.1.5 || >11.1.6 <12":
   version: 11.1.5
   resolution: "file-entry-cache@npm:11.1.5"
@@ -2063,13 +2070,6 @@ __metadata:
   dependencies:
     p-limit: "npm:^3.0.2"
   checksum: 10c0/2290d627ab7903b8b70d11d384fee714b797f6040d9278932754a6860845c4d3190603a0772a663c8cb5a7b21d1b16acb3a6487ebcafa9773094edc3dfe6009a
-  languageName: node
-  linkType: hard
-
-"pako@npm:3.0.1":
-  version: 3.0.1
-  resolution: "pako@npm:3.0.1"
-  checksum: 10c0/1292b2ffcbdf42f95be5519ffc11c4cb8daf065f7681936a5b0fe2028753396fbaea0c22cb22e54a4f12bb0c3217513f6b2261fa77e4dbf8c9bd76efe3eca2cc
   languageName: node
   linkType: hard
 
