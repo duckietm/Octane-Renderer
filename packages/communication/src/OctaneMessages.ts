@@ -9,6 +9,7 @@ import { RequestOfflineMessagesComposer } from './messages/outgoing/friendlist/R
 import { HotelViewLandingEvent, HotelViewLandingRequestComposer, HotelViewLandingSaveComposer, HotelViewLandingSaveSceneComposer, HotelViewLandingVoteComposer, HotelViewLandingResetVotesComposer } from './messages';
 import { RoomQueueStatusEvent, YouAreNotSpectatorMessageEvent, ConfigurationItemStatesEvent, SpecialRoomEventEvent, SpecialSystemChatEvent, ObjectRemoveMultipleEvent, ItemRemoveMultipleEvent, ItemsStateUpdateEvent, ObjectRemoveConfirmEvent, FurnitureListRemoveMultipleEvent, OfficialRoomsEvent } from './messages';
 import { RoomUseHabbiconEvent, TriggerHabbiconComposer } from './messages';
+import { GetWiredContractContentsComposer, UpdateWiredContractComposer, WiredContractContentsEvent, WiredContractOpenEvent, WiredContractUpdateResultEvent } from './messages';
 import { UserHabbiconsEvent, UserHabbiconStatusChangedEvent, HabbiconInfoEvent, HabbiconShopDataEvent, GetHabbiconShopDataComposer, GetHabbiconInfoComposer, BuyHabbiconComposer, BuyHabbiconCollectionComposer, ClaimHabbiconComposer, FavoriteHabbiconComposer, UnfavoriteHabbiconComposer } from './messages';
 import { AddCustomFilterWordMessageComposer, CustomFilterResultEvent, GetCustomFilterMessageComposer, ModifyCustomFilterResultEvent, RemoveCustomFilterWordMessageComposer } from './messages';
 import { MarkMessengerReadComposer, MessengerConversationsEvent, MessengerHistoryEvent, MessengerMessageAckEvent, MessengerMessageFailedEvent, MessengerMessageEvent, MessengerReadCursorEvent, RequestMessengerConversationsComposer, RequestMessengerHistoryComposer, SendMessengerMessageComposer } from './messages';
@@ -561,6 +562,9 @@ export class OctaneMessages implements IMessageConfiguration
         this._events.set(IncomingHeader.WIRED_TRANSACTION_SUCCESS, WiredTransactionSuccessEvent);
         this._events.set(IncomingHeader.WIRED_TRANSACTION_FAIL, WiredTransactionFailEvent);
         this._events.set(IncomingHeader.WIRED_TRADE_ERROR, WiredTradeErrorEvent);
+        this._events.set(IncomingHeader.WIRED_CONTRACT_OPEN, WiredContractOpenEvent);
+        this._events.set(IncomingHeader.WIRED_CONTRACT_CONTENTS, WiredContractContentsEvent);
+        this._events.set(IncomingHeader.WIRED_CONTRACT_UPDATE_RESULT, WiredContractUpdateResultEvent);
         this._events.set(IncomingHeader.FURNITURE_STATE_2, DiceValueMessageEvent);
         this._events.set(IncomingHeader.RECOLOR_FURNI_UPDATE, RecolorFurniUpdateEvent);
         this._events.set(IncomingHeader.LOVELOCK_FURNI_FINISHED, LoveLockFurniFinishedEvent);
@@ -1367,6 +1371,8 @@ export class OctaneMessages implements IMessageConfiguration
         this._composers.set(OutgoingHeader.WIRED_TRADE_OFFER_ITEMS, WiredTradeOfferItemsComposer);
         this._composers.set(OutgoingHeader.WIRED_TRADE_ACCEPT, WiredTradeAcceptComposer);
         this._composers.set(OutgoingHeader.WIRED_TRADE_CANCEL, WiredTradeCancelComposer);
+        this._composers.set(OutgoingHeader.WIRED_CONTRACT_GET_CONTENTS, GetWiredContractContentsComposer);
+        this._composers.set(OutgoingHeader.WIRED_CONTRACT_UPDATE, UpdateWiredContractComposer);
 
         // Toners
         this._composers.set(OutgoingHeader.ROOM_TONER_APPLY, ApplyTonerComposer);

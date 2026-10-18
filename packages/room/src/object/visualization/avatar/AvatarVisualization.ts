@@ -81,8 +81,6 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
 
     private _isLaying: boolean;
     private _layInside: boolean;
-    private _layXOffset: number;
-    private _layYOffset: number;
     private _isAnimating: boolean;
     private _extraSpritesStartIndex: number;
     private _forcedAnimFrames: number;
@@ -375,12 +373,6 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
 
                     sprite.offsetX = ((((-1 * scale) / 2) + canvasOffsets[0]) - ((sprite.texture.width - scale) / 2));
                     sprite.offsetY = (((-(sprite.texture.height) + (scale / 4)) + canvasOffsets[1]) + this._postureOffset);
-
-                    if(this._isLaying)
-                    {
-                        sprite.offsetX += (this._layXOffset - this._layYOffset);
-                        sprite.offsetY += Math.floor((this._layXOffset + this._layYOffset) / 2);
-                    }
                 }
 
                 if(this._isLaying)
@@ -1102,6 +1094,13 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
         this._needsUpdate = true;
     }
 
+    public static isLayInside(postureParameter: string): boolean
+    {
+        const height = Math.trunc(parseFloat(postureParameter));
+
+        return (!isNaN(height) && (height < 0));
+    }
+
     private updateScale(scale: number): void
     {
         if(scale < 48) this._blink = false;
@@ -1117,23 +1116,13 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
 
         this._layInside = false;
         this._isLaying = false;
-        this._layXOffset = 0;
-        this._layYOffset = 0;
 
         if(this._posture === 'lay')
         {
             this._isLaying = true;
 
-            const parts = this._postureParameter ? this._postureParameter.split(';') : [];
-            const height = parts.length > 0 ? parseFloat(parts[0]) : 0;
-
-            if(height < 0) this._layInside = true;
-
-            if(parts.length >= 3)
-            {
-                this._layXOffset = parseFloat(parts[1]) || 0;
-                this._layYOffset = parseFloat(parts[2]) || 0;
-            }
+            // AIR: int(postureParameter) < 0 lays the avatar inside the furni (validateActions).
+            if(AvatarVisualization.isLayInside(this._postureParameter)) this._layInside = true;
         }
     }
 

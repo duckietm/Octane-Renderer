@@ -1,5 +1,5 @@
 import { AvatarGuideStatus, IConnection, IMessageEvent, IRoomCreator, IRoomObjectController, IRoomObject, IVector3D, LegacyDataType, MapDataType, ObjectRolling, PetType, RoomObjectCategory, RoomObjectType, RoomObjectUserType, RoomObjectVariable } from '@octane/api';
-import { AreaHideMessageEvent, ConfInvisStateMessageEvent, DiceValueMessageEvent, FloorHeightMapEvent, FurnitureAliasesComposer, FurnitureAliasesEvent, FurnitureDataEvent, FurnitureFloorAddEvent, FurnitureFloorDataParser, FurnitureFloorEvent, FurnitureFloorRemoveEvent, FurnitureFloorUpdateEvent, FurnitureWallAddEvent, FurnitureWallDataParser, FurnitureWallEvent, FurnitureWallRemoveEvent, FurnitureWallUpdateEvent, GetCommunication, GetRoomEntryDataMessageComposer, GuideSessionEndedMessageEvent, GuideSessionErrorMessageEvent, GuideSessionStartedMessageEvent, IgnoreResultEvent, ItemDataUpdateMessageEvent, ObjectsDataUpdateEvent, ObjectsRollingEvent, OneWayDoorStatusMessageEvent, RecolorFurniUpdateEvent, PetExperienceEvent, PetFigureUpdateEvent, RoomEntryTileMessageEvent, RoomEntryTileMessageParser, RoomHeightMapEvent, RoomHeightMapUpdateEvent, RoomPaintEvent, RoomReadyMessageEvent, RoomUnitChatEvent, RoomUnitChatShoutEvent, RoomUnitChatWhisperEvent, RoomUnitDanceEvent, RoomUnitEffectEvent, RoomUnitEvent, RoomUnitExpressionEvent, RoomUseHabbiconEvent, RoomUnitHandItemEvent, RoomUnitIdleEvent, RoomUnitInfoEvent, RoomUnitNumberEvent, RoomUnitRemoveEvent, RoomUnitStatusEvent, RoomUnitStatusMessage, RoomUnitTypingEvent, RoomVisualizationSettingsEvent, UserInfoEvent, WiredFurniMoveStyleEvent, WiredFurniMoveStyleParser, WiredFurniMovementData, WiredMovementsEvent, WiredUserDirectionUpdateData, WiredUserMovementData, YouArePlayingGameEvent, WiredFurniHighlightEvent, WiredFurniTransparencyEvent, WiredFurniVisualizationStateEvent, WiredUserHighlightEvent, WiredUserTransparencyEvent, WiredUserVisualizationStateEvent } from '@octane/communication';
+import { AreaHideMessageEvent, ConfigurationItemStatesEvent, ConfInvisStateMessageEvent, DiceValueMessageEvent, FloorHeightMapEvent, FurnitureAliasesComposer, FurnitureAliasesEvent, FurnitureDataEvent, FurnitureFloorAddEvent, FurnitureFloorDataParser, FurnitureFloorEvent, FurnitureFloorRemoveEvent, FurnitureFloorUpdateEvent, FurnitureWallAddEvent, FurnitureWallDataParser, FurnitureWallEvent, FurnitureWallRemoveEvent, FurnitureWallUpdateEvent, GetCommunication, GetRoomEntryDataMessageComposer, GuideSessionEndedMessageEvent, GuideSessionErrorMessageEvent, GuideSessionStartedMessageEvent, IgnoreResultEvent, ItemDataUpdateMessageEvent, ObjectsDataUpdateEvent, ObjectsRollingEvent, OneWayDoorStatusMessageEvent, RecolorFurniUpdateEvent, PetExperienceEvent, PetFigureUpdateEvent, RoomEntryTileMessageEvent, RoomEntryTileMessageParser, RoomHeightMapEvent, RoomHeightMapUpdateEvent, RoomPaintEvent, RoomReadyMessageEvent, RoomUnitChatEvent, RoomUnitChatShoutEvent, RoomUnitChatWhisperEvent, RoomUnitDanceEvent, RoomUnitEffectEvent, RoomUnitEvent, RoomUnitExpressionEvent, RoomUseHabbiconEvent, RoomUnitHandItemEvent, RoomUnitIdleEvent, RoomUnitInfoEvent, RoomUnitNumberEvent, RoomUnitRemoveEvent, RoomUnitStatusEvent, RoomUnitStatusMessage, RoomUnitTypingEvent, RoomVisualizationSettingsEvent, UserInfoEvent, WiredFurniMoveStyleEvent, WiredFurniMoveStyleParser, WiredFurniMovementData, WiredMovementsEvent, WiredUserDirectionUpdateData, WiredUserMovementData, YouArePlayingGameEvent, WiredFurniHighlightEvent, WiredFurniTransparencyEvent, WiredFurniVisualizationStateEvent, WiredUserHighlightEvent, WiredUserTransparencyEvent, WiredUserVisualizationStateEvent } from '@octane/communication';
 import { GetEventDispatcher, OctaneEventType, RoomEngineObjectEvent } from '@octane/events';
 import { GetRoomSessionManager, GetSessionDataManager } from '@octane/session';
 import { Vector3d } from '@octane/utils';
@@ -116,6 +116,7 @@ export class RoomMessageHandler
             new PetFigureUpdateEvent(this.onPetFigureUpdateEvent.bind(this)),
             new PetExperienceEvent(this.onPetExperienceEvent.bind(this)),
             new YouArePlayingGameEvent(this.onYouArePlayingGameEvent.bind(this)),
+            new ConfigurationItemStatesEvent(this.onConfigurationItemStatesEvent.bind(this)),
             new DiceValueMessageEvent(this.onDiceValueMessageEvent.bind(this)),
             new RecolorFurniUpdateEvent(this.onRecolorFurniUpdateEvent.bind(this)),
             new IgnoreResultEvent(this.onIgnoreResultEvent.bind(this)),
@@ -1870,6 +1871,21 @@ export class RoomMessageHandler
         if(!parser) return;
 
         this._roomEngine.setRoomEngineGameMode(this._currentRoomId, parser.isPlaying);
+    }
+
+    // AIR onConfigurationItemStates forwards all four room flags to the room engine.
+    private onConfigurationItemStatesEvent(event: ConfigurationItemStatesEvent): void
+    {
+        if(!event || !this._roomEngine) return;
+
+        const parser = event.getParser();
+
+        if(!parser) return;
+
+        this._roomEngine.setHanditemControlBlocked(this._currentRoomId, parser.isHanditemControlBlocked);
+        this._roomEngine.setChooserDisabled(this._currentRoomId, parser.chooserDisabled);
+        this._roomEngine.setFreeFurniMovementsMode(this._currentRoomId, parser.freeFurniMovementsEnabled);
+        this._roomEngine.setInvisibleFurni(this._currentRoomId, parser.invisibleFurni);
     }
 
     private addRoomObjectFurnitureFloor(roomId: number, data: FurnitureFloorDataParser): void

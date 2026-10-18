@@ -12,8 +12,8 @@
     "@octane/api": "1.0.0",
     "@octane/events": "1.0.0",
     "@octane/utils": "1.0.0",
-    "@thumbmarkjs/thumbmarkjs": "^1.11.0",
-    "fflate": "^0.8.3",
+    "@thumbmarkjs/thumbmarkjs": "^1.9.0",
+    "pako": "^3.0.1",
     "pixi.js": "^8.22.0"
   },
   "devDependencies": {

@@ -103,7 +103,8 @@ export class RoomUnitStatusParser implements IMessageParser
                             break;
                         }
                         case 'lay': {
-                            height = parseLocaleFloat(parts[1]);
+                            // AIR lifts the avatar by the absolute lay height; a negative one only lays it inside the furni.
+                            height = Math.abs(parseLocaleFloat(parts[1]));
 
                             break;
                         }

@@ -94,6 +94,12 @@ export interface IRoomEngine
     readonly activeRoomId: number;
     readonly selectedAvatarId: number;
     readonly isDecorating: boolean;
+    /** AIR: the room's ConfigurationItemStates keep the `:chooser` user list closed for visitors below rights. */
+    readonly activeRoomHasChooserDisabled: boolean;
+    /** AIR: the room's ConfigurationItemStates hide the give / drop handitem actions. */
+    readonly activeRoomHasHanditemControlBlocked: boolean;
+    /** AIR: the room's ConfigurationItemStates let this viewer move, rotate and use any furni. */
+    readonly activeRoomHasFreeFurniMovementsMode: boolean;
     moveBlocked: boolean;
     isAreaSelectionMode(): boolean;
     whereYouClickIsWhereYouGo(): boolean;

@@ -875,6 +875,94 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
         return this.isRoomIdPlayingGame(this._activeRoomId);
     }
 
+    /** AIR `setChooserDisabled`: ConfigurationItemStates keeps the `:chooser` user list closed for visitors below rights. */
+    public setChooserDisabled(roomId: number, disabled: boolean): void
+    {
+        const roomInstance = this.getRoomInstance(roomId);
+
+        if(!roomInstance) return;
+
+        roomInstance.model.setValue(RoomVariableEnum.CHOOSER_DISABLED, (disabled ? 1 : 0));
+    }
+
+    public get activeRoomHasChooserDisabled(): boolean
+    {
+        const roomInstance = this.getRoomInstance(this._activeRoomId);
+
+        if(!roomInstance) return false;
+
+        return (roomInstance.model.getValue<number>(RoomVariableEnum.CHOOSER_DISABLED) > 0);
+    }
+
+    /** AIR `setHanditemControlBlocked`: ConfigurationItemStates hides the give / drop handitem actions. */
+    public setHanditemControlBlocked(roomId: number, blocked: boolean): void
+    {
+        this.setRoomVariableFlag(roomId, RoomVariableEnum.HANDITEM_CONTROL_BLOCKED, blocked);
+    }
+
+    public get activeRoomHasHanditemControlBlocked(): boolean
+    {
+        return this.isRoomVariableActive(this._activeRoomId, RoomVariableEnum.HANDITEM_CONTROL_BLOCKED);
+    }
+
+    /** AIR `setFreeFurniMovementsMode`: ConfigurationItemStates lets this viewer move, rotate and use any furni. */
+    public setFreeFurniMovementsMode(roomId: number, enabled: boolean): void
+    {
+        this.setRoomVariableFlag(roomId, RoomVariableEnum.FREE_FURNI_MOVEMENTS_MODE, enabled);
+    }
+
+    public get activeRoomHasFreeFurniMovementsMode(): boolean
+    {
+        return this.isRoomVariableActive(this._activeRoomId, RoomVariableEnum.FREE_FURNI_MOVEMENTS_MODE);
+    }
+
+    /**
+     * AIR `setInvisibleFurni`: while the room's invisible-furni controller is on, every floor and wall furni hides
+     * its layers tagged `invisible` (`furniture_invisible_layer`); furni added later picks the state up on creation.
+     */
+    public setInvisibleFurni(roomId: number, invisible: boolean): void
+    {
+        if(!this.setRoomVariableFlag(roomId, RoomVariableEnum.INVISIBLE_FURNI, invisible)) return;
+
+        const value = (invisible ? 1 : 0);
+
+        for(const category of [ RoomObjectCategory.FLOOR, RoomObjectCategory.WALL ])
+        {
+            for(const roomObject of this.getRoomObjects(roomId, category))
+            {
+                (roomObject as IRoomObjectController)?.model?.setValue(RoomObjectVariable.FURNITURE_INVISIBLE_LAYER, value);
+            }
+        }
+    }
+
+    private applyInvisibleFurniState(roomId: number, roomObject: IRoomObjectController): void
+    {
+        if(!roomObject?.model) return;
+
+        roomObject.model.setValue(RoomObjectVariable.FURNITURE_INVISIBLE_LAYER, (this.isRoomVariableActive(roomId, RoomVariableEnum.INVISIBLE_FURNI) ? 1 : 0));
+    }
+
+    private setRoomVariableFlag(roomId: number, key: string, active: boolean): boolean
+    {
+        const roomInstance = this.getRoomInstance(roomId);
+
+        if(!roomInstance) return false;
+
+        roomInstance.model.setValue(key, (active ? 1 : 0));
+
+        return true;
+    }
+
+    /** AIR `isRoomVariableActive`. */
+    public isRoomVariableActive(roomId: number, key: string): boolean
+    {
+        const roomInstance = this.getRoomInstance(roomId);
+
+        if(!roomInstance) return false;
+
+        return (roomInstance.model.getValue<number>(key) > 0);
+    }
+
     public update(ticker: Ticker): void
     {
         if(!this._roomManager) return;
@@ -1789,7 +1877,11 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
 
     public createRoomObjectFloor(roomId: number, id: number, type: string): IRoomObjectController
     {
-        return this.createRoomObjectAndInitialize(roomId, id, type, RoomObjectCategory.FLOOR);
+        const roomObject = this.createRoomObjectAndInitialize(roomId, id, type, RoomObjectCategory.FLOOR);
+
+        this.applyInvisibleFurniState(roomId, roomObject);
+
+        return roomObject;
     }
 
     public removeRoomObjectFloor(roomId: number, objectId: number, userId: number = -1, refreshTileMap: boolean = false): void
@@ -1889,7 +1981,11 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
 
     public createRoomObjectWall(roomId: number, id: number, type: string): IRoomObjectController
     {
-        return this.createRoomObjectAndInitialize(roomId, id, type, RoomObjectCategory.WALL);
+        const roomObject = this.createRoomObjectAndInitialize(roomId, id, type, RoomObjectCategory.WALL);
+
+        this.applyInvisibleFurniState(roomId, roomObject);
+
+        return roomObject;
     }
 
     private removeRoomObject(roomId: number, objectId: number, category: number): void

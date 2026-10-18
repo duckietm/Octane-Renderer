@@ -132,6 +132,9 @@ export class OutgoingHeader
     public static WIRED_TRADE_OFFER_ITEMS = 9335;
     public static WIRED_TRADE_ACCEPT = 9336;
     public static WIRED_TRADE_CANCEL = 9337;
+    // AIR native contract editor (WiredContractController): our own ids.
+    public static WIRED_CONTRACT_GET_CONTENTS = 9346;
+    public static WIRED_CONTRACT_UPDATE = 9347;
     public static ITEM_DIMMER_TOGGLE = 2296;
     public static ITEM_EXCHANGE_REDEEM = 3115;
     public static ITEM_PAINT = 711;

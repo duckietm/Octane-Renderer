@@ -1,5 +1,5 @@
 import { IMessageDataWrapper, IMessageParser } from '@octane/api';
-import { gunzipSync } from 'fflate';
+import { ungzip } from 'pako';
 
 const SNAPSHOT_ENCODING = 'GZIP_BASE64_JSON';
 const MAX_PAGE_CHUNKS = 10_000;
@@ -12,7 +12,7 @@ const decodePageChunks = (chunks: string[]): CatalogStudioPageSnapshot[] =>
     const bytes = new Uint8Array(binary.length);
     for(let index = 0; index < binary.length; index++) bytes[index] = binary.charCodeAt(index);
 
-    return JSON.parse(new TextDecoder().decode(gunzipSync(bytes))) as CatalogStudioPageSnapshot[];
+    return JSON.parse(new TextDecoder().decode(ungzip(bytes))) as CatalogStudioPageSnapshot[];
 };
 
 export interface CatalogStudioActor

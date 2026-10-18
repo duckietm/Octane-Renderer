@@ -1,4 +1,4 @@
-import { unzlibSync } from 'fflate';
+import { inflate } from 'pako';
 import { Texture } from 'pixi.js';
 import { BinaryReader } from './BinaryReader';
 import { isHabBundle, readHabBundle } from './HabBundle';
@@ -36,7 +36,7 @@ export class OctaneBundle
             const fileName = binaryReader.readBytes(fileNameLength).toString();
             const fileLength = binaryReader.readInt();
             const buffer = binaryReader.readBytes(fileLength);
-            const inflatedBuffer = unzlibSync(new Uint8Array(buffer.toArrayBuffer()));
+            const inflatedBuffer = inflate(buffer.toArrayBuffer());
 
             if(fileName.endsWith('.json'))
             {

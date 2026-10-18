@@ -1,5 +1,23 @@
 import { IMessageDataWrapper } from '@octane/api';
 
+/** AIR contract types (WiredContractController): payment, trade, reward. */
+export const WIRED_CONTRACT_TYPE_PAYMENT = 0;
+export const WIRED_CONTRACT_TYPE_TRADE = 1;
+export const WIRED_CONTRACT_TYPE_REWARD = 2;
+
+/** AIR TradeRequirementNode.TYPE_COIN / TYPE_FURNI. */
+export const WIRED_CONTRACT_NODE_COIN = 0;
+export const WIRED_CONTRACT_NODE_FURNI = 1;
+
+/** AIR editor caps: AddEditContractElement MAX_COINS / MAX_FURNI, five nodes a rule, three payment options. */
+export const WIRED_CONTRACT_MAX_COINS = 100000;
+export const WIRED_CONTRACT_MAX_FURNI = 500;
+export const WIRED_CONTRACT_MAX_NODES = 5;
+export const WIRED_CONTRACT_MAX_PAYMENT_RULES = 3;
+
+/** AIR PaymentContract.LAYOUT_TYPES, in dropdown order. */
+export const WIRED_CONTRACT_LAYOUT_TYPES = [ 'generic', 'games' ];
+
 export interface IWiredContractItemType { isWallItem: boolean; typeId: number; legacyPosterId: string; }
 export interface IWiredContractNode { type: 0 | 1; amount: number; itemType: IWiredContractItemType | null; }
 export interface IWiredContractRule { nodes: IWiredContractNode[]; }
@@ -20,7 +38,7 @@ export interface IWiredContractContents {
 export function readWiredContractRule(wrapper: IMessageDataWrapper): IWiredContractRule
 {
     const count = wrapper.readInt();
-    if(count < 0 || count > 5) throw new Error('Invalid contract node count');
+    if(count < 0 || count > WIRED_CONTRACT_MAX_NODES) throw new Error('Invalid contract node count');
     const nodes: IWiredContractNode[] = [];
     for(let i = 0; i < count; i++)
     {
@@ -40,7 +58,7 @@ export function readWiredContractDefinition(wrapper: IMessageDataWrapper): IWire
     if(wrapper.readBoolean())
     {
         const count = wrapper.readInt();
-        if(count < 0 || count > 3) throw new Error('Invalid contract alternative count');
+        if(count < 0 || count > WIRED_CONTRACT_MAX_PAYMENT_RULES) throw new Error('Invalid contract alternative count');
         youGiveRule = [];
         for(let i = 0; i < count; i++) youGiveRule.push(readWiredContractRule(wrapper));
     }

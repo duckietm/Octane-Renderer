@@ -117,6 +117,10 @@ export class IncomingHeader
     public static WIRED_TRANSACTION_SUCCESS = 9339;
     public static WIRED_TRANSACTION_FAIL = 9346;
     public static WIRED_TRADE_ERROR = 9347;
+    // AIR native contract editor (WiredContractController): our own ids.
+    public static WIRED_CONTRACT_OPEN = 9348;
+    public static WIRED_CONTRACT_CONTENTS = 9349;
+    public static WIRED_CONTRACT_UPDATE_RESULT = 9352;
     public static ITEM_STACK_HELPER = 2816;
     public static ITEM_WALL = 1369;
     public static ITEM_WALL_ADD = 2187;

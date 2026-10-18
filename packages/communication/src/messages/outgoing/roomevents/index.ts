@@ -41,3 +41,5 @@ export * from './UpdateSelectorMessageComposer';
 export * from './UpdateVariableMessageComposer';
 export * from './WiredSetupExportComposer';
 export * from './WiredSetupImportComposer';
+export * from './GetWiredContractContentsComposer';
+export * from './UpdateWiredContractComposer';

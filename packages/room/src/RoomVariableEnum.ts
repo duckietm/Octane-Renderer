@@ -8,4 +8,8 @@
     public static ROOM_Z_SCALE: string = 'room_z_scale';
     public static AD_DISPLAY_DELAY: string = 'ad_display_delay';
     public static IS_PLAYING_GAME: string = 'is_playing_game';
+    public static CHOOSER_DISABLED: string = 'chooser_disabled';
+    public static HANDITEM_CONTROL_BLOCKED: string = 'handitem_control_blocked';
+    public static FREE_FURNI_MOVEMENTS_MODE: string = 'free_furni_movements_mode';
+    public static INVISIBLE_FURNI: string = 'invisible_furni';
 }

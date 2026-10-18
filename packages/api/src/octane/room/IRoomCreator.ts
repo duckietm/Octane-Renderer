@@ -49,4 +49,8 @@ export interface IRoomCreator
     getPetTypeId(figure: string): number;
     refreshTileObjectMap(roomId: number, source: string): void;
     setRoomEngineGameMode(roomId: number, isPlaying: boolean): void;
+    setChooserDisabled(roomId: number, disabled: boolean): void;
+    setHanditemControlBlocked(roomId: number, blocked: boolean): void;
+    setFreeFurniMovementsMode(roomId: number, enabled: boolean): void;
+    setInvisibleFurni(roomId: number, invisible: boolean): void;
 }

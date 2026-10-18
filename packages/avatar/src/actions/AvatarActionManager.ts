@@ -31,7 +31,56 @@ export class AvatarActionManager
         }
 
         if(data.actionOffsets) this.parseActionOffsets(data.actionOffsets);
+
+        this.applyDefaultActionOffsets();
     }
+
+    /**
+     * AIR's canvas offsets from habbo-avatar-render-lib action_offset_*.xml, used where the loaded actions
+     * carry none: HabboAvatarActions.json converted from HabboAvatarActions.xml has no actionOffsets, and
+     * without them a laying avatar sits 17px too high and 17-22px off its pillow, at the wrong depth.
+     */
+    private applyDefaultActionOffsets(): void
+    {
+        for(const { action: state, offsets } of AvatarActionManager.DEFAULT_ACTION_OFFSETS)
+        {
+            const action = this.getActionByState(state);
+
+            if(!action) continue;
+
+            for(const [size, direction, x, y, z] of offsets)
+            {
+                if(action.getOffsets(size, direction)) continue;
+
+                action.setOffsets(size, direction, [x, y, z]);
+            }
+        }
+    }
+
+    public static readonly DEFAULT_ACTION_OFFSETS: { action: string, offsets: [string, number, number, number, number][] }[] = [
+        {
+            action: 'lay',
+            offsets: [
+                ['h', 4, -17, 17, -0.9],
+                ['h', 2, 22, 17, -0.9],
+                ['sh', 4, -5, 16, -0.9],
+                ['sh', 2, 9, 16, -0.9]
+            ]
+        },
+        {
+            action: 'swim',
+            offsets: [
+                ['sh', 0, -28, 0, 0],
+                ['sh', 1, -28, 0, 0],
+                ['sh', 2, -28, 0, 0],
+                ['sh', 3, -28, 0, 0],
+                ['sh', 4, 0, 0, 0],
+                ['sh', 5, 0, 0, 0],
+                ['sh', 6, 0, 0, 0],
+                ['sh', 7, -28, 0, 0]
+            ]
+        }
+    ];
 
     private parseActionOffsets(offsets: any): void
     {

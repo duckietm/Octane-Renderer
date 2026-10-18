@@ -1,5 +1,5 @@
 import { IPlaneDrawingData } from '@octane/api';
-import { unzlibSync } from 'fflate';
+import { inflate } from 'pako';
 import { describe, expect, it } from 'vitest';
 import { fletcher100, makeMagicString, stringToByteArray } from './RenderRoomCrypto';
 import { RenderRoomMessageComposer } from './RenderRoomMessageComposer';
@@ -101,7 +101,7 @@ describe('RenderRoomMessageComposer AIR scene', () =>
 
         // zlib header (CMF 0x78), not raw deflate or gzip.
         expect(bytes[0]).toBe(0x78);
-        expect(new TextDecoder().decode(unzlibSync(bytes))).toBe(EXPECTED_FIRST);
+        expect(new TextDecoder().decode(inflate(bytes))).toBe(EXPECTED_FIRST);
     });
 
     it('leaves out empty mask lists and writes masks and texture columns in AIR\'s shape', () =>

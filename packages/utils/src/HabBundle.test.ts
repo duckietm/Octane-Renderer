@@ -1,11 +1,11 @@
-import { zlibSync } from 'fflate';
+import { deflate } from 'pako';
 import { describe, expect, it } from 'vitest';
 import { readHabBundle } from './HabBundle';
 
 const buildHab = (index: object, data: Uint8Array, version: number = 1): ArrayBuffer =>
 {
     const rawIndex = new TextEncoder().encode(JSON.stringify(index));
-    const packedIndex = zlibSync(rawIndex);
+    const packedIndex = deflate(rawIndex);
     const buffer = new ArrayBuffer(20 + packedIndex.byteLength + data.byteLength);
     const view = new DataView(buffer);
     const bytes = new Uint8Array(buffer);
