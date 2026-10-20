@@ -46,14 +46,26 @@ jobs:
 
       - name: Resolve companion emulator branch
         shell: bash
+        env:
+          RENDERER_BRANCH: ${{ github.head_ref || github.ref_name }}
+          PR_HEAD_OWNER: ${{ github.event.pull_request.head.repo.owner.login || github.repository_owner }}
         run: |
-          stem="${GITHUB_HEAD_REF%-renderer}"
-          branch="${stem}-emulator"
-          if git ls-remote --exit-code https://github.com/simoleo89/Arcturus-Morningstar-Extended.git "refs/heads/${branch}"; then
-            git clone --depth 1 --branch "${branch}" https://github.com/simoleo89/Arcturus-Morningstar-Extended.git .e2e/emulator
-          else
-            git clone --depth 1 --branch dev https://github.com/duckietm/Arcturus-Morningstar-Extended.git .e2e/emulator
-          fi
+          # Same pairing as the packet contracts workflow: the emulator branch with the name of this branch, then
+          # <name>-emulator, on the owner of this branch and on upstream; the emulator dev branch when there is none.
+          stem="${RENDERER_BRANCH%-renderer}"
+          for candidate in \
+            "${PR_HEAD_OWNER}/Polaris-Emulator:${RENDERER_BRANCH}" \
+            "duckietm/Polaris-Emulator:${RENDERER_BRANCH}" \
+            "${PR_HEAD_OWNER}/Polaris-Emulator:${stem}-emulator" \
+            "duckietm/Polaris-Emulator:${stem}-emulator"; do
+            repository="${candidate%%:*}"
+            ref="${candidate#*:}"
+            if git ls-remote --exit-code --heads "https://github.com/${repository}.git" "$ref" >/dev/null 2>&1; then
+              git clone --depth 1 --branch "$ref" "https://github.com/${repository}.git" .e2e/emulator
+              exit 0
+            fi
+          done
+          git clone --depth 1 --branch dev https://github.com/duckietm/Polaris-Emulator.git .e2e/emulator
 
       - name: Set up JDK 25
         uses: actions/setup-java@v6

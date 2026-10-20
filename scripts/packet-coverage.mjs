@@ -33,7 +33,7 @@ export const packetCoverage = (root = rendererRoot) => {
     const communication = path.join(root, 'packages', 'communication', 'src');
     const messages = path.join(communication, 'messages');
     const registry = fs.readFileSync(path.join(communication, 'OctaneMessages.ts'), 'utf8');
-    const client = [ '../Octane/src', '../octane/src' ].map((dir) => path.resolve(root, dir)).find((dir) => fs.existsSync(dir));
+    const client = [ '../Octane/src', '../octane/src', '../ui/src' ].map((dir) => path.resolve(root, dir)).find((dir) => fs.existsSync(dir));
 
     const sources = [
         ...walk(path.join(root, 'packages')).filter((file) => !file.startsWith(messages + path.sep) && !file.endsWith('OctaneMessages.ts')),

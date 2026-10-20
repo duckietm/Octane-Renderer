@@ -41,8 +41,8 @@ jobs:
 
           if [ -z "${linked_branch:-}" ]; then
             exit 0
-          elif git ls-remote --exit-code --heads https://github.com/simoleo89/Arcturus-Morningstar-Extended.git "$linked_branch" >/dev/null 2>&1; then
-            echo "repository=simoleo89/Arcturus-Morningstar-Extended" >> "$GITHUB_OUTPUT"
+          elif git ls-remote --exit-code --heads "https://github.com/${companion_repo}.git" "$linked_branch" >/dev/null 2>&1; then
+            echo "repository=$companion_repo" >> "$GITHUB_OUTPUT"
             echo "ref=$linked_branch" >> "$GITHUB_OUTPUT"
           else
             echo "repository=duckietm/Polaris-Emulator" >> "$GITHUB_OUTPUT"
