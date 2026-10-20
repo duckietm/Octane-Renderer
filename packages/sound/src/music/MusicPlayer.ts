@@ -3,7 +3,7 @@ import { OctaneLogger } from '@octane/utils';
 import { Howl, Howler } from 'howler';
 import { TraxData } from '../trax/TraxData';
 
-const HowlerUnlockState = Howler as typeof Howler & { _audioUnlocked?: boolean };
+let audioUnlocked = false;
 const MAX_CACHED_SAMPLES = 64;
 
 export class MusicPlayer
@@ -140,7 +140,7 @@ export class MusicPlayer
 
     private async unlockAudio(): Promise<void>
     {
-        if(HowlerUnlockState._audioUnlocked) return;
+        if(audioUnlocked) return;
 
         const ctx = Howler.ctx;
 
@@ -150,7 +150,7 @@ export class MusicPlayer
         {
             if(ctx.state !== 'running') await ctx.resume();
 
-            if(ctx.state === 'running') HowlerUnlockState._audioUnlocked = true;
+            if(ctx.state === 'running') audioUnlocked = true;
         }
         catch
         {
@@ -266,7 +266,7 @@ export class MusicPlayer
     {
         if(!this._currentSong || !this._sequence) return;
 
-        if(!HowlerUnlockState._audioUnlocked)
+        if(!audioUnlocked)
         {
             return;
         }

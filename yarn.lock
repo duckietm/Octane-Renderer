@@ -412,7 +412,7 @@ __metadata:
     "@octane/events": "npm:1.0.0"
     "@octane/utils": "npm:1.0.0"
     "@thumbmarkjs/thumbmarkjs": "npm:^1.9.0"
-    pako: "npm:^3.0.1"
+    pako: "npm:^3.0.2"
     pixi.js: "npm:^8.22.0"
     typescript: "npm:^6.0.3"
   languageName: unknown
@@ -526,7 +526,7 @@ __metadata:
   resolution: "@octane/utils@workspace:packages/utils"
   dependencies:
     "@octane/api": "npm:1.0.0"
-    pako: "npm:^3.0.1"
+    pako: "npm:^3.0.2"
     pixi.js: "npm:^8.22.0"
     strip-json-comments: "npm:^5.0.3"
     typescript: "npm:^6.0.3"

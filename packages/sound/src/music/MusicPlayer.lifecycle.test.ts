@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { MusicPlayer } from './MusicPlayer';
 
-vi.mock('howler', () => ({ Howler: { stop: vi.fn(), _audioUnlocked: true }, Howl: vi.fn() }));
+vi.mock('howler', () => ({ Howler: { stop: vi.fn() }, Howl: vi.fn() }));
 vi.mock('@octane/events', () => ({ GetEventDispatcher: () => ({ dispatchEvent: vi.fn() }), SoundManagerEvent: class {} }));
 
 const deferred = () =>
