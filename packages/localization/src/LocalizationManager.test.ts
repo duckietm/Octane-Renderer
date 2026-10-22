@@ -49,3 +49,19 @@ describe('LocalizationManager parameters (AIR Localization.fillParameterValues)'
         expect(localization.getValue('groupforum.view.forum_details')).toContain('user/Cid">Cid</a>');
     });
 });
+
+describe('LocalizationManager text files', () =>
+{
+    it('reads a written \\n as a line break, like AIR', () =>
+    {
+        const localization = new LocalizationManager();
+
+        (localization as unknown as { parseLocalization(data: object): boolean }).parseLocalization({
+            'badge_leaderboard.info.total_badges': 'Top badge collectors.\\nThey are on fire!',
+            'plain': 'No break here'
+        });
+
+        expect(localization.getValue('badge_leaderboard.info.total_badges')).toBe('Top badge collectors.\nThey are on fire!');
+        expect(localization.getValue('plain')).toBe('No break here');
+    });
+});
