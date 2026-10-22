@@ -65,7 +65,13 @@ export class LocalizationManager implements ILocalizationManager
     {
         if(!data) return false;
 
-        for(const key in data) this._definitions.set(key, data[key]);
+        // Like AIR's CoreLocalizationManager, a backslash followed by "n" in a text file is a line break.
+        for(const key in data)
+        {
+            const value = data[key];
+
+            this._definitions.set(key, (typeof value === 'string') ? value.replace(/\\n/g, '\n') : value);
+        }
 
         return true;
     }
