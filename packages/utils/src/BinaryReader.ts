@@ -2,6 +2,8 @@ import { IBinaryReader } from '@octane/api';
 
 export class BinaryReader implements IBinaryReader
 {
+    private static readonly TEXT_DECODER = new TextDecoder();
+
     private _position: number;
     private _dataView: DataView;
 
@@ -72,7 +74,7 @@ export class BinaryReader implements IBinaryReader
 
     public toString(encoding?: string): string
     {
-        return new TextDecoder().decode(this._dataView.buffer);
+        return BinaryReader.TEXT_DECODER.decode(this._dataView.buffer);
     }
 
     public toArrayBuffer(): ArrayBuffer
