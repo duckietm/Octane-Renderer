@@ -135,7 +135,11 @@ export class Motions
         // eslint-disable-next-line no-cond-assign
         while(motion = Motions._REMOVED_MOTIONS.pop())
         {
-            Motions._RUNNING_MOTIONS.splice(Motions._RUNNING_MOTIONS.indexOf(motion), 1);
+            // A motion removed by hand after it was queued here is already out of the list; splice(-1, 1)
+            // would take the last running motion instead.
+            const index = Motions._RUNNING_MOTIONS.indexOf(motion);
+
+            if(index > -1) Motions._RUNNING_MOTIONS.splice(index, 1);
 
             if(motion.running) motion.stop();
         }
