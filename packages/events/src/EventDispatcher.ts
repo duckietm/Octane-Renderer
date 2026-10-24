@@ -90,9 +90,13 @@ export class EventDispatcher implements IEventDispatcher
 
             catch (err)
             {
-                OctaneLogger.error(err.stack);
+                // One subscriber throwing used to stop the dispatch, so every listener
+                // after it missed the event: a React subscriber of ROOM_SESSION_UPDATED
+                // failing left SoundManager and the other internal listeners on stale
+                // state. The error belongs to that listener alone.
+                OctaneLogger.error(err instanceof Error ? (err.stack ?? err.message) : err);
 
-                return;
+                continue;
             }
         }
     }
