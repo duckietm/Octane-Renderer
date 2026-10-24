@@ -151,26 +151,43 @@ describe('EventDispatcher', () =>
             expect(order).toEqual([1, 2, 3]);
         });
 
-        it('should handle errors in listeners gracefully', () =>
+        it('should keep dispatching to the other listeners when one throws', () =>
         {
             const callback1 = vi.fn(() =>
             {
                 throw new Error('Test error');
             });
             const callback2 = vi.fn();
+            const callback3 = vi.fn();
 
             dispatcher.addEventListener('test', callback1);
             dispatcher.addEventListener('test', callback2);
+            dispatcher.addEventListener('test', callback3);
 
             // Should not throw
             expect(() => dispatcher.dispatchEvent({ type: 'test' })).not.toThrow();
 
-            // First callback was called
+            // The failure belongs to the listener that threw, not to the event: the
+            // ones after it still get it.
             expect(callback1).toHaveBeenCalled();
+            expect(callback2).toHaveBeenCalled();
+            expect(callback3).toHaveBeenCalled();
+        });
 
-            // Second callback was NOT called because first threw error
-            // (This is the current behavior - stops on first error)
-            expect(callback2).not.toHaveBeenCalled();
+        it('should survive a listener throwing something that is not an Error', () =>
+        {
+            const callback1 = vi.fn(() =>
+            {
+                // eslint-disable-next-line @typescript-eslint/only-throw-error -- throwing a non-Error is the case
+                throw 'a string';
+            });
+            const callback2 = vi.fn();
+
+            dispatcher.addEventListener('test', callback1);
+            dispatcher.addEventListener('test', callback2);
+
+            expect(() => dispatcher.dispatchEvent({ type: 'test' })).not.toThrow();
+            expect(callback2).toHaveBeenCalled();
         });
     });
 
