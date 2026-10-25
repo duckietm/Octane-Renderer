@@ -428,6 +428,7 @@ export class RoomSessionManager implements IRoomSessionManager, IRoomHandlerList
         session.password = password;
         session.spawnX = spawnX;
         session.spawnY = spawnY;
+        session.onSnapshotChange = () => this.invalidateRoomSessionSnapshot();
 
         return this.addSession(session);
     }
