@@ -47,6 +47,7 @@ export class SocketConnection implements IConnection
     private _sessionKey: CryptoKey = null;
     private _pendingEncryptedSends: ArrayBuffer[] = [];
     private _decryptChain: Promise<void> = Promise.resolve();
+    private _encryptChain: Promise<void> = Promise.resolve();
 
     public init(socketUrl: string): void
     {
@@ -73,6 +74,7 @@ export class SocketConnection implements IConnection
         this._pendingChunks = [];
         this._pendingBytes = 0;
         this._decryptChain = Promise.resolve();
+        this._encryptChain = Promise.resolve();
         const cryptoEnabled = !!GetConfiguration().getValue<boolean>('crypto.ws.enabled', false);
         if(cryptoEnabled && !this.subtleCryptoAvailable())
         {
@@ -286,14 +288,27 @@ export class SocketConnection implements IConnection
         const shared = await deriveSharedSecret(ourKeys.privateKey, serverPubkey);
         this._sessionKey = await deriveAesKey(shared);
         this._socket.send(buildClientHello(ourPubkeySpki));
-        this._cryptoState = 'ready';
 
-        if(this._pendingEncryptedSends.length)
-        {
-            const queued = this._pendingEncryptedSends;
-            this._pendingEncryptedSends = [];
-            for(const buf of queued) await this.encryptAndSend(buf);
-        }
+        // The queued sends go on the chain before the state turns ready, so a send made from then on
+        // queues behind them instead of overtaking them.
+        const queued = this._pendingEncryptedSends;
+        this._pendingEncryptedSends = [];
+        for(const buf of queued) this.queueEncryptedSend(buf);
+        this._cryptoState = 'ready';
+    }
+
+    /**
+     * Encrypts and sends one packet after every packet queued before it. Each encryption is a
+     * separate promise with no completion order, so sends started side by side could reach the
+     * server reordered (SSO and UniqueID during the handshake, a move before a pickup).
+     */
+    private queueEncryptedSend(plaintext: ArrayBuffer): void
+    {
+        const socket = this._socket;
+
+        this._encryptChain = this._encryptChain
+            .then(() => ((this._socket === socket) ? this.encryptAndSend(plaintext) : undefined))
+            .catch(err => OctaneLogger.error('[ws-crypto] encrypt failed', err));
     }
 
     private _cachedSigningPublicKey: CryptoKey = null;
@@ -666,7 +681,7 @@ export class SocketConnection implements IConnection
 
         if(this._cryptoState === 'ready')
         {
-            this.encryptAndSend(buffer).catch(err => OctaneLogger.error('[ws-crypto] encrypt failed', err));
+            this.queueEncryptedSend(buffer);
             return;
         }
 
