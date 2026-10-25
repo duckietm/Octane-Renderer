@@ -1,5 +1,5 @@
 import { IConnection, IRoomHandlerListener } from '@octane/api';
-import { DesktopViewEvent, FlatAccessDeniedMessageEvent, GoToFlatMessageComposer, RoomDoorbellAcceptedEvent, RoomEnterEvent, RoomReadyMessageEvent, YouAreSpectatorMessageEvent } from '@octane/communication';
+import { DesktopViewEvent, FlatAccessDeniedMessageEvent, GoToFlatMessageComposer, RoomDoorbellAcceptedEvent, RoomEnterErrorEvent, RoomEnterEvent, RoomReadyMessageEvent, YouAreSpectatorMessageEvent } from '@octane/communication';
 import { GetEventDispatcher, RoomSessionDoorbellEvent, RoomSessionSpectatorModeEvent } from '@octane/events';
 import { OctaneLogger } from '@octane/utils';
 import { BaseHandler } from './BaseHandler';
@@ -9,6 +9,9 @@ export class RoomSessionHandler extends BaseHandler
     public static RS_CONNECTED: string = 'RS_CONNECTED';
     public static RS_READY: string = 'RS_READY';
     public static RS_DISCONNECTED: string = 'RS_DISCONNECTED';
+    // The server refused the entry (banned, full, ...). The client's navigator leaves the room for it, except while a
+    // reconnect is restoring the session: then the session manager has to.
+    public static RS_REFUSED: string = 'RS_REFUSED';
 
     constructor(connection: IConnection, listener: IRoomHandlerListener)
     {
@@ -20,6 +23,14 @@ export class RoomSessionHandler extends BaseHandler
         connection.addMessageEvent(new RoomDoorbellAcceptedEvent(this.onRoomDoorbellAcceptedEvent.bind(this)));
         connection.addMessageEvent(new FlatAccessDeniedMessageEvent(this.onRoomDoorbellRejectedEvent.bind(this)));
         connection.addMessageEvent(new YouAreSpectatorMessageEvent(this.onYouAreSpectatorMessageEvent.bind(this)));
+        connection.addMessageEvent(new RoomEnterErrorEvent(this.onRoomEnterErrorEvent.bind(this)));
+    }
+
+    private onRoomEnterErrorEvent(event: RoomEnterErrorEvent): void
+    {
+        if(!(event instanceof RoomEnterErrorEvent)) return;
+
+        if(this.listener) this.listener.sessionUpdate(this.roomId, RoomSessionHandler.RS_REFUSED);
     }
 
     private onRoomEnterEvent(event: RoomEnterEvent): void
