@@ -1,4 +1,4 @@
-﻿import { OctaneLogger, OctaneVersion, parseConfigJsonFromResponse } from '@octane/utils';
+﻿import { LegacyExternalInterface, OctaneLogger, OctaneVersion, parseConfigJsonFromResponse } from '@octane/utils';
 import { IConfigurationManager } from './IConfigurationManager';
 
 export class ConfigurationManager implements IConfigurationManager
@@ -80,6 +80,11 @@ export class ConfigurationManager implements IConfigurationManager
             this.parseConfiguration(defaultConfig, true);
 
             for(const json of documents) this.parseConfiguration(json);
+
+            // The page that may embed the client: messages to the parent window go only there.
+            const parentOrigin = this._definitions.get('legacy.parent.origin');
+
+            LegacyExternalInterface.setParentOrigin(typeof parentOrigin === 'string' ? parentOrigin : null);
 
             // With system.log.debug on: which files were read and how big, so a key reported missing is easy to trace
             // to a stale or wrong file. Plain console, as OctaneLogger's switches are only applied after this load.
