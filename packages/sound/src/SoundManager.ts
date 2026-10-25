@@ -16,7 +16,9 @@ export class SoundManager implements ISoundManager
 
     private _internalSamples: IAdvancedMap<string, HTMLAudioElement> = new AdvancedMap();
     private _furniSamples: IAdvancedMap<number, HTMLAudioElement> = new AdvancedMap();
-    private _furnitureBeingPlayed: IAdvancedMap<number, number> = new AdvancedMap();
+    // One playing instance per furni, cloned from the sample cached per code: a single element per code was shared by
+    // every furni playing it, so removing one stopped the others and its handlers pointed at the last furni only.
+    private _furniPlaying: Map<number, HTMLAudioElement> = new Map();
     private _roomObjectSounds: Map<string, HTMLAudioElement> = new Map();
     private _roomObjectSoundPlayedAt: Map<string, number> = new Map();
 
@@ -56,15 +58,11 @@ export class SoundManager implements ISoundManager
         }
 
         // Stop all playing samples
-        this._furnitureBeingPlayed.getKeys().forEach((objectId: number) =>
-        {
-            this.stopFurniSample(objectId);
-        });
+        this.stopAllFurniSamples();
 
         // Clear all samples
         this._internalSamples.dispose();
         this._furniSamples.dispose();
-        this._furnitureBeingPlayed.dispose();
         this._roomObjectSounds.forEach(sample => sample.pause());
         this._roomObjectSounds.clear();
         this._roomObjectSoundPlayedAt.clear();
@@ -89,10 +87,7 @@ export class SoundManager implements ISoundManager
                 return;
             }
             case RoomEngineEvent.DISPOSED: {
-                this._furnitureBeingPlayed.getKeys().forEach((objectId: number) =>
-                {
-                    this.stopFurniSample(objectId);
-                });
+                this.stopAllFurniSamples();
                 this.stopSoundboard();
                 return;
             }
@@ -149,7 +144,7 @@ export class SoundManager implements ISoundManager
         }
     }
 
-    private playSample(sample: HTMLAudioElement, volume: number, pitch: number = 1): void
+    private playSample(sample: HTMLAudioElement, volume: number): void
     {
         sample.volume = volume;
         sample.currentTime = 0;
@@ -184,25 +179,36 @@ export class SoundManager implements ISoundManager
 
     private playFurniSample(objectId: number, code: number, pitch: number): void
     {
-        let sample = this._furniSamples.getValue(code);
+        let template = this._furniSamples.getValue(code);
 
-        if(!sample)
+        if(!template)
         {
             const sampleUrl = GetConfiguration().getValue<string>('external.samples.url');
 
-            sample = new Audio(sampleUrl.replace('%sample%', code.toString()));
-            this._furniSamples.add(code, sample);
+            template = new Audio(sampleUrl.replace('%sample%', code.toString()));
+            this._furniSamples.add(code, template);
         }
 
-        if(!this._furnitureBeingPlayed.hasKey(objectId)) this._furnitureBeingPlayed.add(objectId, code);
+        this.stopFurniSample(objectId);
 
-        sample.onended = event => this.stopFurniSample(objectId);
+        const sample = (typeof template.cloneNode === 'function') ? (template.cloneNode() as HTMLAudioElement) : new Audio(template.src);
+        const rate = clampPlaybackRate(pitch);
 
-        sample.onpause = event => this.stopFurniSample(objectId);
+        // The pitch the furni asked for, which was never applied.
+        sample.preservesPitch = false;
+        sample.defaultPlaybackRate = rate;
+        sample.playbackRate = rate;
 
-        sample.onerror = event => this.stopFurniSample(objectId);
+        const finished = () =>
+        {
+            if(this._furniPlaying.get(objectId) === sample) this._furniPlaying.delete(objectId);
+        };
 
-        this.playSample(sample, this._volumeFurni, pitch);
+        sample.onended = finished;
+        sample.onerror = finished;
+
+        this._furniPlaying.set(objectId, sample);
+        this.playSample(sample, this._volumeFurni);
     }
 
     /**
@@ -270,17 +276,20 @@ export class SoundManager implements ISoundManager
         }
     }
 
+    private stopAllFurniSamples(): void
+    {
+        for(const objectId of [ ...this._furniPlaying.keys() ]) this.stopFurniSample(objectId);
+    }
+
     private stopFurniSample(objectId: number): void
     {
-        const furnitureBeingPlayed = this._furnitureBeingPlayed.getValue(objectId);
-
-        if(!furnitureBeingPlayed) return;
-
-        const sample = this._furniSamples.getValue(furnitureBeingPlayed);
-
-        this._furnitureBeingPlayed.remove(objectId);
+        const sample = this._furniPlaying.get(objectId);
 
         if(!sample) return;
+
+        this._furniPlaying.delete(objectId);
+        sample.onended = null;
+        sample.onerror = null;
 
         try
         {
@@ -302,7 +311,7 @@ export class SoundManager implements ISoundManager
 
     private updateFurniSamplesVolume(volume: number): void
     {
-        this._furniSamples.getValues().forEach((sample: HTMLAudioElement) =>
+        this._furniPlaying.forEach((sample: HTMLAudioElement) =>
         {
             sample.volume = volume;
         });
