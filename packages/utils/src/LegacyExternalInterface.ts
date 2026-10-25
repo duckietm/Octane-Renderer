@@ -128,6 +128,27 @@ export class LegacyExternalInterface
     // Add trusted origins here if cross-origin communication is needed
     private static _allowedOrigins: Set<string> = new Set();
 
+    // The origin of the page that embeds the client (legacy.parent.origin), when the hotel names it.
+    private static _parentOrigin: string | null = null;
+
+    /**
+     * Names the origin of the page that embeds the client. Messages to the parent then go only there: the browser
+     * drops them when the client is framed by anyone else. An empty or invalid value clears it.
+     */
+    public static setParentOrigin(origin: string | null | undefined): void
+    {
+        try
+        {
+            this._parentOrigin = origin ? new URL(origin).origin : null;
+        }
+        catch
+        {
+            this._parentOrigin = null;
+        }
+
+        if(this._parentOrigin === 'null') this._parentOrigin = null;
+    }
+
     public static setAllowedOrigins(origins: string[]): void
     {
         this._allowedOrigins = new Set(origins);
@@ -201,15 +222,19 @@ export class LegacyExternalInterface
     }
 
     /**
-     * The parent's origin when it is known, otherwise '*' (the receiving end validates the message).
-     * Firefox reports an opaque "null" ancestor origin when the frame gets no referrer, and
-     * postMessage throws a SyntaxError for that target, which stopped the client right after loading.
+     * Where messages to the top window may go: the configured parent origin, otherwise the top origin the browser
+     * reports, otherwise nowhere. It used to fall back to '*', and Firefox reports no ancestor origins at all, so any
+     * site framing the hotel received the game URL (which can carry a ticket), the rooms visited and the figure.
+     * An opaque "null" origin counts as unknown: postMessage throws a SyntaxError for that target.
      */
-    public static getParentOrigin(): string
+    public static getParentOrigin(): string | null
     {
-        const origin = window.location.ancestorOrigins?.[0];
+        if(this._parentOrigin) return this._parentOrigin;
 
-        return (origin && origin !== 'null') ? origin : '*';
+        const ancestors = window.location.ancestorOrigins;
+        const origin = (ancestors && ancestors.length) ? ancestors[ancestors.length - 1] : null;
+
+        return (origin && origin !== 'null') ? origin : null;
     }
 
     public static call<K extends keyof typeof window.FlashExternalInterface>(
@@ -217,12 +242,14 @@ export class LegacyExternalInterface
         ...params: Parameters<typeof window.FlashExternalInterface[K]>
     ): ReturnType<typeof window.FlashExternalInterface[K]> | undefined
     {
-        if(window.top !== window)
+        const parentOrigin = (window.top !== window) ? LegacyExternalInterface.getParentOrigin() : null;
+
+        if(parentOrigin)
         {
             window.top.postMessage(LegacyExternalInterface.MESSAGE_KEY + JSON.stringify({
                 method,
                 params
-            }), LegacyExternalInterface.getParentOrigin());
+            }), parentOrigin);
         }
 
         if(!('FlashExternalInterface' in window)) return undefined;
@@ -237,12 +264,14 @@ export class LegacyExternalInterface
         ...params: Parameters<typeof window.FlashExternalGameInterface[K]>
     ): ReturnType<typeof window.FlashExternalGameInterface[K]> | undefined
     {
-        if(window.top !== window)
+        const parentOrigin = (window.top !== window) ? LegacyExternalInterface.getParentOrigin() : null;
+
+        if(parentOrigin)
         {
             window.top.postMessage(LegacyExternalInterface.GAME_MESSAGE_KEY + JSON.stringify({
                 method,
                 params
-            }), LegacyExternalInterface.getParentOrigin());
+            }), parentOrigin);
         }
 
         if(!('FlashExternalGameInterface' in window)) return undefined;

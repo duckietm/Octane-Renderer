@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { LegacyExternalInterface } from '@octane/utils';
 import { ConfigurationManager } from './ConfigurationManager';
 
 const jsonResponse = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
@@ -146,5 +147,19 @@ describe('ConfigurationManager.parseConfiguration', () =>
         expect(manager.getValue('loader')).toBe('Opstarten...');
         expect(manager.getValue('loader.waiting')).toBe('Loading content...');
         expect(manager.getValue('toolbar.stories.enabled')).toBe(false);
+    });
+
+    it('tells the external interface which page may embed the client', async () =>
+    {
+        (window as any).OctaneConfig = { 'config.urls': [ '/ui-config.json' ] };
+        vi.stubGlobal('fetch', vi.fn().mockReturnValue(Promise.resolve(jsonResponse({ 'legacy.parent.origin': 'https://hotel.example' }))));
+        vi.spyOn(window, 'location', 'get').mockReturnValue({ ...window.location, ancestorOrigins: undefined });
+
+        await new ConfigurationManager().init();
+
+        expect(LegacyExternalInterface.getParentOrigin()).toBe('https://hotel.example');
+
+        LegacyExternalInterface.setParentOrigin(null);
+        vi.restoreAllMocks();
     });
 });
