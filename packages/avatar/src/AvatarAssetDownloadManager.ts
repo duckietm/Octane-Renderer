@@ -131,6 +131,21 @@ export class AvatarAssetDownloadManager
         await Promise.all(promises);
     }
 
+    /**
+     * Forgets the figures waiting for a library that could not be downloaded: they cannot complete, and keeping them
+     * kept their listeners for good. A figure asked for again after the library's wait retries it.
+     */
+    private onLibraryFailed(library: AvatarAssetDownloadLibrary): void
+    {
+        for(const [figure, libraries] of [ ...this._incompleteFigures.entries() ])
+        {
+            if(libraries.indexOf(library) === -1) continue;
+
+            this._incompleteFigures.delete(figure);
+            this._figureListeners.delete(figure);
+        }
+    }
+
     private onLibraryLoaded(event: AvatarRenderLibraryEvent): void
     {
         if(!event || !event.library) return;
@@ -293,16 +308,12 @@ export class AvatarAssetDownloadManager
         {
             if(listener && !listener.disposed)
             {
-                let listeners = this._figureListeners.get(figure);
-
-                if(!listeners)
-                {
-                    listeners = [];
-
-                    this._figureListeners.set(figure, listeners);
-                }
+                // Disposed avatars are dropped here, or a figure kept every view that ever asked for it.
+                const listeners = (this._figureListeners.get(figure) ?? []).filter(existing => existing && !existing.disposed);
 
                 if(listeners.indexOf(listener) === -1) listeners.push(listener);
+
+                this._figureListeners.set(figure, listeners);
             }
 
             this._incompleteFigures.set(figure, pendingLibraries);
@@ -311,7 +322,8 @@ export class AvatarAssetDownloadManager
             {
                 if(!library) continue;
 
-                library.downloadAsset();
+                // Not awaited: a failure used to surface as an unhandled rejection.
+                library.downloadAsset().catch(() => this.onLibraryFailed(library));
             }
         }
         else
