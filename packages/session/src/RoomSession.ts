@@ -1,6 +1,7 @@
 import { IRoomSession, IUserDataManager, RoomControllerLevel, RoomTradingLevelEnum } from '@octane/api';
 import { BotRemoveComposer, ChangeQueueMessageComposer, CompostPlantMessageComposer, FurnitureMultiStateComposer, GetCommunication, GetPetCommandsComposer, HarvestPetMessageComposer, MoodlightSettingsComposer, MoodlightSettingsSaveComposer, MoodlightTogggleStateComposer, NewUserExperienceScriptProceedComposer, OpenPetPackageMessageComposer, OpenPresentComposer, PeerUsersClassificationMessageComposer, PetMountComposer, PetRemoveComposer, PollAnswerComposer, PollRejectComposer, PollStartComposer, RemovePetSaddleComposer, RoomAmbassadorAlertComposer, RoomBanUserComposer, RoomDoorbellAccessComposer, RoomEnterComposer, RoomGiveRightsComposer, RoomKickUserComposer, RoomModerationSettings, RoomMuteUserComposer, RoomTakeRightsComposer, RoomUnmuteUserComposer, RoomUnitActionComposer, RoomUnitBackgroundComposer, RoomUnitChatComposer, RoomUnitChatShoutComposer, RoomUnitChatWhisperComposer, RoomUnitDanceComposer, RoomUnitPostureComposer, RoomUnitSignComposer, RoomUnitTypingStartComposer, RoomUnitTypingStopComposer, RoomUsersClassificationMessageComposer, SetClothingChangeDataMessageComposer, TogglePetBreedingComposer, TogglePetRidingComposer, UsePetProductComposer, UserMottoComposer, VotePollCounterMessageComposer } from '@octane/communication';
 import { RoomSessionEvent } from '@octane/events';
+import { GetRoomSessionManager } from './GetRoomSessionManager';
 import { UserDataManager } from './UserDataManager';
 
 export class RoomSession implements IRoomSession
@@ -497,9 +498,15 @@ export class RoomSession implements IRoomSession
         return this._isDecorating;
     }
 
+    // Both flags are part of the room session snapshot the client reads: a change must refresh it, or widgets kept
+    // the old spectator or decorating state until some other change invalidated it.
     public set isDecorating(flag: boolean)
     {
+        if(this._isDecorating === flag) return;
+
         this._isDecorating = flag;
+
+        GetRoomSessionManager()?.invalidateRoomSessionSnapshot();
     }
 
     public get isSpectator(): boolean
@@ -509,7 +516,11 @@ export class RoomSession implements IRoomSession
 
     public set isSpectator(flag: boolean)
     {
+        if(this._isSpectator === flag) return;
+
         this._isSpectator = flag;
+
+        GetRoomSessionManager()?.invalidateRoomSessionSnapshot();
     }
 
     public get moderationSettings(): RoomModerationSettings
