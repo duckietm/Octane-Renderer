@@ -1,46 +1,69 @@
 import { IGraphicAsset, IRoomObjectSprite, RoomObjectVariable } from '@octane/api';
 import { GetConfiguration } from '@octane/configuration';
 import { GetSessionDataManager } from '@octane/session';
-import { AnimatedSprite, Texture } from 'pixi.js';
-import { parseGIF, decompressFrames } from 'gifuct-js';
+import { Texture } from 'pixi.js';
+import { decompressFrames, parseGIF } from 'gifuct-js';
 import { FurnitureAnimatedVisualization } from './FurnitureAnimatedVisualization';
+
+/** A badge image decoded once: one canvas per frame (a still image has one) and each frame's delay. */
+export interface DecodedBadgeImage
+{
+    frames: HTMLCanvasElement[];
+    delays: number[];
+}
 
 export class FurnitureBadgeDisplayVisualization extends FurnitureAnimatedVisualization
 {
     private static readonly BADGE_TAG = 'BADGE';
     private static readonly BADGE_LAYER_ID = 1;
+    private static readonly MIN_FRAME_DELAY_MS = 20;
+    private static readonly MAX_DECODED_BADGES = 64;
+
+    // Decoded once per badge for every display: each display used to fetch (and, for a PNG, load
+    // twice) the same badge again.
+    private static readonly DECODED_BADGES: Map<string, Promise<DecodedBadgeImage>> = new Map();
+    private static _nextInstance = 0;
+
+    private readonly _instance = ++FurnitureBadgeDisplayVisualization._nextInstance;
 
     private _badgeId = '';
     private _badgeAssetNameNormalScale = '';
     private _badgeVisibleInState = -1;
-    private _frameTextures: Texture[] = null;
-    private _animatedSprite: AnimatedSprite = null;
+    private _ownsBadgeAsset = false;
+    private _badgeCanvas: HTMLCanvasElement = null;
+    private _badgeTexture: Texture = null;
+    private _decoded: DecodedBadgeImage = null;
+    private _animationStart = -1;
     private _lastFrameIndex = -1;
+    private _request = 0;
+    private _disposed = false;
 
     public dispose(): void
     {
-        this.disposeAnimatedSprite();
+        this._disposed = true;
+        this.releaseBadge();
         super.dispose();
     }
 
-    private disposeAnimatedSprite(): void
+    /**
+     * Drops this display's badge. A badge copy it owns goes with it: disposing the asset destroys the
+     * private texture. A pending decode is abandoned through the request token.
+     */
+    private releaseBadge(): void
     {
-        if(this._animatedSprite)
+        this._request++;
+
+        if(this._ownsBadgeAsset && this._badgeAssetNameNormalScale)
         {
-            this._animatedSprite.stop();
-            this._animatedSprite.destroy();
-            this._animatedSprite = null;
+            if(this.asset) this.asset.disposeAsset(this._badgeAssetNameNormalScale);
+            else this._badgeTexture?.destroy(true);
         }
 
-        if(this._frameTextures)
-        {
-            for(const texture of this._frameTextures)
-            {
-                texture.destroy(true);
-            }
-            this._frameTextures = null;
-        }
-
+        this._ownsBadgeAsset = false;
+        this._badgeCanvas = null;
+        this._badgeTexture = null;
+        this._decoded = null;
+        this._animationStart = -1;
         this._lastFrameIndex = -1;
     }
 
@@ -53,57 +76,50 @@ export class FurnitureBadgeDisplayVisualization extends FurnitureAnimatedVisuali
     {
         super.update(geometry, time, update, skipUpdate);
 
-        // Update animated GIF using AnimatedSprite's current frame
-        if(this._animatedSprite && this._frameTextures && this._frameTextures.length > 1)
+        const decoded = this._decoded;
+
+        if(!decoded || (decoded.frames.length < 2) || !this._badgeCanvas) return;
+
+        // The frame follows the room's own clock: an AnimatedSprite only kept time, and stayed
+        // registered on the Ticker after the room was left.
+        if(this._animationStart < 0) this._animationStart = time;
+
+        const index = FurnitureBadgeDisplayVisualization.frameAt(decoded.delays, time - this._animationStart);
+
+        if(index === this._lastFrameIndex) return;
+
+        this._lastFrameIndex = index;
+        this.drawFrame(decoded.frames[index]);
+    }
+
+    /** The frame showing at {@code elapsed} milliseconds into a looping animation. */
+    public static frameAt(delays: number[], elapsed: number): number
+    {
+        const total = delays.reduce((sum, delay) => sum + delay, 0);
+
+        if(!total) return 0;
+
+        let position = ((elapsed % total) + total) % total;
+
+        for(let index = 0; index < delays.length; index++)
         {
-            const currentFrameIndex = this._animatedSprite.currentFrame;
+            if(position < delays[index]) return index;
 
-            // Only update if frame has changed
-            if(currentFrameIndex !== this._lastFrameIndex)
-            {
-                this._lastFrameIndex = currentFrameIndex;
-
-                const sessionDataManager = GetSessionDataManager();
-                let tex = sessionDataManager.getBadgeImage(this._badgeId);
-                if(!tex) tex = sessionDataManager.getGroupBadgeImage(this._badgeId);
-
-                if(!tex) return;
-
-                const currentFrameTexture = this._frameTextures[currentFrameIndex];
-                if(!currentFrameTexture) return;
-
-                // Update the badge canvas with the current frame
-                const badgeCanvas = this.getBadgeCanvas(tex);
-                if(!badgeCanvas) return;
-
-                const ctx = badgeCanvas.getContext('2d', { willReadFrequently: true });
-
-                // Create a temporary canvas to extract the frame texture data
-                const frameCanvas = document.createElement('canvas');
-                frameCanvas.width = currentFrameTexture.width;
-                frameCanvas.height = currentFrameTexture.height;
-                const frameCtx = frameCanvas.getContext('2d');
-
-                // Get the source from the texture
-                const frameSource = (currentFrameTexture.source as any).resource;
-                if(frameSource instanceof HTMLCanvasElement || frameSource instanceof HTMLImageElement)
-                {
-                    ctx.clearRect(0, 0, badgeCanvas.width, badgeCanvas.height);
-                    ctx.drawImage(frameSource, 0, 0);
-                    tex.source.update();
-
-                    const assetName = this._badgeAssetNameNormalScale;
-                    if(this.asset && assetName)
-                    {
-                        const asset = this.getAsset(assetName, FurnitureBadgeDisplayVisualization.BADGE_LAYER_ID);
-                        if(asset && asset.texture)
-                        {
-                            asset.texture.source.update();
-                        }
-                    }
-                }
-            }
+            position -= delays[index];
         }
+
+        return delays.length - 1;
+    }
+
+    private drawFrame(frame: HTMLCanvasElement): void
+    {
+        const ctx = this._badgeCanvas?.getContext('2d');
+
+        if(!ctx || !frame) return;
+
+        ctx.clearRect(0, 0, this._badgeCanvas.width, this._badgeCanvas.height);
+        ctx.drawImage(frame, 0, 0, this._badgeCanvas.width, this._badgeCanvas.height);
+        this._badgeTexture?.source.update();
     }
 
     protected updateModel(scale: number): boolean
@@ -115,23 +131,23 @@ export class FurnitureBadgeDisplayVisualization extends FurnitureAnimatedVisuali
 
         if(badgeStatus === -1)
         {
+            this.releaseBadge();
             this._badgeId = '';
             this._badgeAssetNameNormalScale = '';
             this._badgeVisibleInState = -1;
-            this.disposeAnimatedSprite();
 
             return needsUpdate;
         }
 
         if((badgeStatus === 1) && badgeId && (badgeId !== this._badgeId))
         {
+            this.releaseBadge();
             this._badgeId = badgeId;
             this._badgeAssetNameNormalScale = badgeId;
 
             const visibleInState = this.object.model.getValue<number>(RoomObjectVariable.FURNITURE_BADGE_VISIBLE_IN_STATE);
             this._badgeVisibleInState = isNaN(visibleInState) ? -1 : visibleInState;
 
-            this.disposeAnimatedSprite();
             this.addBadgeToAssetCollection(badgeId);
 
             const layerId = FurnitureBadgeDisplayVisualization.BADGE_LAYER_ID;
@@ -174,7 +190,7 @@ export class FurnitureBadgeDisplayVisualization extends FurnitureAnimatedVisuali
     {
         if((sprite.tag === FurnitureBadgeDisplayVisualization.BADGE_TAG) && this._badgeAssetNameNormalScale && (sprite.name === this._badgeAssetNameNormalScale))
         {
-            return '%image.library.url%album1584/' + this._badgeAssetNameNormalScale.replace('badge_', '') + '.png';
+            return '%image.library.url%album1584/' + this._badgeId.replace('badge_', '') + '.png';
         }
 
         return super.getLibraryAssetNameForSprite(asset, sprite);
@@ -234,47 +250,37 @@ export class FurnitureBadgeDisplayVisualization extends FurnitureAnimatedVisuali
         return offset;
     }
 
-    // Normalizes a badge texture's backing resource to a mutable 2D canvas.
-    //
-    // The asset pipeline decodes badge images via `createImageBitmap` (see
-    // StaticImageDecoder), so `tex.source.resource` is an ImageBitmap (or, on the
-    // fallback path, an HTMLImageElement) — neither of which has `getContext`. This
-    // furni needs a canvas it can draw GIF frames into, so bake the immutable bitmap
-    // into a canvas once and swap it in as the source's resource. Returns null for
-    // sources that have no readable CPU resource (e.g. GPU-only rendered group badges).
-    private getBadgeCanvas(tex: Texture): HTMLCanvasElement
+    /**
+     * A private canvas copy of the badge. The badge texture belongs to the session's image cache and
+     * other views use it: drawing animation frames into it (or swapping its resource) changed those
+     * views and made displays of the same badge flicker. Null when the image has no CPU-readable
+     * resource (a GPU-rendered group badge).
+     */
+    private static copyToCanvas(tex: Texture): HTMLCanvasElement
     {
         const source = tex.source as any;
         const resource = source?.resource;
+        const readable = (resource instanceof HTMLCanvasElement)
+            || (resource instanceof HTMLImageElement)
+            || ((typeof ImageBitmap !== 'undefined') && (resource instanceof ImageBitmap));
 
-        if(resource instanceof HTMLCanvasElement) return resource;
+        if(!readable) return null;
 
-        const isBitmap = (typeof ImageBitmap !== 'undefined') && (resource instanceof ImageBitmap);
+        const width = resource.width || (resource as HTMLImageElement).naturalWidth || source.pixelWidth || 0;
+        const height = resource.height || (resource as HTMLImageElement).naturalHeight || source.pixelHeight || 0;
 
-        if(isBitmap || (resource instanceof HTMLImageElement))
-        {
-            const width = resource.width || (resource as HTMLImageElement).naturalWidth || source.pixelWidth || 0;
-            const height = resource.height || (resource as HTMLImageElement).naturalHeight || source.pixelHeight || 0;
+        if(!width || !height) return null;
 
-            if(!width || !height) return null;
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
 
-            const canvas = document.createElement('canvas');
-            canvas.width = width;
-            canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if(!ctx) return null;
 
-            const ctx = canvas.getContext('2d', { willReadFrequently: true });
-            if(!ctx) return null;
+        ctx.drawImage(resource, 0, 0);
 
-            ctx.drawImage(resource, 0, 0);
-
-            // Point the texture at the mutable canvas so later getContext()/drawImage()
-            // and source.update() calls operate on real, readable canvas pixels.
-            source.resource = canvas;
-
-            return canvas;
-        }
-
-        return null;
+        return canvas;
     }
 
     private async addBadgeToAssetCollection(badgeId: string): Promise<void>
@@ -286,142 +292,117 @@ export class FurnitureBadgeDisplayVisualization extends FurnitureAnimatedVisuali
 
         if(!tex || !this.asset) return;
 
-        const badgeCanvas = this.getBadgeCanvas(tex);
+        const canvas = FurnitureBadgeDisplayVisualization.copyToCanvas(tex);
 
-        // Group/rendered badges are GPU-only (no readable canvas resource) and static, so
-        // they can't be driven through the animated-GIF canvas path — add them as-is.
-        if(!badgeCanvas)
+        // A GPU-rendered group badge is static: it is shown as it is, under the badge's own name, and
+        // stays the cache's - this display never disposes it.
+        if(!canvas)
         {
             this.asset.addAsset(badgeId, tex, true, 0, 0, false, false);
 
             return;
         }
 
-        const ctx = badgeCanvas.getContext('2d', { willReadFrequently: true });
-        const imageData = ctx.getImageData(0, 0, 1, 1);
-        const isEmpty = imageData.data[3] === 0;
+        this._badgeAssetNameNormalScale = badgeId + '_display_' + this._instance;
+        this._badgeCanvas = canvas;
+        this._badgeTexture = Texture.from(canvas, true);
+        this._ownsBadgeAsset = true;
+        this.asset.addAsset(this._badgeAssetNameNormalScale, this._badgeTexture, true, 0, 0, false, false);
 
-        if(isEmpty || !this._frameTextures)
+        const request = this._request;
+        const decoded = await FurnitureBadgeDisplayVisualization.decodeBadge(badgeId);
+
+        // Left, disposed or showing another badge by now: nothing of this decode is used.
+        if(this._disposed || (request !== this._request) || !decoded || !decoded.frames.length) return;
+
+        this._decoded = decoded;
+        this._animationStart = -1;
+        this._lastFrameIndex = 0;
+        this.drawFrame(decoded.frames[0]);
+    }
+
+    /** The decoded badge image, fetched and decoded once for every display of that badge. */
+    public static decodeBadge(badgeId: string): Promise<DecodedBadgeImage>
+    {
+        const cache = FurnitureBadgeDisplayVisualization.DECODED_BADGES;
+        let decoded = cache.get(badgeId);
+
+        if(decoded === undefined)
         {
-            const badgeUrl = GetConfiguration().getValue<string>('badge.asset.url', '').replace('%badgename%', badgeId);
+            decoded = FurnitureBadgeDisplayVisualization.fetchAndDecode(badgeId).catch((): DecodedBadgeImage => null);
+            cache.set(badgeId, decoded);
 
-            try
-            {
-                const response = await fetch(badgeUrl);
-                const arrayBuffer = await response.arrayBuffer();
-                const gif = parseGIF(arrayBuffer);
-                const frames = decompressFrames(gif, true);
-
-                if(frames && frames.length > 0)
-                {
-                    this._frameTextures = [];
-                    const frameDelays: number[] = [];
-
-                    const accCanvas = document.createElement('canvas');
-                    accCanvas.width = gif.lsd.width;
-                    accCanvas.height = gif.lsd.height;
-                    const accCtx = accCanvas.getContext('2d', { willReadFrequently: true });
-
-                    for(let i = 0; i < frames.length; i++)
-                    {
-                        const frame = frames[i];
-
-                        if(i > 0)
-                        {
-                            const prevDisposal = frames[i - 1].disposalType;
-                            if(prevDisposal === 2)
-                            {
-                                accCtx.clearRect(0, 0, gif.lsd.width, gif.lsd.height);
-                            }
-                        }
-
-                        const tempCanvas = document.createElement('canvas');
-                        tempCanvas.width = frame.dims.width;
-                        tempCanvas.height = frame.dims.height;
-                        const tempCtx = tempCanvas.getContext('2d');
-
-                        const patchData = new ImageData(
-                            new Uint8ClampedArray(frame.patch),
-                            frame.dims.width,
-                            frame.dims.height
-                        );
-                        tempCtx.putImageData(patchData, 0, 0);
-
-                        accCtx.drawImage(tempCanvas, frame.dims.left, frame.dims.top);
-                        tempCanvas.width = 0;
-                        tempCanvas.height = 0;
-
-                        // Create a new canvas for this frame and create a texture from it
-                        const frameCanvas = document.createElement('canvas');
-                        frameCanvas.width = gif.lsd.width;
-                        frameCanvas.height = gif.lsd.height;
-                        const frameCtx = frameCanvas.getContext('2d');
-                        frameCtx.drawImage(accCanvas, 0, 0);
-
-                        // Create texture from canvas
-                        const frameTexture = Texture.from(frameCanvas, true);
-                        this._frameTextures.push(frameTexture);
-
-                        // GIF delays are in centiseconds (1/100th of a second)
-                        frameDelays.push(frame.delay || 10);
-                    }
-
-                    accCanvas.width = 0;
-                    accCanvas.height = 0;
-
-                    // Create AnimatedSprite with frame textures
-                    if(this._frameTextures.length > 1)
-                    {
-                        this._animatedSprite = new AnimatedSprite(this._frameTextures);
-
-                        // Calculate average delay and set animation speed
-                        const avgDelay = frameDelays.reduce((a, b) => a + b, 0) / frameDelays.length;
-                        // Convert centiseconds to seconds, then to animation speed
-                        // AnimatedSprite.animationSpeed is frames per ticker update (60fps default)
-                        // delay in centiseconds * 10 = milliseconds, / 1000 = seconds
-                        // At 60fps, 1 frame = ~16.67ms
-                        const delayMs = (avgDelay > 50 ? 10 : avgDelay) * 10;
-                        const framesPerTick = 16.67 / delayMs;
-                        this._animatedSprite.animationSpeed = framesPerTick;
-
-                        this._animatedSprite.loop = true;
-                        this._animatedSprite.play();
-                        this._lastFrameIndex = -1;
-                    }
-
-                    // Draw first frame to the badge canvas
-                    const firstFrameSource = (this._frameTextures[0].source as any).resource;
-                    if(firstFrameSource instanceof HTMLCanvasElement)
-                    {
-                        ctx.clearRect(0, 0, badgeCanvas.width, badgeCanvas.height);
-                        ctx.drawImage(firstFrameSource, 0, 0);
-                        tex.source.update();
-                    }
-                }
-            }
-            catch (err)
-            {
-                console.error('Failed to parse GIF, using static image:', err);
-
-                const img = new Image();
-                img.crossOrigin = 'anonymous';
-                img.onload = () =>
-                {
-                    ctx.clearRect(0, 0, badgeCanvas.width, badgeCanvas.height);
-                    ctx.drawImage(img, 0, 0, badgeCanvas.width, badgeCanvas.height);
-                    tex.source.update();
-                    img.onload = null;
-                    img.onerror = null;
-                };
-                img.onerror = () =>
-                {
-                    img.onload = null;
-                    img.onerror = null;
-                };
-                img.src = badgeUrl;
-            }
+            if(cache.size > FurnitureBadgeDisplayVisualization.MAX_DECODED_BADGES) cache.delete(cache.keys().next().value);
         }
 
-        this.asset.addAsset(badgeId, tex, true, 0, 0, false, false);
+        return decoded;
+    }
+
+    private static async fetchAndDecode(badgeId: string): Promise<DecodedBadgeImage>
+    {
+        const badgeUrl = GetConfiguration().getValue<string>('badge.asset.url', '').replace('%badgename%', badgeId);
+        const response = await fetch(badgeUrl);
+
+        if(!response.ok) return null;
+
+        const bytes = await response.arrayBuffer();
+
+        try
+        {
+            return FurnitureBadgeDisplayVisualization.decodeGif(bytes);
+        }
+        catch
+        {
+            // Not a GIF: the same bytes as a still image, without loading the badge a second time.
+            const bitmap = await createImageBitmap(new Blob([ bytes ]));
+            const canvas = document.createElement('canvas');
+            canvas.width = bitmap.width;
+            canvas.height = bitmap.height;
+            canvas.getContext('2d')?.drawImage(bitmap, 0, 0);
+            bitmap.close?.();
+
+            return { frames: [ canvas ], delays: [ 0 ] };
+        }
+    }
+
+    private static decodeGif(bytes: ArrayBuffer): DecodedBadgeImage
+    {
+        const gif = parseGIF(bytes);
+        const frames = decompressFrames(gif, true);
+
+        if(!frames || !frames.length) return null;
+
+        const width = gif.lsd.width;
+        const height = gif.lsd.height;
+        const accumulator = document.createElement('canvas');
+        accumulator.width = width;
+        accumulator.height = height;
+        const accCtx = accumulator.getContext('2d', { willReadFrequently: true });
+        const patch = document.createElement('canvas');
+        const patchCtx = patch.getContext('2d');
+        const decoded: DecodedBadgeImage = { frames: [], delays: [] };
+
+        for(let i = 0; i < frames.length; i++)
+        {
+            const frame = frames[i];
+
+            if((i > 0) && (frames[i - 1].disposalType === 2)) accCtx.clearRect(0, 0, width, height);
+
+            patch.width = frame.dims.width;
+            patch.height = frame.dims.height;
+            patchCtx.putImageData(new ImageData(new Uint8ClampedArray(frame.patch), frame.dims.width, frame.dims.height), 0, 0);
+            accCtx.drawImage(patch, frame.dims.left, frame.dims.top);
+
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            canvas.getContext('2d').drawImage(accumulator, 0, 0);
+
+            decoded.frames.push(canvas);
+            // GIF delays are in hundredths of a second.
+            decoded.delays.push(Math.max(FurnitureBadgeDisplayVisualization.MIN_FRAME_DELAY_MS, (frame.delay || 10) * 10));
+        }
+
+        return decoded;
     }
 }
