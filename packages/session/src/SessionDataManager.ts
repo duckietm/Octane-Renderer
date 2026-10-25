@@ -12,6 +12,7 @@ import { BlockedUsersManager } from './BlockedUsersManager';
 import { IgnoredUsersManager } from './IgnoredUsersManager';
 import { BadgeImageManager } from './badge/BadgeImageManager';
 import { FurnitureDataLoader } from './furniture/FurnitureDataLoader';
+import { GetRoomSessionManager } from './GetRoomSessionManager';
 import { ProductDataLoader } from './product/ProductDataLoader';
 
 export class SessionDataManager implements ISessionDataManager
@@ -445,6 +446,12 @@ export class SessionDataManager implements ISessionDataManager
         const parser = event.getParser();
 
         if(!parser) return;
+
+        // The server sends the tags of any unit - the one whose infostand was opened, every user a wired tag effect
+        // touched - so only the packet for the user's own unit in the active room is about the user.
+        const ownRoomIndex = GetRoomSessionManager()?.viewerSession?.ownRoomIndex ?? -1;
+
+        if(ownRoomIndex < 0 || parser.roomUnitId !== ownRoomIndex) return;
 
         this._tags = parser.tags;
 
