@@ -22,7 +22,7 @@ import { FurnitureBadgeDisplayVisualization } from './FurnitureBadgeDisplayVisua
 // created an AnimatedSprite that stayed on the Ticker for good.
 const display = () =>
 {
-    const visualization = Object.create(FurnitureBadgeDisplayVisualization.prototype) as any;
+    const visualization = Object.create(FurnitureBadgeDisplayVisualization.prototype);
     const asset = { addAsset: vi.fn(() => true), disposeAsset: vi.fn() };
 
     Object.assign(visualization, {

@@ -327,7 +327,7 @@ export class FurnitureBadgeDisplayVisualization extends FurnitureAnimatedVisuali
         const cache = FurnitureBadgeDisplayVisualization.DECODED_BADGES;
         let decoded = cache.get(badgeId);
 
-        if(!decoded)
+        if(decoded === undefined)
         {
             decoded = FurnitureBadgeDisplayVisualization.fetchAndDecode(badgeId).catch((): DecodedBadgeImage => null);
             cache.set(badgeId, decoded);
