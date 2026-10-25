@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const room = vi.hoisted(() => ({ viewerSession: { ownRoomIndex: 4 } as { ownRoomIndex: number } | null }));
+const room: { viewerSession: { ownRoomIndex: number } | null } = vi.hoisted(() => ({ viewerSession: { ownRoomIndex: 4 } }));
 
 vi.mock('../GetRoomSessionManager', () => ({ GetRoomSessionManager: () => room }));
 
