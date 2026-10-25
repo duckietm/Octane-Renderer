@@ -1,6 +1,7 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { GetRoomSessionManager } from '../GetRoomSessionManager';
 import { RoomSession } from '../RoomSession';
+import { RoomSessionManager } from '../RoomSessionManager';
 
 /**
  * isSpectator and isDecorating are part of the room session snapshot but changed without refreshing it, so widgets
@@ -8,47 +9,50 @@ import { RoomSession } from '../RoomSession';
  */
 describe('room session snapshot', () =>
 {
-    const viewing = (session: RoomSession) =>
+    const sessionOf = (manager: RoomSessionManager) =>
     {
-        (GetRoomSessionManager() as unknown as { _viewerSession: RoomSession })._viewerSession = session;
-        GetRoomSessionManager().invalidateRoomSessionSnapshot();
+        manager.createSession(12);
+
+        return manager.viewerSession as RoomSession;
     };
 
     it('shows decorating as soon as it is switched on', () =>
     {
-        const session = new RoomSession();
+        const manager = new RoomSessionManager();
+        const session = sessionOf(manager);
 
-        viewing(session);
-        expect(GetRoomSessionManager().getActiveRoomSessionSnapshot().isDecorating).toBe(false);
+        expect(manager.getActiveRoomSessionSnapshot().isDecorating).toBe(false);
 
         session.isDecorating = true;
 
-        expect(GetRoomSessionManager().getActiveRoomSessionSnapshot().isDecorating).toBe(true);
+        expect(manager.getActiveRoomSessionSnapshot().isDecorating).toBe(true);
     });
 
     it('shows spectator mode as soon as it is set', () =>
     {
-        const session = new RoomSession();
+        const manager = new RoomSessionManager();
+        const session = sessionOf(manager);
 
-        viewing(session);
-        expect(GetRoomSessionManager().getActiveRoomSessionSnapshot().isSpectator).toBe(false);
+        expect(manager.getActiveRoomSessionSnapshot().isSpectator).toBe(false);
 
         session.isSpectator = true;
 
-        expect(GetRoomSessionManager().getActiveRoomSessionSnapshot().isSpectator).toBe(true);
+        expect(manager.getActiveRoomSessionSnapshot().isSpectator).toBe(true);
     });
 
     it('keeps the same snapshot when the value does not change', () =>
     {
-        const session = new RoomSession();
-
-        viewing(session);
-        const before = GetRoomSessionManager().getActiveRoomSessionSnapshot();
+        const manager = new RoomSessionManager();
+        const session = sessionOf(manager);
+        const before = manager.getActiveRoomSessionSnapshot();
 
         session.isDecorating = false;
 
-        expect(GetRoomSessionManager().getActiveRoomSessionSnapshot()).toBe(before);
+        expect(manager.getActiveRoomSessionSnapshot()).toBe(before);
+    });
 
-        viewing(null);
+    it('does not import the session manager, which loads RoomSession first', () =>
+    {
+        expect(readFileSync('packages/session/src/RoomSession.ts', 'utf8')).not.toContain('GetRoomSessionManager');
     });
 });

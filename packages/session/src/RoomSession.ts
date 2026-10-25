@@ -1,7 +1,6 @@
 import { IRoomSession, IUserDataManager, RoomControllerLevel, RoomTradingLevelEnum } from '@octane/api';
 import { BotRemoveComposer, ChangeQueueMessageComposer, CompostPlantMessageComposer, FurnitureMultiStateComposer, GetCommunication, GetPetCommandsComposer, HarvestPetMessageComposer, MoodlightSettingsComposer, MoodlightSettingsSaveComposer, MoodlightTogggleStateComposer, NewUserExperienceScriptProceedComposer, OpenPetPackageMessageComposer, OpenPresentComposer, PeerUsersClassificationMessageComposer, PetMountComposer, PetRemoveComposer, PollAnswerComposer, PollRejectComposer, PollStartComposer, RemovePetSaddleComposer, RoomAmbassadorAlertComposer, RoomBanUserComposer, RoomDoorbellAccessComposer, RoomEnterComposer, RoomGiveRightsComposer, RoomKickUserComposer, RoomModerationSettings, RoomMuteUserComposer, RoomTakeRightsComposer, RoomUnmuteUserComposer, RoomUnitActionComposer, RoomUnitBackgroundComposer, RoomUnitChatComposer, RoomUnitChatShoutComposer, RoomUnitChatWhisperComposer, RoomUnitDanceComposer, RoomUnitPostureComposer, RoomUnitSignComposer, RoomUnitTypingStartComposer, RoomUnitTypingStopComposer, RoomUsersClassificationMessageComposer, SetClothingChangeDataMessageComposer, TogglePetBreedingComposer, TogglePetRidingComposer, UsePetProductComposer, UserMottoComposer, VotePollCounterMessageComposer } from '@octane/communication';
 import { RoomSessionEvent } from '@octane/events';
-import { GetRoomSessionManager } from './GetRoomSessionManager';
 import { UserDataManager } from './UserDataManager';
 
 export class RoomSession implements IRoomSession
@@ -19,6 +18,9 @@ export class RoomSession implements IRoomSession
     private _controllerLevel: number = RoomControllerLevel.NONE;
     private _playTestMode: boolean = false;
     private _ownRoomIndex: number = -1;
+    // Set by the session manager: refreshes the room session snapshot. A callback, not an import of the manager,
+    // which loads this file first.
+    public onSnapshotChange: (() => void) | null = null;
     private _groupId: number = 0;
     private _hotelTimeZone: string = 'UTC';
     private _hotelTimeSnapshotMs: number = 0;
@@ -506,7 +508,7 @@ export class RoomSession implements IRoomSession
 
         this._isDecorating = flag;
 
-        GetRoomSessionManager()?.invalidateRoomSessionSnapshot();
+        this.onSnapshotChange?.();
     }
 
     public get isSpectator(): boolean
@@ -520,7 +522,7 @@ export class RoomSession implements IRoomSession
 
         this._isSpectator = flag;
 
-        GetRoomSessionManager()?.invalidateRoomSessionSnapshot();
+        this.onSnapshotChange?.();
     }
 
     public get moderationSettings(): RoomModerationSettings
