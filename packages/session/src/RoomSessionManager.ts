@@ -24,6 +24,10 @@ export class RoomSessionManager implements IRoomSessionManager, IRoomHandlerList
     private _lastRoomId: number = -1;
     private _lastRoomPassword: string = null;
     private _isReconnecting: boolean = false;
+    // A server-sent disconnect (DesktopView, a refused entry) that came while the reconnect guard was up: dropping it
+    // left a ghost room after a kick or an F5 into a room one is banned from. Applied when the guard ends, unless the
+    // re-entry succeeded first - then it was the old connection's teardown.
+    private _pendingDisconnect: number | null = null;
     private _reconnectGuardTimer: ReturnType<typeof setTimeout> = null;
     private _pendingRoomClear: ReturnType<typeof setTimeout> = null;
     private _savedPosX: number = -1;
@@ -144,9 +148,9 @@ export class RoomSessionManager implements IRoomSessionManager, IRoomHandlerList
             }
             else
             {
-                this._isReconnecting = false;
                 this._savedPosX = -1;
                 this._savedPosY = -1;
+                this.endReconnectGuard();
             }
         });
 
@@ -155,6 +159,7 @@ export class RoomSessionManager implements IRoomSessionManager, IRoomHandlerList
             OctaneLogger.log('[RoomSessionManager] SOCKET_RECONNECT_FAILED - clearing state');
             this.clearGuardTimer();
             this._isReconnecting = false;
+            this._pendingDisconnect = null;
             this._lastRoomId = -1;
             this._lastRoomPassword = null;
             this.clearPersistedRoom();
@@ -165,11 +170,25 @@ export class RoomSessionManager implements IRoomSessionManager, IRoomHandlerList
         {
             this.clearGuardTimer();
             this._isReconnecting = false;
+            this._pendingDisconnect = null;
             this._lastRoomId = -1;
             this._lastRoomPassword = null;
             this.clearPersistedRoom();
             this.clearPersistedPosition();
         });
+    }
+
+    private endReconnectGuard(): void
+    {
+        if(!this._isReconnecting) return;
+
+        this._isReconnecting = false;
+
+        const pending = this._pendingDisconnect;
+
+        this._pendingDisconnect = null;
+
+        if(pending !== null) this.removeSession(pending);
     }
 
     private clearGuardTimer(): void
@@ -212,7 +231,7 @@ export class RoomSessionManager implements IRoomSessionManager, IRoomHandlerList
 
         if(roomId <= 0)
         {
-            this._isReconnecting = false;
+            this.endReconnectGuard();
 
             return;
         }
@@ -228,10 +247,7 @@ export class RoomSessionManager implements IRoomSessionManager, IRoomHandlerList
             {
                 this._reconnectGuardTimer = null;
 
-                if(this._isReconnecting)
-                {
-                    this._isReconnecting = false;
-                }
+                this.endReconnectGuard();
             }, 5000);
 
             return;
@@ -246,10 +262,7 @@ export class RoomSessionManager implements IRoomSessionManager, IRoomHandlerList
         {
             this._reconnectGuardTimer = null;
 
-            if(this._isReconnecting)
-            {
-                this._isReconnecting = false;
-            }
+            this.endReconnectGuard();
         }, 10000);
     }
 
@@ -298,10 +311,7 @@ export class RoomSessionManager implements IRoomSessionManager, IRoomHandlerList
             {
                 this._reconnectGuardTimer = null;
 
-                if(this._isReconnecting)
-                {
-                    this._isReconnecting = false;
-                }
+                this.endReconnectGuard();
             }, 10000);
 
             return true;
@@ -475,10 +485,9 @@ export class RoomSessionManager implements IRoomSessionManager, IRoomHandlerList
 
         if(!session) return;
 
-        if(this._isReconnecting)
-        {
-            return;
-        }
+        // Only the quiet replacement of a session while the reconnect guard is up is held back. A user leaving for
+        // the hotel view, or a session that failed to start, always ends it.
+        if(this._isReconnecting && !openLandingView) return;
 
         this._sessions.delete(this.getRoomId(id));
 
@@ -512,6 +521,8 @@ export class RoomSessionManager implements IRoomSessionManager, IRoomHandlerList
 
                 if(this._isReconnecting)
                 {
+                    this._pendingDisconnect = null;
+
                     if(this._savedPosX >= 0 && this._savedPosY >= 0)
                     {
                         GetCommunication().connection.send(new RoomUnitWalkComposer(this._savedPosX, this._savedPosY));
@@ -524,17 +535,25 @@ export class RoomSessionManager implements IRoomSessionManager, IRoomHandlerList
                     {
                         this._reconnectGuardTimer = null;
 
-                        if(this._isReconnecting)
-                        {
-                            this._isReconnecting = false;
-                        }
+                        this.endReconnectGuard();
                     }, 3000);
                 }
 
                 return;
+            case RoomSessionHandler.RS_REFUSED:
+
+                // Outside a reconnect the navigator answers a refused entry itself.
+                if(this._isReconnecting) this._pendingDisconnect = id;
+
+                return;
             case RoomSessionHandler.RS_DISCONNECTED:
 
-                if(this._isReconnecting) return;
+                if(this._isReconnecting)
+                {
+                    this._pendingDisconnect = id;
+
+                    return;
+                }
 
                 this.removeSession(id);
                 return;
