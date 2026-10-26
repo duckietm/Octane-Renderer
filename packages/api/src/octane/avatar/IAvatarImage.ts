@@ -1,4 +1,5 @@
 import { Container, Texture } from 'pixi.js';
+import { IGraphicAsset } from '../../asset/IGraphicAsset';
 import { RoomObjectSpriteData } from '../../room/RoomObjectSpriteData';
 import { IActiveActionData } from './actions';
 import { IAvatarFigureContainer } from './IAvatarFigureContainer';
@@ -14,6 +15,8 @@ export interface IAvatarImage
     setDirectionAngle(setType: string, angle: number): void;
     updateAnimationByFrames(frameCount?: number): void;
     getScale(): string;
+    /** An avatar or effect asset by name, following the avatar's asset aliases. */
+    getAsset(name: string): IGraphicAsset;
     getSprites(): ISpriteDataContainer[];
     getLayerData(sprite: ISpriteDataContainer): IAnimationLayerData;
     processAsTexture(setType: string, hightlight: boolean, texture?: Texture): Texture;

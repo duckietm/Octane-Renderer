@@ -492,9 +492,11 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
 
                         const assetName = ((((((this._avatarImage.getScale() + '_') + spriteData.member) + '_') + dd) + '_') + frameNumber);
 
-                        const asset = GetAssetManager().getAsset(assetName);
+                        // Through the avatar's aliases, as AIR does: effects such as the hoverboard draw directions 4-7
+                        // from the art of 0-3.
+                        const asset = this._avatarImage.getAsset(assetName);
                         // .hab effects ship only large art: draw it as a real half-size sprite when zoomed out.
-                        const largeAsset = ((!asset && (scale < 48)) ? GetAssetManager().getAsset(('h_' + spriteData.member + '_' + dd + '_' + frameNumber)) : null);
+                        const largeAsset = ((!asset && (scale < 48)) ? this._avatarImage.getAsset(('h_' + spriteData.member + '_' + dd + '_' + frameNumber)) : null);
                         const halfTexture = (isPixelArtTexture(largeAsset?.texture) ? getHalfSizeTexture(largeAsset.texture, halfSizePadding(largeAsset.offsetX), halfSizePadding(largeAsset.offsetY)) : null);
 
                         if(!asset && !halfTexture)
@@ -1511,7 +1513,7 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
             else if(dd > 7) dd -= 8;
 
             const assetName = (this._avatarImage.getScale() + '_' + spriteData.member + '_' + dd + '_' + frameNumber);
-            const asset = GetAssetManager().getAsset(assetName);
+            const asset = this._avatarImage.getAsset(assetName);
 
             if(!asset) continue;
 

@@ -921,11 +921,12 @@ export class RoomPreviewer
         {
             if(this._currentPreviewObjectCategory !== RoomObjectCategory.UNIT)
             {
-                y = (y + (5 - Math.max(0, (height / 2))));
+                // Whole pixels, as AIR: half a pixel blurs the preview.
+                y = Math.trunc(y + (5 - Math.max(0, (height / 2))));
             }
             else
             {
-                y = (y - (5 - Math.min(0, (height / 2))));
+                y = Math.trunc(y - (5 - Math.min(0, (height / 2))));
             }
         }
 
@@ -941,8 +942,8 @@ export class RoomPreviewer
 
             if(distance > 10)
             {
-                x = (point.x + ((offsetX * 10) / distance));
-                y = (point.y + ((offsetY * 10) / distance));
+                x = Math.trunc(point.x + ((offsetX * 10) / distance));
+                y = Math.trunc(point.y + ((offsetY * 10) / distance));
             }
 
             return new Point(x, y);

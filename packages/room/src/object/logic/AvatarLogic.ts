@@ -466,7 +466,11 @@ export class AvatarLogic extends MovingObjectLogic
 
         if(message instanceof ObjectAvatarFlatControlUpdateMessage)
         {
-            model.setValue(RoomObjectVariable.FIGURE_FLAT_CONTROL, message.level);
+            // As AIR does: a level is stored only when it is a number from 0 to 5, anything else (the "no level"
+            // every status packet sends) is 0, so an avatar does not count as changed on every status.
+            const level = Number(message.level);
+
+            model.setValue(RoomObjectVariable.FIGURE_FLAT_CONTROL, ((Number.isFinite(level) && (level >= 0) && (level <= 5)) ? level : 0));
 
             return;
         }
