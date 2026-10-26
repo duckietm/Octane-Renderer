@@ -7,7 +7,8 @@ import { RoomObjectSpriteVisualization } from '../RoomObjectSpriteVisualization'
 import { IWindowReflectionUnitLayer, RoomWindowReflectionState } from '../RoomWindowReflectionState';
 import { ColorData, LayerData } from '../data';
 import { FurnitureVisualizationData } from './FurnitureVisualizationData';
-import { WiredHighlightFilterCache } from '../WiredHighlightFilters';
+import { usesWiredHighlightCompositeSilhouette, WiredHighlightFilterCache } from '../WiredHighlightFilters';
+import { WiredHighlightSilhouette } from '../WiredHighlightSilhouette';
 import { VariableFxStack } from '../variablefx/VariableFxStack';
 import { composeFurnitureAlphaMultiplier, furnitureAlphaTolerance } from './WiredOpacityVisualizationPolicy';
 
@@ -58,6 +59,12 @@ export class FurnitureVisualization extends RoomObjectSpriteVisualization
     private _wiredClickThrough: boolean;
     private _hideInvisibleLayers: boolean;
     private _wiredHighlight: WiredHighlightFilterCache = new WiredHighlightFilterCache();
+    private _wiredHighlightSilhouette: WiredHighlightSilhouette = null;
+    private _extraSprites: IRoomObjectSprite[] = null;
+    private _extraSpritesBase: IRoomObjectSprite[] = null;
+    private _extraSpritesLength: number = -1;
+    private _extraSpritesFx: boolean = false;
+    private _extraSpritesGlow: boolean = false;
     private _highlightBaseSource: Filter[] = null;
     private _highlightSource: Filter[] = null;
     private _highlightCombined: Filter[] = null;
@@ -127,6 +134,11 @@ export class FurnitureVisualization extends RoomObjectSpriteVisualization
 
         this.disposeVariableFx();
 
+        this._wiredHighlightSilhouette?.dispose();
+        this._wiredHighlightSilhouette = null;
+        this._extraSprites = null;
+        this._extraSpritesBase = null;
+
         super.dispose();
 
         this._data = null;
@@ -146,6 +158,8 @@ export class FurnitureVisualization extends RoomObjectSpriteVisualization
     protected reset(): void
     {
         super.reset();
+
+        this._wiredHighlightSilhouette?.clear(true);
 
         this.setDirection(-1);
 
@@ -242,18 +256,62 @@ export class FurnitureVisualization extends RoomObjectSpriteVisualization
             }
         }
 
+        if(this.updateWiredHighlightSilhouette()) this.updateSpriteCounter++;
+
         if(this.updateVariableFx()) this.updateSpriteCounter++;
     }
 
-    /** The furni's sprites, then its wired variable fx stack while one shows (AIR's extra fx sprite). */
+    /**
+     * The furni's sprites, then its wired highlight glow and its wired variable fx stack while they show (AIR's
+     * extra sprites).
+     */
     public get sprites(): IRoomObjectSprite[]
     {
         const sprites = super.sprites;
         const fxSprite = this._variableFxSprite;
+        const glowSprite = this._wiredHighlightSilhouette?.sprite;
+        const showFx = !!fxSprite && fxSprite.visible && !!fxSprite.texture;
+        const showGlow = !!glowSprite && glowSprite.visible && !!glowSprite.texture;
 
-        if(!sprites || !fxSprite || !fxSprite.visible || !fxSprite.texture) return sprites;
+        if(!sprites || (!showFx && !showGlow)) return sprites;
 
-        return [ ...sprites, fxSprite ];
+        if((this._extraSpritesBase !== sprites) || (this._extraSpritesFx !== showFx) || (this._extraSpritesGlow !== showGlow) || (this._extraSpritesLength !== sprites.length))
+        {
+            this._extraSpritesBase = sprites;
+            this._extraSpritesFx = showFx;
+            this._extraSpritesGlow = showGlow;
+            this._extraSpritesLength = sprites.length;
+            this._extraSprites = [ ...sprites, ...(showGlow ? [ glowSprite ] : []), ...(showFx ? [ fxSprite ] : []) ];
+        }
+
+        return this._extraSprites;
+    }
+
+    /**
+     * AIR's composite highlight: outline, soft glow and neon aura are drawn once behind the whole furni (its layers
+     * but the shadow), so the furni stays visible on top. True when the glow sprite changed.
+     */
+    private updateWiredHighlightSilhouette(): boolean
+    {
+        const filters = this._wiredHighlight.filters;
+
+        if(!filters || !usesWiredHighlightCompositeSilhouette(this._wiredHighlight.type))
+        {
+            if(!this._wiredHighlightSilhouette) return false;
+
+            this._wiredHighlightSilhouette.dispose();
+            this._wiredHighlightSilhouette = null;
+
+            return true;
+        }
+
+        if(!this._wiredHighlightSilhouette) this._wiredHighlightSilhouette = new WiredHighlightSilhouette();
+
+        const layers = super.sprites || [];
+        const sources = layers.filter((sprite, layerId) => layerId !== this._shadowLayerIndex);
+        const alpha = 255 * Math.max(0, Math.min(1, (this._alphaMultiplier ?? 1) * (this._lookThrough ? 0.2 : 1)));
+
+        return this._wiredHighlightSilhouette.update(sources, filters, alpha);
     }
 
     /**
@@ -745,8 +803,8 @@ export class FurnitureVisualization extends RoomObjectSpriteVisualization
                 }
                 else
                 {
-                    // The wired highlight goes on every layer but the shadow.
-                    const baseFilters = this.getBaseFilters(layerId !== this._shadowLayerIndex);
+                    // The wired highlight goes on every layer but the shadow; a glow is drawn behind the furni instead.
+                    const baseFilters = this.getBaseFilters((layerId !== this._shadowLayerIndex) && !usesWiredHighlightCompositeSilhouette(this._wiredHighlight.type));
 
                     if((currentFilters && currentFilters.length) || baseFilters.length)
                     {
