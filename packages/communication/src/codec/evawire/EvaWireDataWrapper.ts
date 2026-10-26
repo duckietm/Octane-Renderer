@@ -60,7 +60,11 @@ export class EvaWireDataWrapper implements IMessageDataWrapper
 
     public readString(): string
     {
-        const length = this.readShort();
+        if(!this._buffer) return '';
+
+        // The length is an unsigned short, as Polaris writes it: read signed, a string of 32768 to
+        // 65535 bytes (wired JSON, large heightmaps) came out negative and misread the whole packet.
+        const length = (this._buffer.readShort() & 0xFFFF);
         const buffer = this._buffer.readBytes(length);
 
         return buffer.toString('utf8');

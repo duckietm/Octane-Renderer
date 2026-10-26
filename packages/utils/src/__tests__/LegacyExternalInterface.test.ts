@@ -8,26 +8,70 @@ const withAncestorOrigins = (origins: string[] | undefined) =>
 
 describe('LegacyExternalInterface.getParentOrigin', () =>
 {
-    afterEach(() => vi.restoreAllMocks());
-
-    it('targets the known parent origin', () =>
+    afterEach(() =>
     {
-        withAncestorOrigins([ 'https://hotel.example' ]);
+        vi.restoreAllMocks();
+        LegacyExternalInterface.setParentOrigin(null);
+    });
+
+    it('targets the top origin the browser reports', () =>
+    {
+        withAncestorOrigins([ 'https://cms.example', 'https://hotel.example' ]);
 
         expect(LegacyExternalInterface.getParentOrigin()).toBe('https://hotel.example');
     });
 
-    it('falls back to * for the opaque "null" origin Firefox reports without a referrer', () =>
+    it('sends nowhere for the opaque "null" origin reported without a referrer', () =>
     {
         withAncestorOrigins([ 'null' ]);
 
-        expect(LegacyExternalInterface.getParentOrigin()).toBe('*');
+        expect(LegacyExternalInterface.getParentOrigin()).toBeNull();
     });
 
-    it('falls back to * when the browser has no ancestor origins', () =>
+    it('sends nowhere when the browser reports no ancestor origins and none is configured', () =>
     {
         withAncestorOrigins(undefined);
 
-        expect(LegacyExternalInterface.getParentOrigin()).toBe('*');
+        expect(LegacyExternalInterface.getParentOrigin()).toBeNull();
+    });
+
+    it('prefers the configured parent origin over what the browser reports', () =>
+    {
+        withAncestorOrigins([ 'https://framing-site.example' ]);
+        LegacyExternalInterface.setParentOrigin('https://hotel.example/client/');
+
+        expect(LegacyExternalInterface.getParentOrigin()).toBe('https://hotel.example');
+    });
+
+    it('ignores a configured value that is not an origin', () =>
+    {
+        withAncestorOrigins(undefined);
+        LegacyExternalInterface.setParentOrigin('not a url');
+
+        expect(LegacyExternalInterface.getParentOrigin()).toBeNull();
+    });
+});
+
+describe('LegacyExternalInterface.call', () =>
+{
+    afterEach(() =>
+    {
+        vi.restoreAllMocks();
+        LegacyExternalInterface.setParentOrigin(null);
+    });
+
+    it('never posts to the top window with a "*" target', () =>
+    {
+        const postMessage = vi.fn();
+
+        vi.spyOn(window, 'top', 'get').mockReturnValue({ postMessage } as unknown as Window);
+        withAncestorOrigins(undefined);
+
+        (LegacyExternalInterface.call as (method: string) => void)('heartBeat');
+        expect(postMessage).not.toHaveBeenCalled();
+
+        LegacyExternalInterface.setParentOrigin('https://hotel.example');
+        (LegacyExternalInterface.call as (method: string) => void)('heartBeat');
+        expect(postMessage).toHaveBeenCalledWith(expect.any(String), 'https://hotel.example');
     });
 });

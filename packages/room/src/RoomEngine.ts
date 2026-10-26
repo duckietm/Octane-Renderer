@@ -2536,9 +2536,20 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
 
         this._roomContentLoader.addAssetToCollection(object.type, badgeName, badgeImage, false);
 
+        // Every furni of the same badge used to render a new half-size copy from the texture pool, and
+        // when the collection already held it (or had none) the copy was never given back: one GPU
+        // texture lost per group furni placed or loaded, in every room visited.
+        const smallBadgeName = (badgeName + '_32');
+        const collection = this._roomContentLoader.getCollection(object.type);
+
+        if(!collection || collection.getAsset(smallBadgeName)) return;
+
         const smallBadge = this.createHalfScaleBadge(badgeImage);
 
-        if(smallBadge) this._roomContentLoader.addAssetToCollection(object.type, (badgeName + '_32'), smallBadge, false);
+        if(smallBadge && !this._roomContentLoader.addAssetToCollection(object.type, smallBadgeName, smallBadge, false))
+        {
+            GetTexturePool().putTexture(smallBadge);
+        }
     }
 
     private createHalfScaleBadge(texture: Texture): Texture
@@ -2552,7 +2563,13 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
 
         matrix.scale((halfWidth / texture.width), (halfHeight / texture.height));
 
-        return TextureUtils.writeToTexture(new Sprite(texture), GetTexturePool().getTexture(halfWidth, halfHeight), true, matrix);
+        const sprite = new Sprite(texture);
+        const result = TextureUtils.writeToTexture(sprite, GetTexturePool().getTexture(halfWidth, halfHeight), true, matrix);
+
+        // The sprite only carried the badge into the render; the badge texture itself is shared.
+        sprite.destroy();
+
+        return result;
     }
 
     public dispatchMouseEvent(canvasId: number, x: number, y: number, type: string, altKey: boolean, ctrlKey: boolean, shiftKey: boolean, buttonDown: boolean): void

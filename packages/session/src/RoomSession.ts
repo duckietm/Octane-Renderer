@@ -18,6 +18,9 @@ export class RoomSession implements IRoomSession
     private _controllerLevel: number = RoomControllerLevel.NONE;
     private _playTestMode: boolean = false;
     private _ownRoomIndex: number = -1;
+    // Set by the session manager: refreshes the room session snapshot. A callback, not an import of the manager,
+    // which loads this file first.
+    public onSnapshotChange: (() => void) | null = null;
     private _groupId: number = 0;
     private _hotelTimeZone: string = 'UTC';
     private _hotelTimeSnapshotMs: number = 0;
@@ -497,9 +500,15 @@ export class RoomSession implements IRoomSession
         return this._isDecorating;
     }
 
+    // Both flags are part of the room session snapshot the client reads: a change must refresh it, or widgets kept
+    // the old spectator or decorating state until some other change invalidated it.
     public set isDecorating(flag: boolean)
     {
+        if(this._isDecorating === flag) return;
+
         this._isDecorating = flag;
+
+        this.onSnapshotChange?.();
     }
 
     public get isSpectator(): boolean
@@ -509,7 +518,11 @@ export class RoomSession implements IRoomSession
 
     public set isSpectator(flag: boolean)
     {
+        if(this._isSpectator === flag) return;
+
         this._isSpectator = flag;
+
+        this.onSnapshotChange?.();
     }
 
     public get moderationSettings(): RoomModerationSettings
