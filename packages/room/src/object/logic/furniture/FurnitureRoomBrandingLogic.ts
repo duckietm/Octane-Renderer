@@ -54,6 +54,14 @@ export class FurnitureRoomBrandingLogic extends FurnitureLogic
         if(message instanceof ObjectAdUpdateMessage) this.processAdUpdate(message);
     }
 
+    /** AIR loads branding images over https: an http address is upgraded, only on a page served over https. */
+    public static secureImageUrl(url: string, pageProtocol: string): string
+    {
+        if(!url || (pageProtocol !== 'https:')) return url;
+
+        return url.replace(/^http:/i, 'https:');
+    }
+
     private processAdDataUpdateMessage(message: ObjectDataUpdateMessage): void
     {
         if(!message) return;
@@ -67,11 +75,13 @@ export class FurnitureRoomBrandingLogic extends FurnitureLogic
         if(!isNaN(state) && (this.object.getState(0) !== state)) this.object.setState(state, 0);
 
         const imageUrl = objectData.getValue(FurnitureRoomBrandingLogic.IMAGEURL_KEY);
+        // The image loads over https as AIR does; the infostand options below keep the saved address.
+        const loadUrl = FurnitureRoomBrandingLogic.secureImageUrl(imageUrl, globalThis.location?.protocol);
         const existingUrl = this.object.model.getValue<string>(RoomObjectVariable.FURNITURE_BRANDING_IMAGE_URL);
 
-        if(!existingUrl || (existingUrl !== imageUrl))
+        if(!existingUrl || (existingUrl !== loadUrl))
         {
-            this.object.model.setValue(RoomObjectVariable.FURNITURE_BRANDING_IMAGE_URL, imageUrl);
+            this.object.model.setValue(RoomObjectVariable.FURNITURE_BRANDING_IMAGE_URL, loadUrl);
             this.object.model.setValue(RoomObjectVariable.FURNITURE_BRANDING_IMAGE_STATUS, 0);
 
             this.downloadBackground();

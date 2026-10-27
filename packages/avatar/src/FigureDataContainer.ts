@@ -19,6 +19,8 @@
     public static TROUSERS: string = 'lg';
     public static SHOES: string = 'sh';
     public static TROUSER_ACCESSORIES: string = 'wa';
+    public static MISC: string = 'mc';
+    public static PET: string = 'pt';
     public static BLOCKED_FX_TYPES: number[] = [28, 29, 30, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 68];
 
     private _data: Map<string, number>;
@@ -152,6 +154,8 @@
             case FigureDataContainer.TROUSERS:
             case FigureDataContainer.SHOES:
             case FigureDataContainer.TROUSER_ACCESSORIES:
+            case FigureDataContainer.MISC:
+            case FigureDataContainer.PET:
                 if(partSetId >= 0)
                 {
                     this._data.set(partType, partSetId);
@@ -180,6 +184,8 @@
             case FigureDataContainer.TROUSERS:
             case FigureDataContainer.SHOES:
             case FigureDataContainer.TROUSER_ACCESSORIES:
+            case FigureDataContainer.MISC:
+            case FigureDataContainer.PET:
                 this._colors.set(partType, colorIds);
                 return;
         }

@@ -4,7 +4,8 @@ import { AdvancedMap, GetRenderer, Vector3d } from '@octane/utils';
 import { Container, RenderTexture, Sprite, Texture } from 'pixi.js';
 import { RoomObjectSpriteVisualization } from '../RoomObjectSpriteVisualization';
 import { RoomWindowReflectionState } from '../RoomWindowReflectionState';
-import { WiredHighlightFilterCache } from '../WiredHighlightFilters';
+import { usesWiredHighlightCompositeSilhouette, WiredHighlightFilterCache } from '../WiredHighlightFilters';
+import { WiredHighlightSilhouette } from '../WiredHighlightSilhouette';
 import { AvatarVisualizationData } from './AvatarVisualizationData';
 import { ExpressionAdditionFactory, FloatingIdleZAddition, GameClickTargetAddition, GuideStatusBubbleAddition, HabbiconBubbleAddition, IAvatarAddition, MutedBubbleAddition, NumberBubbleAddition, TypingBubbleAddition, VariableFxStackAddition } from './additions';
 
@@ -72,6 +73,10 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
     private _wiredVisibility: number;
     private _wiredClickThrough: boolean;
     private _wiredHighlight: WiredHighlightFilterCache;
+    private _wiredHighlightSilhouette: WiredHighlightSilhouette = null;
+    private _spritesWithGlow: IRoomObjectSprite[] = null;
+    private _spritesWithGlowBase: IRoomObjectSprite[] = null;
+    private _spritesWithGlowLength: number = -1;
     private _dance: number;
     private _effect: number;
     private _carryObject: number;
@@ -188,6 +193,11 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
         if(this._disposed) return;
 
         super.dispose();
+
+        this._wiredHighlightSilhouette?.dispose();
+        this._wiredHighlightSilhouette = null;
+        this._spritesWithGlow = null;
+        this._spritesWithGlowBase = null;
 
         if(this._avatarImage) this._avatarImage.dispose();
 
@@ -492,9 +502,11 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
 
                         const assetName = ((((((this._avatarImage.getScale() + '_') + spriteData.member) + '_') + dd) + '_') + frameNumber);
 
-                        const asset = GetAssetManager().getAsset(assetName);
+                        // Through the avatar's aliases, as AIR does: effects such as the hoverboard draw directions 4-7
+                        // from the art of 0-3.
+                        const asset = this._avatarImage.getAsset(assetName);
                         // .hab effects ship only large art: draw it as a real half-size sprite when zoomed out.
-                        const largeAsset = ((!asset && (scale < 48)) ? GetAssetManager().getAsset(('h_' + spriteData.member + '_' + dd + '_' + frameNumber)) : null);
+                        const largeAsset = ((!asset && (scale < 48)) ? this._avatarImage.getAsset(('h_' + spriteData.member + '_' + dd + '_' + frameNumber)) : null);
                         const halfTexture = (isPixelArtTexture(largeAsset?.texture) ? getHalfSizeTexture(largeAsset.texture, halfSizePadding(largeAsset.offsetX), halfSizePadding(largeAsset.offsetY)) : null);
 
                         if(!asset && !halfTexture)
@@ -544,6 +556,8 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
                     }
                 }
             }
+
+            this.updateWiredHighlightSprites();
 
             const avatarSprite = this.getSprite(AvatarVisualization.SPRITE_INDEX_AVATAR);
 
@@ -1111,9 +1125,76 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
         sprite.alpha = (placeholder ? 150 : 255) * this._wiredVisibility;
         sprite.alphaTolerance = this._wiredClickThrough ? AlphaTolerance.MATCH_NOTHING : AlphaTolerance.MATCH_OPAQUE_PIXELS;
 
-        const highlightFilters = this._wiredHighlight.filters;
+        // Outline, soft glow and neon aura are drawn behind the avatar (updateWiredHighlightSprites).
+        const highlightFilters = usesWiredHighlightCompositeSilhouette(this._wiredHighlight.type) ? null : this._wiredHighlight.filters;
 
         if((sprite.filters || null) !== highlightFilters) sprite.filters = highlightFilters;
+    }
+
+    /**
+     * AIR updateWiredHighlightSprites: the colour styles go on every sprite but the shadow (and never on an additive
+     * one); outline, soft glow and neon aura are drawn once behind the body and its effect sprites. The body is
+     * redrawn in place, so the glow is always rebuilt here.
+     */
+    private updateWiredHighlightSprites(): void
+    {
+        const filters = this._wiredHighlight.filters;
+        const composite = !!filters && usesWiredHighlightCompositeSilhouette(this._wiredHighlight.type);
+        const sources: IRoomObjectSprite[] = [];
+
+        for(let index = 0; index < this._extraSpritesStartIndex; index++)
+        {
+            if(index === AvatarVisualization.SHADOW_LAYER_ID) continue;
+
+            const sprite = this.getSprite(index);
+
+            if(!sprite) continue;
+
+            if(index !== AvatarVisualization.SPRITE_INDEX_AVATAR)
+            {
+                const layerFilters = (composite || (sprite.blendMode === 'add')) ? null : filters;
+
+                if((sprite.filters || null) !== layerFilters) sprite.filters = layerFilters;
+            }
+
+            sources.push(sprite);
+        }
+
+        if(!composite)
+        {
+            if(this._wiredHighlightSilhouette)
+            {
+                this._wiredHighlightSilhouette.dispose();
+                this._wiredHighlightSilhouette = null;
+                this.updateSpriteCounter++;
+            }
+
+            return;
+        }
+
+        if(!this._wiredHighlightSilhouette) this._wiredHighlightSilhouette = new WiredHighlightSilhouette();
+
+        const body = this.getSprite(AvatarVisualization.SPRITE_INDEX_AVATAR);
+
+        if(this._wiredHighlightSilhouette.update(sources, filters, body ? body.alpha : 255, true)) this.updateSpriteCounter++;
+    }
+
+    /** The avatar's sprites, then its wired highlight glow while one shows. */
+    public get sprites(): IRoomObjectSprite[]
+    {
+        const sprites = super.sprites;
+        const glow = this._wiredHighlightSilhouette?.sprite;
+
+        if(!sprites || !glow || !glow.visible || !glow.texture) return sprites;
+
+        if((this._spritesWithGlowBase !== sprites) || (this._spritesWithGlowLength !== sprites.length))
+        {
+            this._spritesWithGlowBase = sprites;
+            this._spritesWithGlowLength = sprites.length;
+            this._spritesWithGlow = [ ...sprites, glow ];
+        }
+
+        return this._spritesWithGlow;
     }
 
     protected setDirection(direction: number): void
@@ -1511,7 +1592,7 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
             else if(dd > 7) dd -= 8;
 
             const assetName = (this._avatarImage.getScale() + '_' + spriteData.member + '_' + dd + '_' + frameNumber);
-            const asset = GetAssetManager().getAsset(assetName);
+            const asset = this._avatarImage.getAsset(assetName);
 
             if(!asset) continue;
 
