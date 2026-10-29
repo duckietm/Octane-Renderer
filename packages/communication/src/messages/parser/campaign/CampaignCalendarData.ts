@@ -1,4 +1,5 @@
 ﻿import { IMessageDataWrapper } from '@octane/api';
+import { CampaignCalendarReward } from './CampaignCalendarReward';
 
 export class CampaignCalendarData
 {
@@ -8,6 +9,7 @@ export class CampaignCalendarData
     private _campaignDays: number;
     private _openedDays: number[];
     private _missedDays: number[];
+    private _openedRewards: Map<number, CampaignCalendarReward> = new Map();
 
     public parse(wrapper: IMessageDataWrapper): boolean
     {
@@ -35,6 +37,20 @@ export class CampaignCalendarData
             this._missedDays.push(wrapper.readInt());
         }
 
+        this._openedRewards = new Map();
+
+        // Octane servers also send what every opened day held; AIR's packet ends here.
+        if(!wrapper.bytesAvailable) return true;
+
+        count = wrapper.readInt();
+
+        for(let i = 0; i < count; i++)
+        {
+            const day = wrapper.readInt();
+
+            this._openedRewards.set(day, CampaignCalendarReward.parse(wrapper));
+        }
+
         return true;
     }
 
@@ -48,6 +64,7 @@ export class CampaignCalendarData
         data.currentDay = this._currentDay;
         data.missedDays = this._missedDays;
         data.openedDays = this._openedDays;
+        data.openedRewards = this._openedRewards;
 
         return data;
     }
@@ -110,5 +127,16 @@ export class CampaignCalendarData
     public set missedDays(days: number[])
     {
         this._missedDays = days;
+    }
+
+    /** What each opened day held, by day, when the server sends it. */
+    public get openedRewards(): Map<number, CampaignCalendarReward>
+    {
+        return this._openedRewards;
+    }
+
+    public set openedRewards(rewards: Map<number, CampaignCalendarReward>)
+    {
+        this._openedRewards = rewards;
     }
 }

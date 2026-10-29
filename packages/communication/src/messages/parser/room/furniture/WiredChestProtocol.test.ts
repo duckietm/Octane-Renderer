@@ -19,9 +19,13 @@ import { WIRED_TRADE_REQUIREMENT_ANY_COINS, WIRED_TRADE_REQUIREMENT_RULES, WIRED
 import { WiredTransactionFailMessageParser } from './WiredTransactionFailMessageParser';
 import { WIRED_TRANSACTION_SUCCESS_DEPOSIT, WIRED_TRANSACTION_SUCCESS_REWARD, WiredTransactionSuccessMessageParser } from './WiredTransactionSuccessMessageParser';
 
-// Field orders: the AIR WIN63-202610131318 chest, trade and transaction classes (map in PlusEMU
-// reviews/chest-protocol-map.md, ported from volt-renderer, GPL-3.0). The ids are ours, never the official
-// rotated table.
+// Field orders: checked against the AIR WIN63-202610131318 client. Incoming: the parsers in
+// communication.messages.parser.userdefinedroomevents.wiredtrading.chests / .trade, ChestStorage + ChestItemType,
+// TradeRequirement, TradeRequirementRules / RulesDefinition / Rule, TradeRequirementNode, WiredTransactionSuccessContents
+// and the normal trading item list the trade items parser reuses. Outgoing: the chest, lock and wired trade composers
+// WiredChestController, WiredChestWrapperView, ChestSettingsUI, ChestNotificationSettingsUI, the chest sub-controllers,
+// WiredChestUpgradeConfirmationView, WiredMenuChestsTab and WiredTradingModel send. The ids are ours, never the
+// official rotated table.
 
 const hex = (buffer: ArrayBuffer) => Array.from(new Uint8Array(buffer), byte => byte.toString(16).padStart(2, '0')).join('');
 /** The frame body a composer produces (length + header stripped). */
@@ -31,7 +35,7 @@ const int = (value: number) => (value >>> 0).toString(16).padStart(8, '0');
 const bool = (value: boolean) => (value ? '01' : '00');
 const str = (value: string) => (new TextEncoder().encode(value).length).toString(16).padStart(4, '0') + hex(new TextEncoder().encode(value).buffer);
 
-/** A ChestStorage row (AIR package_198/ChestStorage) with legacy stuff data. */
+/** A ChestStorage row (AIR ChestStorage) with legacy stuff data. */
 const writeStorage = (writer: BinaryWriter, id: number, wall: boolean, typeId: number) =>
 {
     writer.writeInt(id);
@@ -48,7 +52,7 @@ const writeStorage = (writer: BinaryWriter, id: number, wall: boolean, typeId: n
     if(!wall) writer.writeInt(5);
 };
 
-/** A trade item (AIR package_141/class_2591, the normal trading item layout). */
+/** A trade item (AIR, the normal trading item layout). */
 const writeTradeItem = (writer: BinaryWriter, itemId: number, type: 'I' | 'S', typeId: number) =>
 {
     writer.writeInt(itemId);
