@@ -1,6 +1,7 @@
 import { IGraphicAsset, IRoomObjectSprite, RoomObjectVariable } from '@octane/api';
 import { GetConfiguration } from '@octane/configuration';
 import { GetSessionDataManager } from '@octane/session';
+import { fillUrlTemplate } from '@octane/utils';
 import { Texture } from 'pixi.js';
 import { decompressFrames, parseGIF } from 'gifuct-js';
 import { FurnitureAnimatedVisualization } from './FurnitureAnimatedVisualization';
@@ -340,7 +341,7 @@ export class FurnitureBadgeDisplayVisualization extends FurnitureAnimatedVisuali
 
     private static async fetchAndDecode(badgeId: string): Promise<DecodedBadgeImage>
     {
-        const badgeUrl = GetConfiguration().getValue<string>('badge.asset.url', '').replace('%badgename%', badgeId);
+        const badgeUrl = fillUrlTemplate(GetConfiguration().getValue<string>('badge.asset.url', ''), '%badgename%', badgeId);
         const response = await fetch(badgeUrl);
 
         if(!response.ok) return null;
