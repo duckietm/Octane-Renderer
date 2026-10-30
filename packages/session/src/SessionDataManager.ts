@@ -58,6 +58,7 @@ export class SessionDataManager implements ISessionDataManager
     private _floorItems: Map<number, IFurnitureData> = new Map();
     private _wallItems: Map<number, IFurnitureData> = new Map();
     private _floorItemOverrides: Map<string, Partial<IFurnitureData>> = new Map();
+    private _furnitureOverridesRequest: number = 0;
     private _wallItemOverrides: Map<string, Partial<IFurnitureData>> = new Map();
     private _products: Map<string, IProductData> = new Map();
     private _furnitureData: FurnitureDataLoader = new FurnitureDataLoader(this._floorItems, this._wallItems);
@@ -287,11 +288,17 @@ export class SessionDataManager implements ISessionDataManager
             return;
         }
 
+        // Only the newest request applies: an older reply, or one that lands after a clear, put old overrides back.
+        const request = ++this._furnitureOverridesRequest;
         const response = await fetch(url);
+
+        if(request !== this._furnitureOverridesRequest) return;
 
         if(response.status !== 200) throw new Error(`Unable to load ${ url }`);
 
         const data = await parseConfigJsonFromResponse(response, url);
+
+        if(request !== this._furnitureOverridesRequest) return;
 
         this._floorItemOverrides = this.parseFurnitureOverrides(data?.roomitemtypes?.furnitype || []);
         this._wallItemOverrides = this.parseFurnitureOverrides(data?.wallitemtypes?.furnitype || []);
@@ -301,6 +308,7 @@ export class SessionDataManager implements ISessionDataManager
 
     public clearFurnitureDataOverrides(): void
     {
+        this._furnitureOverridesRequest++;
         this._floorItemOverrides.clear();
         this._wallItemOverrides.clear();
         this.refreshFurnitureLocalizations();
