@@ -76,6 +76,14 @@ describe('ConfigurationManager.init', () =>
         delete (window as any).OctaneConfig;
     });
 
+    it('says that config.urls is missing instead of failing on it', async () =>
+    {
+        (window as any).OctaneConfig = { 'some.key': 1 };
+        vi.stubGlobal('fetch', vi.fn());
+
+        await expect(new ConfigurationManager().init()).rejects.toThrow('No config.urls defined');
+    });
+
     it('loads the configuration once; later calls share that load', async () =>
     {
         (window as any).OctaneConfig = { 'config.urls': [ '/a.json' ] };

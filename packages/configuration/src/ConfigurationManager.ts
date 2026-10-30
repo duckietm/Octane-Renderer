@@ -41,7 +41,8 @@ export class ConfigurationManager implements IConfigurationManager
 
             this.parseConfiguration(defaultConfig, true);
 
-            const configurationUrls = this.getValue<string[]>('config.urls').slice();
+            // Read before the check: a missing key returned null and .slice() threw before the message below.
+            const configurationUrls = (this.getValue<string[]>('config.urls') ?? []).slice();
 
             if(!configurationUrls || !configurationUrls.length) throw new Error('No config.urls defined in OctaneConfig — expected an array like ["/renderer-config.json", "/ui-config.json"]');
 
