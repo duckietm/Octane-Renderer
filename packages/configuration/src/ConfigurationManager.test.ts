@@ -163,3 +163,26 @@ describe('ConfigurationManager.parseConfiguration', () =>
         vi.restoreAllMocks();
     });
 });
+
+describe('ConfigurationManager.setValue', () =>
+{
+    it('refuses a key that would reach Object.prototype', () =>
+    {
+        const manager = new ConfigurationManager();
+
+        manager.setValue('__proto__.polluted', 'yes');
+        manager.setValue('constructor.prototype.polluted', 'yes');
+
+        expect(({} as Record<string, unknown>).polluted).toBeUndefined();
+        expect(manager.getValue('__proto__.polluted', null)).toBeNull();
+    });
+
+    it('still sets a nested key', () =>
+    {
+        const manager = new ConfigurationManager();
+
+        manager.setValue('loader.waiting', 'yes');
+
+        expect(manager.getValue('loader.waiting')).toBe('yes');
+    });
+});
