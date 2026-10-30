@@ -26,6 +26,22 @@ export class EvaWireFormat implements ICodec
 
     public encode(header: number, messages: any[]): IBinaryWriter
     {
+        try
+        {
+            return this.encodeMessage(header, messages);
+        }
+
+        catch (error)
+        {
+            // A value that cannot be written (a string past 65535 bytes) drops this packet, not the whole send.
+            if(error instanceof RangeError) return null;
+
+            throw error;
+        }
+    }
+
+    private encodeMessage(header: number, messages: any[]): IBinaryWriter
+    {
         const writer = new BinaryWriter();
 
         writer.writeShort(header);
