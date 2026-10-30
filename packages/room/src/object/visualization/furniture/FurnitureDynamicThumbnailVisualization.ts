@@ -4,6 +4,7 @@ import { IsometricImageFurniVisualization } from './IsometricImageFurniVisualiza
 export class FurnitureDynamicThumbnailVisualization extends IsometricImageFurniVisualization
 {
     private _cachedUrl: string;
+    private _disposed: boolean = false;
 
     constructor()
     {
@@ -11,6 +12,14 @@ export class FurnitureDynamicThumbnailVisualization extends IsometricImageFurniV
 
         this._cachedUrl = null;
         this._hasOutline = true;
+    }
+
+    public dispose(): void
+    {
+        this._disposed = true;
+        this._cachedUrl = null;
+
+        super.dispose();
     }
 
     protected updateModel(scale: number): boolean
@@ -27,11 +36,21 @@ export class FurnitureDynamicThumbnailVisualization extends IsometricImageFurniV
                 {
                     const image = new Image();
 
+                    // Set before src, or the browser may already have started the request without CORS.
+                    image.crossOrigin = 'anonymous';
                     image.src = thumbnailUrl;
-                    image.crossOrigin = '*';
 
                     image.onload = () =>
                     {
+                        // A load for an older url, or one that ends after the furni went away, changes nothing.
+                        if(this._disposed || this._cachedUrl !== thumbnailUrl)
+                        {
+                            image.onload = null;
+                            image.onerror = null;
+
+                            return;
+                        }
+
                         if(image.complete && image.width > 0 && image.height > 0)
                         {
                             const texture = Texture.from(image, true);
@@ -49,7 +68,7 @@ export class FurnitureDynamicThumbnailVisualization extends IsometricImageFurniV
 
                     image.onerror = () =>
                     {
-                        this.setThumbnailImages(null);
+                        if(!this._disposed && this._cachedUrl === thumbnailUrl) this.setThumbnailImages(null);
                         image.onload = null;
                         image.onerror = null;
                     };
