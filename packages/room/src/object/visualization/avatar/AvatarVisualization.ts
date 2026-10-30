@@ -77,6 +77,8 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
     private _spritesWithGlow: IRoomObjectSprite[] = null;
     private _spritesWithGlowBase: IRoomObjectSprite[] = null;
     private _spritesWithGlowLength: number = -1;
+    private _wiredHighlightBodyRevision: number = -1;
+    private _wiredHighlightBodyImage: IAvatarImage = null;
     private _dance: number;
     private _effect: number;
     private _carryObject: number;
@@ -196,6 +198,7 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
 
         this._wiredHighlightSilhouette?.dispose();
         this._wiredHighlightSilhouette = null;
+        this._wiredHighlightBodyImage = null;
         this._spritesWithGlow = null;
         this._spritesWithGlowBase = null;
 
@@ -1134,7 +1137,8 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
     /**
      * AIR updateWiredHighlightSprites: the colour styles go on every sprite but the shadow (and never on an additive
      * one); outline, soft glow and neon aura are drawn once behind the body and its effect sprites. The body is
-     * redrawn in place, so the glow is always rebuilt here.
+     * redrawn in place, so the glow is rebuilt when the avatar image says it drew a new frame (a revision it does not
+     * report counts as new); an unchanged frame keeps the glow it has.
      */
     private updateWiredHighlightSprites(): void
     {
@@ -1166,6 +1170,7 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
             {
                 this._wiredHighlightSilhouette.dispose();
                 this._wiredHighlightSilhouette = null;
+                this._wiredHighlightBodyImage = null;
                 this.updateSpriteCounter++;
             }
 
@@ -1175,8 +1180,13 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
         if(!this._wiredHighlightSilhouette) this._wiredHighlightSilhouette = new WiredHighlightSilhouette();
 
         const body = this.getSprite(AvatarVisualization.SPRITE_INDEX_AVATAR);
+        const bodyRevision = this._avatarImage?.textureRevision;
+        const bodyRedrawn = (bodyRevision === undefined) || (this._avatarImage !== this._wiredHighlightBodyImage) || (bodyRevision !== this._wiredHighlightBodyRevision);
 
-        if(this._wiredHighlightSilhouette.update(sources, filters, body ? body.alpha : 255, true)) this.updateSpriteCounter++;
+        this._wiredHighlightBodyImage = this._avatarImage;
+        this._wiredHighlightBodyRevision = (bodyRevision === undefined) ? -1 : bodyRevision;
+
+        if(this._wiredHighlightSilhouette.update(sources, filters, body ? body.alpha : 255, bodyRedrawn)) this.updateSpriteCounter++;
     }
 
     /** The avatar's sprites, then its wired highlight glow while one shows. */

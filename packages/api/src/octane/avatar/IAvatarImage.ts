@@ -20,6 +20,8 @@ export interface IAvatarImage
     getSprites(): ISpriteDataContainer[];
     getLayerData(sprite: ISpriteDataContainer): IAnimationLayerData;
     processAsTexture(setType: string, hightlight: boolean, texture?: Texture): Texture;
+    /** Grows each time processAsTexture may have drawn a new frame; the same value means the same picture. */
+    readonly textureRevision?: number;
     processAsImageUrl(setType: string): string;
     processAsCroppedImageUrl(setType: string, trimTransparentPixels?: boolean): string;
     processAsContainer(setType: string): Container;
