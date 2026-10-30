@@ -52,11 +52,6 @@ export class EventDispatcher implements IEventDispatcher
     {
         if(!event) return false;
 
-        if(event.type && event.type.startsWith('SOCKET_'))
-        {
-            const listenerCount = this._listeners.get(event.type)?.length ?? 0;
-        }
-
         OctaneLogger.events('Dispatched Event', event.type);
 
         this.processEvent(event);
@@ -82,6 +77,9 @@ export class EventDispatcher implements IEventDispatcher
         while(callbacks.length)
         {
             const callback = callbacks.shift();
+
+            // A listener removed by an earlier one in this same dispatch is not called: it may already be disposed.
+            if(!this._listeners.get(event.type)?.includes(callback)) continue;
 
             try
             {
