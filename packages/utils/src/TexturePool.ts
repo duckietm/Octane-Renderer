@@ -113,9 +113,12 @@ export class TexturePool
 
         for(const width in this._textures)
         {
-            for(const height in this._textures[width])
+            // Held here: dropping the last bucket of a width removes the width from the map while it is walked.
+            const heights = this._textures[width];
+
+            for(const height in heights)
             {
-                const textures = this._textures[width][height];
+                const textures = heights[height];
 
                 for(let i = textures.length - 1; i >= 0; i--)
                 {
