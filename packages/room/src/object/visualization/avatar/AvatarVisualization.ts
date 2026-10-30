@@ -1432,6 +1432,16 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
 
         if(headDiffers) this._avatarImage.setDirectionAngle(AvatarSetType.HEAD, toImageAngle(this._headAngle));
 
+        // A direction no longer reflected gives its texture back; they were kept until the avatar was disposed.
+        for(const [ key, texture ] of this._reflectionMirrorTextures)
+        {
+            if(mirrors.has(key)) continue;
+
+            if(texture && !texture.destroyed) texture.destroy(true);
+
+            this._reflectionMirrorTextures.delete(key);
+        }
+
         this._reflectionMirrors = mirrors;
     }
 
