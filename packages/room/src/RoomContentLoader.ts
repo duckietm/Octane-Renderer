@@ -26,6 +26,10 @@ export class RoomContentLoader implements IRoomContentLoader
 
     private _iconListener: IRoomContentListener;
     private _images: Map<string, HTMLImageElement> = new Map();
+    // Downloads on their way, with every object waiting for each: the same image was downloaded once per request.
+    private _imageWaiters: Map<string, number[]> = new Map();
+    // The image cache kept every downloaded image for the whole session.
+    private static readonly MAX_CACHED_IMAGES = 500;
 
     private _activeObjects: { [index: string]: number } = {};
     private _activeObjectTypes: Map<number, string> = new Map();
@@ -316,6 +320,26 @@ export class RoomContentLoader implements IRoomContentLoader
         if(assetUrls && assetUrls.length)
         {
             const url = assetUrls[0];
+            const key = [ type, param ].join('_');
+            const waiting = this._imageWaiters.get(key);
+
+            if(waiting)
+            {
+                waiting.push(id);
+
+                return true;
+            }
+
+            this._imageWaiters.set(key, [ id ]);
+
+            const finish = (loaded: boolean) =>
+            {
+                const ids = this._imageWaiters.get(key) ?? [];
+
+                this._imageWaiters.delete(key);
+
+                for(const waitingId of ids) this._iconListener.onRoomContentLoaded(waitingId, key, loaded);
+            };
 
             const image = new Image();
 
@@ -325,9 +349,12 @@ export class RoomContentLoader implements IRoomContentLoader
             {
                 image.onerror = null;
 
-                this._images.set(([type, param].join('_')), image);
+                this._images.delete(key);
+                this._images.set(key, image);
 
-                this._iconListener.onRoomContentLoaded(id, [type, param].join('_'), true);
+                while(this._images.size > RoomContentLoader.MAX_CACHED_IMAGES) this._images.delete(this._images.keys().next().value);
+
+                finish(true);
             };
 
             image.onerror = () =>
@@ -336,7 +363,7 @@ export class RoomContentLoader implements IRoomContentLoader
 
                 OctaneLogger.error('Failed to download asset', url);
 
-                this._iconListener.onRoomContentLoaded(id, [type, param].join('_'), false);
+                finish(false);
             };
 
             return true;
