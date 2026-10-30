@@ -1,6 +1,6 @@
 import { IGraphicAssetCollection, IObjectVisualizationData, IRoomGeometry, IRoomObjectController, IRoomObjectSprite, IRoomObjectSpriteVisualization, RoomObjectSpriteData } from '@octane/api';
 import { TextureUtils } from '@octane/utils';
-import { Container, Point, Rectangle, Sprite, Texture } from 'pixi.js';
+import { Container, Rectangle, Sprite, Texture } from 'pixi.js';
 import { RoomPlaneDisplay } from '../../renderer/utils/RoomPlaneDisplay';
 import { RoomObjectSprite } from './RoomObjectSprite';
 
@@ -192,46 +192,37 @@ export class RoomObjectSpriteVisualization implements IRoomObjectSpriteVisualiza
         return renderTexture;
     }
 
+    /**
+     * The union of the visible, textured sprites. It used to start from sprite 0 only, so a hidden or empty first
+     * layer left the origin in the union, and moving the left or top edge kept the width and lost the right edge.
+     */
     public getBoundingRectangle(): Rectangle
     {
         const totalSprites = this.totalSprites;
-        const rectangle = new Rectangle();
 
-        let iterator = 0;
+        let left = Infinity;
+        let top = Infinity;
+        let right = -Infinity;
+        let bottom = -Infinity;
 
-        while(iterator < totalSprites)
+        for(let iterator = 0; iterator < totalSprites; iterator++)
         {
             const sprite = this.getSprite(iterator);
 
-            if(sprite && sprite.texture && sprite.visible)
-            {
-                const offsetX = ((sprite.flipH) ? (-(sprite.width) + sprite.offsetX) : sprite.offsetX);
-                const offsetY = ((sprite.flipV) ? (-(sprite.height) + sprite.offsetY) : sprite.offsetY);
-                const point = new Point(offsetX, offsetY);
+            if(!sprite || !sprite.texture || !sprite.visible) continue;
 
-                if(iterator === 0)
-                {
-                    rectangle.x = point.x;
-                    rectangle.y = point.y;
-                    rectangle.width = sprite.width;
-                    rectangle.height = sprite.height;
-                }
-                else
-                {
-                    if(point.x < rectangle.x) rectangle.x = point.x;
+            const offsetX = ((sprite.flipH) ? (-(sprite.width) + sprite.offsetX) : sprite.offsetX);
+            const offsetY = ((sprite.flipV) ? (-(sprite.height) + sprite.offsetY) : sprite.offsetY);
 
-                    if(point.y < rectangle.y) rectangle.y = point.y;
-
-                    if((point.x + sprite.width) > rectangle.right) rectangle.width = ((point.x + sprite.width) - rectangle.x);
-
-                    if((point.y + sprite.height) > rectangle.bottom) rectangle.height = ((point.y + sprite.height) - rectangle.y);
-                }
-            }
-
-            iterator++;
+            left = Math.min(left, offsetX);
+            top = Math.min(top, offsetY);
+            right = Math.max(right, offsetX + sprite.width);
+            bottom = Math.max(bottom, offsetY + sprite.height);
         }
 
-        return rectangle;
+        if(left === Infinity) return new Rectangle();
+
+        return new Rectangle(left, top, (right - left), (bottom - top));
     }
 
     public get instanceId(): number
