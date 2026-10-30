@@ -4,6 +4,8 @@ export class BinaryWriter implements IBinaryWriter
 {
     private static readonly TEXT_ENCODER = new TextEncoder();
     private static readonly INITIAL_CAPACITY = 64;
+    /** The longest string a short length prefix can describe. */
+    public static readonly MAX_STRING_BYTES = 0xFFFF;
 
     // `_buffer` is spare capacity; only the first `_length` bytes have been written.
     private _buffer: Uint8Array;
@@ -69,6 +71,10 @@ export class BinaryWriter implements IBinaryWriter
 
         if(includeLength)
         {
+            // The length went out modulo 65536 while every byte was still written, so the server read a short string
+            // and took the rest of it for the next fields.
+            if(array.length > BinaryWriter.MAX_STRING_BYTES) throw new RangeError(`String of ${ array.length } bytes does not fit a short length`);
+
             this.writeShort(array.length);
             this.appendArray(array);
         }
