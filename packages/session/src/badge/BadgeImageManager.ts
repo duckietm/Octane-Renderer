@@ -4,6 +4,7 @@ import { GetConfiguration } from '@octane/configuration';
 import { BadgeImageReadyEvent, GetEventDispatcher } from '@octane/events';
 import { OctaneLogger, TextureUtils } from '@octane/utils';
 import { CanvasSource, Container, Sprite, Texture } from 'pixi.js';
+import { rememberFailedBadge, shouldRetryBadge } from './BadgeFailureCache';
 import { BadgeInfo } from './BadgeInfo';
 import { GroupBadge } from './GroupBadge';
 import { drawGroupBadge, GroupBadgeLayer } from './GroupBadgeCanvas';
@@ -31,6 +32,8 @@ export class BadgeImageManager
     private _partsSignature: string = null;
     private _badgeParts: Map<string, 'loading' | 'loaded' | 'failed'> = new Map();
     private _badgePartLoadsInFlight: number = 0;
+    // A badge image that failed to load, and when: asked again within the backoff it is not downloaded again.
+    private _failedBadgeUrls: Map<string, number> = new Map();
 
     public async init(): Promise<void>
     {
@@ -101,11 +104,21 @@ export class BadgeImageManager
 
         if(type === BadgeImageManager.NORMAL_BADGE)
         {
+            // A badge with no image was downloaded again every time it was drawn.
+            if(!shouldRetryBadge(this._failedBadgeUrls, url, Date.now())) return null;
+
             const loadBadge = async () =>
             {
                 try
                 {
-                    if(!await GetAssetManager().downloadAsset(url)) return;
+                    if(!await GetAssetManager().downloadAsset(url))
+                    {
+                        rememberFailedBadge(this._failedBadgeUrls, url, Date.now());
+
+                        return;
+                    }
+
+                    this._failedBadgeUrls.delete(url);
 
                     const loadedTexture = GetAssetManager().getTexture(url);
 
