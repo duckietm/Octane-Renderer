@@ -54,3 +54,10 @@ export const parseHostList = (value: unknown): string[] =>
 
     return [];
 };
+
+/**
+ * Puts a value from the server into a URL template. The value is encoded, so `../`, `?` or `#` in a badge code cannot
+ * change the path or the query, and it is inserted as written: a string replacement read `$&` and `$1` as patterns.
+ */
+export const fillUrlTemplate = (template: string, placeholder: string, value: string): string =>
+    (template ?? '').replace(placeholder, () => encodeURIComponent(value ?? ''));

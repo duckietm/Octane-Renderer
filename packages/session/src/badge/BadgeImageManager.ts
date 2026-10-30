@@ -2,7 +2,7 @@ import { GetAssetManager } from '@octane/assets';
 import { GetCommunication, GroupBadgePartsEvent } from '@octane/communication';
 import { GetConfiguration } from '@octane/configuration';
 import { BadgeImageReadyEvent, GetEventDispatcher } from '@octane/events';
-import { OctaneLogger, TextureUtils } from '@octane/utils';
+import { fillUrlTemplate, OctaneLogger, TextureUtils } from '@octane/utils';
 import { CanvasSource, Container, Sprite, Texture } from 'pixi.js';
 import { rememberFailedBadge, shouldRetryBadge } from './BadgeFailureCache';
 import { BadgeInfo } from './BadgeInfo';
@@ -169,7 +169,7 @@ export class BadgeImageManager
         switch(type)
         {
             case BadgeImageManager.NORMAL_BADGE:
-                url = (GetConfiguration().getValue<string>('badge.asset.url')).replace('%badgename%', badge);
+                url = fillUrlTemplate(GetConfiguration().getValue<string>('badge.asset.url'), '%badgename%', badge);
                 break;
             case BadgeImageManager.GROUP_BADGE:
                 url = badge;
@@ -196,7 +196,7 @@ export class BadgeImageManager
         if(!template.includes('%imagerdata%') || (template === '%imagerdata%')) return false;
 
         // Configuration values are interpolated when the file loads.
-        let url = template.replace('%imagerdata%', badgeCode);
+        let url = fillUrlTemplate(template, '%imagerdata%', badgeCode);
 
         if(url.endsWith('.gif')) url = url.slice(0, -3) + 'png';
 
