@@ -20,8 +20,8 @@ describe('RoomObjectEventHandler pending sends', () =>
         const remove = engine.slice(engine.indexOf('public removeRoomInstance(roomId: number): void'));
         const dispose = engine.slice(engine.indexOf('public dispose(): void'));
 
-        expect(remove.slice(0, 200)).toContain('this._roomObjectEventHandler?.cancelPendingSends();');
-        expect(dispose.slice(0, 600)).toContain('this._roomObjectEventHandler?.cancelPendingSends();');
+        expect(remove.slice(0, 200)).toContain('this._roomObjectEventHandler?.cancelPendingSends?.();');
+        expect(dispose.slice(0, 600)).toContain('this._roomObjectEventHandler?.cancelPendingSends?.();');
     });
 
     it('a delayed walk checks the connection first', () =>

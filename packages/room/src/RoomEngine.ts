@@ -131,7 +131,7 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
             this._roomSessionEventCallback = null;
         }
 
-        this._roomObjectEventHandler?.cancelPendingSends();
+        this._roomObjectEventHandler?.cancelPendingSends?.();
 
         GetRoomMessageHandler().dispose();
 
@@ -184,7 +184,7 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
 
     public removeRoomInstance(roomId: number): void
     {
-        this._roomObjectEventHandler?.cancelPendingSends();
+        this._roomObjectEventHandler?.cancelPendingSends?.();
 
         const instance = this.getRoomInstance(roomId);
 
