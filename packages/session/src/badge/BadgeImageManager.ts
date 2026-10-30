@@ -34,6 +34,8 @@ export class BadgeImageManager
     private _badgePartLoadsInFlight: number = 0;
     // A badge image that failed to load, and when: asked again within the backoff it is not downloaded again.
     private _failedBadgeUrls: Map<string, number> = new Map();
+    // Badges being downloaded: a draw while one is on its way asked for it again, and every request sent its own ready event.
+    private _loadingBadgeUrls: Set<string> = new Set();
 
     public async init(): Promise<void>
     {
@@ -107,6 +109,10 @@ export class BadgeImageManager
             // A badge with no image was downloaded again every time it was drawn.
             if(!shouldRetryBadge(this._failedBadgeUrls, url, Date.now())) return null;
 
+            if(this._loadingBadgeUrls.has(url)) return this.getBadgePlaceholder();
+
+            this._loadingBadgeUrls.add(url);
+
             const loadBadge = async () =>
             {
                 try
@@ -128,6 +134,11 @@ export class BadgeImageManager
                 catch (err)
                 {
                     OctaneLogger.error(err);
+                }
+
+                finally
+                {
+                    this._loadingBadgeUrls.delete(url);
                 }
             };
 
