@@ -9,6 +9,7 @@ import {
     FurnitureAliasesComposer,
     FurnitureFloorAddEvent,
     FurnitureFloorRemoveEvent,
+    FurnitureListAddOrUpdateEvent,
     FurnitureListComposer,
     FurnitureListEvent,
     FurnitureListInvalidateEvent,
@@ -34,6 +35,7 @@ interface InventoryLog
     roomRemovals: number[];
     unseenOwnedFurnitureIds: number[];
     invalidations: number;
+    updatedInventoryIds: number[];
     timeline: string[];
 }
 
@@ -52,7 +54,7 @@ const attachInventoryLog = (connection: IConnection): { log: InventoryLog; dispo
     const events: IMessageEvent[] = [];
     const log: InventoryLog = {
         snapshots: [], removedInventoryIds: [], roomAdds: [], roomRemovals: [],
-        unseenOwnedFurnitureIds: [], invalidations: 0, timeline: []
+        unseenOwnedFurnitureIds: [], invalidations: 0, updatedInventoryIds: [], timeline: []
     };
     const register = (event: IMessageEvent): void =>
     {
@@ -84,6 +86,14 @@ const attachInventoryLog = (connection: IConnection): { log: InventoryLog; dispo
     {
         log.invalidations++;
         log.timeline.push('inventory-invalidate');
+    }));
+    register(new FurnitureListAddOrUpdateEvent((event: FurnitureListAddOrUpdateEvent) =>
+    {
+        for(const item of event.getParser().items)
+        {
+            log.updatedInventoryIds.push(item.itemId);
+            log.timeline.push(`inventory-update:${ item.itemId }`);
+        }
     }));
     register(new FurnitureFloorAddEvent((event: FurnitureFloorAddEvent) =>
     {
@@ -189,9 +199,10 @@ describe('Polaris inventory lifecycle', () =>
         expect(recorder.log.roomAdds.find(item => item.itemId === ITEM_ID)).toEqual({ itemId: ITEM_ID, x: 5, y: 5, direction: 90 });
 
         manager.connection.send(new FurniturePickupComposer(RoomObjectCategory.FLOOR, ITEM_ID));
+        // The picker gets the item itself (Habbo's add-or-update); an older server asked for a reload instead.
         await wait(() => recorder.log.roomRemovals.includes(ITEM_ID)
             && recorder.log.unseenOwnedFurnitureIds.includes(ITEM_ID)
-            && recorder.log.invalidations > 0, 'inventory pickup transition');
+            && (recorder.log.updatedInventoryIds.includes(ITEM_ID) || recorder.log.invalidations > 0), 'inventory pickup transition');
 
         manager.connection.send(new FurnitureListComposer());
         await wait(() => recorder.log.snapshots.length === 2, 'final authoritative inventory');
