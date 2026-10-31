@@ -61,6 +61,9 @@ export class EvaWireFormat implements ICodec
             switch(type)
             {
                 case 'undefined':
+                    // A missing optional argument went out as a 2-byte empty string even where the server reads an int
+                    // or a boolean, shifting every field after it. The packet is dropped instead.
+                    throw new RangeError(`Message ${ header }: a field is undefined`);
                 case 'null':
                     writer.writeShort(0);
                     break;
