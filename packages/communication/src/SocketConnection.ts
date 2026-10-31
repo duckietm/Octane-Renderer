@@ -3,7 +3,7 @@ import { GetConfiguration } from '@octane/configuration';
 import { GetEventDispatcher, OctaneEvent, OctaneEventType, ReconnectEvent } from '@octane/events';
 import { OctaneLogger } from '@octane/utils';
 import { EvaWireFormat, InvalidMessageLengthError } from './codec';
-import { aesGcmDecrypt, aesGcmEncrypt, buildClientHello, deriveAesKey, deriveSharedSecret, exportPublicKeySpki, generateEphemeralKeyPair, importPublicKeySpki, importSigningPublicKeyFromBase64, NONCE_LEN, parseServerHello, randomNonce, verifyEphemeralSignature } from './crypto';
+import { aesGcmDecrypt, aesGcmEncrypt, buildClientHello, deriveAesKey, deriveDirectionalKeys, deriveSharedSecret, DIRECTION_CLIENT_TO_SERVER, DIRECTION_SERVER_TO_CLIENT, DirectionalKeys, directionalNonce, exportPublicKeySpki, generateEphemeralKeyPair, importPublicKeySpki, importSigningPublicKeyFromBase64, NONCE_LEN, parseServerHello, randomNonce, readDirectionalNonce, SUBPROTOCOL_V2, verifyEphemeralSignature } from './crypto';
 import { ConnectionStateStore } from './ConnectionStateStore';
 import { IncomingHeader, MessageClassManager, PongMessageComposer } from './messages';
 import { shouldReconnectAfterClose } from './socketClosePolicy';
@@ -45,6 +45,8 @@ export class SocketConnection implements IConnection
 
     private _cryptoState: CryptoState = 'disabled';
     private _sessionKey: CryptoKey = null;
+    /** Set when the server answered the version 2 subprotocol: a key and a counter per direction. */
+    private _directional: { keys: DirectionalKeys, sendCounter: number, receiveCounter: number } = null;
     private _pendingEncryptedSends: ArrayBuffer[] = [];
     private _decryptChain: Promise<void> = Promise.resolve();
     private _encryptChain: Promise<void> = Promise.resolve();
@@ -88,9 +90,11 @@ export class SocketConnection implements IConnection
             this._cryptoState = cryptoEnabled ? 'awaiting_server_hello' : 'disabled';
         }
         this._sessionKey = null;
+        this._directional = null;
         this._pendingEncryptedSends = [];
 
-        this._socket = new WebSocket(socketUrl);
+        // Asking for the subprotocol is how this client offers version 2; an older server ignores it.
+        this._socket = (this._cryptoState === 'awaiting_server_hello') ? new WebSocket(socketUrl, [ SUBPROTOCOL_V2 ]) : new WebSocket(socketUrl);
         this._socket.binaryType = 'arraybuffer';
         this._onOpenCallback = () => this.onSocketOpened();
         this._onCloseCallback = (event: Event) => this.onSocketClosed(event as CloseEvent);
@@ -289,10 +293,13 @@ export class SocketConnection implements IConnection
         const ourKeys = await generateEphemeralKeyPair();
         const ourPubkeySpki = await exportPublicKeySpki(ourKeys.publicKey);
         const shared = await deriveSharedSecret(ourKeys.privateKey, serverPubkey);
-        const sessionKey = await deriveAesKey(shared);
+        const directional = (socket.protocol === SUBPROTOCOL_V2);
+        const sessionKey = directional ? null : await deriveAesKey(shared);
+        const directionalKeys = directional ? await deriveDirectionalKeys(shared, serverPubkeySpki, ourPubkeySpki) : null;
         if(this._socket !== socket) return;
 
         this._sessionKey = sessionKey;
+        this._directional = directionalKeys ? { keys: directionalKeys, sendCounter: 0, receiveCounter: 0 } : null;
         socket.send(buildClientHello(ourPubkeySpki));
 
         // The queued sends go on the chain before the state turns ready, so a send made from then on
@@ -343,16 +350,31 @@ export class SocketConnection implements IConnection
     private async decryptFrame(frame: ArrayBuffer): Promise<ArrayBuffer>
     {
         if(frame.byteLength < NONCE_LEN + 16) throw new Error('encrypted frame too short');
-        const nonce = new Uint8Array(frame, 0, NONCE_LEN);
+        const nonce = new Uint8Array(frame.slice(0, NONCE_LEN));
         const ct = frame.slice(NONCE_LEN);
+
+        if(this._directional)
+        {
+            // Version 2: only the server's next frame is accepted, so a replayed, reordered or reflected one is not.
+            const { direction, counter } = readDirectionalNonce(nonce);
+            if(direction !== DIRECTION_SERVER_TO_CLIENT) throw new Error('encrypted frame of the wrong direction');
+            if(counter !== this._directional.receiveCounter) throw new Error(`encrypted frame ${ counter }, expected ${ this._directional.receiveCounter }`);
+
+            const plain = await aesGcmDecrypt(this._directional.keys.receive, nonce, ct);
+            this._directional.receiveCounter++;
+
+            return plain;
+        }
+
         return aesGcmDecrypt(this._sessionKey, nonce, ct);
     }
 
     private async encryptAndSend(plaintext: ArrayBuffer): Promise<void>
     {
-        if(!this._sessionKey) return;
-        const nonce = randomNonce();
-        const ct = await aesGcmEncrypt(this._sessionKey, nonce, plaintext);
+        if(!this._sessionKey && !this._directional) return;
+        const directional = this._directional;
+        const nonce = directional ? directionalNonce(DIRECTION_CLIENT_TO_SERVER, directional.sendCounter++) : randomNonce();
+        const ct = await aesGcmEncrypt(directional ? directional.keys.send : this._sessionKey, nonce, plaintext);
         const framed = new Uint8Array(NONCE_LEN + ct.byteLength);
         framed.set(nonce, 0);
         framed.set(new Uint8Array(ct), NONCE_LEN);

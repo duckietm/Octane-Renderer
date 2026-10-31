@@ -117,3 +117,69 @@ export async function verifyEphemeralSignature(signingKey: CryptoKey, signature:
         signedBytes
     );
 }
+
+/**
+ * Version 2 of the encrypted channel, asked for as this WebSocket subprotocol. Version 1 used one key both ways and a
+ * random nonce, so a frame could be replayed, reordered or sent back to its author. Version 2 derives a key per
+ * direction, bound to both handshake keys, and every nonce is the direction plus a 64-bit counter that the receiver
+ * checks. A server that does not answer the subprotocol keeps version 1.
+ */
+export const SUBPROTOCOL_V2 = 'octane-ws-v2';
+export const DIRECTION_CLIENT_TO_SERVER = 1;
+export const DIRECTION_SERVER_TO_CLIENT = 2;
+
+export interface DirectionalKeys
+{
+    send: CryptoKey;
+    receive: CryptoKey;
+}
+
+const concatBytes = (...parts: ArrayBuffer[]): Uint8Array<ArrayBuffer> =>
+{
+    const out = new Uint8Array(parts.reduce((total, part) => total + part.byteLength, 0));
+    let offset = 0;
+
+    for(const part of parts)
+    {
+        out.set(new Uint8Array(part), offset);
+        offset += part.byteLength;
+    }
+
+    return out;
+};
+
+/** The raw key of one direction: HKDF-SHA-256 with the label and the hash of both handshake public keys as info. */
+export async function deriveDirectionalKeyBits(sharedSecret: ArrayBuffer, label: string, serverSpki: ArrayBuffer, clientSpki: ArrayBuffer): Promise<ArrayBuffer>
+{
+    const transcript = await window.crypto.subtle.digest('SHA-256', concatBytes(serverSpki, clientSpki));
+    const info = concatBytes(new TextEncoder().encode(label).buffer as ArrayBuffer, transcript);
+    const ikm = await window.crypto.subtle.importKey('raw', sharedSecret, 'HKDF', false, [ 'deriveBits' ]);
+
+    return window.crypto.subtle.deriveBits({ name: 'HKDF', hash: 'SHA-256', salt: new Uint8Array(32), info }, ikm, AES_KEY_BITS);
+}
+
+export async function deriveDirectionalKeys(sharedSecret: ArrayBuffer, serverSpki: ArrayBuffer, clientSpki: ArrayBuffer): Promise<DirectionalKeys>
+{
+    const importKey = async (label: string) => window.crypto.subtle.importKey(
+        'raw', await deriveDirectionalKeyBits(sharedSecret, label, serverSpki, clientSpki), { name: 'AES-GCM' }, false, [ 'encrypt', 'decrypt' ]);
+
+    return { send: await importKey('octane-ws-v2 c2s'), receive: await importKey('octane-ws-v2 s2c') };
+}
+
+export function directionalNonce(direction: number, counter: number): Uint8Array<ArrayBuffer>
+{
+    const nonce = new Uint8Array(NONCE_LEN);
+    const view = new DataView(nonce.buffer);
+
+    view.setUint32(0, direction, false);
+    view.setBigUint64(4, BigInt(counter), false);
+
+    return nonce;
+}
+
+export function readDirectionalNonce(nonce: Uint8Array): { direction: number, counter: number }
+{
+    const view = new DataView(nonce.buffer, nonce.byteOffset, nonce.byteLength);
+
+    return { direction: view.getUint32(0, false), counter: Number(view.getBigUint64(4, false)) };
+}
