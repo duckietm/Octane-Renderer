@@ -90,9 +90,9 @@ export class RoomSession implements IRoomSession
         GetCommunication().connection.send(new RoomUnitChatShoutComposer(text, styleId, chatColour));
     }
 
-    public sendWhisperMessage(recipientName: string, text: string, styleId: number): void
+    public sendWhisperMessage(recipientName: string, text: string, styleId: number, chatColour: string = ''): void
     {
-        GetCommunication().connection.send(new RoomUnitChatWhisperComposer(recipientName, text, styleId));
+        GetCommunication().connection.send(new RoomUnitChatWhisperComposer(recipientName, text, styleId, chatColour));
     }
 
     public sendChatTypingMessage(isTyping: boolean): void
