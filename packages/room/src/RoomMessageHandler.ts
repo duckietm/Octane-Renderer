@@ -1675,19 +1675,9 @@ export class RoomMessageHandler
                 this._roomEngine.updateRoomObjectUserLocation(this._currentRoomId, status.id, location, goal, status.canStandUp, height, direction, status.headDirection);
             }
 
+            // The own position is not stored for a reconnect any more: two synchronous storage writes on every step, for
+            // spawn coordinates the server reads but never trusts (a re-entry keeps the server's own position).
             this._roomEngine.updateRoomObjectUserFlatControl(this._currentRoomId, status.id, null);
-
-            // Save own user's position for reconnection
-            if(status.id === this._ownRoomIndex)
-            {
-                try
-                {
-                    sessionStorage.setItem('nitro.session.lastPosX', status.x.toString());
-                    sessionStorage.setItem('nitro.session.lastPosY', status.y.toString());
-                }
-                catch (e)
-                { /* ignore */ }
-            }
 
             let isPosture = true;
             let postureUpdate = false;
