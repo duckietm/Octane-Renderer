@@ -1,5 +1,43 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
+import { GetConfiguration } from '@octane/configuration';
 import { LocalizationManager } from './LocalizationManager';
+
+// A ${...} placeholder in a text, which can come from the server, fell back to any configuration value.
+describe('LocalizationManager configuration placeholders', () =>
+{
+    afterEach(() =>
+    {
+        GetConfiguration().setValue('socket.url', undefined);
+        GetConfiguration().setValue('url.prefix', undefined);
+        GetConfiguration().setValue('localization.placeholder.configuration.keys', undefined);
+    });
+
+    it('fills an allowed configuration key and leaves any other one as its name', () =>
+    {
+        GetConfiguration().setValue('url.prefix', 'https://hotel.test');
+        GetConfiguration().setValue('socket.url', 'wss://internal:2096');
+
+        const localization = new LocalizationManager();
+
+        expect(localization.getValue('Visit ${url.prefix}/home')).toBe('Visit https://hotel.test/home');
+        expect(localization.getValue('Server ${socket.url}')).toBe('Server socket.url');
+    });
+
+    it('fills a key the configuration lists as allowed', () =>
+    {
+        GetConfiguration().setValue('socket.url', 'wss://internal:2096');
+        GetConfiguration().setValue('localization.placeholder.configuration.keys', [ 'socket.url' ]);
+
+        expect(new LocalizationManager().getValue('Server ${socket.url}')).toBe('Server wss://internal:2096');
+    });
+
+    it('still lets client code read a configuration value directly, as a string', () =>
+    {
+        GetConfiguration().setValue('socket.url', 'wss://internal:2096');
+
+        expect(new LocalizationManager().getValue('socket.url')).toBe('wss://internal:2096');
+    });
+});
 
 const FORUM_DETAILS = 'Score %RATING%, last message by <a href="event:friendbar/user/%LAST_AUTHOR_NAME%">%LAST_AUTHOR_NAME%</a> %UPDATE_TIME%';
 const THREAD_DETAILS = 'By <a href="event:friendbar/user/%THREAD_AUTHOR_NAME%">%THREAD_AUTHOR_NAME%</a> %CREATION_TIME%, last message by <a href="event:friendbar/user/%LAST_AUTHOR_NAME%">%LAST_AUTHOR_NAME%</a> %UPDATE_TIME%';

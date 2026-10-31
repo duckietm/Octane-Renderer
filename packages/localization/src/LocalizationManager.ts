@@ -7,6 +7,13 @@ import { BadgeBaseAndLevel } from './BadgeBaseAndLevel';
 export class LocalizationManager implements ILocalizationManager
 {
     /**
+     * Configuration values a ${...} placeholder may show. Texts can come from the server (alerts, notifications), and
+     * a placeholder there could otherwise print any configuration value, endpoints and keys included. More keys can be
+     * listed in the configuration under localization.placeholder.configuration.keys.
+     */
+    public static readonly PLACEHOLDER_CONFIGURATION_KEYS: ReadonlySet<string> = new Set([ 'url.prefix', 'habbopages.url', 'image.library.url' ]);
+
+    /**
      * Every "%name%" of a text is replaced, in any letter case, as the official Localization.fillParameterValues does
      * (RegExp "gim"), so a parameter used twice (the author of groupforum.view.forum_details) is filled everywhere.
      * The value is inserted as it is ("$" patterns are not expanded).
@@ -114,22 +121,30 @@ export class LocalizationManager implements ILocalizationManager
 
     public getValue(key: string, doParams: boolean = true): string
     {
+        return this.resolveValue(key, doParams, false);
+    }
+
+    private resolveValue(key: string, doParams: boolean, placeholder: boolean): string
+    {
         if(!key || !key.length) return null;
 
         const keys = key.match(/\$\{.[^}]*\}/g);
 
         if(keys && keys.length)
         {
-            for(const splitKey of keys) key = key.replace(splitKey, this.getValue(splitKey.slice(2, -1), doParams));
+            for(const splitKey of keys) key = key.replace(splitKey, this.resolveValue(splitKey.slice(2, -1), doParams, true));
         }
 
         let value = (this._overrideDefinitions.get(key) || this._definitions.get(key) || null);
 
         if(!value)
         {
-            value = (GetConfiguration().definitions.get(key) as any);
+            if(placeholder && !LocalizationManager.isPlaceholderConfigurationKey(key)) return key;
 
-            if(value) return value;
+            const configured = GetConfiguration().definitions.get(key);
+
+            // A configuration value can be a number, a list or an object; a text is always a string.
+            if(configured && (typeof configured !== 'object')) return String(configured);
         }
 
         if(value && doParams)
@@ -146,6 +161,15 @@ export class LocalizationManager implements ILocalizationManager
         }
 
         return (value || key);
+    }
+
+    private static isPlaceholderConfigurationKey(key: string): boolean
+    {
+        if(LocalizationManager.PLACEHOLDER_CONFIGURATION_KEYS.has(key)) return true;
+
+        const extra = GetConfiguration().getValue<string[]>('localization.placeholder.configuration.keys', []);
+
+        return Array.isArray(extra) && extra.includes(key);
     }
 
     public getValueWithParameter(key: string, parameter: string, replacement: string): string
