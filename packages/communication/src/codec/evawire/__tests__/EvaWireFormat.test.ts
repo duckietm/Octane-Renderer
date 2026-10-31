@@ -31,3 +31,25 @@ describe('EvaWireFormat string length', () =>
         expect(() => new BinaryWriter().writeString('é'.repeat(40_000))).toThrow(RangeError);
     });
 });
+
+// An undefined field went out as a 2-byte empty string even where the server reads an int, shifting every field after it.
+describe('EvaWireFormat missing fields', () =>
+{
+    it('drops a packet with an undefined field', () =>
+    {
+        expect(new EvaWireFormat().encode(1, [ 5, undefined, 7 ])).toBeNull();
+    });
+
+    it('still writes null as an empty string', () =>
+    {
+        const encoded = new EvaWireFormat().encode(1, [ null, 7 ]);
+        const reader = new BinaryReader(encoded.getBuffer());
+
+        reader.readInt();
+
+        const wrapper = new EvaWireDataWrapper(reader.readShort(), reader);
+
+        expect(wrapper.readString()).toBe('');
+        expect(wrapper.readInt()).toBe(7);
+    });
+});
