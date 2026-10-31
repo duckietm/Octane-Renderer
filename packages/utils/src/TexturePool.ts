@@ -46,13 +46,15 @@ export class TexturePool
 
     public getTexture(width: number, height: number): Texture
     {
-        if(!this._textures[width]) this._textures[width] = {};
+        // Only read here: a lookup used to create an empty bucket for every size ever asked for, and run() walked all
+        // of them every second for the rest of the session.
+        const bucket = this._textures[width]?.[height];
 
-        if(!this._textures[width][height]) this._textures[width][height] = [];
-
-        if(this._textures[width][height].length)
+        if(bucket?.length)
         {
-            const texture = this._textures[width][height].shift();
+            const texture = bucket.shift();
+
+            if(!bucket.length) this.dropBucket(width, height);
 
             if(texture)
             {
@@ -111,9 +113,12 @@ export class TexturePool
 
         for(const width in this._textures)
         {
-            for(const height in this._textures[width])
+            // Held here: dropping the last bucket of a width removes the width from the map while it is walked.
+            const heights = this._textures[width];
+
+            for(const height in heights)
             {
-                const textures = this._textures[width][height];
+                const textures = heights[height];
 
                 for(let i = textures.length - 1; i >= 0; i--)
                 {
@@ -124,8 +129,31 @@ export class TexturePool
 
                     this.removeAt(textures, i);
                 }
+
+                if(!textures.length) this.dropBucket(width, height);
             }
         }
+    }
+
+    private dropBucket(width: number | string, height: number | string): void
+    {
+        const heights = this._textures[width];
+
+        if(!heights) return;
+
+        delete heights[height];
+
+        if(!Object.keys(heights).length) delete this._textures[width];
+    }
+
+    /** Visible for tests: the sizes that still hold a bucket. */
+    public get bucketCount(): number
+    {
+        let count = 0;
+
+        for(const width in this._textures) count += Object.keys(this._textures[width]).length;
+
+        return count;
     }
 
     private evictOldest(): boolean

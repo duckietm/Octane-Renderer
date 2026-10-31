@@ -271,6 +271,9 @@ export class SocketConnection implements IConnection
 
     private async handleServerHello(frame: ArrayBuffer): Promise<void>
     {
+        // The handshake awaits several times; a reconnect in between replaces the socket, and the key worked out
+        // for the old one must not be installed on, or answered through, the new one.
+        const socket = this._socket;
         const { pubkeySpki: serverPubkeySpki, signature } = parseServerHello(frame);
         const signingRequired = !!GetConfiguration().getValue<boolean>('crypto.ws.signing.enabled', false);
         if(signingRequired)
@@ -286,8 +289,11 @@ export class SocketConnection implements IConnection
         const ourKeys = await generateEphemeralKeyPair();
         const ourPubkeySpki = await exportPublicKeySpki(ourKeys.publicKey);
         const shared = await deriveSharedSecret(ourKeys.privateKey, serverPubkey);
-        this._sessionKey = await deriveAesKey(shared);
-        this._socket.send(buildClientHello(ourPubkeySpki));
+        const sessionKey = await deriveAesKey(shared);
+        if(this._socket !== socket) return;
+
+        this._sessionKey = sessionKey;
+        socket.send(buildClientHello(ourPubkeySpki));
 
         // The queued sends go on the chain before the state turns ready, so a send made from then on
         // queues behind them instead of overtaking them.

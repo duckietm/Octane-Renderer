@@ -69,7 +69,8 @@ export class PetInfoParser implements IMessageParser
             total--;
         }
 
-        this._skillThresholds.sort();
+        // Numeric order: the default sort compares text, so 100 came before 20.
+        this._skillThresholds.sort((a, b) => a - b);
         this._publiclyRideable = wrapper.readInt();
         this._breedable = wrapper.readBoolean();
         this._fullyGrown = wrapper.readBoolean();

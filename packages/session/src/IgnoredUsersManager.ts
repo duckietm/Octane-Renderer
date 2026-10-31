@@ -65,9 +65,13 @@ export class IgnoredUsersManager implements IIgnoredUsersManager
                 this.addUserToIgnoreList(userId);
                 return;
             case 2:
-                this.addUserToIgnoreList(userId);
-                this._ignoredUsers.shift();
-                this.invalidateIgnoredUsersSnapshot();
+                // The list was full: the server dropped its oldest entry to make room. Only when the user was
+                // really added, or a user already on the list cost someone else their place.
+                if(this.addUserToIgnoreList(userId))
+                {
+                    this._ignoredUsers.shift();
+                    this.invalidateIgnoredUsersSnapshot();
+                }
                 return;
             case 3:
                 this.removeUserFromIgnoreList(userId);
@@ -75,12 +79,15 @@ export class IgnoredUsersManager implements IIgnoredUsersManager
         }
     }
 
-    private addUserToIgnoreList(userId: number): void
+    /** Whether the user was added; false when already on the list. */
+    private addUserToIgnoreList(userId: number): boolean
     {
-        if(this._ignoredUsers.indexOf(userId) >= 0) return;
+        if(this._ignoredUsers.indexOf(userId) >= 0) return false;
 
         this._ignoredUsers.push(userId);
         this.invalidateIgnoredUsersSnapshot();
+
+        return true;
     }
 
     private removeUserFromIgnoreList(userId: number): void

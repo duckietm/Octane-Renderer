@@ -84,7 +84,8 @@ describe('TexturePool', () =>
 
         expect(texture.destroy).toHaveBeenCalledWith(true);
         expect(pool.getTotalTextures()).toBe(0);
-        expect(pool.textures[32][16]).toHaveLength(0);
+        // The emptied bucket goes too, so run() does not keep walking sizes that hold nothing.
+        expect(pool.textures[32]).toBeUndefined();
     });
 
     it('only sweeps once per SWEEP_INTERVAL_MS no matter how often run() is called', () =>

@@ -45,6 +45,7 @@ export class AvatarImage implements IAvatarImage, IAvatarEffectListener
     private _directionAnimationStartFrame: number = 0;
     private _directionAnimationActionName: string = null;
     private _changes: boolean = true;
+    private _textureRevision: number = 0;
     private _sprites: ISpriteDataContainer[];
     private _isAnimating: boolean = false;
     private _animationHasResetOnToggle: boolean = false;
@@ -357,6 +358,11 @@ export class AvatarImage implements IAvatarImage, IAvatarEffectListener
         return container;
     }
 
+    public get textureRevision(): number
+    {
+        return this._textureRevision;
+    }
+
     public processAsTexture(setType: string, hightlight: boolean): Texture
     {
         const revision = AvatarFrameTextureCache.revision;
@@ -370,6 +376,9 @@ export class AvatarImage implements IAvatarImage, IAvatarEffectListener
         }
 
         if(!this._changes && (this._activeSetType === setType) && (!this._sharedFrame || this._sharedFrame.cached)) return this._activeTexture;
+
+        // Past the early return the frame may be drawn again, possibly into the same texture.
+        this._textureRevision++;
 
         if(!this._mainAction) return null;
 

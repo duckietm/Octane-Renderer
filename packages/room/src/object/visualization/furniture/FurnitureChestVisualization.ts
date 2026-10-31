@@ -48,6 +48,10 @@ export class FurnitureChestVisualization extends FurnitureAnimatedVisualization
     ];
 
     private _lastVisuals: string = '';
+    // Bumped each time the visuals change: an icon that loads after that belongs to the old list and is dropped.
+    private _iconGeneration: number = 0;
+    // Icon names that failed to load, so a chest state change does not ask for a missing image again.
+    private static readonly _failedIcons: Set<string> = new Set();
     private _iconAssetNames: string[] = [];
     private _icons: { x: number; y: number; width: number; height: number; alpha: number; z: number }[] = [];
     private _mirrored: boolean = false;
@@ -73,6 +77,7 @@ export class FurnitureChestVisualization extends FurnitureAnimatedVisualization
         if(visuals === this._lastVisuals) return needsUpdate;
 
         this._lastVisuals = visuals;
+        this._iconGeneration++;
         this._iconAssetNames = [];
         this._icons = [];
 
@@ -160,13 +165,24 @@ export class FurnitureChestVisualization extends FurnitureAnimatedVisualization
 
         const name = `chest_icon_${ wallItem ? 'w' : 'f' }_${ typeId }`;
 
+        if(FurnitureChestVisualization._failedIcons.has(name)) return;
+
+        const generation = this._iconGeneration;
+
         try
         {
             if(!this.asset.getAsset(name))
             {
                 const texture = await Assets.load<Texture>(url);
 
-                if(!texture || !this.asset) return;
+                if(!texture)
+                {
+                    FurnitureChestVisualization._failedIcons.add(name);
+
+                    return;
+                }
+
+                if(!this.asset) return;
 
                 this.asset.addAsset(name, texture, true, 0, 0, false, false);
             }
@@ -174,8 +190,12 @@ export class FurnitureChestVisualization extends FurnitureAnimatedVisualization
         catch
         {
             // An icon that will not load simply is not shown. The chest still draws.
+            FurnitureChestVisualization._failedIcons.add(name);
+
             return;
         }
+
+        if(generation !== this._iconGeneration) return;
 
         const asset = this.asset.getAsset(name);
         const icon = this._icons[index];

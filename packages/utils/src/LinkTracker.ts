@@ -22,7 +22,8 @@ export const CreateLinkEvent = (link: string): void =>
 {
     if(!link || (link === '')) return;
 
-    for(const tracker of linkTrackers)
+    // A copy: a tracker that removes itself while it handles the link made the live array skip the next one.
+    for(const tracker of [ ...linkTrackers ])
     {
         if(!tracker) continue;
 

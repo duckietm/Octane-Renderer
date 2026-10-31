@@ -2,11 +2,13 @@ import { GetAssetManager } from '@octane/assets';
 import { GetCommunication, GroupBadgePartsEvent } from '@octane/communication';
 import { GetConfiguration } from '@octane/configuration';
 import { BadgeImageReadyEvent, GetEventDispatcher } from '@octane/events';
-import { OctaneLogger, TextureUtils } from '@octane/utils';
+import { fillUrlTemplate, OctaneLogger, TextureUtils } from '@octane/utils';
 import { CanvasSource, Container, Sprite, Texture } from 'pixi.js';
+import { rememberFailedBadge, shouldRetryBadge } from './BadgeFailureCache';
 import { BadgeInfo } from './BadgeInfo';
 import { GroupBadge } from './GroupBadge';
 import { drawGroupBadge, GroupBadgeLayer } from './GroupBadgeCanvas';
+import { GroupBadgeLayerPlan, GroupBadgePartImage, planGroupBadgeLayers } from './GroupBadgeLayerPlan';
 import { GroupBadgePart } from './GroupBadgePart';
 import { getBadgePartUrl } from './GroupBadgePartUrl';
 import { GroupBadgePartTables, readGroupBadgePartsCache, serializeGroupBadgeParts, writeGroupBadgePartsCache } from './GroupBadgePartsCache';
@@ -24,6 +26,9 @@ export class BadgeImageManager
     private _requestedBadges: Map<string, boolean> = new Map();
     private _groupBadgesQueue: Map<string, number> = new Map();
     private _readyToGenerateGroupBadges: boolean = false;
+    /** True once the hotel's own part list arrived this session; until then an unknown part may be a stale cache. */
+    private _partsFromServer: boolean = false;
+    private _incompleteBadgesWarned: Set<string> = new Set();
     private _groupBadgeRetryTimeout: ReturnType<typeof setTimeout> = null;
     private _groupBadgeImageUrls: Map<string, string> = new Map();
     private _remoteGroupBadges: Map<string, boolean> = new Map();
@@ -31,6 +36,10 @@ export class BadgeImageManager
     private _partsSignature: string = null;
     private _badgeParts: Map<string, 'loading' | 'loaded' | 'failed'> = new Map();
     private _badgePartLoadsInFlight: number = 0;
+    // A badge image that failed to load, and when: asked again within the backoff it is not downloaded again.
+    private _failedBadgeUrls: Map<string, number> = new Map();
+    // Badges being downloaded: a draw while one is on its way asked for it again, and every request sent its own ready event.
+    private _loadingBadgeUrls: Set<string> = new Set();
 
     public async init(): Promise<void>
     {
@@ -101,11 +110,25 @@ export class BadgeImageManager
 
         if(type === BadgeImageManager.NORMAL_BADGE)
         {
+            // A badge with no image was downloaded again every time it was drawn.
+            if(!shouldRetryBadge(this._failedBadgeUrls, url, Date.now())) return null;
+
+            if(this._loadingBadgeUrls.has(url)) return this.getBadgePlaceholder();
+
+            this._loadingBadgeUrls.add(url);
+
             const loadBadge = async () =>
             {
                 try
                 {
-                    if(!await GetAssetManager().downloadAsset(url)) return;
+                    if(!await GetAssetManager().downloadAsset(url))
+                    {
+                        rememberFailedBadge(this._failedBadgeUrls, url, Date.now());
+
+                        return;
+                    }
+
+                    this._failedBadgeUrls.delete(url);
 
                     const loadedTexture = GetAssetManager().getTexture(url);
 
@@ -115,6 +138,11 @@ export class BadgeImageManager
                 catch (err)
                 {
                     OctaneLogger.error(err);
+                }
+
+                finally
+                {
+                    this._loadingBadgeUrls.delete(url);
                 }
             };
 
@@ -145,7 +173,7 @@ export class BadgeImageManager
         switch(type)
         {
             case BadgeImageManager.NORMAL_BADGE:
-                url = (GetConfiguration().getValue<string>('badge.asset.url')).replace('%badgename%', badge);
+                url = fillUrlTemplate(GetConfiguration().getValue<string>('badge.asset.url'), '%badgename%', badge);
                 break;
             case BadgeImageManager.GROUP_BADGE:
                 url = badge;
@@ -172,7 +200,7 @@ export class BadgeImageManager
         if(!template.includes('%imagerdata%') || (template === '%imagerdata%')) return false;
 
         // Configuration values are interpolated when the file loads.
-        let url = template.replace('%imagerdata%', badgeCode);
+        let url = fillUrlTemplate(template, '%imagerdata%', badgeCode);
 
         if(url.endsWith('.gif')) url = url.slice(0, -3) + 'png';
 
@@ -282,40 +310,25 @@ export class BadgeImageManager
         return true;
     }
 
-    /** The layers of a badge in drawing order, or null while a part is unknown or its image is missing. */
+    /** The layers of a badge in drawing order (parts the hotel lacks left out), or null while the badge has to wait. */
     private getGroupBadgeLayers(groupBadge: GroupBadge): GroupBadgeLayer[]
     {
-        const layers: GroupBadgeLayer[] = [];
+        const plan: GroupBadgeLayerPlan<Texture, GroupBadgePart> = planGroupBadgeLayers(groupBadge.parts, {
+            names: part => ((part.type === 'b') ? this._groupBases.get(part.key) : this._groupSymbols.get(part.key)),
+            image: name => this.getBadgePartImage(name),
+            partsKnown: this._partsFromServer,
+            position: (part, texture) => part.calculatePosition(texture),
+            tint: part => this.getPartTintColor(part.color)
+        });
 
-        for(const part of groupBadge.parts)
+        if(plan.layers && plan.skipped.length && !this._incompleteBadgesWarned.has(groupBadge.code))
         {
-            let isFirst = true;
-            let renderedPartLayers = 0;
+            this._incompleteBadgesWarned.add(groupBadge.code);
 
-            const partNames = ((part.type === 'b') ? this._groupBases.get(part.key) : this._groupSymbols.get(part.key));
-
-            if(!partNames || !partNames.length) return null;
-
-            for(const partName of partNames)
-            {
-                if(!partName || !partName.length) continue;
-
-                const texture = this.getBadgePartTexture(partName);
-
-                if(!texture) continue;
-
-                const { x, y } = part.calculatePosition(texture);
-
-                layers.push({ texture, x, y, tint: isFirst ? this.getPartTintColor(part.color) : null });
-
-                isFirst = false;
-                renderedPartLayers++;
-            }
-
-            if(!renderedPartLayers) return null;
+            OctaneLogger.warn(`Group badge ${ groupBadge.code } drawn without part(s) ${ plan.skipped.map(part => `${ part.type }${ part.key }`).join(', ') }: not in guilds_elements or no image`);
         }
 
-        return layers.length ? layers : null;
+        return plan.layers;
     }
 
     private renderGroupBadge(groupBadge: GroupBadge): boolean
@@ -393,6 +406,15 @@ export class BadgeImageManager
      * badge parts folder (`badge.asset.grouparts.url`, %part% is the name), the folder the emulator's badge
      * imager reads too. Each part is downloaded once; null while it is on its way.
      */
+    private getBadgePartImage(rawPartName: string): GroupBadgePartImage<Texture>
+    {
+        const texture = this.getBadgePartTexture(rawPartName);
+
+        if(texture) return { status: 'ready', texture };
+
+        return (this._badgeParts.get(rawPartName.replace('.png', '').replace('.gif', '')) === 'failed') ? { status: 'failed' } : { status: 'pending' };
+    }
+
     private getBadgePartTexture(rawPartName: string): Texture
     {
         const partName = rawPartName.replace('.png', '').replace('.gif', '');
@@ -500,6 +522,7 @@ export class BadgeImageManager
         const changed = (this._partsSignature !== null) && (this._partsSignature !== signature);
 
         this.applyPartTables(tables);
+        this._partsFromServer = true;
 
         if(this._partsSignature !== signature) writeGroupBadgePartsCache(signature);
 

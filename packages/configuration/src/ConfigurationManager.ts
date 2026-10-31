@@ -1,6 +1,8 @@
 ﻿import { LegacyExternalInterface, OctaneLogger, OctaneVersion, parseConfigJsonFromResponse } from '@octane/utils';
 import { IConfigurationManager } from './IConfigurationManager';
 
+const UNSAFE_KEY_PARTS = new Set([ '__proto__', 'constructor', 'prototype' ]);
+
 export class ConfigurationManager implements IConfigurationManager
 {
     private _definitions: Map<string, unknown> = new Map();
@@ -39,7 +41,8 @@ export class ConfigurationManager implements IConfigurationManager
 
             this.parseConfiguration(defaultConfig, true);
 
-            const configurationUrls = this.getValue<string[]>('config.urls').slice();
+            // Read before the check: a missing key returned null and .slice() threw before the message below.
+            const configurationUrls = (this.getValue<string[]>('config.urls') ?? []).slice();
 
             if(!configurationUrls || !configurationUrls.length) throw new Error('No config.urls defined in OctaneConfig — expected an array like ["/renderer-config.json", "/ui-config.json"]');
 
@@ -207,6 +210,9 @@ export class ConfigurationManager implements IConfigurationManager
     public setValue<T>(key: string, value: T): void
     {
         const parts = key.split('.');
+
+        // A key such as "__proto__.x" walked into Object.prototype and set the value for every object in the page.
+        if(parts.some(part => UNSAFE_KEY_PARTS.has(part))) return;
 
         let last = this._config;
 

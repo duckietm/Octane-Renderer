@@ -1652,8 +1652,13 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
             this._walkDebounceTimer = setTimeout(() =>
             {
                 this._walkDebounceTimer = null;
+
+                const connection = GetCommunication().connection;
+
+                if(!connection) return;
+
                 this._lastWalkSentAt = Date.now();
-                GetCommunication().connection.send(new RoomUnitWalkComposer(x, y));
+                connection.send(new RoomUnitWalkComposer(x, y));
             }, RoomObjectEventHandler.WALK_MIN_INTERVAL_MS - elapsed);
         }
     }
@@ -2303,6 +2308,21 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
     public clearSelectedAvatar(roomId: number): void
     {
         this.setSelectedAvatar(roomId, 0, false);
+    }
+
+    /**
+     * Drops a walk or a look still waiting to be sent. Called when a room goes away: the timers outlived it and could
+     * send a step or a look into the next room.
+     */
+    public cancelPendingSends(): void
+    {
+        if(this._walkDebounceTimer)
+        {
+            clearTimeout(this._walkDebounceTimer);
+            this._walkDebounceTimer = null;
+        }
+
+        this.clearPendingAvatarLook();
     }
 
     private clearPendingAvatarLook(): void

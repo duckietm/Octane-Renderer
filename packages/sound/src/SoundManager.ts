@@ -29,6 +29,9 @@ export class SoundManager implements ISoundManager
 
     public async init(): Promise<void>
     {
+        // A second init registered every listener again and lost the first set, which could no longer be removed.
+        if(this._eventCallback) return;
+
         this._musicController.init();
 
         // Store callback for cleanup
@@ -60,9 +63,10 @@ export class SoundManager implements ISoundManager
         // Stop all playing samples
         this.stopAllFurniSamples();
 
-        // Clear all samples
-        this._internalSamples.dispose();
-        this._furniSamples.dispose();
+        // Clear all samples. reset() keeps the maps usable: dispose() dropped their storage, and the first sound after
+        // a later init threw.
+        this._internalSamples.reset();
+        this._furniSamples.reset();
         this._roomObjectSounds.forEach(sample => sample.pause());
         this._roomObjectSounds.clear();
         this._roomObjectSoundPlayedAt.clear();

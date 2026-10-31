@@ -76,6 +76,14 @@ describe('ConfigurationManager.init', () =>
         delete (window as any).OctaneConfig;
     });
 
+    it('says that config.urls is missing instead of failing on it', async () =>
+    {
+        (window as any).OctaneConfig = { 'some.key': 1 };
+        vi.stubGlobal('fetch', vi.fn());
+
+        await expect(new ConfigurationManager().init()).rejects.toThrow('No config.urls defined');
+    });
+
     it('loads the configuration once; later calls share that load', async () =>
     {
         (window as any).OctaneConfig = { 'config.urls': [ '/a.json' ] };
@@ -161,5 +169,28 @@ describe('ConfigurationManager.parseConfiguration', () =>
 
         LegacyExternalInterface.setParentOrigin(null);
         vi.restoreAllMocks();
+    });
+});
+
+describe('ConfigurationManager.setValue', () =>
+{
+    it('refuses a key that would reach Object.prototype', () =>
+    {
+        const manager = new ConfigurationManager();
+
+        manager.setValue('__proto__.polluted', 'yes');
+        manager.setValue('constructor.prototype.polluted', 'yes');
+
+        expect(({} as Record<string, unknown>).polluted).toBeUndefined();
+        expect(manager.getValue('__proto__.polluted', null)).toBeNull();
+    });
+
+    it('still sets a nested key', () =>
+    {
+        const manager = new ConfigurationManager();
+
+        manager.setValue('loader.waiting', 'yes');
+
+        expect(manager.getValue('loader.waiting')).toBe('yes');
     });
 });
