@@ -152,7 +152,7 @@ const concatBytes = (...parts: ArrayBuffer[]): Uint8Array<ArrayBuffer> =>
 export async function deriveDirectionalKeyBits(sharedSecret: ArrayBuffer, label: string, serverSpki: ArrayBuffer, clientSpki: ArrayBuffer): Promise<ArrayBuffer>
 {
     const transcript = await window.crypto.subtle.digest('SHA-256', concatBytes(serverSpki, clientSpki));
-    const info = concatBytes(new TextEncoder().encode(label).buffer as ArrayBuffer, transcript);
+    const info = concatBytes(new TextEncoder().encode(label).buffer, transcript);
     const ikm = await window.crypto.subtle.importKey('raw', sharedSecret, 'HKDF', false, [ 'deriveBits' ]);
 
     return window.crypto.subtle.deriveBits({ name: 'HKDF', hash: 'SHA-256', salt: new Uint8Array(32), info }, ikm, AES_KEY_BITS);

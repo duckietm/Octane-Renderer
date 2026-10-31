@@ -9,7 +9,7 @@ type Internals = {
     decryptFrame(frame: ArrayBuffer): Promise<ArrayBuffer>;
 };
 
-const text = (value: string) => new TextEncoder().encode(value).buffer as ArrayBuffer;
+const text = (value: string) => new TextEncoder().encode(value).buffer;
 
 const frame = async (key: CryptoKey, direction: number, counter: number, value: string): Promise<ArrayBuffer> =>
 {

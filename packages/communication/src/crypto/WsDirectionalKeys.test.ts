@@ -4,7 +4,7 @@ import { deriveDirectionalKeyBits, DIRECTION_CLIENT_TO_SERVER, directionalNonce,
 // Version 2 of the encrypted WebSocket: a key per direction bound to both handshake keys, and a counter in every
 // nonce. The expected keys were computed independently (Python hmac/hashlib) and Polaris's test checks the same ones.
 const hex = (buffer: ArrayBuffer) => [ ...new Uint8Array(buffer) ].map(byte => byte.toString(16).padStart(2, '0')).join('');
-const ascii = (text: string) => new TextEncoder().encode(text).buffer as ArrayBuffer;
+const ascii = (text: string) => new TextEncoder().encode(text).buffer;
 const shared = new Uint8Array(Array.from({ length: 32 }, (_, i) => i + 1)).buffer;
 
 describe('encrypted WebSocket v2 keys and nonces', () =>
