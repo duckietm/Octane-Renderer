@@ -45,6 +45,57 @@ export const isAllowedUserImageUrl = (url: string, allowedHosts: string[] = [], 
     return hosts.some(allowed => (host === allowed) || host.endsWith('.' + allowed));
 };
 
+/** The hosts a furni photo or video thumbnail may load from over https when the hotel lists none. */
+export const DEFAULT_FURNI_IMAGE_HOSTS = ['youtube.com', 'ytimg.com'];
+
+/**
+ * Whether a furni photo or thumbnail URL may be loaded. The URL is written by users into the furni data, and loading
+ * it from any host showed the IP of everyone entering the room to that host. Allowed: this site, the sites of the
+ * hotel's own configured URLs (`trustedUrls`, such as the camera), and https from a listed host or its subdomains.
+ */
+export const isAllowedFurniImageUrl = (url: string, allowedHosts: string[], trustedUrls: string[] = [], location: string = globalThis.location?.href): boolean =>
+{
+    if(!url || (typeof url !== 'string')) return false;
+
+    let parsed: URL;
+
+    try
+    {
+        parsed = new URL(url.trim(), location);
+    }
+    catch
+    {
+        return false;
+    }
+
+    if((parsed.protocol !== 'http:') && (parsed.protocol !== 'https:')) return false;
+
+    const origins: string[] = [];
+
+    for(const trusted of [location, ...trustedUrls])
+    {
+        try
+        {
+            if(trusted) origins.push(new URL(trusted, location).origin);
+        }
+        catch
+        {
+            // A broken configured URL trusts nothing.
+        }
+    }
+
+    if(origins.includes(parsed.origin)) return true;
+
+    if(parsed.protocol !== 'https:') return false;
+
+    const host = parsed.hostname.toLowerCase();
+
+    return allowedHosts
+        .map(allowed => allowed.trim().toLowerCase())
+        .filter(allowed => allowed.length)
+        .some(allowed => (host === allowed) || host.endsWith('.' + allowed));
+};
+
 /** A comma separated or array config value as a list of hosts. */
 export const parseHostList = (value: unknown): string[] =>
 {
