@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Each fake encryption resolves after a delay chosen by the test, so later packets can finish first.
 const delays = new Map<number, number>();
+const config = new Map<string, unknown>();
 
 vi.mock('./crypto', () => ({
     NONCE_LEN: 1,
@@ -29,7 +30,7 @@ vi.mock('./crypto', () => ({
 
 vi.mock('@octane/configuration', async importOriginal => ({
     ...(await importOriginal<object>()),
-    GetConfiguration: () => ({ getValue: (_key: string, fallback: unknown) => fallback, interpolate: (value: string) => value })
+    GetConfiguration: () => ({ getValue: (key: string, fallback: unknown) => (config.has(key) ? config.get(key) : fallback), interpolate: (value: string) => value })
 }));
 
 import { SocketConnection } from './SocketConnection';
@@ -64,7 +65,11 @@ const settle = () => new Promise(resolve => setTimeout(resolve, 120));
 
 describe('SocketConnection encrypted send order', () =>
 {
-    beforeEach(() => delays.clear());
+    beforeEach(() =>
+    {
+        delays.clear();
+        config.clear();
+    });
     afterEach(() => vi.useRealTimers());
 
     it('sends packets in the order they were written, whichever encryption finishes first', async () =>
@@ -99,5 +104,14 @@ describe('SocketConnection encrypted send order', () =>
         await settle();
 
         expect(sent).toEqual([ 255, 1, 2, 3 ]);
+    });
+
+    it('refuses the version 1 session when crypto.ws.require_v2 is set and the server did not take version 2', async () =>
+    {
+        config.set('crypto.ws.require_v2', true);
+        const { internals, sent } = setup('awaiting_server_hello');
+
+        await expect(internals.handleServerHello(new ArrayBuffer(0))).rejects.toThrow('crypto.ws.require_v2');
+        expect(sent).toEqual([]);
     });
 });

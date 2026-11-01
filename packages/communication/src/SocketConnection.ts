@@ -294,6 +294,14 @@ export class SocketConnection implements IConnection
         const ourPubkeySpki = await exportPublicKeySpki(ourKeys.publicKey);
         const shared = await deriveSharedSecret(ourKeys.privateKey, serverPubkey);
         const directional = (socket.protocol === SUBPROTOCOL_V2);
+        // Without the subprotocol in the upgrade answer the session falls back to version 1, which a proxy can
+        // force by dropping one header. A hotel whose server speaks version 2 can refuse that.
+        if(!directional)
+        {
+            if(GetConfiguration().getValue<boolean>('crypto.ws.require_v2', false)) throw new Error('crypto.ws.require_v2=true but the server did not take ' + SUBPROTOCOL_V2);
+
+            OctaneLogger.log('[ws-crypto] the server did not take ' + SUBPROTOCOL_V2 + ': using the version 1 session');
+        }
         const sessionKey = directional ? null : await deriveAesKey(shared);
         const directionalKeys = directional ? await deriveDirectionalKeys(shared, serverPubkeySpki, ourPubkeySpki) : null;
         if(this._socket !== socket) return;
