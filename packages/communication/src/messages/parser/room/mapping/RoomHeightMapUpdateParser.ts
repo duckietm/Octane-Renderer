@@ -41,8 +41,9 @@ export class RoomHeightMapUpdateParser implements IMessageParser
 
         this._count--;
 
-        this._x = this._wrapper.readByte();
-        this._y = this._wrapper.readByte();
+        // The server writes x and y as unsigned bytes: read signed, a column past 127 came out negative.
+        this._x = this._wrapper.readByte() & 0xFF;
+        this._y = this._wrapper.readByte() & 0xFF;
         this._value = this._wrapper.readShort();
 
         return true;
