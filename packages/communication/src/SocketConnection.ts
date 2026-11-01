@@ -381,8 +381,13 @@ export class SocketConnection implements IConnection
     {
         if(!this._sessionKey && !this._directional) return;
         const directional = this._directional;
-        const nonce = directional ? directionalNonce(DIRECTION_CLIENT_TO_SERVER, directional.sendCounter++) : randomNonce();
+        // The counter moves only once the packet is encrypted: a failed encryption used to leave a gap, and the
+        // server, which wants the next counter, closed the session at the following packet. Sends run one at a
+        // time on the encrypt chain, and a packet that failed was never sent, so its nonce is not reused on the wire.
+        const counter = directional ? directional.sendCounter : 0;
+        const nonce = directional ? directionalNonce(DIRECTION_CLIENT_TO_SERVER, counter) : randomNonce();
         const ct = await aesGcmEncrypt(directional ? directional.keys.send : this._sessionKey, nonce, plaintext);
+        if(directional) directional.sendCounter = counter + 1;
         const framed = new Uint8Array(NONCE_LEN + ct.byteLength);
         framed.set(nonce, 0);
         framed.set(new Uint8Array(ct), NONCE_LEN);
