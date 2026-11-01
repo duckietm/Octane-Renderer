@@ -89,7 +89,9 @@ export class RoomSessionManager implements IRoomSessionManager, IRoomHandlerList
             if(isNaN(roomId) || roomId <= 0) return;
 
             this._lastRoomId = roomId;
-            this._lastRoomPassword = sessionStorage.getItem(STORAGE_KEY_ROOM_PASSWORD) || null;
+            // The password is kept in memory only: a socket reconnect still has it, a page reload asks for it again.
+            this._lastRoomPassword = null;
+            sessionStorage.removeItem(STORAGE_KEY_ROOM_PASSWORD);
 
             this._isReconnecting = true;
         }
@@ -125,7 +127,7 @@ export class RoomSessionManager implements IRoomSessionManager, IRoomHandlerList
             this.cancelRoomIdClear();
             if(this._lastRoomId > 0)
             {
-                this.persistRoom(this._lastRoomId, this._lastRoomPassword);
+                this.persistRoom(this._lastRoomId);
             }
             this._isReconnecting = true;
         });
@@ -278,7 +280,7 @@ export class RoomSessionManager implements IRoomSessionManager, IRoomHandlerList
 
             if(isNaN(roomId) || roomId <= 0) return false;
 
-            const password = sessionStorage.getItem(STORAGE_KEY_ROOM_PASSWORD) || null;
+            const password = this._lastRoomPassword;
 
             let spawnX = -1;
             let spawnY = -1;
@@ -322,7 +324,7 @@ export class RoomSessionManager implements IRoomSessionManager, IRoomHandlerList
         }
     }
 
-    private persistRoom(roomId: number, password: string): void
+    private persistRoom(roomId: number): void
     {
         try
         {
@@ -330,14 +332,8 @@ export class RoomSessionManager implements IRoomSessionManager, IRoomHandlerList
             {
                 sessionStorage.setItem(STORAGE_KEY_ROOM_ID, roomId.toString());
 
-                if(password)
-                {
-                    sessionStorage.setItem(STORAGE_KEY_ROOM_PASSWORD, password);
-                }
-                else
-                {
-                    sessionStorage.removeItem(STORAGE_KEY_ROOM_PASSWORD);
-                }
+                // A room password never goes to storage, where any script on the page could read it in clear text.
+                sessionStorage.removeItem(STORAGE_KEY_ROOM_PASSWORD);
             }
             else
             {
@@ -446,7 +442,7 @@ export class RoomSessionManager implements IRoomSessionManager, IRoomHandlerList
         this._viewerSession = roomSession;
         this._lastRoomId = roomSession.roomId;
         this._lastRoomPassword = roomSession.password;
-        this.persistRoom(roomSession.roomId, roomSession.password);
+        this.persistRoom(roomSession.roomId);
 
         this.invalidateRoomSessionSnapshot();
 
@@ -574,7 +570,7 @@ export class RoomSessionManager implements IRoomSessionManager, IRoomHandlerList
         this._sessions.set(this.getRoomId(toRoomId), existing);
 
         this._lastRoomId = toRoomId;
-        this.persistRoom(toRoomId, existing.password);
+        this.persistRoom(toRoomId);
 
         this.setHandlers(existing);
     }

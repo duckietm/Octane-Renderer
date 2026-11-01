@@ -17,7 +17,14 @@ vi.mock('./crypto', () => ({
     deriveAesKey: async () => ({}),
     buildClientHello: () => new Uint8Array([ 255, 255 ]).buffer,
     importSigningPublicKeyFromBase64: vi.fn(),
-    verifyEphemeralSignature: vi.fn()
+    verifyEphemeralSignature: vi.fn(),
+    // Version 2 is only used when the server answers its subprotocol; the fake socket here has none.
+    SUBPROTOCOL_V2: 'octane-ws-v2',
+    DIRECTION_CLIENT_TO_SERVER: 1,
+    DIRECTION_SERVER_TO_CLIENT: 2,
+    deriveDirectionalKeys: vi.fn(),
+    directionalNonce: vi.fn(),
+    readDirectionalNonce: vi.fn()
 }));
 
 vi.mock('@octane/configuration', async importOriginal => ({

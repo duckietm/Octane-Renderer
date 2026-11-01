@@ -39,6 +39,8 @@ export class HabbiconBubbleAddition implements IAvatarAddition
     private _mirrorResolved: boolean = false;
     private _mirrored: boolean = false;
     private _partOfStack: boolean = false;
+    /** The composed texture this bubble shows, held so the shared cache does not destroy it under the sprite. */
+    private _heldTexture: Texture = null;
 
     constructor(
         private _id: number,
@@ -49,6 +51,7 @@ export class HabbiconBubbleAddition implements IAvatarAddition
 
     public dispose(): void
     {
+        this.holdTexture(null);
         this._runtime = null;
         this._visualization = null;
     }
@@ -187,6 +190,7 @@ export class HabbiconBubbleAddition implements IAvatarAddition
     {
         if(!texture) return;
 
+        this.holdTexture(texture);
         sprite.texture = texture;
         this._bitmapWidth = texture.width;
         this._bitmapHeight = texture.height;
@@ -250,6 +254,17 @@ export class HabbiconBubbleAddition implements IAvatarAddition
         this._complete = true;
         sprite.alpha = 0;
         sprite.visible = false;
+    }
+
+    private holdTexture(texture: Texture): void
+    {
+        if(texture === this._heldTexture) return;
+
+        const manager = HabbiconAssetManager.getInstance();
+
+        manager.retainTexture(texture);
+        manager.releaseTexture(this._heldTexture);
+        this._heldTexture = texture;
     }
 
     private configureTiming(): void

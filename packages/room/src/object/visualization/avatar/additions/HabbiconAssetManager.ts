@@ -52,6 +52,12 @@ export class HabbiconAssetManager
     private _sourceCanvases = new Map<string, HTMLCanvasElement>();
     private _imageUrls = new Map<string, string>();
     private _composedTextures = new Map<string, Texture>();
+    /**
+     * How many bubbles show each composed texture. The cache evicted and destroyed its oldest texture while a sprite in
+     * a crowded room could still show it; one still in use is destroyed when the last bubble lets it go.
+     */
+    private _textureUsers = new Map<Texture, number>();
+    private _evictedInUse = new Set<Texture>();
     private _animationLoading = new Map<number, Promise<void>>();
     private _spritesheet: HTMLImageElement = null;
     private _collectionSpritesheet: HTMLImageElement = null;
@@ -229,10 +235,38 @@ export class HabbiconAssetManager
 
             this._composedTextures.delete(oldestKey);
 
-            if(oldest && !oldest.destroyed) oldest.destroy(true);
+            if(!oldest || oldest.destroyed) continue;
+
+            if(this._textureUsers.has(oldest)) this._evictedInUse.add(oldest);
+            else oldest.destroy(true);
         }
 
         return texture;
+    }
+
+    public retainTexture(texture: Texture): void
+    {
+        if(!texture) return;
+
+        this._textureUsers.set(texture, (this._textureUsers.get(texture) ?? 0) + 1);
+    }
+
+    public releaseTexture(texture: Texture): void
+    {
+        if(!texture) return;
+
+        const users = (this._textureUsers.get(texture) ?? 0) - 1;
+
+        if(users > 0)
+        {
+            this._textureUsers.set(texture, users);
+
+            return;
+        }
+
+        this._textureUsers.delete(texture);
+
+        if(this._evictedInUse.delete(texture) && !texture.destroyed) texture.destroy(true);
     }
 
     public getPreviewTexture(habbiconId: number, small: boolean): Texture

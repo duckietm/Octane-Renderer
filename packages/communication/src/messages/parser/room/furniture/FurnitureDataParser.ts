@@ -27,9 +27,12 @@ export class FurnitureDataParser implements IMessageParser
     {
         if(!wrapper) return null;
 
-        const data = ObjectDataFactory.getData(wrapper.readInt());
+        const format = wrapper.readInt();
+        const data = ObjectDataFactory.getData(format);
 
-        if(!data) return null;
+        // An unknown format cannot be skipped, since only the format knows its length: reading on would take its
+        // payload for the next furni's fields. The packet is dropped instead.
+        if(!data) throw new Error(`Unknown stuff data format ${ format }`);
 
         data.parseWrapper(wrapper);
 
