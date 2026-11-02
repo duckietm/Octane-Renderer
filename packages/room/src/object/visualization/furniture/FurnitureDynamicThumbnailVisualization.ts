@@ -1,8 +1,13 @@
+import { GetConfiguration } from '@octane/configuration';
+import { DEFAULT_FURNI_IMAGE_HOSTS, isAllowedFurniImageUrl, parseHostList } from '@octane/utils';
 import { Texture } from 'pixi.js';
 import { IsometricImageFurniVisualization } from './IsometricImageFurniVisualization';
 
 export class FurnitureDynamicThumbnailVisualization extends IsometricImageFurniVisualization
 {
+    // A larger image is not drawn: the URL comes from user data and decoding it costs memory for everyone in the room.
+    public static MAXIMUM_IMAGE_SIDE: number = 2048;
+
     private _cachedUrl: string;
     private _disposed: boolean = false;
 
@@ -26,7 +31,7 @@ export class FurnitureDynamicThumbnailVisualization extends IsometricImageFurniV
     {
         if(this.object)
         {
-            const thumbnailUrl = this.getThumbnailURL();
+            const thumbnailUrl = FurnitureDynamicThumbnailVisualization.allowedUrl(this.getThumbnailURL());
 
             if(this._cachedUrl !== thumbnailUrl)
             {
@@ -51,7 +56,9 @@ export class FurnitureDynamicThumbnailVisualization extends IsometricImageFurniV
                             return;
                         }
 
-                        if(image.complete && image.width > 0 && image.height > 0)
+                        const side = FurnitureDynamicThumbnailVisualization.MAXIMUM_IMAGE_SIDE;
+
+                        if(image.complete && image.width > 0 && image.height > 0 && image.width <= side && image.height <= side)
                         {
                             const texture = Texture.from(image, true);
                             texture.source.scaleMode = 'linear';
@@ -86,5 +93,20 @@ export class FurnitureDynamicThumbnailVisualization extends IsometricImageFurniV
     protected getThumbnailURL(): string
     {
         throw new Error('This method must be overridden!');
+    }
+
+    /** The URL when the hotel allows furni images from its host, otherwise null. */
+    private static allowedUrl(url: string): string
+    {
+        if(!url) return url;
+
+        const configuration = GetConfiguration();
+        const hosts = configuration.getValue<unknown>('furni.external.image.hosts', null);
+        const allowedHosts = (hosts === null || hosts === undefined) ? DEFAULT_FURNI_IMAGE_HOSTS : parseHostList(hosts);
+        const trustedUrls = ['camera.url', 'thumbnails.url', 'url.prefix']
+            .map(key => configuration.getValue<string>(key, ''))
+            .filter(value => (typeof value === 'string') && value.length);
+
+        return isAllowedFurniImageUrl(url, allowedHosts, trustedUrls) ? url : null;
     }
 }

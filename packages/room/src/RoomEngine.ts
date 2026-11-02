@@ -2155,7 +2155,7 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
         return true;
     }
 
-    public updateRoomObjectUserLocation(roomId: number, objectId: number, location: IVector3D, targetLocation: IVector3D, canStandUp: boolean = false, baseY: number = 0, direction: IVector3D = null, headDirection: number = NaN, skipLocationFix: boolean = false, isSlide: boolean = false, duration: number = ObjectMoveUpdateMessage.DEFAULT_DURATION): boolean
+    public updateRoomObjectUserLocation(roomId: number, objectId: number, location: IVector3D, targetLocation: IVector3D, canStandUp: boolean = false, baseY: number = 0, direction: IVector3D = null, headDirection: number = NaN, skipLocationFix: boolean = false, isSlide: boolean = false, duration: number = ObjectMoveUpdateMessage.DEFAULT_DURATION, anchorObject: IRoomObjectController = null, anchorOffset: IVector3D = null): boolean
     {
         const object = this.getRoomObjectUser(roomId, objectId);
 
@@ -2170,7 +2170,7 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
         const fixedLoc = skipLocationFix ? location : this.fixedUserLocation(roomId, location);
         const fixedTarget = skipLocationFix ? targetLocation : this.fixedUserLocation(roomId, targetLocation);
 
-        object.processUpdateMessage(new ObjectAvatarUpdateMessage(fixedLoc, fixedTarget, direction, headDirection, canStandUp, baseY, isSlide, duration));
+        object.processUpdateMessage(new ObjectAvatarUpdateMessage(fixedLoc, fixedTarget, direction, headDirection, canStandUp, baseY, isSlide, duration, anchorObject, anchorOffset));
 
         const roomSession = this._roomSessionManager.getSession(roomId);
 

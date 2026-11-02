@@ -490,6 +490,16 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
                     this.placeObject(roomId, (event instanceof RoomObjectTileMouseEvent), (event instanceof RoomObjectWallMouseEvent));
                 }
 
+                // A bot or pet goes onto a furni one can stand on, as an avatar walks onto it.
+                else if((category === RoomObjectCategory.FLOOR) && selectedData && (selectedData.category === RoomObjectCategory.UNIT))
+                {
+                    if(this.getUnitPlacementTile(event, roomId))
+                    {
+                        this.handleObjectPlace(event, roomId);
+                        this.placeObject(roomId, true, false);
+                    }
+                }
+
                 else if(category === RoomObjectCategory.UNIT)
                 {
                     switch(event.objectType)
@@ -688,7 +698,7 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
 
                 return;
             case RoomObjectOperationType.OBJECT_PLACE:
-                if(category === RoomObjectCategory.ROOM) this.handleObjectPlace(event, roomId);
+                if((category === RoomObjectCategory.ROOM) || ((category === RoomObjectCategory.FLOOR) && selectedData && (selectedData.category === RoomObjectCategory.UNIT))) this.handleObjectPlace(event, roomId);
 
                 return;
         }
@@ -1281,7 +1291,7 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
 
         if(!roomObject)
         {
-            if(event instanceof RoomObjectTileMouseEvent)
+            if((event instanceof RoomObjectTileMouseEvent) || ((selectedData.category === RoomObjectCategory.UNIT) && this.getUnitPlacementTile(event, roomId)))
             {
                 if(selectedData.category === RoomObjectCategory.FLOOR)
                 {
@@ -1378,7 +1388,9 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
 
             else if(selectedData.category === RoomObjectCategory.UNIT)
             {
-                if(!((event instanceof RoomObjectTileMouseEvent) && this.handleUserPlace(roomObject, Math.trunc(event.tileX + 0.5), Math.trunc(event.tileY + 0.5), this._roomEngine.getLegacyWallGeometry(roomId))))
+                const tile = this.getUnitPlacementTile(event, roomId);
+
+                if(!(tile && this.handleUserPlace(roomObject, tile.x, tile.y, this._roomEngine.getLegacyWallGeometry(roomId))))
                 {
                     this._roomEngine.removeRoomObjectUser(roomId, selectedData.id);
 
@@ -2437,6 +2449,22 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
         const selectedData = new SelectedRoomObjectData(id, category, operation, location, direction, typeId, instanceData, stuffData, state, frameNumber, posture);
 
         this._roomEngine.setSelectedRoomObjectData(roomId, selectedData);
+    }
+
+    /**
+     * The tile a bot or pet being placed goes to: the floor tile under the cursor, or, over a furni one can stand, sit
+     * or lie on (a rug, a tile, a chair), the tile of it under the cursor, as an avatar walks there.
+     */
+    private getUnitPlacementTile(event: RoomObjectMouseEvent, roomId: number): { x: number, y: number }
+    {
+        if(event instanceof RoomObjectTileMouseEvent) return { x: Math.trunc(event.tileX + 0.5), y: Math.trunc(event.tileY + 0.5) };
+
+        if(!event || !this._roomEngine || (this._roomEngine.getRoomObjectCategoryForType(event.objectType) !== RoomObjectCategory.FLOOR)) return null;
+
+        const furni = this._roomEngine.getRoomObject(roomId, event.objectId, RoomObjectCategory.FLOOR);
+        const point = this.getActiveSurfaceLocation(furni, event);
+
+        return point ? { x: point.x, y: point.y } : null;
     }
 
     private handleUserPlace(roomObject: IRoomObjectController, x: number, y: number, wallGeometry: ILegacyWallGeometry): boolean

@@ -22,6 +22,8 @@ export class MovingObjectLogic extends RoomObjectLogicBase
     private static SLIDE_CHAIN_BUFFER: number = 100;
     private static SLIDE_PERIOD_MIN: number = 100;
     private static SLIDE_PERIOD_MAX: number = 4000;
+    private static SLIDE_PERIOD_SMOOTHING: number = 0.25;
+    private static SLIDE_BACKLOG_PACE: number = 0.2;
 
     private _liftAmount: number;
 
@@ -212,6 +214,7 @@ export class MovingObjectLogic extends RoomObjectLogicBase
             {
                 if(this.object && message.direction) this.object.setDirection(message.direction);
 
+                this.shortenActiveSlide(message);
                 this.queueMoveMessage(message);
 
                 return;
@@ -283,7 +286,11 @@ export class MovingObjectLogic extends RoomObjectLogicBase
 
         if((this._lastSlideArrivalTime > 0) && (sincePrevious >= MovingObjectLogic.SLIDE_PERIOD_MIN) && (sincePrevious <= MovingObjectLogic.SLIDE_PERIOD_MAX))
         {
-            this._estimatedSlidePeriod = sincePrevious;
+            // A smoothed cadence: a repeater's ticks come unevenly (250ms, 300ms, 250ms...), and following the last
+            // gap alone made every other hop end early and stall, or run late and pile up.
+            this._estimatedSlidePeriod = (this._estimatedSlidePeriod > 0)
+                ? (this._estimatedSlidePeriod + ((sincePrevious - this._estimatedSlidePeriod) * MovingObjectLogic.SLIDE_PERIOD_SMOOTHING))
+                : sincePrevious;
         }
         else
         {
@@ -306,7 +313,14 @@ export class MovingObjectLogic extends RoomObjectLogicBase
 
         if(!chained) return baseDuration;
 
-        return fromQueue ? this._estimatedSlidePeriod : (this._estimatedSlidePeriod + MovingObjectLogic.SLIDE_CHAIN_BUFFER);
+        if(!fromQueue) return (this._estimatedSlidePeriod + MovingObjectLogic.SLIDE_CHAIN_BUFFER);
+
+        // Keep about one hop waiting: run a little faster while more are queued and a little slower when this was the
+        // last one, so the chain neither falls behind the server nor runs dry and stalls before the next tick.
+        const waiting = this._queuedMoveMessages.length;
+        const pace = 1 + (MovingObjectLogic.SLIDE_BACKLOG_PACE * (1 - Math.min(waiting, 3)));
+
+        return Math.max(MovingObjectLogic.SLIDE_PERIOD_MIN, (this._estimatedSlidePeriod * pace));
     }
 
     private processMoveMessage(message: ObjectMoveUpdateMessage, fromQueue: boolean = false): void
@@ -435,6 +449,40 @@ export class MovingObjectLogic extends RoomObjectLogicBase
     private isInterpolating(): boolean
     {
         return (this._locationDelta.length > 0) && ((this.time - this._changeTime) < this._updateInterval);
+    }
+
+    /**
+     * A chain's first hop runs the full animation time, as its cadence is not known yet; once it is, a hop still that
+     * long would hold every later tick back in the queue. It goes on from where the object is, ending one cadence on.
+     */
+    private shortenActiveSlide(message: ObjectMoveUpdateMessage): void
+    {
+        if(!this.object || this._followObject || this._hopping || this._landing || this._queuedMoveMessages.length) return;
+
+        // An eased or jumping hop is not a straight line, so it is not cut short.
+        const style = this.object.model?.getValue<number>(RoomObjectVariable.FURNITURE_MOVE_STYLE);
+
+        if(style && (style > 0)) return;
+
+        const duration = this.getSlideDuration(message, false);
+
+        if(duration >= message.duration) return;
+
+        const remaining = this._updateInterval - (this.time - this._changeTime);
+
+        if(remaining <= duration) return;
+
+        const end = this.getMovementEndLocation();
+        const locationOffset = this.getLocationOffset();
+
+        this._location.assign(this.object.getLocation());
+
+        if(locationOffset) this._location.subtract(locationOffset);
+
+        this._locationDelta.assign(end);
+        this._locationDelta.subtract(this._location);
+        this._changeTime = this._lastUpdateTime;
+        this.updateInterval = duration;
     }
 
     private shouldQueueMoveMessage(message: ObjectMoveUpdateMessage): boolean

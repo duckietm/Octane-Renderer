@@ -86,4 +86,10 @@ describe('LocalizationManager parameters (AIR Localization.fillParameterValues)'
 
         expect(localization.getValue('groupforum.view.forum_details')).toContain('user/Cid">Cid</a>');
     });
+
+    it('takes a parameter name with pattern characters as plain text', () =>
+    {
+        expect(LocalizationManager.escapeRegExp('a(b)*')).toBe('a\\(b\\)\\*');
+        expect(LocalizationManager.replaceParameter('cost %x(% now', 'x(', '5')).toBe('cost 5 now');
+    });
 });

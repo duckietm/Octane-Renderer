@@ -57,6 +57,17 @@ export class RoomHeightMapParser implements IMessageParser
 
         this._width = wrapper.readInt();
         const totalTiles = wrapper.readInt();
+
+        // A width of 0 made the height Infinity and the room loop over it never ended; a count that is not whole
+        // rows of the width has no height either.
+        if(this._width <= 0 || totalTiles < 0 || (totalTiles % this._width) !== 0)
+        {
+            this._width = 0;
+            this._height = 0;
+
+            return false;
+        }
+
         this._height = totalTiles / this._width;
 
         let i = 0;

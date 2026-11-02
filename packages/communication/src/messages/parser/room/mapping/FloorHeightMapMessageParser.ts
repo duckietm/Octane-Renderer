@@ -2,6 +2,9 @@ import { IMessageDataWrapper, IMessageParser } from '@octane/api';
 
 export class FloorHeightMapMessageParser implements IMessageParser
 {
+    /** The longest side of a floor plan the client accepts. */
+    public static MAX_SIDE = 512;
+
     public static TILE_BLOCKED: number = -110;
 
     private _model: string;
@@ -64,6 +67,16 @@ export class FloorHeightMapMessageParser implements IMessageParser
             }
 
             iterator++;
+        }
+
+        // A model this large is no room: it made the client allocate a map of that size, and the stacking map after it.
+        if(width > FloorHeightMapMessageParser.MAX_SIDE || modelRows > FloorHeightMapMessageParser.MAX_SIDE)
+        {
+            this._heightMap = [];
+            this._width = 0;
+            this._height = 0;
+
+            return false;
         }
 
         this._heightMap = [];

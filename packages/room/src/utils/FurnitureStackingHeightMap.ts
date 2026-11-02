@@ -32,7 +32,7 @@ export class FurnitureStackingHeightMap implements IFurnitureStackingHeightMap
     {
         this._width = 0;
         this._height = 0;
-        this._height = null;
+        this._heights = null;
         this._isNotStackable = null;
         this._isRoomTile = null;
     }

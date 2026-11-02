@@ -1,4 +1,5 @@
 import { AvatarGuideStatus, IConnection, IMessageEvent, IRoomCreator, IRoomObjectController, IRoomObject, IVector3D, LegacyDataType, MapDataType, ObjectRolling, PetType, RoomObjectCategory, RoomObjectType, RoomObjectUserType, RoomObjectVariable } from '@octane/api';
+import { wiredMovementPosture, wiredMovementSeatOffset, wiredSeatAnchorId } from './wiredMovementPosture';
 import { AreaHideMessageEvent, ConfigurationItemStatesEvent, ConfInvisStateMessageEvent, DiceValueMessageEvent, FloorHeightMapEvent, FurnitureAliasesComposer, FurnitureAliasesEvent, FurnitureDataEvent, FurnitureFloorAddEvent, FurnitureFloorDataParser, FurnitureFloorEvent, FurnitureFloorRemoveEvent, FurnitureFloorUpdateEvent, FurnitureWallAddEvent, FurnitureWallDataParser, FurnitureWallEvent, FurnitureWallRemoveEvent, FurnitureWallUpdateEvent, GetCommunication, GetRoomEntryDataMessageComposer, GuideSessionEndedMessageEvent, GuideSessionErrorMessageEvent, GuideSessionStartedMessageEvent, IgnoreResultEvent, ItemDataUpdateMessageEvent, ObjectsDataUpdateEvent, ObjectsRollingEvent, OneWayDoorStatusMessageEvent, RecolorFurniUpdateEvent, PetExperienceEvent, PetFigureUpdateEvent, RoomEntryTileMessageEvent, RoomEntryTileMessageParser, RoomHeightMapEvent, RoomHeightMapUpdateEvent, RoomPaintEvent, RoomReadyMessageEvent, RoomUnitChatEvent, RoomUnitChatShoutEvent, RoomUnitChatWhisperEvent, RoomUnitDanceEvent, RoomUnitEffectEvent, RoomUnitEvent, RoomUnitExpressionEvent, RoomUseHabbiconEvent, RoomUnitHandItemEvent, RoomUnitIdleEvent, RoomUnitInfoEvent, RoomUnitNumberEvent, RoomUnitRemoveEvent, RoomUnitStatusEvent, RoomUnitStatusMessage, RoomUnitTypingEvent, RoomVisualizationSettingsEvent, UserInfoEvent, WiredFurniMoveStyleEvent, WiredFurniMoveStyleParser, WiredFurniMovementData, WiredMovementsEvent, WiredUserDirectionUpdateData, WiredUserMovementData, YouArePlayingGameEvent, WiredFurniHighlightEvent, WiredFurniTransparencyEvent, WiredFurniVisualizationStateEvent, WiredUserHighlightEvent, WiredUserTransparencyEvent, WiredUserVisualizationStateEvent } from '@octane/communication';
 import { GetEventDispatcher, OctaneEventType, RoomEngineObjectEvent } from '@octane/events';
 import { GetRoomSessionManager, GetSessionDataManager } from '@octane/session';
@@ -610,7 +611,7 @@ export class RoomMessageHandler
             {
                 if(!movement) continue;
 
-                this.applyWiredUserMovement(movement);
+                this.applyWiredUserMovement(movement, parser.furniMovements);
             }
         }
 
@@ -636,9 +637,9 @@ export class RoomMessageHandler
 
         if(object && object.type !== RoomObjectUserType.MONSTER_PLANT)
         {
-            const posture = (movement.movementType === ObjectRolling.MOVE) ? 'mv' : 'std';
+            const posture = wiredMovementPosture(movement.movementType, object.model?.getValue<string>(RoomObjectVariable.FIGURE_POSTURE));
 
-            this._roomEngine.updateRoomObjectUserPosture(this._currentRoomId, movement.id, posture);
+            if(posture) this._roomEngine.updateRoomObjectUserPosture(this._currentRoomId, movement.id, posture);
         }
     }
 
@@ -726,44 +727,77 @@ export class RoomMessageHandler
         }
     }
 
-    private applyWiredUserMovement(movement: WiredUserMovementData): void
+    private applyWiredUserMovement(movement: WiredUserMovementData, furniMovements: WiredFurniMovementData[] = null): void
     {
         const isSlide = (movement.movementType === ObjectRolling.SLIDE);
-        this.trackWiredUserMovement(movement);
+        const object = this._roomEngine.getRoomObjectUser(this._currentRoomId, movement.id);
+        const currentPosture = object?.model?.getValue<string>(RoomObjectVariable.FIGURE_POSTURE);
+        const seatOffset = wiredMovementSeatOffset(movement.movementType, currentPosture, object?.model?.getValue<number>(RoomObjectVariable.FIGURE_VERTICAL_OFFSET));
+        const location = seatOffset ? new Vector3d(movement.location.x, movement.location.y, (movement.location.z + seatOffset)) : movement.location;
+        const targetLocation = seatOffset ? new Vector3d(movement.targetLocation.x, movement.targetLocation.y, (movement.targetLocation.z + seatOffset)) : movement.targetLocation;
+
+        this.trackWiredUserMovement(movement.id, location, targetLocation, movement.duration);
+
+        // A rider follows the furni it sits or stands on: each side of a chained ride queued its own slides, so the
+        // rider ran a few hops ahead of or behind its seat or tile.
+        const seatId = wiredSeatAnchorId(movement.movementType, currentPosture, movement, furniMovements, (id) => this.getWiredSeatFootprint(id));
+        const seatMovement = (seatId !== null) ? furniMovements.find(furni => furni && (furni.id === seatId)) : null;
+        const seatObject = seatMovement ? this._roomEngine.getRoomObjectFloor(this._currentRoomId, seatId) : null;
+        const seatAnchorOffset = seatObject
+            ? new Vector3d(
+                (targetLocation.x - seatMovement.targetLocation.x),
+                (targetLocation.y - seatMovement.targetLocation.y),
+                (targetLocation.z - seatMovement.targetLocation.z))
+            : null;
 
         this._roomEngine.updateRoomObjectUserLocation(
             this._currentRoomId,
             movement.id,
-            movement.location,
-            movement.targetLocation,
+            location,
+            targetLocation,
             false,
-            0,
+            seatOffset,
             new Vector3d(movement.bodyDirection),
             movement.headDirection,
             true,
             isSlide,
-            movement.duration);
-
-        const object = this._roomEngine.getRoomObjectUser(this._currentRoomId, movement.id);
+            movement.duration,
+            seatObject,
+            seatAnchorOffset);
 
         if(object && object.type !== RoomObjectUserType.MONSTER_PLANT)
         {
-            const posture = (movement.movementType === ObjectRolling.MOVE) ? 'mv' : 'std';
+            const posture = wiredMovementPosture(movement.movementType, currentPosture);
 
-            this._roomEngine.updateRoomObjectUserPosture(this._currentRoomId, movement.id, posture);
+            if(posture) this._roomEngine.updateRoomObjectUserPosture(this._currentRoomId, movement.id, posture);
         }
     }
 
-    private trackWiredUserMovement(movement: WiredUserMovementData): void
+    /** The tiles a floor furni covers from its origin, its size turned with it. */
+    private getWiredSeatFootprint(id: number): { width: number, length: number }
     {
-        this._activeWiredUserMovements.set(movement.id, {
-            expiresAt: Date.now() + Math.max(movement.duration, 1) + RoomMessageHandler.WIRED_MOVEMENT_STATUS_GRACE,
-            sourceX: movement.location.x,
-            sourceY: movement.location.y,
-            sourceZ: movement.location.z,
-            targetX: movement.targetLocation.x,
-            targetY: movement.targetLocation.y,
-            targetZ: movement.targetLocation.z
+        const furni = this._roomEngine.getRoomObjectFloor(this._currentRoomId, id);
+        const model = furni?.model;
+
+        if(!model) return null;
+
+        const sizeX = Math.max(1, (model.getValue<number>(RoomObjectVariable.FURNITURE_SIZE_X) || 1));
+        const sizeY = Math.max(1, (model.getValue<number>(RoomObjectVariable.FURNITURE_SIZE_Y) || 1));
+        const turned = ((Math.round(((furni.getDirection()?.x || 0) % 360) / 90) % 2) !== 0);
+
+        return turned ? { width: sizeY, length: sizeX } : { width: sizeX, length: sizeY };
+    }
+
+    private trackWiredUserMovement(id: number, location: IVector3D, targetLocation: IVector3D, duration: number): void
+    {
+        this._activeWiredUserMovements.set(id, {
+            expiresAt: Date.now() + Math.max(duration, 1) + RoomMessageHandler.WIRED_MOVEMENT_STATUS_GRACE,
+            sourceX: location.x,
+            sourceY: location.y,
+            sourceZ: location.z,
+            targetX: targetLocation.x,
+            targetY: targetLocation.y,
+            targetZ: targetLocation.z
         });
     }
 

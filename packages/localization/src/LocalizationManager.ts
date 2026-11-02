@@ -22,9 +22,15 @@ export class LocalizationManager implements ILocalizationManager
     {
         if(!value || !parameter) return value;
 
-        const pattern = new RegExp('%' + parameter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '%', 'gi');
+        const pattern = new RegExp('%' + LocalizationManager.escapeRegExp(parameter) + '%', 'gi');
 
         return value.replace(pattern, () => replacement);
+    }
+
+    /** A parameter name as a literal inside a pattern: a name with a pattern character used to change or break it. */
+    public static escapeRegExp(text: string): string
+    {
+        return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
 
     private _definitions: Map<string, string> = new Map();
@@ -187,7 +193,7 @@ export class LocalizationManager implements ILocalizationManager
             // If it does, it will create a RegEx with the provided parameter, eg. NUM_DAYS or NUM_MONTS
             // Then, based on the provided replacement it searches for the resultgroup based on the replacement.
             // If the replacement is not either 0, 1 - it will be assumed it will be plural. (eg. Months)
-            const regex = new RegExp('%{' + parameter.toUpperCase() + '\\|([^|]*)\\|([^|]*)\\|([^|]*)}');
+            const regex = new RegExp('%{' + LocalizationManager.escapeRegExp(parameter.toUpperCase()) + '\\|([^|]*)\\|([^|]*)\\|([^|]*)}');
             const result = value.match(regex);
 
             if(!result) return replacedValue;
@@ -245,7 +251,7 @@ export class LocalizationManager implements ILocalizationManager
 
                 if(value.startsWith('%{'))
                 {
-                    const regex = new RegExp('%{' + parameter.toUpperCase() + '\\|([^|]*)\\|([^|]*)\\|([^|]*)}');
+                    const regex = new RegExp('%{' + LocalizationManager.escapeRegExp(parameter.toUpperCase()) + '\\|([^|]*)\\|([^|]*)\\|([^|]*)}');
                     const result = value.match(regex);
 
                     if(!result) continue;

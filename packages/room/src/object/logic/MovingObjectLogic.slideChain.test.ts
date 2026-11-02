@@ -132,4 +132,34 @@ describe('MovingObjectLogic slide chaining', () =>
 
         expect(samples[samples.length - 1].x).toBeCloseTo(7, 5);
     });
+
+    it('glides without stalls through a wired chain with an uneven cadence', () =>
+    {
+        // a wired repeater: 2000ms animation time, ticks alternating 250ms and 300ms
+        const arrivals: { time: number, message: ObjectMoveUpdateMessage }[] = [];
+        let time = 16;
+
+        for(let hop = 0; hop < 24; hop++)
+        {
+            arrivals.push({ time, message: slide((5 + hop), (6 + hop), 2000) });
+            time += ((hop % 2) === 0) ? 250 : 300;
+        }
+
+        const lastArrival = arrivals[arrivals.length - 1].time;
+        const samples = simulate(arrivals, (lastArrival + 3000));
+
+        // once the chain is known (third tick on) the object never stands still until the ticks stop
+        expect(stallsBetween(samples, 600, lastArrival)).toBe(0);
+
+        // the backlog stays small: it is never more than about two hops behind the newest tick
+        for(const arrival of arrivals.slice(4))
+        {
+            const sample = samples.find(entry => entry.time >= arrival.time);
+            const newestTarget = arrival.message.targetLocation.x;
+
+            expect(newestTarget - sample.x).toBeLessThan(3);
+        }
+
+        expect(samples[samples.length - 1].x).toBeCloseTo(29, 5);
+    });
 });
