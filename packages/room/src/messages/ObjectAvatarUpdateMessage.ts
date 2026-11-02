@@ -1,4 +1,4 @@
-import { IVector3D } from '@octane/api';
+import { IRoomObjectController, IVector3D } from '@octane/api';
 import { ObjectMoveUpdateMessage } from './ObjectMoveUpdateMessage';
 
 export class ObjectAvatarUpdateMessage extends ObjectMoveUpdateMessage
@@ -7,9 +7,9 @@ export class ObjectAvatarUpdateMessage extends ObjectMoveUpdateMessage
     private _canStandUp: boolean;
     private _baseY: number;
 
-    constructor(location: IVector3D, targetLocation: IVector3D, direction: IVector3D, headDirection: number, canStandUp: boolean, baseY: number, isSlide: boolean = false, duration: number = ObjectMoveUpdateMessage.DEFAULT_DURATION)
+    constructor(location: IVector3D, targetLocation: IVector3D, direction: IVector3D, headDirection: number, canStandUp: boolean, baseY: number, isSlide: boolean = false, duration: number = ObjectMoveUpdateMessage.DEFAULT_DURATION, anchorObject: IRoomObjectController = null, anchorOffset: IVector3D = null)
     {
-        super(location, targetLocation, direction, isSlide, duration, 0);
+        super(location, targetLocation, direction, isSlide, duration, 0, anchorObject, anchorOffset);
 
         this._headDirection = headDirection;
         this._canStandUp = canStandUp;
