@@ -27,19 +27,22 @@ export const wiredMovementSeatOffset = (movementType: string, currentPosture: st
     return verticalOffset;
 };
 
-interface IWiredSeatPoint { x: number; y: number; }
+interface IWiredSeatPoint { x: number; y: number; z?: number; }
 interface IWiredSeatMove { location: IWiredSeatPoint; targetLocation: IWiredSeatPoint; }
 export interface IWiredSeatFurniMove extends IWiredSeatMove { id: number; }
 export interface IWiredSeatFootprint { width: number; length: number; }
+
+const RIDE_HEIGHT_EPSILON = 0.01;
 
 const staysOnTile = (move: IWiredSeatMove): boolean =>
     !!move && !!move.location && !!move.targetLocation
     && (move.location.x === move.targetLocation.x) && (move.location.y === move.targetLocation.y);
 
 /**
- * The seat a sitter or lying user rides in a batch of wired movements: a furni the same batch moves on its tile whose
- * footprint holds the user, who stays on its tile too. Each side of a chained ride queues its own slides, and network
- * jitter left the two queues a few hops apart; a rider that follows its seat object stays on it. Null when none.
+ * The furni a user rides in a batch of wired movements: one the same batch moves on its tile, whose footprint holds the
+ * user, who stays on its tile too. A sitter or a lying user rides its seat; a standing user the highest such furni at
+ * or under its feet. Each side of a chained ride queues its own slides, and network jitter left the two queues a few
+ * hops apart; a rider that follows the furni object stays on it. Null when none, or for a walk.
  */
 export const wiredSeatAnchorId = (
     movementType: string,
@@ -48,10 +51,12 @@ export const wiredSeatAnchorId = (
     furniMoves: ReadonlyArray<IWiredSeatFurniMove>,
     footprint: (furniId: number) => IWiredSeatFootprint = null): number =>
 {
-    if(movementType === ObjectRolling.MOVE || !isSeatedPosture(currentPosture) || !staysOnTile(userMove) || !furniMoves) return null;
+    if(movementType === ObjectRolling.MOVE || (currentPosture === 'mv') || !staysOnTile(userMove) || !furniMoves) return null;
 
     const ux = userMove.targetLocation.x;
     const uy = userMove.targetLocation.y;
+    const uz = userMove.targetLocation.z;
+    let ridden: IWiredSeatFurniMove = null;
 
     for(const furni of furniMoves)
     {
@@ -61,8 +66,22 @@ export const wiredSeatAnchorId = (
         const dx = ux - furni.targetLocation.x;
         const dy = uy - furni.targetLocation.y;
 
-        if((dx >= 0) && (dy >= 0) && (dx < Math.max(1, size.width)) && (dy < Math.max(1, size.length))) return furni.id;
+        if((dx < 0) || (dy < 0) || (dx >= Math.max(1, size.width)) || (dy >= Math.max(1, size.length))) continue;
+
+        const fz = furni.targetLocation.z;
+
+        // Without heights the first furni on the tile is the one.
+        if(!Number.isFinite(uz) || !Number.isFinite(fz))
+        {
+            if(!ridden) ridden = furni;
+
+            continue;
+        }
+
+        if(fz > (uz + RIDE_HEIGHT_EPSILON)) continue;
+
+        if(!ridden || !Number.isFinite(ridden.targetLocation.z) || (fz > ridden.targetLocation.z)) ridden = furni;
     }
 
-    return null;
+    return ridden ? ridden.id : null;
 };

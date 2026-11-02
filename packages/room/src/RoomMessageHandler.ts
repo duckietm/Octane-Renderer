@@ -738,8 +738,8 @@ export class RoomMessageHandler
 
         this.trackWiredUserMovement(movement.id, location, targetLocation, movement.duration);
 
-        // A rider follows the seat object itself: each side of a chained ride queued its own slides, so the sitter ran
-        // a few hops ahead of or behind its seat.
+        // A rider follows the furni it sits or stands on: each side of a chained ride queued its own slides, so the
+        // rider ran a few hops ahead of or behind its seat or tile.
         const seatId = wiredSeatAnchorId(movement.movementType, currentPosture, movement, furniMovements, (id) => this.getWiredSeatFootprint(id));
         const seatMovement = (seatId !== null) ? furniMovements.find(furni => furni && (furni.id === seatId)) : null;
         const seatObject = seatMovement ? this._roomEngine.getRoomObjectFloor(this._currentRoomId, seatId) : null;

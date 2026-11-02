@@ -59,9 +59,27 @@ describe('wiredSeatAnchorId', () =>
         expect(wiredSeatAnchorId(ObjectRolling.SLIDE, 'lay', sitter, [ bed ])).toBeNull();
     });
 
-    it('leaves a standing or walking user, a moved seat and another tile alone', () =>
+    it('lets a standing user follow the tile it stands on', () =>
     {
-        expect(wiredSeatAnchorId(ObjectRolling.SLIDE, 'std', sitter, [ throne ])).toBeNull();
+        const tile = { id: 3, location: { x: 9, y: 6, z: 0.24 }, targetLocation: { x: 9, y: 6, z: 0.46 } };
+        const stander = { location: { x: 9, y: 6, z: 0.26 }, targetLocation: { x: 9, y: 6, z: 0.48 } };
+
+        expect(wiredSeatAnchorId(ObjectRolling.SLIDE, 'std', stander, [ tile ])).toBe(3);
+    });
+
+    it('picks the highest furni at or under the feet of a standing user', () =>
+    {
+        const low = { id: 1, location: { x: 9, y: 6, z: 0 }, targetLocation: { x: 9, y: 6, z: 0.2 } };
+        const mid = { id: 2, location: { x: 9, y: 6, z: 0.5 }, targetLocation: { x: 9, y: 6, z: 0.7 } };
+        const above = { id: 4, location: { x: 9, y: 6, z: 3 }, targetLocation: { x: 9, y: 6, z: 3.2 } };
+        const stander = { location: { x: 9, y: 6, z: 0.8 }, targetLocation: { x: 9, y: 6, z: 1 } };
+
+        expect(wiredSeatAnchorId(ObjectRolling.SLIDE, 'std', stander, [ low, above, mid ])).toBe(2);
+    });
+
+    it('leaves a walking user, a moved seat and another tile alone', () =>
+    {
+        expect(wiredSeatAnchorId(ObjectRolling.SLIDE, 'mv', sitter, [ throne ])).toBeNull();
         expect(wiredSeatAnchorId(ObjectRolling.MOVE, 'sit', sitter, [ throne ])).toBeNull();
         expect(wiredSeatAnchorId(ObjectRolling.SLIDE, 'sit', sitter, [ { id: 7, location: at(8, 12), targetLocation: at(9, 12) } ])).toBeNull();
         expect(wiredSeatAnchorId(ObjectRolling.SLIDE, 'sit', { location: at(3, 3), targetLocation: at(3, 3) }, [ throne ])).toBeNull();
