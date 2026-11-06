@@ -48,6 +48,7 @@ export class RoomMessageHandler
     private _roomUnitIndexByIdentity = new Map<string, number>();
     private _activeConfInvisHiddenItemIds = new Set<number>();
     private _confInvisReapplyTimeouts: ReturnType<typeof setTimeout>[] = [];
+    private _delayedFloorRemovals: Set<ReturnType<typeof setTimeout>> = new Set();
     private _activeAreaHideControllers = new Map<number, AreaHideControllerState>();
     private _areaHideReapplyTimeouts: ReturnType<typeof setTimeout>[] = [];
     private _isConfInvisControlActive = false;
@@ -165,6 +166,7 @@ export class RoomMessageHandler
         }
         this._activeConfInvisHiddenItemIds.clear();
         this.clearConfInvisReapplyTimeouts();
+        this.clearDelayedFloorRemovals();
         this._activeAreaHideControllers.clear();
         this.clearAreaHideReapplyTimeouts();
         this._isConfInvisControlActive = false;
@@ -187,6 +189,7 @@ export class RoomMessageHandler
         this._roomUnitIndexByIdentity.clear();
         this._activeConfInvisHiddenItemIds.clear();
         this.clearConfInvisReapplyTimeouts();
+        this.clearDelayedFloorRemovals();
         this._activeAreaHideControllers.clear();
         this.clearAreaHideReapplyTimeouts();
         this._isConfInvisControlActive = false;
@@ -194,6 +197,7 @@ export class RoomMessageHandler
 
     public clearRoomId(): void
     {
+        this.clearDelayedFloorRemovals();
         this._currentRoomId = 0;
         this._latestEntryTileEvent = null;
         this._pendingWiredEffects.clear();
@@ -978,13 +982,21 @@ export class RoomMessageHandler
 
         if(parser.delay > 0)
         {
-            setTimeout(() =>
+            // The removal belongs to the room it was sent for: leaving it, or disposing the handler,
+            // cancels the timer, which would otherwise remove an item with the same id in the next room.
+            const timeout = setTimeout(() =>
             {
+                this._delayedFloorRemovals.delete(timeout);
+
+                if(!this._roomEngine) return;
+
                 this._activeConfInvisHiddenItemIds.delete(parser.itemId);
                 this.removeAreaHideController(parser.itemId);
                 this._roomEngine.removeRoomObjectFloor(this._currentRoomId, parser.itemId, (parser.isExpired) ? -1 : parser.userId, true);
                 this.applyAreaHideStateToRoomObjects();
             }, parser.delay);
+
+            this._delayedFloorRemovals.add(timeout);
         }
         else
         {
@@ -1129,6 +1141,16 @@ export class RoomMessageHandler
 
             this._confInvisReapplyTimeouts.push(timeout);
         }
+    }
+
+    private clearDelayedFloorRemovals(): void
+    {
+        for(const timeout of this._delayedFloorRemovals)
+        {
+            clearTimeout(timeout);
+        }
+
+        this._delayedFloorRemovals.clear();
     }
 
     private clearConfInvisReapplyTimeouts(): void
