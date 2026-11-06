@@ -21,6 +21,15 @@ export class UserDataManager implements IUserDataManager
         GetEventDispatcher().dispatchEvent(new OctaneEvent(OctaneEventType.ROOM_USER_LIST_UPDATED));
     }
 
+    /** Forgets every unit of the room: the session moves on to another room. */
+    public clear(): void
+    {
+        this._userDataByType.clear();
+        this._userDataByRoomIndex.clear();
+        this._userBadges.clear();
+        this.invalidateRoomUserListSnapshot();
+    }
+
     public getRoomUserListSnapshot(): ReadonlyArray<IRoomUserData>
     {
         if(this._roomUserListSnapshot) return this._roomUserListSnapshot;
