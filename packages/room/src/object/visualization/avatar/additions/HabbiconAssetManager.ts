@@ -45,7 +45,10 @@ export class HabbiconAssetManager
     private static CONTENT_INSET: number = 7;
     public static readonly SPINNING_DUCK_NAME: string = 'duck_spinning';
 
+    private static RETRY_DELAY_MS: number = 30000;
+
     private _loading: Promise<void> | null = null;
+    private _retryAt: number = 0;
     private _definitions = new Map<number, HabbiconDefinition>();
     private _collectionDefinitions = new Map<number, HabbiconFrameData>();
     private _runtimeAssets = new Map<number, HabbiconRuntimeAsset>();
@@ -71,9 +74,20 @@ export class HabbiconAssetManager
 
     public preload(): Promise<void>
     {
-        if(this._loading === null) this._loading = this.load();
+        // A failed manifest is tried again after a pause instead of leaving the icons off until a page reload:
+        // the first use can come before the configuration is ready, or meet a passing server error.
+        if((this._loading === null) && (Date.now() >= this._retryAt))
+        {
+            this._loading = this.load().then(loaded =>
+            {
+                if(loaded) return;
 
-        return this._loading;
+                this._loading = null;
+                this._retryAt = Date.now() + HabbiconAssetManager.RETRY_DELAY_MS;
+            });
+        }
+
+        return this._loading ?? Promise.resolve();
     }
 
     public getNameKey(habbiconId: number): string
@@ -278,17 +292,17 @@ export class HabbiconAssetManager
         return this.composeTexture(source, 255, 255, false, `${ habbiconId }:preview:${ small ? 'small' : 'large' }:255:255`);
     }
 
-    private async load(): Promise<void>
+    private async load(): Promise<boolean>
     {
         try
         {
             const baseUrl = this.getBaseUrl();
 
-            if(!baseUrl) return;
+            if(!baseUrl) return false;
 
             const response = await fetch(`${ baseUrl }habbicons.json`);
 
-            if(!response.ok) return;
+            if(!response.ok) return false;
 
             const data = await response.json();
             const habbicons = Array.isArray(data?.habbicons) ? data.habbicons : [];
@@ -340,6 +354,8 @@ export class HabbiconAssetManager
                 this.loadImage(`${ baseUrl }habbicons_spritesheet.png`),
                 this.loadImage(`${ baseUrl }collection_icons_spritesheet.png`).catch(() => null)
             ]);
+
+            return true;
         }
         catch
         {
@@ -347,6 +363,8 @@ export class HabbiconAssetManager
             this._collectionDefinitions.clear();
             this._spritesheet = null;
             this._collectionSpritesheet = null;
+
+            return false;
         }
     }
 
