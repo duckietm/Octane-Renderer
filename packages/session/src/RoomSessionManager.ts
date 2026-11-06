@@ -440,6 +440,8 @@ export class RoomSessionManager implements IRoomSessionManager, IRoomHandlerList
         GetEventDispatcher().dispatchEvent(new RoomSessionEvent(RoomSessionEvent.CREATED, roomSession));
 
         this._viewerSession = roomSession;
+        // A clear scheduled when the previous room was left must not wipe the room entered now.
+        this.cancelRoomIdClear();
         this._lastRoomId = roomSession.roomId;
         this._lastRoomPassword = roomSession.password;
         this.persistRoom(roomSession.roomId);
@@ -569,6 +571,7 @@ export class RoomSessionManager implements IRoomSessionManager, IRoomHandlerList
 
         this._sessions.set(this.getRoomId(toRoomId), existing);
 
+        this.cancelRoomIdClear();
         this._lastRoomId = toRoomId;
         this.persistRoom(toRoomId);
 

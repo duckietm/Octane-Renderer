@@ -5,7 +5,7 @@ import { UserDataManager } from './UserDataManager';
 
 export class RoomSession implements IRoomSession
 {
-    private _userData: IUserDataManager = new UserDataManager();
+    private _userData: UserDataManager = new UserDataManager();
 
     private _roomId: number = 0;
     private _password: string = null;
@@ -78,6 +78,16 @@ export class RoomSession implements IRoomSession
         if(roomId === this._roomId) return;
 
         this._roomId = roomId;
+
+        // What belonged to the previous room: the server sends the new room's rights and units,
+        // but never a "not owner", so a forward from an owned room kept the owner's tools.
+        this._userData.clear();
+        this._controllerLevel = RoomControllerLevel.NONE;
+        this._ownRoomIndex = -1;
+        this._isRoomOwner = false;
+        this._isDecorating = false;
+        this._isSpectator = false;
+        this.onSnapshotChange?.();
     }
 
     public sendChatMessage(text: string, styleId: number, chatColour: string): void
