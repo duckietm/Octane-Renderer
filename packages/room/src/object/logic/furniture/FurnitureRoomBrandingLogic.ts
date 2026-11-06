@@ -152,6 +152,15 @@ export class FurnitureRoomBrandingLogic extends FurnitureLogic
         super.mouseEvent(event, geometry);
     }
 
+    // A download that finishes after the owner changed the address, or after the furni left the room,
+    // must not report its result over the image shown now.
+    private isCurrentImage(imageUrl: string): boolean
+    {
+        const model = this.object && this.object.model;
+
+        return !!model && (model.getValue<string>(RoomObjectVariable.FURNITURE_BRANDING_IMAGE_URL) === imageUrl);
+    }
+
     private async downloadBackground(): Promise<void>
     {
         const model = this.object && this.object.model;
@@ -187,6 +196,8 @@ export class FurnitureRoomBrandingLogic extends FurnitureLogic
             {
                 const status = await asset.downloadAsset(imageUrl);
 
+                if(!this.isCurrentImage(imageUrl)) return;
+
                 if(!status)
                 {
                     this.processUpdateMessage(new ObjectAdUpdateMessage(ObjectAdUpdateMessage.IMAGE_LOADING_FAILED));
@@ -196,6 +207,8 @@ export class FurnitureRoomBrandingLogic extends FurnitureLogic
             }
             catch (error)
             {
+                if(!this.isCurrentImage(imageUrl)) return;
+
                 console.error(`[Soundboard/Branding] failed to load branding image "${ imageUrl }":`, error);
 
                 this.processUpdateMessage(new ObjectAdUpdateMessage(ObjectAdUpdateMessage.IMAGE_LOADING_FAILED));
