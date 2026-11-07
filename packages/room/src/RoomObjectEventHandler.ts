@@ -2011,6 +2011,10 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
                 this.setFurnitureAlphaMultiplier(roomObject, 1);
                 this._roomEngine.removeObjectMoverIconSprite();
 
+                // The object already shows where it was dropped. When nothing is sent, the server cannot put it back,
+                // so it goes back here; it used to stay at the preview position until the room was reloaded.
+                let moveSent = false;
+
                 if(GetCommunication().connection)
                 {
                     if(category === RoomObjectCategory.FLOOR)
@@ -2020,6 +2024,7 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
                         const direction = (angle / 45);
 
                         GetCommunication().connection.send(new FurnitureFloorUpdateComposer(objectId, location.x, location.y, direction));
+                        moveSent = true;
                     }
 
                     else if(category === RoomObjectCategory.WALL)
@@ -2031,7 +2036,11 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
                         {
                             const location = wallGeometry.getOldLocationString(roomObject.getLocation(), angle);
 
-                            if(location) GetCommunication().connection.send(new FurnitureWallUpdateComposer(objectId, location));
+                            if(location)
+                            {
+                                GetCommunication().connection.send(new FurnitureWallUpdateComposer(objectId, location));
+                                moveSent = true;
+                            }
                         }
                     }
 
@@ -2047,9 +2056,19 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
                         {
                             const userData = roomSession.userDataManager.getUserDataByIndex(objectId);
 
-                            if(userData) GetCommunication().connection.send(new PetMoveComposer(userData.webID, location.x, location.y, direction));
+                            if(userData)
+                            {
+                                GetCommunication().connection.send(new PetMoveComposer(userData.webID, location.x, location.y, direction));
+                                moveSent = true;
+                            }
                         }
                     }
+                }
+
+                if(!moveSent && selectedData && selectedData.loc && selectedData.dir)
+                {
+                    roomObject.setLocation(selectedData.loc);
+                    roomObject.setDirection(selectedData.dir);
                 }
 
                 break;
