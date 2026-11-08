@@ -40,6 +40,8 @@ export class AssetManager implements IAssetManager
     private _collectionOrder: WeakMap<GraphicAssetCollection, number> = new WeakMap();
     private _nextCollectionOrder: number = 0;
     private _imageResources: Map<string, LoadedImageResource> = new Map();
+    // The image resource key whose sheet a downloaded collection was cut from.
+    private _collectionSources: WeakMap<GraphicAssetCollection, string> = new WeakMap();
     private _downloads: Map<string, Promise<boolean>> = new Map();
 
     constructor(private readonly _dependencies: AssetManagerDependencies = DEFAULT_DEPENDENCIES)
@@ -140,6 +142,8 @@ export class AssetManager implements IAssetManager
             replaced.onAssetChanged = null;
 
             for(const name of replaced.assetNames) this.assetChanged(replaced, name, false);
+
+            this.releaseReplacedCollection(replaced);
         }
 
         this._collections.set(collection.name, collection);
@@ -149,6 +153,31 @@ export class AssetManager implements IAssetManager
         collection.onAssetChanged = (name, added) => this.assetChanged(collection, name, added);
 
         return collection;
+    }
+
+    // A collection replaced by one of the same name kept its textures registered and its sheet loaded for the session.
+    private releaseReplacedCollection(replaced: GraphicAssetCollection): void
+    {
+        for(const [name, texture] of replaced.textures)
+        {
+            if(this._textures.get(name) === texture) this._textures.delete(name);
+        }
+
+        const source = this._collectionSources.get(replaced);
+
+        if(source === undefined) return;
+
+        this._collectionSources.delete(replaced);
+
+        const resource = this._imageResources.get(source);
+
+        if(!resource) return;
+
+        this._imageResources.delete(source);
+
+        if(this._textures.get(source) === resource.texture) this._textures.delete(source);
+
+        resource.dispose();
     }
 
     public async downloadAssets(urls: string[]): Promise<boolean>
@@ -210,12 +239,13 @@ export class AssetManager implements IAssetManager
                             return pinPixelArtSampling(resource.texture);
                         });
 
-                    await this.processAsset(octaneBundle.texture, octaneBundle.jsonFile);
+                    const collection = await this.processAsset(octaneBundle.texture, octaneBundle.jsonFile);
 
                     const retainedResource = decodedResources.pop();
 
                     for(const resource of decodedResources) resource.dispose();
                     if(retainedResource) this.setImageResource(url, retainedResource);
+                    this.setCollectionSource(collection, url);
                 }
                 catch (error)
                 {
@@ -248,8 +278,9 @@ export class AssetManager implements IAssetManager
 
                 try
                 {
-                    await this.processAsset(pinPixelArtSampling(resource.texture), data);
+                    const collection = await this.processAsset(pinPixelArtSampling(resource.texture), data);
                     this.setImageResource(url, resource);
+                    this.setCollectionSource(collection, url);
                 }
                 catch (error)
                 {
@@ -335,6 +366,11 @@ export class AssetManager implements IAssetManager
 
         this._imageResources.set(key, resource);
         this.setTexture(key, resource.texture);
+    }
+
+    private setCollectionSource(collection: IGraphicAssetCollection, key: string): void
+    {
+        if(collection instanceof GraphicAssetCollection) this._collectionSources.set(collection, key);
     }
 
     private async loadLocalRoom(): Promise<void>
