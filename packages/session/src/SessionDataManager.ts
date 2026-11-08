@@ -4,7 +4,7 @@ import type { FurnidataDeltaEntry } from '@octane/communication';
 import { applyFurnidataDeltaTo } from './furniture/applyFurnidataDelta';
 import { GetConfiguration } from '@octane/configuration';
 import { GetLocalizationManager } from '@octane/localization';
-import { GetEventDispatcher, MysteryBoxKeysUpdateEvent, OctaneEvent, OctaneEventType, OctaneSettingsEvent, SessionDataPreferencesEvent, UserNameUpdateEvent } from '@octane/events';
+import { GetEventDispatcher, MysteryBoxKeysUpdateEvent, OctaneEvent, OctaneEventType, OctaneSettingsEvent, RoomSessionEvent, SessionDataPreferencesEvent, UserNameUpdateEvent } from '@octane/events';
 import { CreateLinkEvent, HabboWebTools, parseConfigJsonFromResponse } from '@octane/utils';
 import { Texture } from 'pixi.js';
 import { GroupInformationManager } from './GroupInformationManager';
@@ -19,6 +19,7 @@ export class SessionDataManager implements ISessionDataManager
 {
     private _messageEvents: IMessageEvent[] = [];
     private _settingsEventCallback: (event: OctaneSettingsEvent) => void = null;
+    private _pendingRespectsDropCallback: () => void = null;
     private _userId: number;
     private _name: string;
     private _figure: string;
@@ -213,6 +214,11 @@ export class SessionDataManager implements ISessionDataManager
         };
 
         GetEventDispatcher().addEventListener<OctaneSettingsEvent>(OctaneSettingsEvent.SETTINGS_UPDATED, this._settingsEventCallback);
+
+        this._pendingRespectsDropCallback = () => this.dropPendingRespects();
+
+        GetEventDispatcher().addEventListener(OctaneEventType.SOCKET_CLOSED, this._pendingRespectsDropCallback);
+        GetEventDispatcher().addEventListener(RoomSessionEvent.ENDED, this._pendingRespectsDropCallback);
     }
 
     public dispose(): void
@@ -238,6 +244,13 @@ export class SessionDataManager implements ISessionDataManager
         {
             GetEventDispatcher().removeEventListener(OctaneSettingsEvent.SETTINGS_UPDATED, this._settingsEventCallback);
             this._settingsEventCallback = null;
+        }
+
+        if(this._pendingRespectsDropCallback)
+        {
+            GetEventDispatcher().removeEventListener(OctaneEventType.SOCKET_CLOSED, this._pendingRespectsDropCallback);
+            GetEventDispatcher().removeEventListener(RoomSessionEvent.ENDED, this._pendingRespectsDropCallback);
+            this._pendingRespectsDropCallback = null;
         }
     }
 
@@ -475,6 +488,9 @@ export class SessionDataManager implements ISessionDataManager
         if(!parser) return;
 
         HabboWebTools.roomVisited(parser.roomId);
+
+        // A respect queued in the previous room targets a user who is not here.
+        this.dropPendingRespects();
     }
 
     private onInClientLinkEvent(event: InClientLinkEvent): void
@@ -770,6 +786,27 @@ export class SessionDataManager implements ISessionDataManager
         this._nextRespectAt = Date.now() + SessionDataManager.RESPECT_MIN_INTERVAL;
 
         this.flushPendingRespects();
+    }
+
+    /**
+     * Respects still queued when the socket closes or the room changes are never sent, so the
+     * points reserved for them go back; the server's next user info resyncs the count anyway.
+     */
+    private dropPendingRespects(): void
+    {
+        if(this._respectTimer)
+        {
+            clearTimeout(this._respectTimer);
+
+            this._respectTimer = null;
+        }
+
+        if(!this._pendingRespects.length) return;
+
+        this._respectsLeft += this._pendingRespects.length;
+        this._pendingRespects = [];
+
+        this.invalidateUserDataSnapshot();
     }
 
     public givePetRespect(petId: number): void
