@@ -1018,6 +1018,7 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
         this.processPendingFurniture();
 
         GetTexturePool().flushReleased();
+        GetTexturePool().run();
 
         this._roomManager.update(time, update);
 

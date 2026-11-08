@@ -57,6 +57,18 @@ describe('TexturePool', () =>
         expect(pool.getTotalTextures()).toBe(0);
     });
 
+    it('ignores a texture that is already in the pool', () =>
+    {
+        const texture = makeTexture(32, 16);
+
+        pool.putTexture(texture);
+        pool.putTexture(texture);
+
+        expect(pool.getTotalTextures()).toBe(1);
+        expect(pool.getTexture(32, 16)).toBe(texture);
+        expect(pool.getTexture(32, 16)).not.toBe(texture);
+    });
+
     it('creates a fresh texture when nothing pooled matches', () =>
     {
         pool.putTexture(makeTexture(32, 16));
