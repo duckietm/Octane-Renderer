@@ -53,6 +53,7 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
     private _imageCache: RoomObjectImageCache = new RoomObjectImageCache();
     private _thumbnailObjectIdBank: NumberBank = new NumberBank(1000);
     private _thumbnailCallbacks: Map<string, IGetImageListener[]> = new Map();
+    private _thumbnailRequestIds: Map<string, number> = new Map();
     private _activeRoomId: number = -1;
     private _activeRoomActiveCanvas: number = -1;
     private _activeRoomActiveCanvasMouseX: number = 0;
@@ -161,6 +162,7 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
         this._roomInstanceDatas.clear();
         this._imageCallbacks.clear();
         this._thumbnailCallbacks.clear();
+        this._thumbnailRequestIds.clear();
         this._badgeListenerObjects.clear();
         this.removeIdleBadgeImageListener();
         this.clearRoomObjectImageCache();
@@ -3005,6 +3007,7 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
         if(listeners)
         {
             this._thumbnailCallbacks.delete(assetName);
+            this._thumbnailRequestIds.delete(assetName);
 
             const image = this._roomContentLoader.getImage(assetName);
 
@@ -3482,14 +3485,6 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
             if(!roomInstance) return imageResult;
         }
 
-        let objectId = this._thumbnailObjectIdBank.reserveNumber();
-        const objectCategory = this.getRoomObjectCategoryForType(type);
-
-        if(objectId < 0) return imageResult;
-
-        objectId++;
-
-        imageResult.id = objectId;
         imageResult.data = null;
         imageResult.image = null;
 
@@ -3499,30 +3494,46 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
 
         if(!asset && listener)
         {
-            let contentListeners = this._thumbnailCallbacks.get(assetName);
+            const contentListeners = this._thumbnailCallbacks.get(assetName);
 
-            if(!contentListeners)
+            // A download already on its way answers this listener too, under its own id: reserving another would never be returned.
+            if(contentListeners)
             {
-                contentListeners = [];
+                contentListeners.push(listener);
 
-                this._thumbnailCallbacks.set(assetName, contentListeners);
+                imageResult.id = (this._thumbnailRequestIds.get(assetName) ?? 0);
 
-                this._roomContentLoader.downloadImage(objectId, type, param, null);
+                return imageResult;
             }
 
-            contentListeners.push(listener);
-        }
-        else
-        {
-            if(asset)
+            let objectId = this._thumbnailObjectIdBank.reserveNumber();
+
+            if(objectId < 0) return imageResult;
+
+            objectId++;
+
+            this._thumbnailCallbacks.set(assetName, [ listener ]);
+            this._thumbnailRequestIds.set(assetName, objectId);
+
+            if(!this._roomContentLoader.downloadImage(objectId, type, param, null))
             {
-                imageResult.image = asset;
+                this._thumbnailCallbacks.delete(assetName);
+                this._thumbnailRequestIds.delete(assetName);
+                this._thumbnailObjectIdBank.freeNumber((objectId - 1));
+
+                imageResult.id = 0;
+
+                return imageResult;
             }
 
-            this._thumbnailObjectIdBank.freeNumber((objectId - 1));
+            imageResult.id = objectId;
 
-            imageResult.id = 0;
+            return imageResult;
         }
+
+        if(asset) imageResult.image = asset;
+
+        imageResult.id = 0;
 
         return imageResult;
     }

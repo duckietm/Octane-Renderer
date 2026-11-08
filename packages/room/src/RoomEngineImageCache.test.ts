@@ -312,6 +312,7 @@ describe('RoomEngine image cache wiring', () =>
             _roomDatas: new Map(),
             _roomInstanceDatas: new Map(),
             _thumbnailCallbacks: new Map(),
+            _thumbnailRequestIds: new Map(),
             _badgeListenerObjects: new Map()
         });
 
