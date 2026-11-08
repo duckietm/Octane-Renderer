@@ -17,6 +17,9 @@ export class RoomRotatingEffect
 
     public static init(delay: number, duration: number): void
     {
+        // A timer left from the previous effect would end this one on the old duration.
+        this.turnVisualizationOff();
+
         this._SafeStr_4513 = 0;
         this._SafeStr_4515 = delay;
         this._SafeStr_4516 = duration;
