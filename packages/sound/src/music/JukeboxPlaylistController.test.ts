@@ -10,20 +10,31 @@ const state = vi.hoisted(() => ({
 
 vi.mock('@octane/communication', () => ({
     GetCommunication: () => ({ registerMessageEvent: vi.fn(), removeMessageEvent: vi.fn() }),
-    GetJukeboxPlayListMessageComposer: class {},
-    JukeboxPlayListFullMessageEvent: class {},
-    JukeboxSongDisksMessageEvent: class {},
-    NowPlayingMessageEvent: class {}
+    GetJukeboxPlayListMessageComposer: class
+    {
+    },
+    JukeboxPlayListFullMessageEvent: class
+    {
+    },
+    JukeboxSongDisksMessageEvent: class
+    {
+    },
+    NowPlayingMessageEvent: class
+    {
+    }
 }));
 vi.mock('@octane/events', () => ({
     GetEventDispatcher: () => ({ addEventListener: vi.fn(), removeEventListener: vi.fn(), dispatchEvent: (event: { type: string }) => state.dispatched.push(event.type) }),
-    NowPlayingEvent: class {},
+    NowPlayingEvent: class
+    {
+    },
     PlayListStatusEvent: class
     {
         public static PLUE_PLAY_LIST_UPDATED = 'PLUE_PLAY_LIST_UPDATED';
         public static PLUE_PLAY_LIST_FULL = 'PLUE_PLAY_LIST_FULL';
 
-        constructor(public type: string) {}
+        constructor(public type: string)
+        {}
     },
     SongInfoReceivedEvent: class
     {

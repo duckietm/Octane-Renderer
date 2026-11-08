@@ -20,7 +20,10 @@ class FakeContext
     public destination = {};
     public sources: FakeSource[] = [];
     public gain = { gain: { value: 1, setValueAtTime: vi.fn() }, connect: vi.fn() };
-    public resume = vi.fn(async () => { this.state = 'running'; });
+    public resume = vi.fn(async () =>
+    {
+        this.state = 'running';
+    });
     public decodeAudioData = vi.fn(async () => ({ duration: 2.5 }));
 
     constructor()
