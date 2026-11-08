@@ -123,16 +123,9 @@ export class MusicPlayer
         if(sample) return sample;
 
         // Requests for a sample already loading share that load: a second Howl would never be unloaded.
-        let loading = this._loading.get(id);
+        if(!this._loading.has(id)) this._loading.set(id, this.loadSong(id).finally(() => this._loading.delete(id)));
 
-        if(!loading)
-        {
-            loading = this.loadSong(id).finally(() => this._loading.delete(id));
-
-            this._loading.set(id, loading);
-        }
-
-        return loading;
+        return this._loading.get(id);
     }
 
     public async playSampleOnce(sampleId: number): Promise<void>

@@ -26,7 +26,12 @@ vi.mock('howler', () => ({
         }
     }
 }));
-vi.mock('@octane/events', () => ({ GetEventDispatcher: () => ({ dispatchEvent: vi.fn() }), SoundManagerEvent: class {} }));
+vi.mock('@octane/events', () => ({
+    GetEventDispatcher: () => ({ dispatchEvent: vi.fn() }),
+    SoundManagerEvent: class
+    {
+    }
+}));
 
 beforeEach(() =>
 {
