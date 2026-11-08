@@ -34,7 +34,7 @@ packages/
   localization     LocalizationManager
   room             RoomEngine + RoomVisualization
   session          SessionDataManager + RoomSessionManager + handlers
-  sound            SoundManager (howler-based)
+  sound            SoundManager (HTML audio) + MusicPlayer (Web Audio)
   utils            shared utilities (BinaryReader, Logger, …)
 ```
 

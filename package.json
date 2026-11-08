@@ -43,13 +43,11 @@
   "main": "./index",
   "dependencies": {
     "gifuct-js": "^2.1.2",
-    "howler": "^2.2.4",
     "pixi-filters": "^6.1.5",
     "pixi.js": "8.22.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@types/howler": "^2.2.13",
     "@types/node": "^26.6.2",
     "@vitest/coverage-v8": "5.1.0",
     "eslint": "^10.11.0",
