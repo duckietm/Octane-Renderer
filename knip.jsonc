@@ -1,0 +1,14 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  // Every workspace package is consumed through its src/index.ts barrel (the client aliases
+  // @octane/* to those files), and the root index.ts re-exports all of them.
+  "workspaces": {
+    ".": {
+      "entry": ["index.ts", "scripts/*.mjs"]
+    },
+    "packages/*": {
+      "entry": ["src/index.ts"],
+      "project": ["src/**/*.ts"]
+    }
+  }
+}

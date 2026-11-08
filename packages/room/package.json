@@ -16,6 +16,7 @@
     "@octane/configuration": "1.0.0",
     "@octane/events": "1.0.0",
     "@octane/session": "1.0.0",
+    "@octane/utils": "1.0.0",
     "pixi.js": "^8.22.0"
   },
   "devDependencies": {

@@ -29,6 +29,9 @@ jobs:
           COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
         run: corepack yarn install --immutable
 
+      - name: Dependencies
+        run: yarn knip --dependencies
+
       - name: Test
         run: yarn test
 

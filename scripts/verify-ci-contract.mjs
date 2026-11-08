@@ -9,6 +9,7 @@ const REQUIRED = [
     [ /node-version:\s*['"]?22['"]?/, 'Node.js 22' ],
     [ /run:\s*corepack enable/, 'Corepack activation' ],
     [ /corepack yarn install --immutable/, 'immutable Yarn dependency install' ],
+    [ /run:\s*yarn knip --dependencies(?:\s|$)/m, 'dependency check' ],
     [ /run:\s*yarn test(?:\s|$)/m, 'test command' ],
     [ /run:\s*yarn compile(?:\s|$)/m, 'compile command' ],
     [ /run:\s*yarn build(?:\s|$)/m, 'build command' ]
