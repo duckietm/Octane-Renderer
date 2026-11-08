@@ -383,6 +383,7 @@ __metadata:
   dependencies:
     "@octane/api": "npm:1.0.0"
     "@octane/assets": "npm:1.0.0"
+    "@octane/configuration": "npm:1.0.0"
     "@octane/events": "npm:1.0.0"
     "@octane/utils": "npm:1.0.0"
     pixi.js: "npm:^8.22.0"
@@ -409,6 +410,7 @@ __metadata:
   resolution: "@octane/communication@workspace:packages/communication"
   dependencies:
     "@octane/api": "npm:1.0.0"
+    "@octane/configuration": "npm:1.0.0"
     "@octane/events": "npm:1.0.0"
     "@octane/utils": "npm:1.0.0"
     "@thumbmarkjs/thumbmarkjs": "npm:^1.11.0"
@@ -422,7 +424,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@octane/configuration@workspace:packages/configuration"
   dependencies:
-    "@octane/api": "npm:1.0.0"
     "@octane/utils": "npm:1.0.0"
     typescript: "npm:^6.0.3"
   languageName: unknown
@@ -446,9 +447,7 @@ __metadata:
     "@octane/api": "npm:1.0.0"
     "@octane/communication": "npm:1.0.0"
     "@octane/configuration": "npm:1.0.0"
-    "@octane/events": "npm:1.0.0"
     "@octane/utils": "npm:1.0.0"
-    pixi.js: "npm:^8.22.0"
     typescript: "npm:^6.0.3"
   languageName: unknown
   linkType: soft
@@ -487,6 +486,7 @@ __metadata:
     "@octane/configuration": "npm:1.0.0"
     "@octane/events": "npm:1.0.0"
     "@octane/session": "npm:1.0.0"
+    "@octane/utils": "npm:1.0.0"
     pixi.js: "npm:^8.22.0"
     typescript: "npm:^6.0.3"
   languageName: unknown
@@ -514,7 +514,9 @@ __metadata:
   dependencies:
     "@octane/api": "npm:1.0.0"
     "@octane/communication": "npm:1.0.0"
-    pixi.js: "npm:^8.22.0"
+    "@octane/configuration": "npm:1.0.0"
+    "@octane/events": "npm:1.0.0"
+    "@octane/utils": "npm:1.0.0"
     typescript: "npm:^6.0.3"
   languageName: unknown
   linkType: soft

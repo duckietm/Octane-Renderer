@@ -10,6 +10,7 @@
   "main": "./index",
   "dependencies": {
     "@octane/api": "1.0.0",
+    "@octane/configuration": "1.0.0",
     "@octane/events": "1.0.0",
     "@octane/utils": "1.0.0",
     "@thumbmarkjs/thumbmarkjs": "^1.11.0",
