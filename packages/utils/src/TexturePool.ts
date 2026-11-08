@@ -73,6 +73,9 @@ export class TexturePool
     {
         if(!texture || texture.destroyed || !texture.source) return;
 
+        // Already pooled: a second entry would hand the same texture to two owners.
+        if(this._pooledAt.has(texture)) return;
+
         const bytes = TexturePool.getTextureBytes(texture);
 
         if(bytes > TexturePool.MAX_POOL_BYTES)
@@ -101,6 +104,7 @@ export class TexturePool
         this._totalBytes += bytes;
     }
 
+    // Sweeps idle textures; called every room engine update and throttled to one pass per SWEEP_INTERVAL_MS.
     public run(): void
     {
         if(!this._totalTextures) return;
