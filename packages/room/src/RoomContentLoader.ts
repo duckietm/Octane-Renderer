@@ -377,52 +377,8 @@ export class RoomContentLoader implements IRoomContentLoader
 
     public downloadAssetSync(type: string): void
     {
-        const assetUrl: string = this.getAssetUrls(type)?.[0];
-
-        if(!assetUrl || !assetUrl.length) return;
-
-        if((this._pendingContentTypes.indexOf(type) >= 0)) return;
-
-        this._pendingContentTypes.push(type);
-
-        GetAssetManager()
-            .downloadAsset(assetUrl)
-            .then(() =>
-            {
-                const petIndex = this._pets[type];
-
-                if(petIndex !== undefined)
-                {
-                    const collection = this.getCollection(type);
-                    const keys = collection.getPaletteNames();
-                    const palettes: Map<number, IPetColorResult> = new Map();
-
-                    for(const key of keys)
-                    {
-                        const palette = collection.getPalette(key);
-                        const paletteData = collection.data.palettes[key];
-
-                        const primaryColor = palette.primaryColor;
-                        const secondaryColor = palette.secondaryColor;
-                        const breed = ((paletteData.breed !== undefined) ? paletteData.breed : 0);
-                        const tag = ((paletteData.colorTag !== undefined) ? paletteData.colorTag : -1);
-                        const master = ((paletteData.master !== undefined) ? paletteData.master : false);
-                        const layerTags = ((paletteData.tags !== undefined) ? paletteData.tags : []);
-
-                        palettes.set(parseInt(key), new PetColorResult(primaryColor, secondaryColor, breed, tag, key, master, layerTags));
-                    }
-
-                    this._petColors.set(petIndex, palettes);
-                }
-
-                GetEventDispatcher().dispatchEvent(new RoomContentLoadedEvent(RoomContentLoadedEvent.RCLE_SUCCESS, type));
-            })
-            .catch((err) =>
-            {
-                this.clearPendingType(type);
-
-                GetEventDispatcher().dispatchEvent(new RoomContentLoadedEvent(RoomContentLoadedEvent.RCLE_FAILURE, type));
-            });
+        // The same download as downloadAsset, so a failed one is reported as a failure and may be requested again.
+        this.downloadAsset(type).catch(() => null);
     }
 
     /** A failed type may be requested again later, instead of staying a placeholder until reload. */
