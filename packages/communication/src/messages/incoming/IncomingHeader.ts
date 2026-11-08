@@ -151,6 +151,8 @@ export class IncomingHeader
     public static MODERATION_REPORT_DISABLED = 1651;
     public static MODERATION_TOOL = 2696;
     public static MODERATION_USER_INFO = 2866;
+    // Moderator user records (cautions, bans, linked bans, trade locks): custom id in the reserved 94xx block.
+    public static MODERATION_USER_RECORDS = 9482;
     public static MOTD_MESSAGES = 2035;
     public static NAVIGATOR_CATEGORIES = 1562;
     public static NAVIGATOR_COLLAPSED = 1543;

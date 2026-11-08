@@ -4,6 +4,7 @@ export * from './DefaultSanctionMessageComposer';
 export * from './GetCfhChatlogMessageComposer';
 export * from './GetModeratorRoomInfoMessageComposer';
 export * from './GetModeratorUserInfoMessageComposer';
+export * from './GetModeratorUserRecordsMessageComposer';
 export * from './GetRoomChatlogMessageComposer';
 export * from './GetRoomVisitsMessageComposer';
 export * from './GetUserChatlogMessageComposer';
