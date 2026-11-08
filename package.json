@@ -41,12 +41,10 @@
   },
   "main": "./index",
   "dependencies": {
-    "@thumbmarkjs/thumbmarkjs": "^1.11.0",
     "gifuct-js": "^2.1.2",
     "howler": "^2.2.4",
     "pixi-filters": "^6.1.5",
-    "pixi.js": "8.22.0",
-    "strip-json-comments": "^5.0.3"
+    "pixi.js": "8.22.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
