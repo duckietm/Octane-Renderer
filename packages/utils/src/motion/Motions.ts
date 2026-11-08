@@ -129,8 +129,15 @@ export class Motions
 
         let motion: Motion = null;
 
+        // A motion queued while the previous tick was iterating starts now, in the order it was queued;
+        // moved without a start it was not running and the loop below dropped it.
         // eslint-disable-next-line no-cond-assign
-        while(motion = Motions._QUEUED_MOTIONS.pop()) Motions._RUNNING_MOTIONS.push(motion);
+        while(motion = Motions._QUEUED_MOTIONS.shift())
+        {
+            Motions._RUNNING_MOTIONS.push(motion);
+
+            motion.start();
+        }
 
         // eslint-disable-next-line no-cond-assign
         while(motion = Motions._REMOVED_MOTIONS.pop())

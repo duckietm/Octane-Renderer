@@ -24,4 +24,34 @@ describe('Motions', () =>
 
         lists()._RUNNING_MOTIONS.length = 0;
     });
+
+    it('starts a motion queued during a tick on the next tick', () =>
+    {
+        const queued = new Motion(document.createElement('div'));
+        const ticks: number[] = [];
+
+        queued.tick = () =>
+        {
+            ticks.push(1);
+        };
+
+        const runner = new Motion(document.createElement('div'));
+
+        runner.tick = () =>
+        {
+            Motions.runMotion(queued);
+        };
+
+        Motions.runMotion(runner);
+
+        lists().onTick();
+        lists().onTick();
+
+        expect(queued.running).toBe(true);
+        expect(ticks.length).toBe(1);
+        expect(lists()._RUNNING_MOTIONS).toContain(queued);
+
+        Motions.removeMotion(runner);
+        Motions.removeMotion(queued);
+    });
 });
