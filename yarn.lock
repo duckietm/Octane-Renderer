@@ -369,8 +369,8 @@ __metadata:
     "@jsquash/avif": "npm:^2.1.1"
     "@octane/api": "npm:1.0.0"
     "@octane/utils": "npm:1.0.0"
-    "@pixi/gif": "npm:^3.0.1"
     apng-js: "npm:^1.1.5"
+    gifuct-js: "npm:^2.1.2"
     pixi.js: "npm:^8.22.0"
     typescript: "npm:^6.0.3"
     wasm-webp: "npm:^0.1.0"
@@ -544,15 +544,6 @@ __metadata:
   version: 2.9.6
   resolution: "@pixi/colord@npm:2.9.6"
   checksum: 10c0/513636a67140b8bb3292eb4a7a3a5303a394525410fe972ebfe1e5db3749f27f7c0f176e4c84fcb9ab0fa22ee1d8ce2a15b3e32db7021e65ac0561941d2933a3
-  languageName: node
-  linkType: hard
-
-"@pixi/gif@npm:^3.0.1":
-  version: 3.0.1
-  resolution: "@pixi/gif@npm:3.0.1"
-  peerDependencies:
-    pixi.js: ^8.0.0
-  checksum: 10c0/e6940bf8182bb98bc4a38dce14080b7efedb850e84f689afa803ecc0ce94a2ce741122f8428ce9683fd563a4e6d9a7bbf193f77bc8b68c311964dba7fe2b1365
   languageName: node
   linkType: hard
 

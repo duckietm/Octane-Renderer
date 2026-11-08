@@ -15,8 +15,8 @@
     "@jsquash/avif": "^2.1.1",
     "@octane/api": "1.0.0",
     "@octane/utils": "1.0.0",
-    "@pixi/gif": "^3.0.1",
     "apng-js": "^1.1.5",
+    "gifuct-js": "^2.1.2",
     "pixi.js": "^8.22.0",
     "wasm-webp": "^0.1.0"
   },

@@ -8,11 +8,9 @@ vi.mock('pixi.js', () => ({
     Texture: { from: vi.fn() }
 }));
 
-vi.mock('@pixi/gif', () => ({ AnimatedGIF: { fromBuffer: vi.fn() } }));
-
 describe('decodeGifImage', () =>
 {
-    it('wraps the existing Pixi GIF controller in an idempotent resource lifecycle', () =>
+    it('wraps the GIF controller in an idempotent resource lifecycle', () =>
     {
         const destroy = vi.fn();
         const texture = { source: { scaleMode: 'nearest' } };
