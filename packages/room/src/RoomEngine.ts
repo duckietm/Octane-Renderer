@@ -75,12 +75,23 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
     private _badgeImageReadyCallback: (event: BadgeImageReadyEvent) => void = null;
     private _areaSelectionManager: IRoomAreaSelectionManager = new RoomAreaSelectionManager(this);
     private _roomSessionEventCallback: (event: RoomSessionEvent) => void = null;
+    private _roomObjectEventCallback: (event: RoomObjectEvent) => void = null;
 
     public async init(): Promise<void>
     {
         this.setPlaneRenderMode(GetConfiguration().getValue<boolean>('room.planes.direct', false));
 
-        GetRoomObjectLogicFactory().registerEventFunction(event => this.processRoomObjectEvent(event));
+        // Kept so dispose can take it back: an anonymous function stayed registered, and every later init added one
+        // more, so each room object event was processed once per init.
+        if(this._roomObjectEventCallback) GetRoomObjectLogicFactory().removeEventFunction(this._roomObjectEventCallback);
+        this._roomObjectEventCallback = (event: RoomObjectEvent) => this.processRoomObjectEvent(event);
+        GetRoomObjectLogicFactory().registerEventFunction(this._roomObjectEventCallback);
+
+        if(this._roomSessionEventCallback)
+        {
+            GetEventDispatcher().removeEventListener(RoomSessionEvent.STARTED, this._roomSessionEventCallback);
+            GetEventDispatcher().removeEventListener(RoomSessionEvent.ENDED, this._roomSessionEventCallback);
+        }
 
         this._roomSessionEventCallback = (event: RoomSessionEvent) => this.onRoomSessionEvent(event);
         GetEventDispatcher().addEventListener<RoomSessionEvent>(RoomSessionEvent.STARTED, this._roomSessionEventCallback);
@@ -132,6 +143,12 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
         }
 
         this._roomObjectEventHandler?.cancelPendingSends?.();
+
+        if(this._roomObjectEventCallback)
+        {
+            GetRoomObjectLogicFactory().removeEventFunction(this._roomObjectEventCallback);
+            this._roomObjectEventCallback = null;
+        }
 
         GetRoomMessageHandler().dispose();
 

@@ -60,6 +60,9 @@ export class SoundManager implements ISoundManager
             this._eventCallback = null;
         }
 
+        // The music controller registered its packets and listeners in init: left behind, a later init doubled them.
+        this._musicController?.dispose();
+
         // Stop all playing samples
         this.stopAllFurniSamples();
 

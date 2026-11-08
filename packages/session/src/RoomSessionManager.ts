@@ -1,4 +1,4 @@
-import { IRoomHandlerListener, IRoomSession, IRoomSessionManager, IRoomSessionSnapshot } from '@octane/api';
+import { IConnection, IMessageEvent, IOctaneEvent, IRoomHandlerListener, IRoomSession, IRoomSessionManager, IRoomSessionSnapshot } from '@octane/api';
 import { GetCommunication, RoomEnterComposer, RoomUnitWalkComposer } from '@octane/communication';
 import { GetEventDispatcher, OctaneEvent, OctaneEventType, RoomSessionEvent, SocketReauthenticatedEvent } from '@octane/events';
 import { OctaneLogger } from '@octane/utils';
@@ -14,6 +14,9 @@ const STORAGE_KEY_POS_Y = 'nitro.session.lastPosY';
 export class RoomSessionManager implements IRoomSessionManager, IRoomHandlerListener
 {
     private _handlers: BaseHandler[] = [];
+    // What init registered, so dispose can take it back: the handlers' packets and the socket listeners.
+    private _handlerEvents: { connection: IConnection, event: IMessageEvent }[] = [];
+    private _socketListeners: { type: string, callback: (event: IOctaneEvent) => void }[] = [];
     private _sessions: Map<string, IRoomSession> = new Map();
     private _pendingSession: IRoomSession = null;
 
@@ -70,6 +73,9 @@ export class RoomSessionManager implements IRoomSessionManager, IRoomHandlerList
 
     public async init(): Promise<void>
     {
+        // A second init registered every handler and socket listener again, so each packet was handled twice.
+        if(this._handlers.length || this._socketListeners.length) return;
+
         this.createHandlers();
         this.processPendingSession();
         this.setupReconnectListener();
@@ -99,9 +105,53 @@ export class RoomSessionManager implements IRoomSessionManager, IRoomHandlerList
         {}
     }
 
+    /**
+     * Takes back everything init registered and the timers it may have left, so a later init starts clean. Nothing
+     * called this before: a logout without a page reload kept every handler and listener of the old session.
+     */
+    public dispose(): void
+    {
+        for(const { connection, event } of this._handlerEvents) connection.removeMessageEvent(event);
+        this._handlerEvents = [];
+
+        for(const handler of this._handlers) handler?.dispose();
+        this._handlers = [];
+
+        for(const { type, callback } of this._socketListeners) GetEventDispatcher().removeEventListener(type, callback);
+        this._socketListeners = [];
+
+        this.clearGuardTimer();
+        this.cancelRoomIdClear();
+    }
+
+    private listen<T extends IOctaneEvent>(type: string, callback: (event: T) => void): void
+    {
+        GetEventDispatcher().addEventListener<T>(type, callback);
+        this._socketListeners.push({ type, callback });
+    }
+
+    // The handlers register their packets on the connection they are given; this one records each, for dispose.
+    private recordingConnection(connection: IConnection): IConnection
+    {
+        return new Proxy(connection, {
+            get: (target, key) =>
+            {
+                if(key === 'addMessageEvent') return (event: IMessageEvent) =>
+                {
+                    this._handlerEvents.push({ connection: target, event });
+                    target.addMessageEvent(event);
+                };
+
+                const value = Reflect.get(target, key, target);
+
+                return (typeof value === 'function') ? value.bind(target) : value;
+            }
+        });
+    }
+
     private createHandlers(): void
     {
-        const connection = GetCommunication().connection;
+        const connection = GetCommunication().connection ? this.recordingConnection(GetCommunication().connection) : null;
 
         if(!connection) return;
 
@@ -122,7 +172,7 @@ export class RoomSessionManager implements IRoomSessionManager, IRoomHandlerList
 
     private setupReconnectListener(): void
     {
-        GetEventDispatcher().addEventListener(OctaneEventType.SOCKET_RECONNECTING, () =>
+        this.listen(OctaneEventType.SOCKET_RECONNECTING, () =>
         {
             this.cancelRoomIdClear();
             if(this._lastRoomId > 0)
@@ -132,14 +182,14 @@ export class RoomSessionManager implements IRoomSessionManager, IRoomHandlerList
             this._isReconnecting = true;
         });
 
-        GetEventDispatcher().addEventListener(OctaneEventType.SOCKET_RECONNECTED, () =>
+        this.listen(OctaneEventType.SOCKET_RECONNECTED, () =>
         {
             this.clearGuardTimer();
 
             if(shouldAttemptRoomReEntry(OctaneEventType.SOCKET_RECONNECTED)) this.attemptRoomReEntry();
         });
 
-        GetEventDispatcher().addEventListener<SocketReauthenticatedEvent>(OctaneEventType.SOCKET_REAUTHENTICATED, event =>
+        this.listen<SocketReauthenticatedEvent>(OctaneEventType.SOCKET_REAUTHENTICATED, event =>
         {
             this.snapshotSavedPosition();
             this.clearGuardTimer();
@@ -156,7 +206,7 @@ export class RoomSessionManager implements IRoomSessionManager, IRoomHandlerList
             }
         });
 
-        GetEventDispatcher().addEventListener(OctaneEventType.SOCKET_RECONNECT_FAILED, () =>
+        this.listen(OctaneEventType.SOCKET_RECONNECT_FAILED, () =>
         {
             OctaneLogger.log('[RoomSessionManager] SOCKET_RECONNECT_FAILED - clearing state');
             this.clearGuardTimer();
@@ -168,7 +218,7 @@ export class RoomSessionManager implements IRoomSessionManager, IRoomHandlerList
             this.clearPersistedPosition();
         });
 
-        GetEventDispatcher().addEventListener(OctaneEventType.SOCKET_CLOSED, () =>
+        this.listen(OctaneEventType.SOCKET_CLOSED, () =>
         {
             this.clearGuardTimer();
             this._isReconnecting = false;
