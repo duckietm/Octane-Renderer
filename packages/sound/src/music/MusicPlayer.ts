@@ -64,6 +64,18 @@ export class MusicPlayer
         this._tickerInterval = window.setInterval(() => this.tick(), 1000);
     }
 
+    /** Loads the samples of a song, then plays it, unless a newer request, a play or a stop came in meanwhile. */
+    public async preloadAndPlay(song: string, currentSongId: number, startPos: number = 0, playLength: number = -1): Promise<void>
+    {
+        const generation = ++this._playGeneration;
+
+        await this.preloadSamplesForSong(song);
+
+        if(generation !== this._playGeneration) return;
+
+        await this.play(song, currentSongId, startPos, playLength);
+    }
+
     private reset(keepSampleIds: ReadonlySet<number> = new Set()): void
     {
         this._playGeneration++;

@@ -9,6 +9,9 @@ vi.mock('howler', () => ({
     {
         public handlers = new Map<string, () => void>();
         public unload = vi.fn();
+        public play = vi.fn(() => 1);
+        public playing = vi.fn(() => false);
+        public seek = vi.fn();
 
         constructor(public options: { src: string[] })
         {
@@ -96,5 +99,47 @@ describe('MusicPlayer song switch', () =>
             vi.clearAllTimers();
             vi.useRealTimers();
         }
+    });
+});
+
+describe('MusicPlayer preloadAndPlay', () =>
+{
+    it('plays the newest request when an older one finishes loading last', async () =>
+    {
+        vi.useFakeTimers();
+
+        try
+        {
+            const player = new MusicPlayer('%sample%.mp3');
+
+            const older = player.preloadAndPlay('1:5,4:', 1);
+            const newer = player.preloadAndPlay('1:6,4:', 2);
+
+            howls[1].handlers.get('load')();
+            await newer;
+            howls[0].handlers.get('load')();
+            await older;
+
+            expect(player['_currentSongId']).toBe(2);
+        }
+        finally
+        {
+            vi.clearAllTimers();
+            vi.useRealTimers();
+        }
+    });
+
+    it('does not start a song stopped while its samples load', async () =>
+    {
+        const player = new MusicPlayer('%sample%.mp3');
+        const play = vi.spyOn(player, 'play');
+
+        const request = player.preloadAndPlay('1:5,4:', 1);
+
+        player.stop();
+        howls[0].handlers.get('load')();
+        await request;
+
+        expect(play).not.toHaveBeenCalled();
     });
 });

@@ -2,7 +2,7 @@ import { IAdvancedMap, IMessageEvent, IMusicController, IPlaylistController, ISo
 import { GetCommunication, GetNowPlayingMessageComposer, GetSongInfoMessageComposer, GetUserSongDisksMessageComposer, TraxSongInfoMessageEvent, UserSongDisksInventoryMessageEvent } from '@octane/communication';
 import { GetConfiguration } from '@octane/configuration';
 import { GetEventDispatcher, NotifyPlayedSongEvent, NowPlayingEvent, RoomObjectSoundMachineEvent, SongDiskInventoryReceivedEvent, SongInfoReceivedEvent, SoundManagerEvent } from '@octane/events';
-import { AdvancedMap } from '@octane/utils';
+import { AdvancedMap, OctaneLogger } from '@octane/utils';
 import { GetSoundManager } from '../GetSoundManager';
 import { SongDataEntry, SongStartRequestData } from '../common';
 import { TraxData } from '../trax/TraxData';
@@ -139,8 +139,7 @@ export class MusicController implements IMusicController
     {
         this.stop(MusicPriorities.PRIORITY_PURCHASE_PREVIEW);
         this._musicPlayer.setVolume(GetSoundManager().traxVolume);
-        await this._musicPlayer.preloadSamplesForSong(songData);
-        await this._musicPlayer.play(songData, -1, Math.max(0, startPosSeconds), -1);
+        await this._musicPlayer.preloadAndPlay(songData, -1, Math.max(0, startPosSeconds), -1);
     }
 
     public stopPreview(): void
@@ -464,7 +463,7 @@ export class MusicController implements IMusicController
         {
             this.notifySongPlaying(songData);
         }
-        this._musicPlayer.preloadSamplesForSong(songData.songData).then(() => this._musicPlayer.play(songData.songData, songData.id, startPos, playLength));
+        this._musicPlayer.preloadAndPlay(songData.songData, songData.id, startPos, playLength).catch(error => OctaneLogger.error('failed to play song ' + songData.id, error));
         if(priority > MusicPriorities.PRIORITY_ROOM_PLAYLIST)
         {
             GetEventDispatcher().dispatchEvent(new NowPlayingEvent(NowPlayingEvent.NPE_USER_PLAY_SONG, priority, songData.id, -1));
