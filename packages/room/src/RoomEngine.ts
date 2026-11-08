@@ -8,6 +8,7 @@ import { FurniId, GetRenderer, GetTexturePool, GetTickerTime, OctaneLogger, Numb
 import { Container, Matrix, Point, PointData, Rectangle, RenderTexture, Sprite, Texture, Ticker, WebGLRenderer } from 'pixi.js';
 import { DEFAULT_WIRED_CLICK_SETTINGS, normalizeWiredClickSettings, WiredClickSettings } from './utils/WiredClickSettings';
 import { GetRoomContentLoader } from './GetRoomContentLoader';
+import { buildContentImageKey } from './RoomContentLoader';
 import { GetRoomManager } from './GetRoomManager';
 import { GetRoomMessageHandler } from './GetRoomMessageHandler';
 import { GetRoomObjectLogicFactory } from './GetRoomObjectLogicFactory';
@@ -3493,7 +3494,7 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
         imageResult.data = null;
         imageResult.image = null;
 
-        const assetName = [type, param].join('_');
+        const assetName = buildContentImageKey(type, param);
 
         const asset = this._roomContentLoader.getImage(assetName);
 

@@ -7,6 +7,9 @@ import { OctaneLogger } from '@octane/utils';
 import { Texture } from 'pixi.js';
 import { PetColorResult } from './PetColorResult';
 
+/** The name an icon image is cached and announced under; the engine looks it up by the same name. */
+export const buildContentImageKey = (type: string, param: string): string => [ type, param ].join('_');
+
 export class RoomContentLoader implements IRoomContentLoader
 {
     private static PLACE_HOLDER: string = 'place_holder';
@@ -299,6 +302,7 @@ export class RoomContentLoader implements IRoomContentLoader
 
     public downloadImage(id: number, type: string, param: string, events: IEventDispatcher = null): boolean
     {
+        const key = buildContentImageKey(type, param);
         let typeName: string = null;
         let assetUrls: string[] = [];
 
@@ -320,7 +324,6 @@ export class RoomContentLoader implements IRoomContentLoader
         if(assetUrls && assetUrls.length)
         {
             const url = assetUrls[0];
-            const key = [ type, param ].join('_');
             const waiting = this._imageWaiters.get(key);
 
             if(waiting)
