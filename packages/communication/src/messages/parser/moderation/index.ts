@@ -16,6 +16,8 @@ export * from './ModeratorRoomInfoMessageParser';
 export * from './ModeratorToolPreferencesMessageParser';
 export * from './ModeratorUserInfoData';
 export * from './ModeratorUserInfoMessageParser';
+export * from './ModeratorUserRecordData';
+export * from './ModeratorUserRecordsParser';
 export * from './ModRoomData';
 export * from './PatternMatchData';
 export * from './RoomChatlogMessageParser';

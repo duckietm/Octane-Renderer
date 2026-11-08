@@ -168,6 +168,8 @@ export class OutgoingHeader
     public static MARK_CONSOLE_READ = 4085;
     public static CONSOLE_TYPING = 4087;
     public static MOD_TOOL_USER_INFO = 3295;
+    // Moderator user records request (kind 0 cautions, 1 bans, 2 linked bans, 3 trade locks): custom id in the reserved 94xx block.
+    public static MOD_TOOL_USER_RECORDS = 9481;
     public static GET_USER_FLAT_CATS = 3027;
     public static NAVIGATOR_INIT = 2110;
     public static NAVIGATOR_SEARCH = 249;
