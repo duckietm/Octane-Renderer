@@ -78,6 +78,7 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
     private _areaSelectionManager: IRoomAreaSelectionManager = new RoomAreaSelectionManager(this);
     private _roomSessionEventCallback: (event: RoomSessionEvent) => void = null;
     private _roomObjectEventCallback: (event: RoomObjectEvent) => void = null;
+    private _disposed: boolean = false;
 
     public async init(): Promise<void>
     {
@@ -167,6 +168,8 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
         this._badgeListenerObjects.clear();
         this.removeIdleBadgeImageListener();
         this.clearRoomObjectImageCache();
+
+        this._disposed = true;
     }
 
     public setActiveRoomId(roomId: number): void
@@ -1863,18 +1866,7 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
                         const objectData = ObjectDataFactory.getData(dataKey);
                         const icon = this.getFurnitureFloorIcon(typeId, null, extras, objectData);
 
-                        if(icon && icon.data)
-                        {
-                            (async () =>
-                            {
-                                const image = await icon.getImage();
-                                const event = new OctaneToolbarAnimateIconEvent(image, screenLocation.x, screenLocation.y);
-
-                                event.iconName = ToolbarIconEnum.INVENTORY;
-
-                                GetEventDispatcher().dispatchEvent(event);
-                            })();
-                        }
+                        if(icon && icon.data) this.animateIconToInventory(icon, screenLocation.x, screenLocation.y);
                     }
                 }
             }
@@ -1884,6 +1876,23 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
         this.setMouseDefault(roomId, RoomObjectCategory.FLOOR, objectId);
 
         if(refreshTileMap) this.refreshTileObjectMap(roomId, 'RoomEngine.disposeObjectFurniture()');
+    }
+
+    // The icon decodes after the furni is gone: a failed decode or an engine disposed meanwhile drops the animation.
+    private animateIconToInventory(icon: IImageResult, x: number, y: number): void
+    {
+        icon.getImage()
+            .then(image =>
+            {
+                if(this._disposed || !image) return;
+
+                const event = new OctaneToolbarAnimateIconEvent(image, x, y);
+
+                event.iconName = ToolbarIconEnum.INVENTORY;
+
+                GetEventDispatcher().dispatchEvent(event);
+            })
+            .catch(error => OctaneLogger.warn('Inventory icon animation', error));
     }
 
     public getRoomObjectWall(roomId: number, objectId: number): IRoomObjectController
@@ -1907,22 +1916,7 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
                     const objectData = roomObject.model.getValue<string>(RoomObjectVariable.FURNITURE_DATA);
                     const icon = this.getFurnitureWallIcon(typeId, null, objectData);
 
-                    if(icon && icon.data)
-                    {
-                        (async () =>
-                        {
-                            const image = await icon.getImage();
-
-                            if(GetEventDispatcher())
-                            {
-                                const event = new OctaneToolbarAnimateIconEvent(image, screenLocation.x, screenLocation.y);
-
-                                event.iconName = ToolbarIconEnum.INVENTORY;
-
-                                GetEventDispatcher().dispatchEvent(event);
-                            }
-                        })();
-                    }
+                    if(icon && icon.data) this.animateIconToInventory(icon, screenLocation.x, screenLocation.y);
                 }
             }
         }
