@@ -18,7 +18,7 @@ const fixture = () =>
 {
     const bytes = readFileSync(join(__dirname, '__fixtures__', 'disposal.gif'));
 
-    return bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
+    return bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
 };
 
 const RED = [ 255, 0, 0, 255 ];

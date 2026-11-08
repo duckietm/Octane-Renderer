@@ -13,7 +13,10 @@ const animate = (engine: object, getImage: () => Promise<HTMLImageElement>) =>
 
 const settle = () => new Promise(resolve => setTimeout(resolve, 0));
 
-beforeEach(() => { dispatched.length = 0; });
+beforeEach(() =>
+{
+    dispatched.length = 0;
+});
 
 describe('RoomEngine inventory icon animation', () =>
 {

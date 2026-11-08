@@ -497,12 +497,10 @@ __metadata:
   resolution: "@octane/renderer@workspace:."
   dependencies:
     "@eslint/js": "npm:^10.0.1"
-    "@types/howler": "npm:^2.2.13"
     "@types/node": "npm:^26.6.2"
     "@vitest/coverage-v8": "npm:5.1.0"
     eslint: "npm:^10.11.0"
     gifuct-js: "npm:^2.1.2"
-    howler: "npm:^2.2.4"
     jsdom: "npm:30.1.3"
     knip: "npm:6.43.0"
     pixi-filters: "npm:^6.1.5"
@@ -1035,13 +1033,6 @@ __metadata:
   version: 0.1.5
   resolution: "@types/gradient-parser@npm:0.1.5"
   checksum: 10c0/8347fb24885aeb133421baec58d0eab4e8ec43d17f337bc4f1d23bde99ca5e87b82b44834eb00d71fd820503c530d4c75e4d9a98652e09b2f04b08fbc1057762
-  languageName: node
-  linkType: hard
-
-"@types/howler@npm:^2.2.13":
-  version: 2.2.13
-  resolution: "@types/howler@npm:2.2.13"
-  checksum: 10c0/dd3773d2cc8d48f41480a991bc05f9f4e9b74b130b7c674434553c46dae6cae3398935dc1156cc36aece72d00f098c10204c0eb20ee444563a9758c49cd78ad5
   languageName: node
   linkType: hard
 
@@ -1936,13 +1927,6 @@ __metadata:
   version: 2.2.0
   resolution: "hookified@npm:2.2.0"
   checksum: 10c0/7017d2b66945490293a5aba239e7b39f39071dd940fa019348c7ffea92b91b8c267853c4c51680ed0f3687b33352582fa4d2cff6dd4c5a1c5c44b037276f07aa
-  languageName: node
-  linkType: hard
-
-"howler@npm:^2.2.4":
-  version: 2.2.4
-  resolution: "howler@npm:2.2.4"
-  checksum: 10c0/74a295f56fd9b2abce122b27ed12c33fa195fb8a76832803e92d8e462a1eca803b55f44c14db052211d0cfab85c7c5249664c68d95bbbc16c775fac73866c6ef
   languageName: node
   linkType: hard
 
