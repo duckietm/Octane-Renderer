@@ -50,7 +50,7 @@ export class MusicPlayer
         // A stop or a newer play while the samples load must win.
         const generation = this._playGeneration;
 
-        await this.preload();
+        await this.preload(generation);
 
         if(generation !== this._playGeneration) return;
 
@@ -167,19 +167,25 @@ export class MusicPlayer
         }
     }
 
-    private async preload(): Promise<void>
+    // Builds the sequence of the song selected when it started; a newer play or a stop while samples load discards it.
+    private async preload(generation: number): Promise<void>
     {
+        const song = this._currentSong;
+        const sequence: ISequenceEntry[][] = [];
+
         this._sequence = [];
 
-        if(!this._currentSong) return;
+        if(!song) return;
 
-        for(const channel of this._currentSong.channels)
+        for(const channel of song.channels)
         {
             const sequenceEntryArray: ISequenceEntry[] = [];
             for(const sample of channel.items)
             {
                 const isRestSample = (sample.id === -1) || (sample.id === 0);
                 const sampleDuration = isRestSample ? 1 : Math.ceil((await this.getSample(sample.id)).duration());
+
+                if(generation !== this._playGeneration) return;
 
                 const sampleCount = Math.ceil((sample.length * 2) / sampleDuration);
 
@@ -192,10 +198,12 @@ export class MusicPlayer
                 }
             }
 
-            this._sequence.push(sequenceEntryArray);
+            sequence.push(sequenceEntryArray);
         }
 
-        if(this._playLength <= 0) this._playLength = Math.max(...this._sequence.map((value: ISequenceEntry[]) => value.length));
+        this._sequence = sequence;
+
+        if(this._playLength <= 0) this._playLength = Math.max(...sequence.map((value: ISequenceEntry[]) => value.length));
     }
 
     public async preloadSamplesForSong(song: string): Promise<void>

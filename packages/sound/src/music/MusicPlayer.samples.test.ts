@@ -70,3 +70,31 @@ describe('MusicPlayer samples', () =>
         expect(howls).toHaveLength(2);
     });
 });
+
+describe('MusicPlayer song switch', () =>
+{
+    it('keeps the sequence of the newer song when an older one finishes loading', async () =>
+    {
+        vi.useFakeTimers();
+
+        try
+        {
+            const player = new MusicPlayer('%sample%.mp3');
+
+            const older = player.play('1:5,4:', 1);
+
+            await player.play('1:0,2:', 2);
+
+            howls[0].handlers.get('load')();
+            await older;
+
+            expect(player['_sequence']).toEqual([ Array.from({ length: 4 }, () => ({ sampleId: 0, offset: 0 })) ]);
+            expect(player['_currentSongId']).toBe(2);
+        }
+        finally
+        {
+            vi.clearAllTimers();
+            vi.useRealTimers();
+        }
+    });
+});
