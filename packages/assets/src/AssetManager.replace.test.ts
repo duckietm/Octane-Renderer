@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { Texture } from 'pixi.js';
 import { AssetManager } from './AssetManager';
+import { GraphicAssetCollection } from './GraphicAssetCollection';
 
 const createResource = () => ({ texture: new Texture(), format: 'png' as const, animated: false, dispose: vi.fn() });
 
@@ -56,7 +57,7 @@ describe('AssetManager collection replacement', () =>
     it('unregisters the texture names only the replaced collection held', () =>
     {
         const manager = new AssetManager();
-        const old = manager.createCollection({ name: 'chair' }, null);
+        const old = manager.createCollection({ name: 'chair' }, null) as GraphicAssetCollection;
         const kept = new Texture();
         const stale = new Texture();
 
@@ -65,7 +66,7 @@ describe('AssetManager collection replacement', () =>
         manager.setTexture('chair_shared', kept);
         manager.setTexture('chair_old_only', stale);
 
-        const replacement = manager.createCollection({ name: 'chair' }, null);
+        const replacement = manager.createCollection({ name: 'chair' }, null) as GraphicAssetCollection;
         const fresh = new Texture();
 
         replacement.textures.set('chair_shared', fresh);
