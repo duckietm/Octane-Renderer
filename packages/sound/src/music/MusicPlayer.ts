@@ -92,6 +92,12 @@ export class MusicPlayer
         this._isPlaying = true;
     }
 
+    /** Stops the song and its ticker without reporting it complete: nothing listens any more. */
+    public dispose(): void
+    {
+        this.reset();
+    }
+
     public stop(): void
     {
         const songId = this._currentSongId;

@@ -200,6 +200,10 @@ export class MusicController implements IMusicController
         GetEventDispatcher().removeEventListener(RoomObjectSoundMachineEvent.SOUND_MACHINE_INIT, this.onSoundMachineInit);
         GetEventDispatcher().removeEventListener(RoomObjectSoundMachineEvent.SOUND_MACHINE_DISPOSE, this.onSoundMachineDispose);
         GetEventDispatcher().removeEventListener(SoundManagerEvent.TRAX_SONG_COMPLETE, this.onTraxSongComplete);
+
+        // The player's one-second ticker kept running, and kept the song playing, after the controller was gone.
+        this._musicPlayer?.dispose();
+        this._musicPlayer = undefined;
     }
 
     public get samplesIdsInUse(): number[]

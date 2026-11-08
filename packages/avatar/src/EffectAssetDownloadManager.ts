@@ -64,6 +64,8 @@ export class EffectAssetDownloadManager
         this._effectListeners.clear();
         this._incompleteEffects.clear();
         this._currentDownloads = [];
+        // The names decide which libraries the next effect map creates: kept, a later init created none.
+        this._libraryNames = [];
     }
 
     private processEffectMap(data: any): void

@@ -1,5 +1,5 @@
 import { IConnection, IRoomHandlerListener } from '@octane/api';
-import { GetCommunication, OpenPetPackageRequestedMessageEvent, OpenPetPackageResultMessageEvent } from '@octane/communication';
+import { OpenPetPackageRequestedMessageEvent, OpenPetPackageResultMessageEvent } from '@octane/communication';
 import { GetEventDispatcher, RoomSessionPetPackageEvent } from '@octane/events';
 import { BaseHandler } from './BaseHandler';
 
@@ -9,8 +9,8 @@ export class PetPackageHandler extends BaseHandler
     {
         super(connection, listener);
 
-        GetCommunication().registerMessageEvent(new OpenPetPackageRequestedMessageEvent(this.onOpenPetPackageRequested.bind(this)));
-        GetCommunication().registerMessageEvent(new OpenPetPackageResultMessageEvent(this.onOpenPetPackageResult.bind(this)));
+        connection.addMessageEvent(new OpenPetPackageRequestedMessageEvent(this.onOpenPetPackageRequested.bind(this)));
+        connection.addMessageEvent(new OpenPetPackageResultMessageEvent(this.onOpenPetPackageResult.bind(this)));
     }
 
     private onOpenPetPackageRequested(event: OpenPetPackageRequestedMessageEvent): void
