@@ -15,6 +15,7 @@ export class MusicPlayer
     private _isPlaying: boolean;
     private _currentPos: number;
     private _cache: Map<number, Howl>;
+    private _loading: Map<number, Promise<Howl>> = new Map();
     private _sampleUrl: string;
 
     private _tickerInterval: number | undefined;
@@ -117,11 +118,21 @@ export class MusicPlayer
 
     public async getSample(id: number): Promise<Howl>
     {
-        let sample = this._cache.get(id);
+        const sample = this._cache.get(id);
 
-        if(!sample) sample = await this.loadSong(id);
+        if(sample) return sample;
 
-        return Promise.resolve(sample);
+        // Requests for a sample already loading share that load: a second Howl would never be unloaded.
+        let loading = this._loading.get(id);
+
+        if(!loading)
+        {
+            loading = this.loadSong(id).finally(() => this._loading.delete(id));
+
+            this._loading.set(id, loading);
+        }
+
+        return loading;
     }
 
     public async playSampleOnce(sampleId: number): Promise<void>
@@ -221,6 +232,7 @@ export class MusicPlayer
             sample.once('loaderror', () =>
             {
                 OctaneLogger.error('failed to load sample ' + songId);
+                sample.unload();
                 reject(new Error('failed to load sample ' + songId));
             });
         });
