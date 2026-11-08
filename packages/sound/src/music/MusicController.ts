@@ -21,7 +21,7 @@ export class MusicController implements IMusicController
     private _availableSongs: Map<number, SongDataEntry> = new Map();
     private _songRequestsPerPriority: SongStartRequestData[] = [];
     private _songRequestCountsPerPriority: number[] = [];
-    private _diskInventoryMissingData: number[] = [];
+    private _diskInventoryMissingData: Set<number> = new Set();
     private _songDiskInventory: IAdvancedMap<number, number> = new AdvancedMap();
     private _priorityPlaying: number = -1;
     private _requestNumberPlaying: number = -1;
@@ -291,13 +291,10 @@ export class MusicController implements IMusicController
                     this.playSongObject(topRequestPriotityIndex, songId);
                 }
                 GetEventDispatcher().dispatchEvent(new SongInfoReceivedEvent(SongInfoReceivedEvent.SIR_TRAX_SONG_INFO_RECEIVED, song.id));
-                while(this._diskInventoryMissingData.indexOf(song.id) != -1)
+                // Re-announce the inventory as each missing name lands, not only once all have: one that never arrives must not hold back the rest.
+                if(this._diskInventoryMissingData.delete(song.id))
                 {
-                    this._diskInventoryMissingData.splice(this._diskInventoryMissingData.indexOf(song.id), 1);
-                    if(this._diskInventoryMissingData.length === 0)
-                    {
-                        GetEventDispatcher().dispatchEvent(new SongDiskInventoryReceivedEvent(SongDiskInventoryReceivedEvent.SDIR_SONG_DISK_INVENTORY_RECEIVENT_EVENT));
-                    }
+                    GetEventDispatcher().dispatchEvent(new SongDiskInventoryReceivedEvent(SongDiskInventoryReceivedEvent.SDIR_SONG_DISK_INVENTORY_RECEIVENT_EVENT));
                 }
 
             }
@@ -309,6 +306,7 @@ export class MusicController implements IMusicController
         const parser = event.getParser();
 
         this._songDiskInventory.reset();
+        this._diskInventoryMissingData.clear();
         for(let i = 0; i < parser.songDiskCount; i++)
         {
             const diskId = parser.getDiskId(i);
@@ -317,7 +315,7 @@ export class MusicController implements IMusicController
 
             if(!this._availableSongs.get(songId))
             {
-                this._diskInventoryMissingData.push(songId);
+                this._diskInventoryMissingData.add(songId);
                 this.requestSongInfoWithoutSamples(songId);
             }
         }
