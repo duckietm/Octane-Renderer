@@ -2,7 +2,7 @@ import { IAdvancedMap, IMessageEvent, IMusicController, IPlaylistController, ISo
 import { GetCommunication, GetNowPlayingMessageComposer, GetSongInfoMessageComposer, GetUserSongDisksMessageComposer, TraxSongInfoMessageEvent, UserSongDisksInventoryMessageEvent } from '@octane/communication';
 import { GetConfiguration } from '@octane/configuration';
 import { GetEventDispatcher, NotifyPlayedSongEvent, NowPlayingEvent, RoomObjectSoundMachineEvent, SongDiskInventoryReceivedEvent, SongInfoReceivedEvent, SoundManagerEvent } from '@octane/events';
-import { AdvancedMap } from '@octane/utils';
+import { AdvancedMap, OctaneLogger } from '@octane/utils';
 import { GetSoundManager } from '../GetSoundManager';
 import { SongDataEntry, SongStartRequestData } from '../common';
 import { TraxData } from '../trax/TraxData';
@@ -21,7 +21,7 @@ export class MusicController implements IMusicController
     private _availableSongs: Map<number, SongDataEntry> = new Map();
     private _songRequestsPerPriority: SongStartRequestData[] = [];
     private _songRequestCountsPerPriority: number[] = [];
-    private _diskInventoryMissingData: number[] = [];
+    private _diskInventoryMissingData: Set<number> = new Set();
     private _songDiskInventory: IAdvancedMap<number, number> = new AdvancedMap();
     private _priorityPlaying: number = -1;
     private _requestNumberPlaying: number = -1;
@@ -139,8 +139,7 @@ export class MusicController implements IMusicController
     {
         this.stop(MusicPriorities.PRIORITY_PURCHASE_PREVIEW);
         this._musicPlayer.setVolume(GetSoundManager().traxVolume);
-        await this._musicPlayer.preloadSamplesForSong(songData);
-        await this._musicPlayer.play(songData, -1, Math.max(0, startPosSeconds), -1);
+        await this._musicPlayer.preloadAndPlay(songData, -1, Math.max(0, startPosSeconds), -1);
     }
 
     public stopPreview(): void
@@ -200,6 +199,10 @@ export class MusicController implements IMusicController
         GetEventDispatcher().removeEventListener(RoomObjectSoundMachineEvent.SOUND_MACHINE_INIT, this.onSoundMachineInit);
         GetEventDispatcher().removeEventListener(RoomObjectSoundMachineEvent.SOUND_MACHINE_DISPOSE, this.onSoundMachineDispose);
         GetEventDispatcher().removeEventListener(SoundManagerEvent.TRAX_SONG_COMPLETE, this.onTraxSongComplete);
+
+        // The player's one-second ticker kept running, and kept the song playing, after the controller was gone.
+        this._musicPlayer?.dispose();
+        this._musicPlayer = undefined;
     }
 
     public get samplesIdsInUse(): number[]
@@ -288,13 +291,10 @@ export class MusicController implements IMusicController
                     this.playSongObject(topRequestPriotityIndex, songId);
                 }
                 GetEventDispatcher().dispatchEvent(new SongInfoReceivedEvent(SongInfoReceivedEvent.SIR_TRAX_SONG_INFO_RECEIVED, song.id));
-                while(this._diskInventoryMissingData.indexOf(song.id) != -1)
+                // Re-announce the inventory as each missing name lands, not only once all have: one that never arrives must not hold back the rest.
+                if(this._diskInventoryMissingData.delete(song.id))
                 {
-                    this._diskInventoryMissingData.splice(this._diskInventoryMissingData.indexOf(song.id), 1);
-                    if(this._diskInventoryMissingData.length === 0)
-                    {
-                        GetEventDispatcher().dispatchEvent(new SongDiskInventoryReceivedEvent(SongDiskInventoryReceivedEvent.SDIR_SONG_DISK_INVENTORY_RECEIVENT_EVENT));
-                    }
+                    GetEventDispatcher().dispatchEvent(new SongDiskInventoryReceivedEvent(SongDiskInventoryReceivedEvent.SDIR_SONG_DISK_INVENTORY_RECEIVENT_EVENT));
                 }
 
             }
@@ -306,6 +306,7 @@ export class MusicController implements IMusicController
         const parser = event.getParser();
 
         this._songDiskInventory.reset();
+        this._diskInventoryMissingData.clear();
         for(let i = 0; i < parser.songDiskCount; i++)
         {
             const diskId = parser.getDiskId(i);
@@ -314,7 +315,7 @@ export class MusicController implements IMusicController
 
             if(!this._availableSongs.get(songId))
             {
-                this._diskInventoryMissingData.push(songId);
+                this._diskInventoryMissingData.add(songId);
                 this.requestSongInfoWithoutSamples(songId);
             }
         }
@@ -460,7 +461,7 @@ export class MusicController implements IMusicController
         {
             this.notifySongPlaying(songData);
         }
-        this._musicPlayer.preloadSamplesForSong(songData.songData).then(() => this._musicPlayer.play(songData.songData, songData.id, startPos, playLength));
+        this._musicPlayer.preloadAndPlay(songData.songData, songData.id, startPos, playLength).catch(error => OctaneLogger.error('failed to play song ' + songData.id, error));
         if(priority > MusicPriorities.PRIORITY_ROOM_PLAYLIST)
         {
             GetEventDispatcher().dispatchEvent(new NowPlayingEvent(NowPlayingEvent.NPE_USER_PLAY_SONG, priority, songData.id, -1));

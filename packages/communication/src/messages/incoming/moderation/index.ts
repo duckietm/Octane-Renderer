@@ -9,6 +9,7 @@ export * from './ModeratorMessageEvent';
 export * from './ModeratorRoomInfoEvent';
 export * from './ModeratorToolPreferencesEvent';
 export * from './ModeratorUserInfoEvent';
+export * from './ModeratorUserRecordsEvent';
 export * from './RoomChatlogEvent';
 export * from './RoomVisitsEvent';
 export * from './UserBannedMessageEvent';

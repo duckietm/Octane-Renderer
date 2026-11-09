@@ -10,7 +10,7 @@ export class JukeboxPlaylistController implements IPlaylistController
     private _isPlaying = false;
     private _entries: ISongInfo[];
     private _currentSongId: number = -1;
-    private _missingSongInfo: number[] = [];
+    private _missingSongInfo: Set<number> = new Set();
     private _playPosition: number = -1;
     private _disposed: boolean = false;
     private _messageEvents: IMessageEvent[] = [];
@@ -74,32 +74,38 @@ export class JukeboxPlaylistController implements IPlaylistController
         const parser = event.getParser();
 
         this._entries = [];
+        this._missingSongInfo.clear();
 
         for(let i = 0; i < parser.songDisks.length; i++)
         {
             const songId = parser.songDisks.getWithIndex(i);
             const diskId = parser.songDisks.getKey(i);
-
-            let songInfo = (GetSoundManager().musicController.getSongInfo(songId) as SongDataEntry);
+            const songInfo = GetSoundManager().musicController.getSongInfo(songId);
 
             if(!songInfo)
             {
-                songInfo = new SongDataEntry(songId, -1, null, null, null);
+                this._missingSongInfo.add(songId);
 
-                if(this._missingSongInfo.indexOf(songId) < 0)
-                {
-                    this._missingSongInfo.push(songId);
-
-                    GetSoundManager().musicController.requestSongInfoWithoutSamples(songId);
-                }
+                GetSoundManager().musicController.requestSongInfoWithoutSamples(songId);
             }
 
-            songInfo.diskId = diskId;
-
-            this._entries.push(songInfo);
+            // Each disk gets its own entry: the cached song info is shared, and two disks of the same song would overwrite each other's disk id.
+            this._entries.push(this.createDiskEntry(songInfo, songId, diskId));
         }
 
-        if(!this._missingSongInfo.length) GetEventDispatcher().dispatchEvent(new PlayListStatusEvent(PlayListStatusEvent.PLUE_PLAY_LIST_UPDATED));
+        // Announce the playlist right away; a song whose info never arrives would otherwise hold it back for good.
+        GetEventDispatcher().dispatchEvent(new PlayListStatusEvent(PlayListStatusEvent.PLUE_PLAY_LIST_UPDATED));
+    }
+
+    private createDiskEntry(songInfo: ISongInfo, songId: number, diskId: number): SongDataEntry
+    {
+        const entry = songInfo
+            ? new SongDataEntry(songInfo.id, songInfo.length, songInfo.name, songInfo.creator, songInfo.songData)
+            : new SongDataEntry(songId, -1, null, null, null);
+
+        entry.diskId = diskId;
+
+        return entry;
     }
 
     private onJukeboxPlayListFullMessageEvent(event: JukeboxPlayListFullMessageEvent): void
@@ -109,30 +115,20 @@ export class JukeboxPlaylistController implements IPlaylistController
 
     private onSongInfoReceivedEvent(event: SongInfoReceivedEvent): void
     {
+        if(!this._missingSongInfo.delete(event.id)) return;
+
+        const songInfo = GetSoundManager().musicController.getSongInfo(event.id);
+
+        if(!songInfo) return;
+
         for(let i = 0; i < this.length; i++)
         {
             const songData = this._entries[i];
 
-            if(songData.id === event.id)
-            {
-                const diskId = songData.diskId;
-                const updatedSongData = GetSoundManager().musicController.getSongInfo(event.id);
-
-                if(updatedSongData)
-                {
-                    updatedSongData.diskId = diskId;
-                    this._entries[i] = updatedSongData;
-                }
-
-                break;
-            }
+            if(songData.id === event.id) this._entries[i] = this.createDiskEntry(songInfo, event.id, songData.diskId);
         }
 
-        const missingIndex = this._missingSongInfo.indexOf(event.id);
-
-        if(missingIndex >= 0) this._missingSongInfo.splice(missingIndex, 1);
-
-        if(!this._missingSongInfo.length) GetEventDispatcher().dispatchEvent(new PlayListStatusEvent(PlayListStatusEvent.PLUE_PLAY_LIST_UPDATED));
+        GetEventDispatcher().dispatchEvent(new PlayListStatusEvent(PlayListStatusEvent.PLUE_PLAY_LIST_UPDATED));
     }
 
     public stopPlaying(): void

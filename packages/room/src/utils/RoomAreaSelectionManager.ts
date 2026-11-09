@@ -83,18 +83,21 @@ export class RoomAreaSelectionManager implements IRoomAreaSelectionManager
     {
         this._roomEngine = roomEngine;
 
-        GetEventDispatcher().addEventListener<RoomEngineObjectEvent>(RoomEngineObjectEvent.ADDED, event =>
-        {
-            if(this._state === RoomAreaSelectionManager.NOT_ACTIVE) return;
+        this.onRoomObjectAdded = this.onRoomObjectAdded.bind(this);
+    }
 
-            if(event.roomId !== this._roomEngine.activeRoomId) return;
+    // Listened to only while active: a furni added during a selection is looked through like the rest.
+    private onRoomObjectAdded(event: RoomEngineObjectEvent): void
+    {
+        if(this._state === RoomAreaSelectionManager.NOT_ACTIVE) return;
 
-            if(event.category !== 10 && event.category !== 20) return;
+        if(event.roomId !== this._roomEngine.activeRoomId) return;
 
-            const roomObject = this._roomEngine.getRoomObject(event.roomId, event.objectId, event.category);
+        if(event.category !== 10 && event.category !== 20) return;
 
-            if(roomObject.visualization instanceof FurnitureVisualization) roomObject.visualization.lookThrough = true;
-        });
+        const roomObject = this._roomEngine.getRoomObject(event.roomId, event.objectId, event.category);
+
+        if(roomObject?.visualization instanceof FurnitureVisualization) roomObject.visualization.lookThrough = true;
     }
 
     private getAllFurniture(): IRoomObject[]
@@ -254,12 +257,16 @@ export class RoomAreaSelectionManager implements IRoomAreaSelectionManager
 
         this._state = RoomAreaSelectionManager.NOT_SELECTING_AREA;
 
+        GetEventDispatcher().addEventListener<RoomEngineObjectEvent>(RoomEngineObjectEvent.ADDED, this.onRoomObjectAdded);
+
         return true;
     }
 
     public deactivate(): void
     {
         if(this._state === RoomAreaSelectionManager.NOT_ACTIVE) return;
+
+        GetEventDispatcher().removeEventListener(RoomEngineObjectEvent.ADDED, this.onRoomObjectAdded);
 
         this._callback = null;
 

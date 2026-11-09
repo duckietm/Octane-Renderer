@@ -1,9 +1,8 @@
 import { GetEventDispatcher, SoundManagerEvent } from '@octane/events';
 import { OctaneLogger } from '@octane/utils';
-import { Howl, Howler } from 'howler';
 import { TraxData } from '../trax/TraxData';
+import { MusicAudio, MusicSample, MusicVoice, WebAudioMusicAudio } from './MusicAudio';
 
-const HowlerUnlockState = Howler as typeof Howler & { _audioUnlocked?: boolean };
 const MAX_CACHED_SAMPLES = 64;
 
 export class MusicPlayer
@@ -14,16 +13,17 @@ export class MusicPlayer
     private _playLength: number;
     private _isPlaying: boolean;
     private _currentPos: number;
-    private _cache: Map<number, Howl>;
+    private _cache: Map<number, MusicSample>;
+    private _loading: Map<number, Promise<MusicSample>> = new Map();
     private _sampleUrl: string;
 
     private _tickerInterval: number | undefined;
     private _playGeneration: number = 0;
     private _sequence: ISequenceEntry[][];
-    private _auditionHowl: Howl | null = null;
-    private _auditionPlayId: number = -1;
+    private _auditionSample: MusicSample | null = null;
+    private _auditionVoice: MusicVoice | null = null;
 
-    constructor(sampleUrl: string)
+    constructor(sampleUrl: string, private readonly _audio: MusicAudio = new WebAudioMusicAudio())
     {
         this._sampleUrl = sampleUrl;
         this._isPlaying = false;
@@ -31,7 +31,7 @@ export class MusicPlayer
         this._currentPos = 0;
         this._playLength = 0;
         this._sequence = [];
-        this._cache = new Map<number, Howl>();
+        this._cache = new Map<number, MusicSample>();
     }
 
     public async play(song: string, currentSongId: number, startPos: number = 0, playLength: number = -1): Promise<void>
@@ -49,7 +49,7 @@ export class MusicPlayer
         // A stop or a newer play while the samples load must win.
         const generation = this._playGeneration;
 
-        await this.preload();
+        await this.preload(generation);
 
         if(generation !== this._playGeneration) return;
 
@@ -63,13 +63,25 @@ export class MusicPlayer
         this._tickerInterval = window.setInterval(() => this.tick(), 1000);
     }
 
+    /** Loads the samples of a song, then plays it, unless a newer request, a play or a stop came in meanwhile. */
+    public async preloadAndPlay(song: string, currentSongId: number, startPos: number = 0, playLength: number = -1): Promise<void>
+    {
+        const generation = ++this._playGeneration;
+
+        await this.preloadSamplesForSong(song);
+
+        if(generation !== this._playGeneration) return;
+
+        await this.play(song, currentSongId, startPos, playLength);
+    }
+
     private reset(keepSampleIds: ReadonlySet<number> = new Set()): void
     {
         this._playGeneration++;
         this._isPlaying = false;
         window.clearInterval(this._tickerInterval);
 
-        Howler.stop();
+        this._audio.stopAll();
         this.unloadSamples(keepSampleIds);
         this._currentSongId = -1;
         this._currentSong = undefined;
@@ -84,12 +96,18 @@ export class MusicPlayer
     {
         this._isPlaying = false;
 
-        Howler.stop();
+        this._audio.stopAll();
     }
 
     public resume(): void
     {
         this._isPlaying = true;
+    }
+
+    /** Stops the song and its ticker without reporting it complete: nothing listens any more. */
+    public dispose(): void
+    {
+        this.reset();
     }
 
     public stop(): void
@@ -101,21 +119,24 @@ export class MusicPlayer
 
     public setVolume(volume: number): void
     {
-        Howler.volume(volume);
+        this._audio.setVolume(volume);
     }
 
     public getVolume(): number
     {
-        return Howler.volume();
+        return this._audio.getVolume();
     }
 
-    public async getSample(id: number): Promise<Howl>
+    public async getSample(id: number): Promise<MusicSample>
     {
-        let sample = this._cache.get(id);
+        const sample = this._cache.get(id);
 
-        if(!sample) sample = await this.loadSong(id);
+        if(sample) return sample;
 
-        return Promise.resolve(sample);
+        // Requests for a sample already loading share that load: a second copy would never be unloaded.
+        if(!this._loading.has(id)) this._loading.set(id, this.loadSong(id).finally(() => this._loading.delete(id)));
+
+        return this._loading.get(id);
     }
 
     public async playSampleOnce(sampleId: number): Promise<void>
@@ -126,50 +147,44 @@ export class MusicPlayer
 
         await this.unlockAudio();
 
-        this._auditionHowl = sample;
-        this._auditionPlayId = sample.play();
+        this._auditionSample = sample;
+        this._auditionVoice = sample.play();
     }
 
     public stopSampleOnce(): void
     {
-        if(this._auditionHowl && (this._auditionPlayId !== -1)) this._auditionHowl.stop(this._auditionPlayId);
+        this._auditionVoice?.stop();
 
-        this._auditionHowl = null;
-        this._auditionPlayId = -1;
+        this._auditionSample = null;
+        this._auditionVoice = null;
     }
 
     private async unlockAudio(): Promise<void>
     {
-        if(HowlerUnlockState._audioUnlocked) return;
+        if(this._audio.unlocked) return;
 
-        const ctx = Howler.ctx;
-
-        if(!ctx) return;
-
-        try
-        {
-            if(ctx.state !== 'running') await ctx.resume();
-
-            if(ctx.state === 'running') HowlerUnlockState._audioUnlocked = true;
-        }
-        catch
-        {
-        }
+        await this._audio.unlock();
     }
 
-    private async preload(): Promise<void>
+    // Builds the sequence of the song selected when it started; a newer play or a stop while samples load discards it.
+    private async preload(generation: number): Promise<void>
     {
+        const song = this._currentSong;
+        const sequence: ISequenceEntry[][] = [];
+
         this._sequence = [];
 
-        if(!this._currentSong) return;
+        if(!song) return;
 
-        for(const channel of this._currentSong.channels)
+        for(const channel of song.channels)
         {
             const sequenceEntryArray: ISequenceEntry[] = [];
             for(const sample of channel.items)
             {
                 const isRestSample = (sample.id === -1) || (sample.id === 0);
-                const sampleDuration = isRestSample ? 1 : Math.ceil((await this.getSample(sample.id)).duration());
+                const sampleDuration = isRestSample ? 1 : Math.ceil((await this.getSample(sample.id)).duration);
+
+                if(generation !== this._playGeneration) return;
 
                 const sampleCount = Math.ceil((sample.length * 2) / sampleDuration);
 
@@ -182,10 +197,12 @@ export class MusicPlayer
                 }
             }
 
-            this._sequence.push(sequenceEntryArray);
+            sequence.push(sequenceEntryArray);
         }
 
-        if(this._playLength <= 0) this._playLength = Math.max(...this._sequence.map((value: ISequenceEntry[]) => value.length));
+        this._sequence = sequence;
+
+        if(this._playLength <= 0) this._playLength = Math.max(...sequence.map((value: ISequenceEntry[]) => value.length));
     }
 
     public async preloadSamplesForSong(song: string): Promise<void>
@@ -195,29 +212,26 @@ export class MusicPlayer
         await Promise.all(traxData.getSampleIds().filter(id => (id !== -1) && (id !== 0)).map(id => this.getSample(id)));
     }
 
-    private async loadSong(songId: number): Promise<Howl>
+    private async loadSong(songId: number): Promise<MusicSample>
     {
-        return new Promise<Howl>((resolve, reject) =>
+        let sample: MusicSample;
+
+        try
         {
-            const sample = new Howl({
-                src: [this._sampleUrl.replace('%sample%', songId.toString())],
-                preload: true,
-            });
+            sample = await this._audio.load(this._sampleUrl.replace('%sample%', songId.toString()));
+        }
+        catch (error)
+        {
+            OctaneLogger.error('failed to load sample ' + songId, error);
 
-            sample.once('load', () =>
-            {
-                if(this._cache.size >= MAX_CACHED_SAMPLES) this.unloadSamples(this.currentSampleIds, 1);
+            throw new Error('failed to load sample ' + songId);
+        }
 
-                this._cache.set(songId, sample);
-                resolve(sample);
-            });
+        if(this._cache.size >= MAX_CACHED_SAMPLES) this.unloadSamples(this.currentSampleIds, 1);
 
-            sample.once('loaderror', () =>
-            {
-                OctaneLogger.error('failed to load sample ' + songId);
-                reject(new Error('failed to load sample ' + songId));
-            });
-        });
+        this._cache.set(songId, sample);
+
+        return sample;
     }
 
 
@@ -236,7 +250,7 @@ export class MusicPlayer
 
             if(keepSampleIds.has(id)) continue;
 
-            if(sample === this._auditionHowl) this.stopSampleOnce();
+            if(sample === this._auditionSample) this.stopSampleOnce();
 
             sample.unload();
             this._cache.delete(id);
@@ -266,7 +280,7 @@ export class MusicPlayer
     {
         if(!this._currentSong || !this._sequence) return;
 
-        if(!HowlerUnlockState._audioUnlocked)
+        if(!this._audio.unlocked)
         {
             return;
         }
@@ -287,10 +301,9 @@ export class MusicPlayer
             {
                 sampleAudio.play();
             }
-            else if(!sampleAudio.playing())
+            else if(!sampleAudio.isPlaying())
             {
-                sampleAudio.seek(entry.offset);
-                sampleAudio.play();
+                sampleAudio.play(entry.offset);
             }
         }
     }

@@ -8,3 +8,6 @@ export * from './MarketplaceOffersEvent';
 export * from './MarketplaceOwnOffersEvent';
 export * from './MarketplaceCancelAllOffersResultEvent';
 export * from './MarketplaceClearOwnHistoryResultEvent';
+export * from './NftMarketplaceBuyResultEvent';
+export * from './NftMarketplaceItemStatsEvent';
+export * from './NftMarketplaceMakeOfferResultEvent';

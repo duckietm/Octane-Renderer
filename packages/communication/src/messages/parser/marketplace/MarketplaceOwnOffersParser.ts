@@ -32,6 +32,8 @@ export class MarketplaceOwnOffersParser implements IMessageParser
             let furniId;
             let extraData;
             let stuffData: IObjectData;
+            let productCode: string = null;
+            let nftFurniType = 0;
             if(furniType == 1)
             {
                 furniId = wrapper.readInt();
@@ -52,12 +54,19 @@ export class MarketplaceOwnOffersParser implements IMessageParser
                     stuffData.uniqueSeries = wrapper.readInt();
                     furniType = 1;
                 }
+                // A collectible: its product code, the furni and its kind (1 floor, 2 wall).
+                else if(furniType == MarketplaceOffer.TYPE_NFT)
+                {
+                    productCode = wrapper.readString();
+                    furniId = wrapper.readInt();
+                    nftFurniType = wrapper.readInt();
+                }
             }
 
             const price = wrapper.readInt();
             const local9 = wrapper.readInt();
             const local10 = wrapper.readInt();
-            const local13 = new MarketplaceOffer(offerId, furniId, furniType, extraData, stuffData, price, status, local9, local10);
+            const local13 = new MarketplaceOffer(offerId, furniId, furniType, extraData, stuffData, price, status, local9, local10, -1, productCode, nftFurniType);
 
             if(i < MarketplaceOwnOffersParser.MAX_LIST_LENGTH)
             {

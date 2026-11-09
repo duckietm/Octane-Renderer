@@ -168,6 +168,8 @@ export class OutgoingHeader
     public static MARK_CONSOLE_READ = 4085;
     public static CONSOLE_TYPING = 4087;
     public static MOD_TOOL_USER_INFO = 3295;
+    // Moderator user records request (kind 0 cautions, 1 bans, 2 linked bans, 3 trade locks): custom id in the reserved 94xx block.
+    public static MOD_TOOL_USER_RECORDS = 9481;
     public static GET_USER_FLAT_CATS = 3027;
     public static NAVIGATOR_INIT = 2110;
     public static NAVIGATOR_SEARCH = 249;
@@ -428,6 +430,10 @@ export class OutgoingHeader
     public static MARKETPLACE_CANCEL_ALL_OFFERS = 1228;
     public static MARKETPLACE_CLEAR_OWN_HISTORY = 2058;
     public static MARKETPLACE_SELL_MULTIPLE_ITEMS = 1551;
+    // AIR's Collectibles marketplace. The buy's official id (121) is the emerald furni redeem here.
+    public static NFT_MARKETPLACE_MAKE_OFFER = 2346;
+    public static NFT_MARKETPLACE_ITEM_STATS = 2706;
+    public static NFT_MARKETPLACE_BUY_OFFER = 9425;
     // AIR 13 club extend confirmation (ClubDiscountPromoExtension).
     public static HABBO_CLUB_EXTEND_CONFIRM = 352;
     // AIR 13 help: 2935 ask for my reports, 3063 appeal one of them.

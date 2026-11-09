@@ -8,6 +8,7 @@ import { FurniId, GetRenderer, GetTexturePool, GetTickerTime, OctaneLogger, Numb
 import { Container, Matrix, Point, PointData, Rectangle, RenderTexture, Sprite, Texture, Ticker, WebGLRenderer } from 'pixi.js';
 import { DEFAULT_WIRED_CLICK_SETTINGS, normalizeWiredClickSettings, WiredClickSettings } from './utils/WiredClickSettings';
 import { GetRoomContentLoader } from './GetRoomContentLoader';
+import { buildContentImageKey } from './RoomContentLoader';
 import { GetRoomManager } from './GetRoomManager';
 import { GetRoomMessageHandler } from './GetRoomMessageHandler';
 import { GetRoomObjectLogicFactory } from './GetRoomObjectLogicFactory';
@@ -53,6 +54,7 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
     private _imageCache: RoomObjectImageCache = new RoomObjectImageCache();
     private _thumbnailObjectIdBank: NumberBank = new NumberBank(1000);
     private _thumbnailCallbacks: Map<string, IGetImageListener[]> = new Map();
+    private _thumbnailRequestIds: Map<string, number> = new Map();
     private _activeRoomId: number = -1;
     private _activeRoomActiveCanvas: number = -1;
     private _activeRoomActiveCanvasMouseX: number = 0;
@@ -75,12 +77,24 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
     private _badgeImageReadyCallback: (event: BadgeImageReadyEvent) => void = null;
     private _areaSelectionManager: IRoomAreaSelectionManager = new RoomAreaSelectionManager(this);
     private _roomSessionEventCallback: (event: RoomSessionEvent) => void = null;
+    private _roomObjectEventCallback: (event: RoomObjectEvent) => void = null;
+    private _disposed: boolean = false;
 
     public async init(): Promise<void>
     {
         this.setPlaneRenderMode(GetConfiguration().getValue<boolean>('room.planes.direct', false));
 
-        GetRoomObjectLogicFactory().registerEventFunction(event => this.processRoomObjectEvent(event));
+        // Kept so dispose can take it back: an anonymous function stayed registered, and every later init added one
+        // more, so each room object event was processed once per init.
+        if(this._roomObjectEventCallback) GetRoomObjectLogicFactory().removeEventFunction(this._roomObjectEventCallback);
+        this._roomObjectEventCallback = (event: RoomObjectEvent) => this.processRoomObjectEvent(event);
+        GetRoomObjectLogicFactory().registerEventFunction(this._roomObjectEventCallback);
+
+        if(this._roomSessionEventCallback)
+        {
+            GetEventDispatcher().removeEventListener(RoomSessionEvent.STARTED, this._roomSessionEventCallback);
+            GetEventDispatcher().removeEventListener(RoomSessionEvent.ENDED, this._roomSessionEventCallback);
+        }
 
         this._roomSessionEventCallback = (event: RoomSessionEvent) => this.onRoomSessionEvent(event);
         GetEventDispatcher().addEventListener<RoomSessionEvent>(RoomSessionEvent.STARTED, this._roomSessionEventCallback);
@@ -133,6 +147,12 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
 
         this._roomObjectEventHandler?.cancelPendingSends?.();
 
+        if(this._roomObjectEventCallback)
+        {
+            GetRoomObjectLogicFactory().removeEventFunction(this._roomObjectEventCallback);
+            this._roomObjectEventCallback = null;
+        }
+
         GetRoomMessageHandler().dispose();
 
         for(const roomId of this._roomDatas.keys())
@@ -144,9 +164,12 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
         this._roomInstanceDatas.clear();
         this._imageCallbacks.clear();
         this._thumbnailCallbacks.clear();
+        this._thumbnailRequestIds.clear();
         this._badgeListenerObjects.clear();
         this.removeIdleBadgeImageListener();
         this.clearRoomObjectImageCache();
+
+        this._disposed = true;
     }
 
     public setActiveRoomId(roomId: number): void
@@ -998,6 +1021,7 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
         this.processPendingFurniture();
 
         GetTexturePool().flushReleased();
+        GetTexturePool().run();
 
         this._roomManager.update(time, update);
 
@@ -1842,18 +1866,7 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
                         const objectData = ObjectDataFactory.getData(dataKey);
                         const icon = this.getFurnitureFloorIcon(typeId, null, extras, objectData);
 
-                        if(icon && icon.data)
-                        {
-                            (async () =>
-                            {
-                                const image = await icon.getImage();
-                                const event = new OctaneToolbarAnimateIconEvent(image, screenLocation.x, screenLocation.y);
-
-                                event.iconName = ToolbarIconEnum.INVENTORY;
-
-                                GetEventDispatcher().dispatchEvent(event);
-                            })();
-                        }
+                        if(icon && icon.data) this.animateIconToInventory(icon, screenLocation.x, screenLocation.y);
                     }
                 }
             }
@@ -1863,6 +1876,23 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
         this.setMouseDefault(roomId, RoomObjectCategory.FLOOR, objectId);
 
         if(refreshTileMap) this.refreshTileObjectMap(roomId, 'RoomEngine.disposeObjectFurniture()');
+    }
+
+    // The icon decodes after the furni is gone: a failed decode or an engine disposed meanwhile drops the animation.
+    private animateIconToInventory(icon: IImageResult, x: number, y: number): void
+    {
+        icon.getImage()
+            .then(image =>
+            {
+                if(this._disposed || !image) return;
+
+                const event = new OctaneToolbarAnimateIconEvent(image, x, y);
+
+                event.iconName = ToolbarIconEnum.INVENTORY;
+
+                GetEventDispatcher().dispatchEvent(event);
+            })
+            .catch(error => OctaneLogger.warn('Inventory icon animation', error));
     }
 
     public getRoomObjectWall(roomId: number, objectId: number): IRoomObjectController
@@ -1886,22 +1916,7 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
                     const objectData = roomObject.model.getValue<string>(RoomObjectVariable.FURNITURE_DATA);
                     const icon = this.getFurnitureWallIcon(typeId, null, objectData);
 
-                    if(icon && icon.data)
-                    {
-                        (async () =>
-                        {
-                            const image = await icon.getImage();
-
-                            if(GetEventDispatcher())
-                            {
-                                const event = new OctaneToolbarAnimateIconEvent(image, screenLocation.x, screenLocation.y);
-
-                                event.iconName = ToolbarIconEnum.INVENTORY;
-
-                                GetEventDispatcher().dispatchEvent(event);
-                            }
-                        })();
-                    }
+                    if(icon && icon.data) this.animateIconToInventory(icon, screenLocation.x, screenLocation.y);
                 }
             }
         }
@@ -2988,6 +3003,7 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
         if(listeners)
         {
             this._thumbnailCallbacks.delete(assetName);
+            this._thumbnailRequestIds.delete(assetName);
 
             const image = this._roomContentLoader.getImage(assetName);
 
@@ -3465,47 +3481,55 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
             if(!roomInstance) return imageResult;
         }
 
-        let objectId = this._thumbnailObjectIdBank.reserveNumber();
-        const objectCategory = this.getRoomObjectCategoryForType(type);
-
-        if(objectId < 0) return imageResult;
-
-        objectId++;
-
-        imageResult.id = objectId;
         imageResult.data = null;
         imageResult.image = null;
 
-        const assetName = [type, param].join('_');
+        const assetName = buildContentImageKey(type, param);
 
         const asset = this._roomContentLoader.getImage(assetName);
 
         if(!asset && listener)
         {
-            let contentListeners = this._thumbnailCallbacks.get(assetName);
+            const contentListeners = this._thumbnailCallbacks.get(assetName);
 
-            if(!contentListeners)
+            // A download already on its way answers this listener too, under its own id: reserving another would never be returned.
+            if(contentListeners)
             {
-                contentListeners = [];
+                contentListeners.push(listener);
 
-                this._thumbnailCallbacks.set(assetName, contentListeners);
+                imageResult.id = (this._thumbnailRequestIds.get(assetName) ?? 0);
 
-                this._roomContentLoader.downloadImage(objectId, type, param, null);
+                return imageResult;
             }
 
-            contentListeners.push(listener);
-        }
-        else
-        {
-            if(asset)
+            let objectId = this._thumbnailObjectIdBank.reserveNumber();
+
+            if(objectId < 0) return imageResult;
+
+            objectId++;
+
+            this._thumbnailCallbacks.set(assetName, [ listener ]);
+            this._thumbnailRequestIds.set(assetName, objectId);
+
+            if(!this._roomContentLoader.downloadImage(objectId, type, param, null))
             {
-                imageResult.image = asset;
+                this._thumbnailCallbacks.delete(assetName);
+                this._thumbnailRequestIds.delete(assetName);
+                this._thumbnailObjectIdBank.freeNumber((objectId - 1));
+
+                imageResult.id = 0;
+
+                return imageResult;
             }
 
-            this._thumbnailObjectIdBank.freeNumber((objectId - 1));
+            imageResult.id = objectId;
 
-            imageResult.id = 0;
+            return imageResult;
         }
+
+        if(asset) imageResult.image = asset;
+
+        imageResult.id = 0;
 
         return imageResult;
     }

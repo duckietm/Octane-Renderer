@@ -77,6 +77,8 @@ export class AvatarAssetDownloadManager
         this._figureListeners.clear();
         this._incompleteFigures.clear();
         this._currentDownloads = [];
+        // The names decide which libraries the next figure map creates: kept, a later init created none.
+        this._libraryNames = [];
     }
 
     private processFigureMap(data: any): void

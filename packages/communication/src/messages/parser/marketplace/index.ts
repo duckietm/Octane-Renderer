@@ -10,3 +10,6 @@ export * from './MarketplaceOffersParser';
 export * from './MarketplaceOwnOffersParser';
 export * from './MarketplaceCancelAllOffersResultParser';
 export * from './MarketplaceClearOwnHistoryResultParser';
+export * from './NftMarketplaceBuyResultParser';
+export * from './NftMarketplaceItemStatsParser';
+export * from './NftMarketplaceMakeOfferResultParser';

@@ -7,6 +7,9 @@ import { OctaneLogger } from '@octane/utils';
 import { Texture } from 'pixi.js';
 import { PetColorResult } from './PetColorResult';
 
+/** The name an icon image is cached and announced under; the engine looks it up by the same name. */
+export const buildContentImageKey = (type: string, param: string): string => [ type, param ].join('_');
+
 export class RoomContentLoader implements IRoomContentLoader
 {
     private static PLACE_HOLDER: string = 'place_holder';
@@ -299,6 +302,7 @@ export class RoomContentLoader implements IRoomContentLoader
 
     public downloadImage(id: number, type: string, param: string, events: IEventDispatcher = null): boolean
     {
+        const key = buildContentImageKey(type, param);
         let typeName: string = null;
         let assetUrls: string[] = [];
 
@@ -320,7 +324,6 @@ export class RoomContentLoader implements IRoomContentLoader
         if(assetUrls && assetUrls.length)
         {
             const url = assetUrls[0];
-            const key = [ type, param ].join('_');
             const waiting = this._imageWaiters.get(key);
 
             if(waiting)
@@ -374,52 +377,8 @@ export class RoomContentLoader implements IRoomContentLoader
 
     public downloadAssetSync(type: string): void
     {
-        const assetUrl: string = this.getAssetUrls(type)?.[0];
-
-        if(!assetUrl || !assetUrl.length) return;
-
-        if((this._pendingContentTypes.indexOf(type) >= 0)) return;
-
-        this._pendingContentTypes.push(type);
-
-        GetAssetManager()
-            .downloadAsset(assetUrl)
-            .then(() =>
-            {
-                const petIndex = this._pets[type];
-
-                if(petIndex !== undefined)
-                {
-                    const collection = this.getCollection(type);
-                    const keys = collection.getPaletteNames();
-                    const palettes: Map<number, IPetColorResult> = new Map();
-
-                    for(const key of keys)
-                    {
-                        const palette = collection.getPalette(key);
-                        const paletteData = collection.data.palettes[key];
-
-                        const primaryColor = palette.primaryColor;
-                        const secondaryColor = palette.secondaryColor;
-                        const breed = ((paletteData.breed !== undefined) ? paletteData.breed : 0);
-                        const tag = ((paletteData.colorTag !== undefined) ? paletteData.colorTag : -1);
-                        const master = ((paletteData.master !== undefined) ? paletteData.master : false);
-                        const layerTags = ((paletteData.tags !== undefined) ? paletteData.tags : []);
-
-                        palettes.set(parseInt(key), new PetColorResult(primaryColor, secondaryColor, breed, tag, key, master, layerTags));
-                    }
-
-                    this._petColors.set(petIndex, palettes);
-                }
-
-                GetEventDispatcher().dispatchEvent(new RoomContentLoadedEvent(RoomContentLoadedEvent.RCLE_SUCCESS, type));
-            })
-            .catch((err) =>
-            {
-                this.clearPendingType(type);
-
-                GetEventDispatcher().dispatchEvent(new RoomContentLoadedEvent(RoomContentLoadedEvent.RCLE_FAILURE, type));
-            });
+        // The same download as downloadAsset, so a failed one is reported as a failure and may be requested again.
+        this.downloadAsset(type).catch(() => null);
     }
 
     /** A failed type may be requested again later, instead of staying a placeholder until reload. */
