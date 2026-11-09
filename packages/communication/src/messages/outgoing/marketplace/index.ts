@@ -11,3 +11,6 @@ export * from './RedeemMarketplaceOfferCreditsMessageComposer';
 export * from './CancelAllMarketplaceOffersMessageComposer';
 export * from './ClearOwnMarketplaceHistoryMessageComposer';
 export * from './MakeMultipleOffersMessageComposer';
+export * from './BuyNftMarketplaceOfferComposer';
+export * from './GetNftMarketplaceItemStatsComposer';
+export * from './MakeNftMarketplaceOfferComposer';

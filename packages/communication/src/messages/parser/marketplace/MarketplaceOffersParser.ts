@@ -7,6 +7,7 @@ export class MarketplaceOffersParser implements IMessageParser
     private static FURNITYPE_STUFF: number = 1;
     private static FURNITYPE_WALL: number = 2;
     private static FAKE_FURNITYPE_UNIQUE: number = 3;
+    private static FURNITYPE_NFT: number = 5;
 
     private readonly MAX_LIST_LENGTH = 500;
 
@@ -38,6 +39,8 @@ export class MarketplaceOffersParser implements IMessageParser
             let furniId = -1;
             let extraData = '';
             let stuffData: IObjectData = null;
+            let productCode: string = null;
+            let nftFurniType = 0;
 
             if(furniType === MarketplaceOffersParser.FURNITYPE_STUFF)
             {
@@ -60,12 +63,20 @@ export class MarketplaceOffersParser implements IMessageParser
                 furniType = MarketplaceOffersParser.FURNITYPE_STUFF;
             }
 
+            // A collectible (AIR's Collectibles marketplace): its product code, the furni and its kind.
+            else if(furniType === MarketplaceOffersParser.FURNITYPE_NFT)
+            {
+                productCode = wrapper.readString();
+                furniId = wrapper.readInt();
+                nftFurniType = wrapper.readInt();
+            }
+
             const price = wrapper.readInt();
             const timeLeftMinutes = wrapper.readInt();
             const averagePrice = wrapper.readInt();
             const offerCount = wrapper.readInt();
 
-            const offerItem = new MarketplaceOffer(offerId, furniId, furniType, extraData, stuffData, price, status, timeLeftMinutes, averagePrice, offerCount);
+            const offerItem = new MarketplaceOffer(offerId, furniId, furniType, extraData, stuffData, price, status, timeLeftMinutes, averagePrice, offerCount, productCode, nftFurniType);
 
             if(i < this.MAX_LIST_LENGTH) this._offers.push(offerItem);
 

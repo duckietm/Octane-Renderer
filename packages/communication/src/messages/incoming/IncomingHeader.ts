@@ -406,6 +406,10 @@ export class IncomingHeader
     // AIR 13 marketplace batch results: 1949 MarketPlaceCancelAllResult, 175 MarketPlaceClearOwnHistoryResult.
     public static MARKETPLACE_CANCEL_ALL_RESULT = 1949;
     public static MARKETPLACE_CLEAR_OWN_HISTORY_RESULT = 175;
+    // AIR's Collectibles marketplace (nft_* furni for emeralds).
+    public static NFT_MARKETPLACE_BUY_RESULT = 1583;
+    public static NFT_MARKETPLACE_ITEM_STATS = 2492;
+    public static NFT_MARKETPLACE_MAKE_OFFER_RESULT = 3524;
     // AIR 13 catalog: 933 LtdRaffleEntered, 2316 LtdRaffleResult.
     public static CATALOG_LTD_RAFFLE_ENTERED = 933;
     public static CATALOG_LTD_RAFFLE_RESULT = 2316;

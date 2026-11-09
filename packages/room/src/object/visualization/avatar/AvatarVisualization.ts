@@ -1562,7 +1562,9 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
     /**
      * Behaviour from the AIR client (AvatarVisualization.getSpriteList): the figure as camera scene sprites, the
      * figure parts from the avatar image, then the effect sprites, then the shadow. Positions are relative to the
-     * avatar's screen location; the scene builder moves them into place.
+     * avatar's screen location; the scene builder moves them into place. As in the AIR build of 4 November 2026,
+     * effect sprites and the shadow are lifted by the avatar body layer's own offset (its direction offset and
+     * animation dy), so an effect that moves the body keeps its sprites and shadow on the figure in a photo.
      */
     public getSpriteList(): RoomObjectSpriteData[]
     {
@@ -1581,12 +1583,19 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
             shadowData.name = shadowSprite.libraryAssetName;
             shadowData.width = Math.trunc(shadowSprite.width);
             shadowData.height = Math.trunc(shadowSprite.height);
+
+            const bodySprite = this.getSprite(AvatarVisualization.AVATAR_LAYER_ID);
+
+            shadowData.z = shadowSprite.relativeDepth - (bodySprite ? bodySprite.relativeDepth : 0);
         }
 
         const spriteList = this._avatarImage.getServerRenderData() || [];
         const direction = this._avatarImage.getDirection();
         // AIR always places the effect sprites for the 64 scale.
         const scale = 64;
+        const bodyOffsetY = this.getBodyLayerOffsetY(direction);
+
+        if(shadowData) shadowData.y -= bodyOffsetY;
 
         for(const spriteData of (this._avatarImage.getSprites() || []))
         {
@@ -1619,7 +1628,7 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
             const data = new RoomObjectSpriteData();
 
             data.x = Math.trunc((asset.offsetX - (scale / 2)) + offsetX);
-            data.y = Math.trunc(asset.offsetY + offsetY);
+            data.y = Math.trunc(asset.offsetY + offsetY - bodyOffsetY);
 
             if(spriteData.hasStaticY) data.y = Math.trunc(data.y + ((this._verticalOffset * scale) / (2 * AvatarVisualization.BASE_Y_SCALE)));
 
@@ -1627,6 +1636,8 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
 
             data.name = assetName;
             data.z = (this._isLaying ? (-0.409 - ((0.001 * this.spriteCount) * offsetZ)) : ((-0.001 * this.spriteCount) * offsetZ));
+            // AIR's tie-break, so an effect sprite at the same depth as a figure part draws after it.
+            data.z += 3.7e-11;
 
             const rectangle = asset.rectangle;
 
@@ -1652,6 +1663,27 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
         if(shadowData) spriteList.push(shadowData);
 
         return spriteList;
+    }
+
+    /** The y offset of the avatar body layer itself (AIR leaves it out while the avatar sits where it can stand up). */
+    private getBodyLayerOffsetY(direction: number): number
+    {
+        if(this._canStandUp) return 0;
+
+        let offsetY = 0;
+
+        for(const spriteData of (this._avatarImage.getSprites() || []))
+        {
+            if(spriteData.id !== AvatarVisualization.AVATAR) continue;
+
+            offsetY += spriteData.getDirectionOffsetY(direction);
+
+            const layerData = this._avatarImage.getLayerData(spriteData);
+
+            if(layerData) offsetY += layerData.dy;
+        }
+
+        return offsetY;
     }
 
     private updateShadow(scale: number): void
