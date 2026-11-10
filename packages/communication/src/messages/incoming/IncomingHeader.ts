@@ -378,6 +378,8 @@ export class IncomingHeader
     public static GIFT_RECEIVER_NOT_FOUND = 1517;
     // Official special items display has-claimed response.
     public static HAS_CLAIMED_PRODUCT = 266;
+    // Official claim result (claimId, result), read by the cursed dragon adoption window.
+    public static CLAIM_PRODUCT_RESULT = 43;
     public static GIFT_OPENED = 56;
     public static FLOOD_CONTROL = 566;
     public static REMAINING_MUTE = IncomingHeader.ROOM_MUTE_USER;

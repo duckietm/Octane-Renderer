@@ -17,6 +17,7 @@ export * from './DirectSMSClubBuyAvailableMessageEvent';
 export * from './FireworkChargeDataEvent';
 export * from './GiftReceiverNotFoundEvent';
 export * from './GiftWrappingConfigurationEvent';
+export * from './ClaimProductResultEvent';
 export * from './HasClaimedProductEvent';
 export * from './HabboClubExtendOfferMessageEvent';
 export * from './HabboClubOffersMessageEvent';

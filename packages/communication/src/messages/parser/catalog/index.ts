@@ -27,6 +27,7 @@ export * from './FireworkChargeDataParser';
 export * from './FrontPageItem';
 export * from './GiftReceiverNotFoundParser';
 export * from './GiftWrappingConfigurationParser';
+export * from './ClaimProductResultParser';
 export * from './HasClaimedProductParser';
 export * from './HabboClubExtendOfferMessageParser';
 export * from './HabboClubOffersMessageParser';
