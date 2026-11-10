@@ -6,6 +6,8 @@ export class CantConnectMessageParser implements IMessageParser
     public static REASON_CLOSED: number = 2;
     public static REASON_QUEUE_ERROR: number = 3;
     public static REASON_BANNED: number = 4;
+    // AIR onCantConnect case 4 of (reason - 1): the room owner blocked this user.
+    public static REASON_BLOCKED: number = 5;
 
     private _reason: number;
     private _parameter: string;
