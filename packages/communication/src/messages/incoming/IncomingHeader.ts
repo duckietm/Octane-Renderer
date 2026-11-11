@@ -380,6 +380,8 @@ export class IncomingHeader
     public static HAS_CLAIMED_PRODUCT = 266;
     // Official claim result (claimId, result), read by the cursed dragon adoption window.
     public static CLAIM_PRODUCT_RESULT = 43;
+    // Custom: the first-login setup of an account made outside the client's register screen.
+    public static FIRST_LOGIN_SETUP = 9496;
     public static GIFT_OPENED = 56;
     public static FLOOD_CONTROL = 566;
     public static REMAINING_MUTE = IncomingHeader.ROOM_MUTE_USER;

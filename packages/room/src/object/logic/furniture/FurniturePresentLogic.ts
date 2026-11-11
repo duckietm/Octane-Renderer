@@ -10,6 +10,7 @@ export class FurniturePresentLogic extends FurnitureLogic
     private static EXTRA_PARAM: string = 'EXTRA_PARAM';
     private static PURCHASER_NAME: string = 'PURCHASER_NAME';
     private static PURCHASER_FIGURE: string = 'PURCHASER_FIGURE';
+    private static TRUSTED_SENDER: string = 'TRUSTED_SENDER';
 
     public getEventTypes(): string[]
     {
@@ -76,6 +77,8 @@ export class FurniturePresentLogic extends FurnitureLogic
         this.writeToModel(RoomObjectVariable.FURNITURE_TYPE_ID, stuffData.getValue(FurniturePresentLogic.PRODUCT_CODE));
         this.writeToModel(RoomObjectVariable.FURNITURE_PURCHASER_NAME, stuffData.getValue(FurniturePresentLogic.PURCHASER_NAME));
         this.writeToModel(RoomObjectVariable.FURNITURE_PURCHASER_FIGURE, stuffData.getValue(FurniturePresentLogic.PURCHASER_FIGURE));
+        // AIR: 1 when staff sent the gift, 0 for any other sender (and for a server that does not say).
+        this.object.model.setValue(RoomObjectVariable.FURNITURE_TRUSTED_SENDER, (stuffData.getValue(FurniturePresentLogic.TRUSTED_SENDER) === 'true') ? 1 : 0);
     }
 
     private writeToModel(key: string, value: string): void

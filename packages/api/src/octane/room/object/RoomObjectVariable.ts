@@ -22,6 +22,7 @@ export class RoomObjectVariable
     public static FIGURE_HIGHLIGHT: string = 'figure_highlight';
     public static FURNITURE_PURCHASER_NAME: string = 'furniture_purchaser_name';
     public static FURNITURE_PURCHASER_FIGURE: string = 'furniture_purchaser_figure';
+    public static FURNITURE_TRUSTED_SENDER: string = 'furniture_trusted_sender';
     public static STD: string = 'std';
     public static SWIM: string = 'swm';
     public static FIGURE_SIGN: string = 'figure_sign';

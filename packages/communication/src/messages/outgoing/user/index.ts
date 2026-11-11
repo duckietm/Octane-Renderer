@@ -13,3 +13,4 @@ export * from './UnblockGroupMemberMessageComposer';
 export * from './UserRespectComposer';
 export * from './WelcomeGiftChangeEmailComposer';
 export * from './wordfilter';
+export * from './FirstLoginSetupChooseComposer';

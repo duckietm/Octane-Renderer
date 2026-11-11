@@ -72,6 +72,8 @@ export class OutgoingHeader
     // Official special items display free claim (has-claimed request, claim).
     public static HAS_CLAIMED_PRODUCT_REQUEST = 395;
     public static CLAIM_FREE_PRODUCT = 3935;
+    // Custom: the answer to the first-login setup.
+    public static FIRST_LOGIN_SETUP_CHOOSE = 9497;
     public static GROUP_ADMIN_ADD = 2894;
     public static GROUP_ADMIN_REMOVE = 722;
     public static GROUP_CREATE_OPTIONS = 798;
