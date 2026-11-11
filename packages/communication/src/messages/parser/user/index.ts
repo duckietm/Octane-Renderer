@@ -33,3 +33,4 @@ export * from './ScrSendKickbackInfoMessageParser';
 export * from './wardrobe';
 export * from './WelcomeGiftChangeEmailResultParser';
 export * from './wordfilter';
+export * from './FirstLoginSetupParser';
