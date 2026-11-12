@@ -1,6 +1,6 @@
 import { IMessageDataWrapper, IMessageParser } from '@octane/api';
 
-export type HotelViewLandingSlotType = 'bonus' | 'promotion' | 'catalogpromo' | 'catalogpromosmall' | 'expiringcatalogpage' | 'expiringcatalogpagesmall' | 'communitygoal' | 'dailyquest' | 'nextlimitedrarecountdown' | 'achievementcompetition_hall_of_fame' | 'achievementcompetition_prizes' | 'habbotalentspromo' | 'habbowaypromo' | 'safetyquizpromo' | 'habbomoderationpromo' | 'promoarticle' | 'communitygoalvsmode' | 'communitygoalvsmodevote' | 'concurrentusersgoal';
+export type HotelViewLandingSlotType = 'bonus' | 'promotion' | 'catalogpromo' | 'catalogpromosmall' | 'expiringcatalogpage' | 'expiringcatalogpagesmall' | 'communitygoal' | 'dailyquest' | 'roomhoppernetwork' | 'nextlimitedrarecountdown' | 'achievementcompetition_hall_of_fame' | 'achievementcompetition_prizes' | 'habbotalentspromo' | 'habbowaypromo' | 'safetyquizpromo' | 'habbomoderationpromo' | 'promoarticle' | 'communitygoalvsmode' | 'communitygoalvsmodevote' | 'concurrentusersgoal';
 
 export interface IHotelViewLandingSlot
 {

@@ -74,6 +74,8 @@ export class OutgoingHeader
     public static CLAIM_FREE_PRODUCT = 3935;
     // Custom: the answer to the first-login setup.
     public static FIRST_LOGIN_SETUP_CHOOSE = 9497;
+    // Custom: a rentable bot moved or turned like furni.
+    public static BOT_MOVE = 9498;
     public static GROUP_ADMIN_ADD = 2894;
     public static GROUP_ADMIN_REMOVE = 722;
     public static GROUP_CREATE_OPTIONS = 798;

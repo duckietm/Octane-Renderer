@@ -7,6 +7,7 @@ export * from './CompostPlantMessageComposer';
 export * from './GetItemDataComposer';
 export * from './HarvestPetMessageComposer';
 export * from './PetMessageComposer';
+export * from './BotMoveComposer';
 export * from './PetMoveComposer';
 export * from './PetPlaceComposer';
 export * from './PetRemoveComposer';

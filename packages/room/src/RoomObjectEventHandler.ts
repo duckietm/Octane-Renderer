@@ -1,5 +1,5 @@
 import { IFurnitureStackingHeightMap, ILegacyWallGeometry, IObjectData, IRoomCanvasMouseListener, IRoomEngineServices, IRoomGeometry, IRoomObject, IRoomObjectController, IRoomObjectEventManager, ISelectedRoomObjectData, IVector3D, MouseEventType, RoomObjectCategory, RoomObjectOperationType, RoomObjectPlacementSource, RoomObjectType, RoomObjectUserType, RoomObjectVariable } from '@octane/api';
-import { BotPlaceComposer, ClickFurniMessageComposer, ClickUserMessageComposer, FurnitureColorWheelComposer, FurnitureDiceActivateComposer, FurnitureDiceDeactivateComposer, FurnitureFloorUpdateComposer, FurnitureGroupInfoComposer, FurnitureMultiStateComposer, FurnitureOneWayDoorComposer, FurniturePickupComposer, FurniturePlaceComposer, FurniturePostItPlaceComposer, FurnitureRandomStateComposer, FurnitureWallMultiStateComposer, FurnitureWallUpdateComposer, GetCommunication, GetItemDataComposer, GetResolutionAchievementsMessageComposer, PetMoveComposer, PetPlaceComposer, RemoveWallItemComposer, RoomUnitLookComposer, RoomUnitWalkComposer, SetItemDataMessageComposer, SetObjectDataMessageComposer } from '@octane/communication';
+import { BotMoveComposer, BotPlaceComposer, ClickFurniMessageComposer, ClickUserMessageComposer, FurnitureColorWheelComposer, FurnitureDiceActivateComposer, FurnitureDiceDeactivateComposer, FurnitureFloorUpdateComposer, FurnitureGroupInfoComposer, FurnitureMultiStateComposer, FurnitureOneWayDoorComposer, FurniturePickupComposer, FurniturePlaceComposer, FurniturePostItPlaceComposer, FurnitureRandomStateComposer, FurnitureWallMultiStateComposer, FurnitureWallUpdateComposer, GetCommunication, GetItemDataComposer, GetResolutionAchievementsMessageComposer, PetMoveComposer, PetPlaceComposer, RemoveWallItemComposer, RoomUnitLookComposer, RoomUnitWalkComposer, SetItemDataMessageComposer, SetObjectDataMessageComposer } from '@octane/communication';
 import { GetConfiguration } from '@octane/configuration';
 import { GetEventDispatcher, RoomEngineDimmerStateEvent, RoomEngineObjectEvent, RoomEngineObjectPlacedEvent, RoomEngineObjectPlacedOnUserEvent, RoomEngineObjectPlaySoundEvent, RoomEngineRoomAdEvent, RoomEngineSamplePlaybackEvent, RoomEngineTriggerWidgetEvent, RoomEngineUseProductEvent, RoomObjectBadgeAssetEvent, RoomObjectDataRequestEvent, RoomObjectDimmerStateUpdateEvent, RoomObjectEvent, RoomObjectFloorHoleEvent, RoomObjectFurnitureActionEvent, RoomObjectHSLColorEnableEvent, RoomObjectHSLColorEnabledEvent, RoomObjectMouseEvent, RoomObjectMoveEvent, RoomObjectPlaySoundIdEvent, RoomObjectRoomAdEvent, RoomObjectSamplePlaybackEvent, RoomObjectSoundMachineEvent, RoomObjectStateChangedEvent, RoomObjectTileMouseEvent, RoomObjectWallMouseEvent, RoomObjectWidgetRequestEvent, RoomSpriteMouseEvent } from '@octane/events';
 import { GetRoomSessionManager, GetSessionDataManager } from '@octane/session';
@@ -468,7 +468,7 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
 
                 else if(category === RoomObjectCategory.UNIT)
                 {
-                    if(selectedData && (event.objectType === RoomObjectUserType.MONSTER_PLANT))
+                    if(selectedData && ((event.objectType === RoomObjectUserType.MONSTER_PLANT) || (event.objectType === RoomObjectUserType.RENTABLE_BOT)))
                     {
                         this.modifyRoomObject(roomId, selectedData.id, selectedData.category, RoomObjectOperationType.OBJECT_MOVE_TO);
                     }
@@ -552,7 +552,7 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
                             this.modifyRoomObject(roomId, event.objectId, category, RoomObjectOperationType.OBJECT_PICKUP_PET);
                         }
 
-                        else if(!event.ctrlKey && !event.altKey && event.shiftKey && (event.objectType === RoomObjectUserType.MONSTER_PLANT))
+                        else if(!event.ctrlKey && !event.altKey && event.shiftKey && ((event.objectType === RoomObjectUserType.MONSTER_PLANT) || (event.objectType === RoomObjectUserType.RENTABLE_BOT)))
                         {
                             this.modifyRoomObject(roomId, event.objectId, category, RoomObjectOperationType.OBJECT_ROTATE_POSITIVE);
                         }
@@ -719,7 +719,7 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
         switch(operation)
         {
             case RoomObjectOperationType.OBJECT_UNDEFINED:
-                if((category === RoomObjectCategory.FLOOR) || (category === RoomObjectCategory.WALL) || (event.objectType === RoomObjectUserType.MONSTER_PLANT))
+                if((category === RoomObjectCategory.FLOOR) || (category === RoomObjectCategory.WALL) || (event.objectType === RoomObjectUserType.MONSTER_PLANT) || (event.objectType === RoomObjectUserType.RENTABLE_BOT))
                 {
                     if((event.altKey && !event.ctrlKey && !event.shiftKey) || this.decorateModeMove(event))
                     {
@@ -745,7 +745,7 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
         switch(operation)
         {
             case RoomObjectOperationType.OBJECT_UNDEFINED:
-                if((category === RoomObjectCategory.FLOOR) || (category === RoomObjectCategory.WALL) || (event.objectType === RoomObjectUserType.MONSTER_PLANT))
+                if((category === RoomObjectCategory.FLOOR) || (category === RoomObjectCategory.WALL) || (event.objectType === RoomObjectUserType.MONSTER_PLANT) || (event.objectType === RoomObjectUserType.RENTABLE_BOT))
                 {
                     if((!event.ctrlKey && !event.shiftKey) || this.decorateModeMove(event))
                     {
@@ -1960,6 +1960,13 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
                                 }
                             }
                         }
+                        else if(roomObject.type === RoomObjectUserType.RENTABLE_BOT)
+                        {
+                            // AIR sendMoveUserObjectMessage: a rentable bot has its own move packet.
+                            const userData = GetRoomSessionManager().getSession(roomId)?.userDataManager.getUserDataByIndex(objectId);
+
+                            if(userData) GetCommunication().connection.send(new BotMoveComposer(userData.webID, Math.trunc(x), Math.trunc(y), direction));
+                        }
                         else
                         {
                             GetCommunication().connection.send(new FurnitureFloorUpdateComposer(objectId, x, y, direction));
@@ -2058,7 +2065,8 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
 
                             if(userData)
                             {
-                                GetCommunication().connection.send(new PetMoveComposer(userData.webID, location.x, location.y, direction));
+                                if(roomObject.type === RoomObjectUserType.RENTABLE_BOT) GetCommunication().connection.send(new BotMoveComposer(userData.webID, location.x, location.y, direction));
+                                else GetCommunication().connection.send(new PetMoveComposer(userData.webID, location.x, location.y, direction));
                                 moveSent = true;
                             }
                         }
@@ -2131,6 +2139,11 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
         {
             allowedDirections = roomObject.model.getValue<number[]>(RoomObjectVariable.PET_ALLOWED_DIRECTIONS);
         }
+        else if(roomObject.type === RoomObjectUserType.RENTABLE_BOT)
+        {
+            // AIR USER_ALLOWED_DIRECTIONS: a bot faces any of the eight directions.
+            allowedDirections = [ 0, 45, 90, 135, 180, 225, 270, 315 ];
+        }
         else
         {
             allowedDirections = roomObject.model.getValue<number[]>(RoomObjectVariable.FURNITURE_ALLOWED_DIRECTIONS);
@@ -2181,9 +2194,11 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
         let sizeX = object.model.getValue<number>(RoomObjectVariable.FURNITURE_SIZE_X);
         let sizeY = object.model.getValue<number>(RoomObjectVariable.FURNITURE_SIZE_Y);
 
-        if(sizeX < 1) sizeX = 1;
+        // A pet or bot has no furniture size: AIR reads it into an int, where the missing value is 0 and so becomes
+        // 1. Left undefined here, every rotation of a monster plant or bot failed the tile check.
+        if(!(sizeX >= 1)) sizeX = 1;
 
-        if(sizeY < 1) sizeY = 1;
+        if(!(sizeY >= 1)) sizeY = 1;
 
         let baseSizeX = sizeX;
         let baseSizeY = sizeY;
