@@ -14,6 +14,7 @@
     "@octane/configuration": "1.0.0",
     "@octane/events": "1.0.0",
     "@octane/utils": "1.0.0",
+    "pixi-filters": "^6.1.5",
     "pixi.js": "^8.22.0"
   },
   "devDependencies": {

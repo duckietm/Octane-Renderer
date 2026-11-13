@@ -426,6 +426,7 @@ __metadata:
     "@octane/configuration": "npm:1.0.0"
     "@octane/events": "npm:1.0.0"
     "@octane/utils": "npm:1.0.0"
+    pixi-filters: "npm:^6.1.5"
     pixi.js: "npm:^8.22.0"
     typescript: "npm:^6.0.3"
   languageName: unknown
@@ -526,6 +527,8 @@ __metadata:
     "@octane/events": "npm:1.0.0"
     "@octane/session": "npm:1.0.0"
     "@octane/utils": "npm:1.0.0"
+    gifuct-js: "npm:^2.1.2"
+    pixi-filters: "npm:^6.1.5"
     pixi.js: "npm:^8.22.0"
     typescript: "npm:^6.0.3"
   languageName: unknown
