@@ -4,7 +4,8 @@
  * played. The furniture ones ship with the sound manager (`FURNITURE_cuckoo_clock` is
  * `furniture_sounds/cuckoo_clock.mp3`), so they are bundled here instead of coming from `sounds.url`.
  */
-const BUNDLED_SOUNDS = import.meta.glob<string>('./assets/*.mp3', { eager: true, import: 'default' });
+// No type argument: the client type-checks this file with its own non-generic `import.meta.glob`.
+const BUNDLED_SOUNDS = import.meta.glob('./assets/*.mp3', { eager: true, import: 'default' });
 
 /** Official `HabboSoundTypesEnum.FURNITURE_SOUND_CUCKOO_CLOCK`. */
 export const FURNITURE_SOUND_CUCKOO_CLOCK = 'FURNITURE_cuckoo_clock';
@@ -19,7 +20,7 @@ const soundNameFromPath = (path: string): string =>
     return fileName.substring(0, fileName.lastIndexOf('.'));
 };
 
-const BUNDLED_SOUND_URLS: Map<string, string> = new Map(Object.keys(BUNDLED_SOUNDS ?? {}).map(path => [ soundNameFromPath(path), BUNDLED_SOUNDS[path] ]));
+const BUNDLED_SOUND_URLS: Map<string, string> = new Map(Object.keys(BUNDLED_SOUNDS ?? {}).map(path => [ soundNameFromPath(path), String(BUNDLED_SOUNDS[path]) ]));
 
 /** The url of a bundled room object sound, or `null` when the official sound manager has no such asset. */
 export const getRoomObjectSoundUrl = (soundId: string): string =>
