@@ -17,6 +17,8 @@
     "@octane/events": "1.0.0",
     "@octane/session": "1.0.0",
     "@octane/utils": "1.0.0",
+    "gifuct-js": "^2.1.2",
+    "pixi-filters": "^6.1.5",
     "pixi.js": "^8.22.0"
   },
   "devDependencies": {
