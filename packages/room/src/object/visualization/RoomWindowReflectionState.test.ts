@@ -59,3 +59,15 @@ describe('RoomWindowReflectionState.reflectDirection', () =>
         expect(RoomWindowReflectionState.reflectDirection(0, 1, 0)).toBe(0);
     });
 });
+
+describe('RoomWindowReflectionState.mirrorDirectionCandidates', () =>
+{
+    it('tries the mirrored facing, then the same axis from the other side', () =>
+    {
+        // A two-facing furni (2 and 4) turned to 2 by a left wall mirrors to 6: no picture, so 2 itself is next.
+        expect(RoomWindowReflectionState.mirrorDirectionCandidates(6)).toEqual([ 6, 2 ]);
+        expect(RoomWindowReflectionState.mirrorDirectionCandidates(0)).toEqual([ 0, 4 ]);
+        expect(RoomWindowReflectionState.mirrorDirectionCandidates(-2)).toEqual([ 6, 2 ]);
+        expect(RoomWindowReflectionState.mirrorDirectionCandidates(9)).toEqual([ 1, 5 ]);
+    });
+});

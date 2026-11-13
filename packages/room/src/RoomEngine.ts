@@ -84,7 +84,8 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
     {
         this.setPlaneRenderMode(GetConfiguration().getValue<boolean>('room.planes.direct', false));
         // Official `room.dragging.always_center`: the room goes back to its centre when a drag ends.
-        this._roomDraggingAlwaysCenters = (GetConfiguration().getValue<boolean>('room.dragging.always_center', false) === true);
+        // Optional: asked for only when the hotel set it, so a config without it logs no missing key.
+        this._roomDraggingAlwaysCenters = (GetConfiguration().definitions.has('room.dragging.always_center') && (GetConfiguration().getValue<boolean>('room.dragging.always_center', false) === true));
 
         // Kept so dispose can take it back: an anonymous function stayed registered, and every later init added one
         // more, so each room object event was processed once per init.

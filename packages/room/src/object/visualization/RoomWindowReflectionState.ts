@@ -142,6 +142,17 @@ export class RoomWindowReflectionState
         return ((((Math.round(degrees / 45) * 45) % 360) + 360) % 360);
     }
 
+    /**
+     * The sprite directions (0-7) to try for a furni's mirror image, best first: the mirrored facing itself, then
+     * the opposite facing, which stands on the same axis and so keeps the furni's footprint and stance.
+     */
+    public static mirrorDirectionCandidates(exactDirection: number): number[]
+    {
+        const exact = ((((Math.round(exactDirection) % 8) + 8) % 8));
+
+        return [ exact, ((exact + 4) % 8) ];
+    }
+
     public static hasEntryNear(planeLocation: IVector3D, normal: IVector3D, roomId: string = null, range: number = 0.8): boolean
     {
         if(!planeLocation || !normal) return false;
