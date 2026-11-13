@@ -522,9 +522,34 @@ export class FurnitureVisualization extends RoomObjectSpriteVisualization
                 const exactDirection = (((Math.round(offsetDirection / 45) % 8) + 8) % 8);
 
                 let mirrorDirection = exactDirection;
-                let mirrorLayers = ((exactDirection !== this._direction) ? this.buildMirrorLayers(sources, exactDirection) : null);
+                let mirrorLayers: IWindowReflectionUnitLayer[] = null;
+                let resolved = false;
 
-                if(!mirrorLayers && (exactDirection !== this._direction))
+                // The mirrored facing first; a furni drawn for two facings only (a vending machine) has no picture
+                // of its back, so the same axis seen from the other side comes next. That keeps it standing as it
+                // stands in the room, where the nearest drawn facing would turn it a quarter.
+                for(const candidate of RoomWindowReflectionState.mirrorDirectionCandidates(exactDirection))
+                {
+                    mirrorDirection = candidate;
+
+                    if(candidate === this._direction)
+                    {
+                        resolved = true;
+
+                        break;
+                    }
+
+                    mirrorLayers = this.buildMirrorLayers(sources, candidate);
+
+                    if(mirrorLayers)
+                    {
+                        resolved = true;
+
+                        break;
+                    }
+                }
+
+                if(!resolved)
                 {
                     mirrorDirection = this._data.getValidDirection(this._scale, offsetDirection);
 
