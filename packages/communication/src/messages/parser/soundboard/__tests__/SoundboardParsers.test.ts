@@ -136,10 +136,10 @@ describe('SoundboardSettingsParser', () =>
         off.writeInt(0);
 
         const parser = new SoundboardSettingsParser();
-        parser.parse(new TestWrapper(new BinaryReader(on.getBuffer())) as any);
+        parser.parse(new TestWrapper(new BinaryReader(on.getBuffer())));
         expect(parser.roomMode).toBe(1);
 
-        parser.parse(new TestWrapper(new BinaryReader(off.getBuffer())) as any);
+        parser.parse(new TestWrapper(new BinaryReader(off.getBuffer())));
         expect(parser.roomMode).toBe(0);
     });
 
