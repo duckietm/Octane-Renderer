@@ -7,12 +7,12 @@ top of.
 
 ## Stack
 
-- **TypeScript 6.0** (root) + **tsgo** (`@typescript/native-preview`,
-  TS 7 preview compiler — used by `yarn compile:fast`, ~7× faster on
+- **TypeScript 6.0** (root) + **TypeScript 7** (the native compiler, installed as
+  the `typescript7` alias of `typescript@7` — used by `yarn compile:fast`, ~7× faster on
   this codebase)
 - **PixiJS v8** (`pixi.js@8.22`)
 - **Vite 8** for build + bundling
-- **Vitest 4** for unit tests
+- **Vitest 5** for unit tests
 - **Yarn 4.18 workspaces** (`packages/*`) through Corepack, using the
   `node-modules` linker for compatibility with the existing build tooling.
 - **No React** — this is a pure TS library; React lives in `../octane`.
@@ -222,8 +222,8 @@ also semantically wrong. Replaced with the standard
 ```
 yarn build              # vite build
 yarn compile            # tsc --project ./tsconfig.json --noEmit false
-yarn compile:fast       # tsgo (~7× faster, TS 7 preview)
-yarn eslint             # lint src + packages/*/src
+yarn compile:fast       # TypeScript 7 (~7× faster)
+yarn eslint             # lint src + packages/*/src (also a CI step)
 yarn test               # vitest run
 yarn test:watch         # vitest watch
 yarn test:coverage      # vitest with v8 coverage
