@@ -5,3 +5,4 @@ export * from './TalentTrackParser';
 export * from './TalentTrackRewardPerk';
 export * from './TalentTrackRewardProduct';
 export * from './TalentTrackTask';
+export * from './CitizenshipVipOfferPromoEnabledParser';

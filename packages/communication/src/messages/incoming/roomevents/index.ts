@@ -52,3 +52,4 @@ export * from './WiredUserVisualizationStateEvent';
 export * from './WiredContractOpenEvent';
 export * from './WiredContractContentsEvent';
 export * from './WiredContractUpdateResultEvent';
+export * from './WiredMenuErrorEvent';

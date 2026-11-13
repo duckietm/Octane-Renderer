@@ -83,6 +83,8 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
     public async init(): Promise<void>
     {
         this.setPlaneRenderMode(GetConfiguration().getValue<boolean>('room.planes.direct', false));
+        // Official `room.dragging.always_center`: the room goes back to its centre when a drag ends.
+        this._roomDraggingAlwaysCenters = (GetConfiguration().getValue<boolean>('room.dragging.always_center', false) === true);
 
         // Kept so dispose can take it back: an anonymous function stayed registered, and every later init added one
         // more, so each room object event was processed once per init.

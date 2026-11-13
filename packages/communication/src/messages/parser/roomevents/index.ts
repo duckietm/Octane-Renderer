@@ -61,3 +61,4 @@ export * from './WiredContractData';
 export * from './WiredContractOpenParser';
 export * from './WiredContractContentsParser';
 export * from './WiredContractUpdateResultParser';
+export * from './WiredMenuErrorParser';
