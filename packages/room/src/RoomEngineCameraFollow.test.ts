@@ -57,7 +57,7 @@ const run = (scenario: Scenario, steps: { target: [ number, number, number ]; ti
         [ RoomVariableEnum.ROOM_MAX_X, scenario.room[2] ],
         [ RoomVariableEnum.ROOM_MAX_Y, scenario.room[3] ]
     ]);
-    const engine = Object.create(RoomEngine.prototype) as any;
+    const engine = Object.create(RoomEngine.prototype);
 
     Object.assign(engine, {
         _roomInstanceDatas: new Map([[ ROOM_ID, instanceData ]]),
@@ -75,7 +75,7 @@ const run = (scenario: Scenario, steps: { target: [ number, number, number ]; ti
         engine.updateRoomCamera(ROOM_ID, 1, new Vector3d(...target), time);
 
         return {
-            target: vector(camera.target as never),
+            target: vector(camera.target),
             location: vector(camera.location),
             targetObject: vector(camera.targetObjectLoc),
             limited: [ camera.limitedLocationX, camera.limitedLocationY ],
@@ -153,7 +153,7 @@ describe('RoomEngine camera follow', () =>
     {
         const geometry = new RoomGeometry(64, new Vector3d(45, 30, 0), new Vector3d(5, 5, 0));
         const instanceData = new RoomInstanceData(ROOM_ID);
-        const engine = Object.create(RoomEngine.prototype) as any;
+        const engine = Object.create(RoomEngine.prototype);
 
         Object.assign(engine, {
             _roomInstanceDatas: new Map([[ ROOM_ID, instanceData ]]),

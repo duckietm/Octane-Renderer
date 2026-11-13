@@ -116,7 +116,7 @@ const run = (objects: FakeObject[], options: Options = {}) =>
         } : null)));
     }
 
-    const engine = Object.create(RoomEngine.prototype) as any;
+    const engine = Object.create(RoomEngine.prototype);
 
     Object.assign(engine, {
         _roomManager: {
@@ -140,7 +140,7 @@ const run = (objects: FakeObject[], options: Options = {}) =>
         listenersLeft: [ ...callbacks.keys() ],
         cache: [ ...(options.cached ?? []).map((cached) => cached.key), ...objects.map((object) => object.key).filter(Boolean) ]
             .filter((key, index, all) => all.indexOf(key) === index)
-            .map((key) => `${key}: ${(cache.get(key as string)?.texture as unknown as { name: string })?.name ?? 'none'}`)
+            .map((key) => `${key}: ${(cache.get(key)?.texture as unknown as { name: string })?.name ?? 'none'}`)
     };
 };
 

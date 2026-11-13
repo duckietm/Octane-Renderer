@@ -64,7 +64,10 @@ class TestStack extends VariableFxStack
 
     protected createTexture(): Texture
     {
-        const texture = { width: 1, height: 1, destroyed: false, source: { update: () => undefined }, destroy() { this.destroyed = true; } };
+        const texture = { width: 1, height: 1, destroyed: false, source: { update: () => undefined }, destroy()
+        {
+            this.destroyed = true;
+        } };
 
         this.textures.push(texture);
 

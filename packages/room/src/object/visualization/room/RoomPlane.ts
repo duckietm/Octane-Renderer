@@ -1812,13 +1812,13 @@ export class RoomPlane implements IRoomPlane
     {
         const dataType: keyof IAssetRoomVisualizationData = (this._type === RoomPlane.TYPE_FLOOR) ? 'floorData' : (this._type === RoomPlane.TYPE_WALL) ? 'wallData' : 'landscapeData';
         const candidates: IAssetPlaneVisualizationData[] = [];
-        const roomData = GetAssetManager().getCollection('room')?.data?.roomVisualization?.[dataType] as IAssetPlaneVisualizationData;
+        const roomData = GetAssetManager().getCollection('room')?.data?.roomVisualization?.[dataType];
 
         if(roomData) candidates.push(roomData);
 
         if(this._type === RoomPlane.TYPE_LANDSCAPE)
         {
-            const landscapeData = GetAssetManager().getCollection('landscape')?.data?.roomVisualization?.landscapeData as IAssetPlaneVisualizationData;
+            const landscapeData = GetAssetManager().getCollection('landscape')?.data?.roomVisualization?.landscapeData;
 
             if(landscapeData) candidates.push(landscapeData);
         }

@@ -72,7 +72,7 @@ describe('SocketConnection held sends', () =>
         const write = vi.spyOn(internals, 'write').mockImplementation(() => undefined);
         const other = { getMessageArray: () => [] };
 
-        connection.registerMessages({ events: new Map(), composers: new Map([ [ 2596, PongMessageComposer ] ]) } as never);
+        connection.registerMessages({ events: new Map(), composers: new Map([ [ 2596, PongMessageComposer ] ]) });
         internals._isAuthenticated = true;
 
         connection.send(other as never, new PongMessageComposer());

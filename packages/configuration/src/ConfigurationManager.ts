@@ -18,7 +18,7 @@ export class ConfigurationManager implements IConfigurationManager
     /** Loads the configuration once; later calls share that load. A failed load is retried on the next call. */
     public init(): Promise<void>
     {
-        if(!this._initialLoad)
+        if(this._initialLoad === null)
         {
             this._initialLoad = this.reloadConfiguration().catch(error =>
             {

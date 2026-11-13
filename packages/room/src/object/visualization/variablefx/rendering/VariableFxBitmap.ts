@@ -89,12 +89,12 @@ export class VariableFxBitmap implements IVariableFxImage
         this.width = Math.max(1, (width | 0));
         this.height = Math.max(1, (height | 0));
         this._canvas = VariableFxBitmap.createCanvas(this.width, this.height);
-        this._context = (this._canvas ? (this._canvas.getContext('2d') as VariableFxCanvasContext) : null);
+        this._context = (this._canvas ? this._canvas.getContext('2d') : null);
     }
 
     public get source(): CanvasImageSource
     {
-        return (this._canvas as CanvasImageSource);
+        return this._canvas;
     }
 
     public get disposed(): boolean
@@ -242,7 +242,7 @@ export class VariableFxBitmap implements IVariableFxImage
     private static readPixels(image: IVariableFxImage, x: number, y: number, width: number, height: number): Uint8ClampedArray
     {
         const canvas = VariableFxBitmap.createCanvas(width, height);
-        const context = (canvas ? (canvas.getContext('2d') as VariableFxCanvasContext) : null);
+        const context = (canvas ? canvas.getContext('2d') : null);
 
         if(!context) return null;
 
@@ -256,7 +256,7 @@ export class VariableFxBitmap implements IVariableFxImage
     private createTintedSurface(image: IVariableFxImage, transform: IVariableFxColorTransform): CanvasImageSource
     {
         const canvas = VariableFxBitmap.createCanvas(image.width, image.height);
-        const context = (canvas ? (canvas.getContext('2d') as VariableFxCanvasContext) : null);
+        const context = (canvas ? canvas.getContext('2d') : null);
 
         if(!context) return null;
 
@@ -276,6 +276,6 @@ export class VariableFxBitmap implements IVariableFxImage
 
         context.globalCompositeOperation = 'source-over';
 
-        return (canvas as CanvasImageSource);
+        return canvas;
     }
 }

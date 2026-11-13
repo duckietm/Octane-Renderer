@@ -61,7 +61,7 @@ const play = (steps: Step[], options: Options = {}) =>
     };
 
     const canvas = { isFlipped: !!options.flipped, screenOffsetX: -40, screenOffsetY: 25 } as never;
-    const engine = Object.create(RoomEngine.prototype) as any;
+    const engine = Object.create(RoomEngine.prototype);
 
     Object.assign(engine, {
         _activeRoomId: ROOM_ID,

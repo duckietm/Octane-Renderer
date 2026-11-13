@@ -4,7 +4,7 @@
  * played. The furniture ones ship with the sound manager (`FURNITURE_cuckoo_clock` is
  * `furniture_sounds/cuckoo_clock.mp3`), so they are bundled here instead of coming from `sounds.url`.
  */
-const BUNDLED_SOUNDS = import.meta.glob('./assets/*.mp3', { eager: true, import: 'default' }) as Record<string, string>;
+const BUNDLED_SOUNDS = import.meta.glob<string>('./assets/*.mp3', { eager: true, import: 'default' });
 
 /** Official `HabboSoundTypesEnum.FURNITURE_SOUND_CUCKOO_CLOCK`. */
 export const FURNITURE_SOUND_CUCKOO_CLOCK = 'FURNITURE_cuckoo_clock';
