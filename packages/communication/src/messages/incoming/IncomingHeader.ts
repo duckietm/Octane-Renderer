@@ -346,6 +346,8 @@ export class IncomingHeader
     // are already GROUP_LIST / PET_INFO here, so those two take custom ids instead.
     public static WIRED_ENVIRONMENT = 347;
     public static WIRED_CLICK_SETTINGS = 2288;
+    public static WIRED_MENU_ERROR = 289;
+    public static CITIZENSHIP_VIP_OFFER_PROMO_ENABLED = 2764;
     public static WIRED_LOG_PAGE = 918;
     public static WIRED_ALL_VARIABLES_HASH = 1646;
     public static WIRED_ALL_VARIABLES_DIFF = 2498;
