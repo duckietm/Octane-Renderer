@@ -11,6 +11,6 @@ export class CitizenshipVipOfferPromoEnabledEvent extends MessageEvent implement
 
     public getParser(): CitizenshipVipOfferPromoEnabledParser
     {
-        return this.parser as CitizenshipVipOfferPromoEnabledParser;
+        return this.parser;
     }
 }

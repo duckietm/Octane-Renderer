@@ -4,8 +4,10 @@ import { UserDataManager } from './UserDataManager';
 
 vi.mock('@octane/communication', () => ({
     GetCommunication: () => ({ connection: { send: vi.fn() } }),
-    RequestPetInfoComposer: class {},
-    UserCurrentBadgesComposer: class {}
+    RequestPetInfoComposer: class
+    {},
+    UserCurrentBadgesComposer: class
+    {}
 }));
 
 describe('UserDataManager badges', () =>

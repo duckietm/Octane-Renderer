@@ -23,7 +23,10 @@ const entry = (key: string, width = 30, height = 10): IRoomObjectVariableFxEntry
     visualizer: visualizer(width, height)
 });
 
-const fakeTexture = (width: number, height: number) => ({ width, height, destroyed: false, source: { update: () => undefined }, destroy() { this.destroyed = true; } }) as unknown as Texture;
+const fakeTexture = (width: number, height: number) => ({ width, height, destroyed: false, source: { update: () => undefined }, destroy()
+{
+    this.destroyed = true;
+} }) as unknown as Texture;
 
 describe('variable fx stack on its holders', () =>
 {

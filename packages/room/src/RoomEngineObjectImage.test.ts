@@ -77,7 +77,7 @@ const render = (type: string, value: string, args: Args = {}, options: Options =
         removeRoomObject: (id: number, objectCategory: number) => log.push(`remove ${id} ${objectCategory}`)
     };
     const cache = new RoomObjectImageCache(8);
-    const engine = Object.create(RoomEngine.prototype) as any;
+    const engine = Object.create(RoomEngine.prototype);
 
     Object.assign(engine, {
         _roomManager: options.noManager ? null : {

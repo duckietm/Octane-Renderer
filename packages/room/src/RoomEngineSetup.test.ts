@@ -9,7 +9,7 @@ vi.mock('./GetRoomEngine', () => ({
     GetRoomEngine: () => null
 }));
 
-const settings = vi.hoisted(() => ({ values: {} as Record<string, unknown> }));
+const settings = vi.hoisted(() => ({ values: {} }));
 
 vi.mock('@octane/configuration', async (importOriginal) => ({
     ...(await importOriginal<object>()),
@@ -64,7 +64,7 @@ const run = (floor: string, wall: string, landscape: string, options: Options = 
             return id === RoomEngine.ROOM_OBJECT_ID ? roomObject : { id };
         }
     };
-    const engine = Object.create(RoomEngine.prototype) as any;
+    const engine = Object.create(RoomEngine.prototype);
 
     Object.assign(engine, {
         _roomManager: options.noManager ? null : { createRoomInstance: (id: number) => (options.noInstance ? null : (log.push(`createRoomInstance ${id}`), instance)) },

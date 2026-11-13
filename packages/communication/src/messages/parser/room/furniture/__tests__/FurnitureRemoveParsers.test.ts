@@ -13,7 +13,10 @@ const wrapperOf = (values: (number | string | boolean)[]): IMessageDataWrapper =
         readInt: () => queue.shift(),
         readString: () => queue.shift(),
         readBoolean: () => queue.shift(),
-        get bytesAvailable() { return queue.length > 0; }
+        get bytesAvailable()
+        {
+            return queue.length > 0;
+        }
     } as unknown as IMessageDataWrapper;
 };
 

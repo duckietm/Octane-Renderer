@@ -161,7 +161,8 @@ export class SoundManager implements ISoundManager
             const playing = sample.play();
 
             // A browser blocking autoplay rejects the promise; that is not an error worth a stack trace.
-            if(playing && (typeof playing.catch === 'function')) playing.catch(() => undefined);
+            // Older browsers return nothing from play(), so the promise is checked before it is used.
+            if(typeof playing?.catch === 'function') playing.catch(() => undefined);
         }
         catch (e)
         {
