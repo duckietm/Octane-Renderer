@@ -829,4 +829,6 @@ export class OutgoingHeader
     public static GET_USER_NFT_WARDROBE = 3206;
     public static SAVE_USER_NFT_WARDROBE = 133;
     public static GET_SELECTED_NFT_WARDROBE_OUTFIT = 3810;
+    // Generic plugin channel (ours): a client panel answers its server plugin, 10200-10209.
+    public static PLUGIN_CHANNEL_ACTION = 10201;
 }

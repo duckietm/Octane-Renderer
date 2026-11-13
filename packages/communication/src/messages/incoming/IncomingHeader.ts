@@ -788,4 +788,6 @@ export class IncomingHeader
     // AIR avatar collectibles (avatar editor NFT tab, server -> client), official ids.
     public static USER_NFT_WARDROBE = 2236;
     public static SELECTED_NFT_WARDROBE_OUTFIT = 350;
+    // Generic plugin channel (ours): a server plugin talks to its own client panels, 10200-10209.
+    public static PLUGIN_CHANNEL_MESSAGE = 10200;
 }

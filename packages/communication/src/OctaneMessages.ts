@@ -1389,6 +1389,8 @@ import {
     WiredSetupExportResultEvent,
     WiredSetupImportComposer,
     WiredSetupImportResultEvent,
+    PluginChannelActionComposer,
+    PluginChannelMessageEvent,
     WiredTradeAcceptComposer,
     WiredTradeCancelComposer,
     WiredTradeCancelledEvent,
@@ -2095,6 +2097,7 @@ export class OctaneMessages implements IMessageConfiguration
         this._events.set(IncomingHeader.WIRED_ARRAY_INSPECTION_DATA, WiredArrayInspectionDataEvent);
         this._events.set(IncomingHeader.WIRED_SETUP_EXPORT_RESULT, WiredSetupExportResultEvent);
         this._events.set(IncomingHeader.WIRED_SETUP_IMPORT_RESULT, WiredSetupImportResultEvent);
+        this._events.set(IncomingHeader.PLUGIN_CHANNEL_MESSAGE, PluginChannelMessageEvent);
         this._events.set(IncomingHeader.WIRED_ENVIRONMENT, WiredEnvironmentEvent);
         this._events.set(IncomingHeader.WIRED_CLICK_USER_RESPONSE, WiredClickUserResponseEvent);
         this._events.set(IncomingHeader.WIRED_CLICK_SETTINGS, WiredClickSettingsEvent);
@@ -2923,6 +2926,7 @@ export class OctaneMessages implements IMessageConfiguration
         this._composers.set(OutgoingHeader.WIRED_ARRAY_INSPECTION_UPDATE, WiredArrayInspectionUpdateComposer);
         this._composers.set(OutgoingHeader.WIRED_SETUP_EXPORT, WiredSetupExportComposer);
         this._composers.set(OutgoingHeader.WIRED_SETUP_IMPORT, WiredSetupImportComposer);
+        this._composers.set(OutgoingHeader.PLUGIN_CHANNEL_ACTION, PluginChannelActionComposer);
         this._composers.set(OutgoingHeader.WIRED_USER_SELECTED, WiredUserSelectedComposer);
         this._composers.set(OutgoingHeader.WIRED_MENU_PERMISSIONS_SAVE, WiredMenuPermissionsSaveComposer);
         this._composers.set(OutgoingHeader.WIRED_ROOM_STATE_ACTION, WiredRoomStateActionComposer);
