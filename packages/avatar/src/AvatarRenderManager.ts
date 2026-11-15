@@ -7,6 +7,7 @@ import { AvatarAssetDownloadManager } from './AvatarAssetDownloadManager';
 import { AvatarFigureContainer } from './AvatarFigureContainer';
 import { AvatarImage } from './AvatarImage';
 import { AvatarStructure } from './AvatarStructure';
+import { getMissingBundledActions } from './actions/BundledAvatarActions';
 import { EffectAssetDownloadManager } from './EffectAssetDownloadManager';
 import { FigureDataContainer } from './FigureDataContainer';
 import { PlaceHolderAvatarImage } from './PlaceHolderAvatarImage';
@@ -91,14 +92,22 @@ export class AvatarRenderManager implements IAvatarRenderManager
 
         if(!url || !url.length) throw new Error('Missing "avatar.actions.url" in config — add the URL to your renderer-config.json');
 
+        let actions: { actions?: { state?: string }[] };
+
         try
         {
-            this._structure.updateActions(await loadGamedata(url));
+            actions = await loadGamedata(url);
+            this._structure.updateActions(actions);
         }
         catch (err)
         {
             throw new Error(`Could not load avatar actions from "${ url }" — check "avatar.actions.url" in renderer-config.json (${ err?.message || err })`);
         }
+
+        // Postures the hotel's JSON lacks (SnowStorm, cry, vote, typing) come from the bundled actions.
+        const missing = getMissingBundledActions(actions);
+
+        if(missing.actions.length) this._structure.updateActions(missing);
     }
 
     private async loadFigureData(): Promise<void>
