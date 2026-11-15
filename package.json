@@ -10,7 +10,7 @@
   ],
   "resolutions": {
     "pako": "3.0.3",
-    "pixi.js": "8.22.0",
+    "pixi.js": "8.23.0",
     "vite": "8.3.7",
     "vitest": "5.1.0"
   },
@@ -43,7 +43,7 @@
   "main": "./index",
   "dependencies": {
     "pixi-filters": "^6.1.5",
-    "pixi.js": "8.22.0"
+    "pixi.js": "8.23.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

@@ -10,7 +10,7 @@ top of.
 - **TypeScript 6.0** (root) + **TypeScript 7** (the native compiler, installed as
   the `typescript7` alias of `typescript@7` — used by `yarn compile:fast`, ~7× faster on
   this codebase)
-- **PixiJS v8** (`pixi.js@8.22`)
+- **PixiJS v8** (`pixi.js@8.23`)
 - **Vite 8** for build + bundling
 - **Vitest 5** for unit tests
 - **Yarn 4.18 workspaces** (`packages/*`) through Corepack, using the

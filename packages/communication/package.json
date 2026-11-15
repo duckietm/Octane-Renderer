@@ -15,7 +15,7 @@
     "@octane/utils": "1.0.0",
     "@thumbmarkjs/thumbmarkjs": "^1.11.0",
     "pako": "^3.0.3",
-    "pixi.js": "^8.22.0"
+    "pixi.js": "^8.23.0"
   },
   "devDependencies": {
     "typescript": "^6.0.3"
