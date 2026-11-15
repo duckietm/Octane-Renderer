@@ -1393,6 +1393,8 @@ import {
     BotDialogueChooseComposer,
     BotDialogueEvent,
     BotDialogueOpenComposer,
+    BotDialogueWindowChooseComposer,
+    BotDialogueWindowEvent,
     PluginChannelMessageEvent,
     WiredTradeAcceptComposer,
     WiredTradeCancelComposer,
@@ -2102,6 +2104,7 @@ export class OctaneMessages implements IMessageConfiguration
         this._events.set(IncomingHeader.WIRED_SETUP_IMPORT_RESULT, WiredSetupImportResultEvent);
         this._events.set(IncomingHeader.PLUGIN_CHANNEL_MESSAGE, PluginChannelMessageEvent);
         this._events.set(IncomingHeader.BOT_DIALOGUE, BotDialogueEvent);
+        this._events.set(IncomingHeader.BOT_DIALOGUE_WINDOW, BotDialogueWindowEvent);
         this._events.set(IncomingHeader.WIRED_ENVIRONMENT, WiredEnvironmentEvent);
         this._events.set(IncomingHeader.WIRED_CLICK_USER_RESPONSE, WiredClickUserResponseEvent);
         this._events.set(IncomingHeader.WIRED_CLICK_SETTINGS, WiredClickSettingsEvent);
@@ -2933,6 +2936,7 @@ export class OctaneMessages implements IMessageConfiguration
         this._composers.set(OutgoingHeader.PLUGIN_CHANNEL_ACTION, PluginChannelActionComposer);
         this._composers.set(OutgoingHeader.BOT_DIALOGUE_OPEN, BotDialogueOpenComposer);
         this._composers.set(OutgoingHeader.BOT_DIALOGUE_CHOOSE, BotDialogueChooseComposer);
+        this._composers.set(OutgoingHeader.BOT_DIALOGUE_WINDOW_CHOOSE, BotDialogueWindowChooseComposer);
         this._composers.set(OutgoingHeader.WIRED_USER_SELECTED, WiredUserSelectedComposer);
         this._composers.set(OutgoingHeader.WIRED_MENU_PERMISSIONS_SAVE, WiredMenuPermissionsSaveComposer);
         this._composers.set(OutgoingHeader.WIRED_ROOM_STATE_ACTION, WiredRoomStateActionComposer);

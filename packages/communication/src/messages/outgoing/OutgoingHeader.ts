@@ -834,4 +834,5 @@ export class OutgoingHeader
     // Bot dialogues in the bot menu (ours), 10210-10219.
     public static BOT_DIALOGUE_OPEN = 10211;
     public static BOT_DIALOGUE_CHOOSE = 10212;
+    public static BOT_DIALOGUE_WINDOW_CHOOSE = 10214;
 }

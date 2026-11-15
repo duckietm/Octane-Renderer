@@ -792,4 +792,5 @@ export class IncomingHeader
     public static PLUGIN_CHANNEL_MESSAGE = 10200;
     // Bot dialogues in the bot menu (ours), 10210-10219.
     public static BOT_DIALOGUE = 10210;
+    public static BOT_DIALOGUE_WINDOW = 10213;
 }
