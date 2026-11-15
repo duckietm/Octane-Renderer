@@ -831,4 +831,7 @@ export class OutgoingHeader
     public static GET_SELECTED_NFT_WARDROBE_OUTFIT = 3810;
     // Generic plugin channel (ours): a client panel answers its server plugin, 10200-10209.
     public static PLUGIN_CHANNEL_ACTION = 10201;
+    // Bot dialogues in the bot menu (ours), 10210-10219.
+    public static BOT_DIALOGUE_OPEN = 10211;
+    public static BOT_DIALOGUE_CHOOSE = 10212;
 }
