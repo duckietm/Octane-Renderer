@@ -54,41 +54,17 @@ const extractIncomingMethod = (
 {
     const name = method.name.getText();
     if(stack.includes(name)) return unsupported(`Recursive packet helper ${ [...stack, name].join(' -> ') }`);
-    const dynamic = dynamicPacketFlow(method);
+    const loops = incomingListLoops(method);
+    const dynamic = dynamicPacketFlow(method, methods, loops);
     if(dynamic) return unsupported(dynamic);
 
-    const calls: ts.CallExpression[] = [];
-    visit(method.body, node =>
-    {
-        if(ts.isCallExpression(node)) calls.push(node);
-    });
-    calls.sort((left, right) => left.getStart() - right.getStart());
+    const scoped = extractIncomingScope(method.body, { methods, overloaded, stack: [...stack, name], loops });
+    if(typeof scoped === 'string') return unsupported(scoped);
     const fields: WireSchema[] = [];
     const optionalGuard = trailingOptionalGuard(method);
     const optionalFields: WireSchema[] = [];
-    for(const call of calls)
-    {
-        const destination = optionalGuard && call.getStart() > optionalGuard.position
-            ? optionalFields
-            : fields;
-        const read = readCall(call);
-        if(read)
-        {
-            destination.push({ type: read, name: inferredName(call) });
-            continue;
-        }
-        const helperName = localHelperName(call);
-        if(!helperName) continue;
-        if(!methods.has(helperName))
-        {
-            if(/^(read|parse)/i.test(helperName)) return unsupported(`Unresolved packet helper ${ helperName }`);
-            continue;
-        }
-        if(overloaded.has(helperName)) return unsupported(`Overloaded packet helper ${ helperName } cannot be resolved safely`);
-        const helper = extractIncomingMethod(methods.get(helperName), methods, overloaded, [...stack, name]);
-        if(helper.unsupportedReason) return helper;
-        destination.push(...helper.fields);
-    }
+    for(const { field, position } of scoped)
+        (optionalGuard && position > optionalGuard.position ? optionalFields : fields).push(field);
     if(optionalGuard && optionalFields.length)
         fields.push({ type: 'optional', controller: optionalGuard.controller, fields: optionalFields });
     const wrapperNames = new Set(method.parameters.map(parameter => parameter.name.getText()));
@@ -103,6 +79,179 @@ const extractIncomingMethod = (
     if(delegatedConstructor)
         return unsupported(`Packet fields delegated to external constructor ${ delegatedConstructor } inside ${ name }`);
     return { fields };
+};
+
+interface ListLoop
+{
+    loop: ts.Statement;
+    countType: ScalarType;
+    body: ts.Statement;
+}
+
+interface IncomingScopeContext
+{
+    methods: ReadonlyMap<string, ts.MethodDeclaration>;
+    overloaded: ReadonlySet<string>;
+    stack: readonly string[];
+    loops: ReadonlyMap<ts.CallExpression, ListLoop>;
+}
+
+interface PositionedField
+{
+    field: WireSchema;
+    position: number;
+}
+
+/** The reads inside one scope: the method body, or the body of a recognised list loop. Returns a reason when unsupported. */
+const extractIncomingScope = (scope: ts.Node, context: IncomingScopeContext): PositionedField[] | string =>
+{
+    const loopNodes = new Set<ts.Node>([ ...context.loops.values() ].map(loop => loop.loop));
+    const calls: ts.CallExpression[] = [];
+    visit(scope, node =>
+    {
+        if(ts.isCallExpression(node)) calls.push(node);
+    });
+    calls.sort((left, right) => left.getStart() - right.getStart());
+    const fields: PositionedField[] = [];
+    for(const call of calls)
+    {
+        if(insideLoopOf(call, scope, loopNodes)) continue;
+        const position = call.getStart();
+        const loop = context.loops.get(call);
+        if(loop)
+        {
+            const item = extractIncomingScope(loop.body, context);
+            if(typeof item === 'string') return item;
+            fields.push({ field: { type: 'list', countType: loop.countType, item: item.map(entry => entry.field) }, position });
+            continue;
+        }
+        const read = readCall(call);
+        if(read)
+        {
+            fields.push({ field: { type: read, name: inferredName(call) }, position });
+            continue;
+        }
+        const helperName = localHelperName(call);
+        if(!helperName) continue;
+        if(!context.methods.has(helperName))
+        {
+            if(/^(read|parse)/i.test(helperName)) return `Unresolved packet helper ${ helperName }`;
+            continue;
+        }
+        if(context.overloaded.has(helperName)) return `Overloaded packet helper ${ helperName } cannot be resolved safely`;
+        const helper = extractIncomingMethod(context.methods.get(helperName), context.methods, context.overloaded, context.stack);
+        if(helper.unsupportedReason) return helper.unsupportedReason;
+        helper.fields.forEach(field => fields.push({ field, position }));
+    }
+    return fields;
+};
+
+const insideLoopOf = (node: ts.Node, scope: ts.Node, loopNodes: ReadonlySet<ts.Node>): boolean =>
+{
+    for(let current = node.parent; current && current !== scope; current = current.parent)
+        if(loopNodes.has(current)) return true;
+    return false;
+};
+
+/**
+ * Loops read as a list: `const n = wrapper.readInt()` (or readShort) followed by a loop that runs n times,
+ * keyed by the call that reads the count. `let i = 0` and guards that read nothing may sit between them.
+ * Anything else stays a data-dependent loop.
+ */
+const incomingListLoops = (method: ts.MethodDeclaration): Map<ts.CallExpression, ListLoop> =>
+{
+    const loops = new Map<ts.CallExpression, ListLoop>();
+    visit(method.body, node =>
+    {
+        if(!ts.isForStatement(node) && !ts.isWhileStatement(node)) return;
+        const body = node.statement;
+        if(containsNode(body, child => ts.isBreakStatement(child) || ts.isContinueStatement(child) || ts.isReturnStatement(child))) return;
+        if(!ts.isBlock(node.parent)) return;
+        const siblings = node.parent.statements;
+        const zeroed = new Set<string>();
+        let index = siblings.indexOf(node) - 1;
+        for(; index >= 0; index--)
+        {
+            const sibling = siblings[index];
+            const zero = zeroDeclaration(sibling);
+            if(zero) zeroed.add(zero);
+            else if(!ts.isIfStatement(sibling) || containsNode(sibling, child => ts.isCallExpression(child)
+                && (readCall(child) !== undefined || localHelperName(child) !== undefined))) break;
+        }
+        const count = index >= 0 ? countDeclaration(siblings[index]) : undefined;
+        if(!count) return;
+        if(!runsCountTimes(node, count.name, zeroed)) return;
+        loops.set(count.call, { loop: node, countType: count.type, body });
+    });
+    return loops;
+};
+
+const countDeclaration = (statement: ts.Statement): { name: string; call: ts.CallExpression; type: ScalarType } | undefined =>
+{
+    if(!ts.isVariableStatement(statement) || statement.declarationList.declarations.length !== 1) return undefined;
+    const declaration = statement.declarationList.declarations[0];
+    if(!ts.isIdentifier(declaration.name) || !declaration.initializer) return undefined;
+    const initializer = unwrap(declaration.initializer);
+    if(!ts.isCallExpression(initializer)) return undefined;
+    const type = readCall(initializer);
+    if(type !== 'int' && type !== 'short') return undefined;
+    return { name: declaration.name.text, call: initializer, type };
+};
+
+const zeroDeclaration = (statement: ts.Statement): string | undefined =>
+{
+    if(!ts.isVariableStatement(statement) || statement.declarationList.declarations.length !== 1) return undefined;
+    const declaration = statement.declarationList.declarations[0];
+    if(!ts.isIdentifier(declaration.name) || declaration.initializer?.getText() !== '0') return undefined;
+    return declaration.name.text;
+};
+
+/** `for(let i = 0; i < n; i++)`, `while(i < n) { ...; i++ }`, `while(n > 0) { ...; n-- }` or `while(n-- > 0)`. */
+const runsCountTimes = (loop: ts.ForStatement | ts.WhileStatement, count: string, zeroed: ReadonlySet<string>): boolean =>
+{
+    const statements = ts.isBlock(loop.statement) ? [ ...loop.statement.statements ] : [ loop.statement ];
+    const mentionsCount = (nodes: readonly ts.Node[]) => nodes.some(node => containsNode(node,
+        child => ts.isIdentifier(child) && child.text === count));
+    const isStep = (node: ts.Node | undefined, name: string, operator: ts.SyntaxKind): boolean =>
+    {
+        if(!node) return false;
+        const expression = ts.isExpressionStatement(node) ? node.expression : node;
+        return (ts.isPostfixUnaryExpression(expression) || ts.isPrefixUnaryExpression(expression))
+            && expression.operator === operator && expression.operand.getText() === name;
+    };
+    const condition = loop.kind === ts.SyntaxKind.ForStatement ? loop.condition : loop.expression;
+    if(!condition || !ts.isBinaryExpression(condition)) return false;
+    const left = condition.left.getText();
+    const right = condition.right.getText();
+    const operator = condition.operatorToken.kind;
+
+    if(ts.isForStatement(loop))
+    {
+        const initializer = loop.initializer;
+        if(!initializer || !ts.isVariableDeclarationList(initializer) || initializer.declarations.length !== 1) return false;
+        const index = initializer.declarations[0];
+        if(!ts.isIdentifier(index.name) || index.initializer?.getText() !== '0') return false;
+        return operator === ts.SyntaxKind.LessThanToken && left === index.name.text && right === count
+            && isStep(loop.incrementor, index.name.text, ts.SyntaxKind.PlusPlusToken)
+            && !mentionsCount(statements);
+    }
+    if(operator === ts.SyntaxKind.LessThanToken && zeroed.has(left) && right === count)
+        return isStep(statements.at(-1), left, ts.SyntaxKind.PlusPlusToken) && !mentionsCount(statements);
+    if(operator === ts.SyntaxKind.GreaterThanToken && left === count && right === '0')
+        return isStep(statements.at(-1), count, ts.SyntaxKind.MinusMinusToken) && !mentionsCount(statements.slice(0, -1));
+    if(operator === ts.SyntaxKind.GreaterThanToken && left === `${ count }--` && right === '0')
+        return !mentionsCount(statements);
+    return false;
+};
+
+const containsNode = (node: ts.Node, predicate: (node: ts.Node) => boolean): boolean =>
+{
+    let found = false;
+    visit(node, child =>
+    {
+        if(!found && predicate(child)) found = true;
+    });
+    return found;
 };
 
 const trailingOptionalGuard = (
@@ -265,23 +414,35 @@ const inferredName = (call: ts.CallExpression): string =>
     return '';
 };
 
-const dynamicPacketFlow = (method: ts.MethodDeclaration): string | undefined =>
+const dynamicPacketFlow = (
+    method: ts.MethodDeclaration,
+    methods: ReadonlyMap<string, ts.MethodDeclaration>,
+    loops: ReadonlyMap<ts.CallExpression, ListLoop>): string | undefined =>
 {
+    const listLoops = new Set<ts.Node>([ ...loops.values() ].map(loop => loop.loop));
     let reason: string | undefined;
     visit(method.body, node =>
     {
-        if(reason || !(ts.isIfStatement(node) || ts.isSwitchStatement(node) || ts.isForStatement(node)
+        if(reason || listLoops.has(node) || !(ts.isIfStatement(node) || ts.isSwitchStatement(node) || ts.isForStatement(node)
             || ts.isForOfStatement(node) || ts.isForInStatement(node) || ts.isWhileStatement(node)
             || ts.isDoStatement(node))) return;
-        let containsRead = false;
-        visit(node, child =>
-        {
-            if(ts.isCallExpression(child) && readCall(child)) containsRead = true;
-        });
-        if(containsRead) reason = `Data-dependent packet operations in ${ ts.SyntaxKind[node.kind] } inside ${ method.name.getText() }`;
+        if(readsPacket(node, methods, new Set()))
+            reason = `Data-dependent packet operations in ${ ts.SyntaxKind[node.kind] } inside ${ method.name.getText() }`;
     });
     return reason;
 };
+
+/** Whether a node reads packet fields, directly or through same-class helper methods. */
+const readsPacket = (node: ts.Node, methods: ReadonlyMap<string, ts.MethodDeclaration>, visited: Set<string>): boolean =>
+    containsNode(node, child =>
+    {
+        if(!ts.isCallExpression(child)) return false;
+        if(readCall(child)) return true;
+        const helperName = localHelperName(child);
+        if(!helperName || !methods.has(helperName) || visited.has(helperName)) return false;
+        visited.add(helperName);
+        return readsPacket(methods.get(helperName), methods, visited);
+    });
 
 const unwrapArray = (expression: ts.Expression): ts.ArrayLiteralExpression | undefined =>
 {

@@ -9,6 +9,73 @@ const fixture = (name: string) => resolve(
 
 const types = (fields: readonly WireSchema[]) => fields.map(field => field.type);
 
+const shape = (fields: readonly WireSchema[]): string => fields.map(field =>
+{
+    if(field.type === 'list') return `list<${ field.countType }>[${ shape(field.item) }]`;
+    if(field.type === 'optional') return `optional[${ shape(field.fields) }]`;
+    if(field.type === 'variant') return 'variant';
+    return field.type;
+}).join(',');
+
+const listShape = (name: string, side: 'incoming' | 'outgoing'): string =>
+{
+    const result = extractTypeScriptPacketSignature(fixture(`lists/${ name }`), side);
+
+    expect(result.unsupportedReason).toBeUndefined();
+    return shape(result.fields);
+};
+
+const listReason = (name: string, side: 'incoming' | 'outgoing'): string | undefined =>
+    extractTypeScriptPacketSignature(fixture(`lists/${ name }`), side).unsupportedReason;
+
+describe('TypeScript list extraction', () =>
+{
+    it('extracts a list read after its count', () =>
+    {
+        expect(listShape('ListParserFixture.ts', 'incoming')).toBe('list<int>[int,string],boolean');
+    });
+
+    it('extracts a short count', () =>
+    {
+        expect(listShape('ShortCountParserFixture.ts', 'incoming')).toBe('list<short>[int]');
+    });
+
+    it('extracts a nested list', () =>
+    {
+        expect(listShape('NestedListParserFixture.ts', 'incoming')).toBe('list<int>[string,list<int>[int]]');
+    });
+
+    it('extracts a decrementing while', () =>
+    {
+        expect(listShape('DecrementingListParserFixture.ts', 'incoming')).toBe('list<int>[int]');
+    });
+
+    it('extracts a list whose item is read by a local helper', () =>
+    {
+        expect(listShape('HelperItemListParserFixture.ts', 'incoming')).toBe('list<int>[int,string]');
+    });
+
+    it('keeps a delegated item unsupported', () =>
+    {
+        expect(listReason('DelegatedItemListParserFixture.ts', 'incoming')).toContain('external constructor');
+    });
+
+    it('rejects a conditional read in the body', () =>
+    {
+        expect(listReason('ConditionalReadListParserFixture.ts', 'incoming')).toContain('Data-dependent');
+    });
+
+    it('rejects a loop driven by bytesAvailable', () =>
+    {
+        expect(listReason('BytesAvailableLoopParserFixture.ts', 'incoming')).toContain('Data-dependent');
+    });
+
+    it('rejects a loop that reads through a helper without a count', () =>
+    {
+        expect(listReason('HelperLoopWithoutCountParserFixture.ts', 'incoming')).toContain('Data-dependent');
+    });
+});
+
 describe('TypeScript packet signature extractor', () =>
 {
     it('extracts incoming wrapper reads and same-class helpers in execution order', () =>
