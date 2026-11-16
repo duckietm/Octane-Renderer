@@ -74,6 +74,49 @@ describe('TypeScript list extraction', () =>
     {
         expect(listReason('HelperLoopWithoutCountParserFixture.ts', 'incoming')).toContain('Data-dependent');
     });
+
+    it('extracts a list followed by trailing scalars', () =>
+    {
+        expect(listShape('ListAfterCountComposerFixture.ts', 'outgoing'))
+            .toBe('list<int>[int,int],string,int,int,string,string,string');
+    });
+
+    it('extracts a forEach list with separate pushes', () =>
+    {
+        expect(listShape('ForEachListComposerFixture.ts', 'outgoing')).toBe('list<int>[int,int,boolean]');
+    });
+
+    it('extracts three consecutive lists in order', () =>
+    {
+        expect(listShape('ThreeListsComposerFixture.ts', 'outgoing'))
+            .toBe('int,list<int>[string,int],list<int>[int,int],list<int>[string],string');
+    });
+
+    it('extracts a spread primitive list', () =>
+    {
+        expect(listShape('SpreadListComposerFixture.ts', 'outgoing')).toBe('list<int>[string]');
+    });
+
+    it('keeps an imported item type unsupported', () =>
+    {
+        expect(listReason('ImportedItemListComposerFixture.ts', 'outgoing')).toBeDefined();
+    });
+
+    it('keeps a push inside an if unsupported', () =>
+    {
+        expect(listReason('PushInsideIfComposerFixture.ts', 'outgoing')).toBeDefined();
+    });
+
+    it('keeps a count without its loop unsupported', () =>
+    {
+        expect(listReason('CountWithoutLoopComposerFixture.ts', 'outgoing')).toBeDefined();
+    });
+
+    it('keeps the array mutated outside the constructor unsupported', () =>
+    {
+        expect(extractTypeScriptPacketSignature(fixture('MutatedOutgoingFixture.ts'), 'outgoing').unsupportedReason)
+            .toContain('mutated with push');
+    });
 });
 
 describe('TypeScript packet signature extractor', () =>

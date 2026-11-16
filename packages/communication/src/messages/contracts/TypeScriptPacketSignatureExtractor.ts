@@ -284,6 +284,12 @@ const extractOutgoing = (packetClass: ts.ClassDeclaration): TypeScriptExtraction
     const returnStatement = method.body.statements.find(ts.isReturnStatement);
     if(!returnStatement?.expression) return unsupported('Outgoing composer getMessageArray has no returned value');
     const returnedName = propertyName(returnStatement.expression);
+    if(constructor?.body && returnedName && ts.isPropertyAccessExpression(unwrap(returnStatement.expression))
+        && !trailingOptionalPush(constructor, returnedName))
+    {
+        const sequence = extractConstructorSequence(packetClass, constructor, returnedName);
+        if(sequence) return sequence;
+    }
     let array = unwrapArray(returnStatement.expression);
     if(!array && constructor?.body)
     {
@@ -331,6 +337,274 @@ const extractOutgoing = (packetClass: ts.ClassDeclaration): TypeScriptExtraction
         fields.push({ type: 'optional', controller: field.name, fields: [field] });
     }
     return { fields };
+};
+
+/**
+ * A message array built in the constructor by pushing in order: a literal, then pushes of scalars, where
+ * `xs.length` (last value of a literal or push) is followed at once by a loop over `xs` that only pushes, or
+ * `push(xs.length, ...xs)` for a primitive array. Returns undefined when the constructor does not push to the
+ * array at all, so the plain literal path applies.
+ */
+const extractConstructorSequence = (
+    packetClass: ts.ClassDeclaration,
+    constructor: ts.ConstructorDeclaration,
+    returnedName: string): TypeScriptExtractionResult | undefined =>
+{
+    const statements = constructor.body.statements;
+    let start = -1;
+    let arrayName = returnedName;
+    let initial: ts.ArrayLiteralExpression | undefined;
+    for(let index = 0; index < statements.length && start < 0; index++)
+    {
+        const statement = statements[index];
+        const assigned = assignedArray(statement, returnedName);
+        if(assigned)
+        {
+            start = index;
+            initial = assigned;
+        }
+        else if(ts.isVariableStatement(statement) && statement.declarationList.declarations.length === 1)
+        {
+            const declaration = statement.declarationList.declarations[0];
+            const literal = declaration.initializer && unwrapArray(declaration.initializer);
+            const local = ts.isIdentifier(declaration.name) ? declaration.name.text : undefined;
+            if(literal && local && statements.some(later => isAliasAssignment(later, returnedName, local)))
+            {
+                start = index;
+                initial = literal;
+                arrayName = local;
+            }
+        }
+    }
+    if(start < 0) return undefined;
+    const pushes = (node: ts.Node) => containsNode(node, child => isPushOn(child, arrayName));
+    if(!statements.some(pushes)) return undefined;
+
+    let mutatedElsewhere = false;
+    visit(packetClass, node =>
+    {
+        if(isPushOn(node, returnedName) && !constructor.body.statements.some(statement => containsNode(statement, child => child === node)))
+            mutatedElsewhere = true;
+    });
+    if(mutatedElsewhere) return unsupported(`Outgoing message array ${ returnedName } is mutated outside the constructor`);
+
+    const parameters = new Map<string, ts.ParameterDeclaration>();
+    constructor.parameters.forEach(parameter => parameters.set(parameter.name.getText(), parameter));
+    const source = packetClass.getSourceFile();
+    const fields: WireSchema[] = [];
+    let pending: { collection: string; type: ScalarType } | undefined;
+
+    const addValues = (values: readonly ts.Expression[]): string | undefined =>
+    {
+        for(let index = 0; index < values.length; index++)
+        {
+            const value = values[index];
+            const last = index === values.length - 1;
+            const count = countOf(value);
+            if(count)
+            {
+                const next = values[index + 1];
+                if(next && ts.isSpreadElement(next) && next.expression.getText() === count.collection && index + 2 === values.length)
+                {
+                    const element = elementType(count.collection, parameters);
+                    const type = element ? wireType(element) : undefined;
+                    if(!type) return `Outgoing list ${ count.collection } has no statically resolvable item type`;
+                    fields.push({ type: 'list', countType: count.type, item: [ { type, name: '' } ] });
+                    return undefined;
+                }
+                if(!last) return `Outgoing count ${ value.getText() } is not followed by its loop`;
+                pending = count;
+                continue;
+            }
+            if(ts.isSpreadElement(value)) return `Outgoing spread ${ value.getText() } has no count before it`;
+            const field = outgoingField(value, parameters);
+            if(typeof field === 'string') return field;
+            fields.push(field);
+        }
+        return undefined;
+    };
+
+    const initialReason = addValues(initial.elements);
+    if(initialReason) return unsupported(initialReason);
+    for(const statement of statements.slice(start + 1))
+    {
+        if(pending)
+        {
+            const item = listItem(statement, pending.collection, arrayName, parameters, source);
+            if(typeof item === 'string') return unsupported(item);
+            fields.push({ type: 'list', countType: pending.type, item });
+            pending = undefined;
+            continue;
+        }
+        if(isAliasAssignment(statement, returnedName, arrayName)) continue;
+        const push = pushStatement(statement, arrayName);
+        if(!push) return unsupported(`Outgoing composer statement ${ statement.getText().split('\n')[0] } cannot be resolved statically`);
+        const reason = addValues(push.arguments);
+        if(reason) return unsupported(reason);
+    }
+    if(pending) return unsupported(`Outgoing count ${ pending.collection }.length is not followed by its loop`);
+    return { fields };
+};
+
+const assignedArray = (statement: ts.Statement, returnedName: string): ts.ArrayLiteralExpression | undefined =>
+{
+    if(!ts.isExpressionStatement(statement) || !ts.isBinaryExpression(statement.expression)) return undefined;
+    const assignment = statement.expression;
+    if(assignment.operatorToken.kind !== ts.SyntaxKind.EqualsToken || !ts.isPropertyAccessExpression(unwrap(assignment.left))
+        || propertyName(assignment.left) !== returnedName) return undefined;
+    return unwrapArray(assignment.right);
+};
+
+const isAliasAssignment = (statement: ts.Statement, returnedName: string, local: string): boolean =>
+{
+    if(local === returnedName || !ts.isExpressionStatement(statement) || !ts.isBinaryExpression(statement.expression)) return false;
+    const assignment = statement.expression;
+    return assignment.operatorToken.kind === ts.SyntaxKind.EqualsToken
+        && ts.isPropertyAccessExpression(unwrap(assignment.left))
+        && propertyName(assignment.left) === returnedName
+        && ts.isIdentifier(unwrap(assignment.right))
+        && (unwrap(assignment.right) as ts.Identifier).text === local;
+};
+
+const isPushOn = (node: ts.Node, arrayName: string): node is ts.CallExpression =>
+    ts.isCallExpression(node) && ts.isPropertyAccessExpression(node.expression)
+    && [ 'push', 'unshift', 'splice' ].includes(node.expression.name.text)
+    && propertyName(node.expression.expression) === arrayName;
+
+const pushStatement = (statement: ts.Statement, arrayName: string): ts.CallExpression | undefined =>
+{
+    if(!ts.isExpressionStatement(statement)) return undefined;
+    const call = statement.expression;
+    return isPushOn(call, arrayName) && (call.expression as ts.PropertyAccessExpression).name.text === 'push' ? call : undefined;
+};
+
+/** `xs.length` as an int count, `new Short(xs.length)` as a short one. */
+const countOf = (raw: ts.Expression): { collection: string; type: ScalarType } | undefined =>
+{
+    let value = unwrap(raw);
+    let type: ScalarType = 'int';
+    if(ts.isNewExpression(value) && value.expression.getText() === 'Short' && value.arguments?.length === 1)
+    {
+        value = unwrap(value.arguments[0]);
+        type = 'short';
+    }
+    if(!ts.isPropertyAccessExpression(value) || value.name.text !== 'length' || !ts.isIdentifier(value.expression)) return undefined;
+    return { collection: value.expression.text, type };
+};
+
+/** The item of a loop over `collection` whose body only pushes to the array: `for...of` or `forEach`. */
+const listItem = (
+    statement: ts.Statement,
+    collection: string,
+    arrayName: string,
+    parameters: ReadonlyMap<string, ts.ParameterDeclaration>,
+    source: ts.SourceFile): WireSchema[] | string =>
+{
+    let variable: string | undefined;
+    let body: ts.Node | undefined;
+    if(ts.isForOfStatement(statement) && statement.expression.getText() === collection
+        && ts.isVariableDeclarationList(statement.initializer) && statement.initializer.declarations.length === 1
+        && ts.isIdentifier(statement.initializer.declarations[0].name))
+    {
+        variable = statement.initializer.declarations[0].name.text;
+        body = statement.statement;
+    }
+    else if(ts.isExpressionStatement(statement) && ts.isCallExpression(statement.expression)
+        && ts.isPropertyAccessExpression(statement.expression.expression)
+        && statement.expression.expression.name.text === 'forEach'
+        && statement.expression.expression.expression.getText() === collection
+        && statement.expression.arguments.length === 1 && ts.isArrowFunction(statement.expression.arguments[0]))
+    {
+        const callback = statement.expression.arguments[0];
+        if(callback.parameters.length === 1 && ts.isIdentifier(callback.parameters[0].name))
+        {
+            variable = callback.parameters[0].name.text;
+            body = callback.body;
+        }
+    }
+    if(!variable || !body) return `Outgoing count ${ collection }.length is not followed by a loop over it`;
+
+    const pushes: ts.CallExpression[] = [];
+    const bodyStatements = ts.isBlock(body) ? [ ...body.statements ] : [ body ];
+    for(const node of bodyStatements)
+    {
+        const call = ts.isExpressionStatement(node) ? node.expression : node;
+        if(!isPushOn(call, arrayName) || (call.expression as ts.PropertyAccessExpression).name.text !== 'push')
+            return `Outgoing loop over ${ collection } does more than push`;
+        pushes.push(call);
+    }
+
+    const element = elementType(collection, parameters);
+    if(!element) return `Outgoing list ${ collection } has no statically resolvable item type`;
+    const item: WireSchema[] = [];
+    for(const value of pushes.flatMap(push => [ ...push.arguments ]))
+    {
+        const expression = unwrap(value);
+        let type: ScalarType | undefined;
+        let name = '';
+        if(ts.isIdentifier(expression) && expression.text === variable) type = wireType(element);
+        else if(ts.isPropertyAccessExpression(expression) && ts.isIdentifier(expression.expression)
+            && expression.expression.text === variable)
+        {
+            name = expression.name.text;
+            const member = memberType(element, name, source);
+            type = member ? wireType(member) : undefined;
+        }
+        else
+        {
+            const field = outgoingField(value, parameters);
+            if(typeof field === 'string') return field;
+            item.push(field);
+            continue;
+        }
+        if(!type) return `Outgoing list item ${ value.getText() } has no statically resolvable wire type`;
+        item.push({ type, name });
+    }
+    return item;
+};
+
+/** The element type of a constructor parameter declared as `T[]` or `Array<T>` (rest parameters too). */
+const elementType = (collection: string, parameters: ReadonlyMap<string, ts.ParameterDeclaration>): ts.TypeNode | undefined =>
+{
+    const type = parameters.get(collection)?.type;
+    if(!type) return undefined;
+    if(ts.isArrayTypeNode(type)) return type.elementType;
+    if(ts.isTypeReferenceNode(type) && type.typeName.getText() === 'Array' && type.typeArguments?.length === 1)
+        return type.typeArguments[0];
+    return undefined;
+};
+
+/** A member's declared type, for an inline type literal or an interface, type alias or class of the same file. */
+const memberType = (type: ts.TypeNode, member: string, source: ts.SourceFile): ts.TypeNode | undefined =>
+{
+    if(ts.isTypeLiteralNode(type)) return propertyType(type.members, member);
+    if(!ts.isTypeReferenceNode(type)) return undefined;
+    const name = type.typeName.getText();
+    for(const statement of source.statements)
+    {
+        if(ts.isInterfaceDeclaration(statement) && statement.name.text === name) return propertyType(statement.members, member);
+        if(ts.isTypeAliasDeclaration(statement) && statement.name.text === name) return memberType(statement.type, member, source);
+        if(ts.isClassDeclaration(statement) && statement.name?.text === name)
+        {
+            for(const classMember of statement.members)
+            {
+                if(ts.isPropertyDeclaration(classMember) && classMember.name.getText() === member) return classMember.type;
+                if(ts.isConstructorDeclaration(classMember))
+                {
+                    const parameter = classMember.parameters.find(candidate => candidate.name.getText() === member
+                        && ts.getModifiers(candidate)?.length);
+                    if(parameter) return parameter.type;
+                }
+            }
+        }
+    }
+    return undefined;
+};
+
+const propertyType = (members: ts.NodeArray<ts.TypeElement>, member: string): ts.TypeNode | undefined =>
+{
+    const property = members.find(candidate => ts.isPropertySignature(candidate) && candidate.name.getText() === member);
+    return property && ts.isPropertySignature(property) ? property.type : undefined;
 };
 
 /** Recognize one optional scalar at the end, without accepting arbitrary packet mutation. */
