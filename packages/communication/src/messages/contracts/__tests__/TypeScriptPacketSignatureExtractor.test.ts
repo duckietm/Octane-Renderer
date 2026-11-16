@@ -65,6 +65,11 @@ describe('TypeScript list extraction', () =>
         expect(listReason('ConditionalReadListParserFixture.ts', 'incoming')).toContain('Data-dependent');
     });
 
+    it('keeps a list whose item reads nothing statically unsupported', () =>
+    {
+        expect(listReason('EmptyItemListParserFixture.ts', 'incoming')).toContain('reads nothing');
+    });
+
     it('rejects a loop driven by bytesAvailable', () =>
     {
         expect(listReason('BytesAvailableLoopParserFixture.ts', 'incoming')).toContain('Data-dependent');

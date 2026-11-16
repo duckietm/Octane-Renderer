@@ -122,6 +122,13 @@ const extractIncomingScope = (scope: ts.Node, context: IncomingScopeContext): Po
         {
             const item = extractIncomingScope(loop.body, context);
             if(typeof item === 'string') return item;
+            if(!item.length)
+            {
+                const delegated = findNode(loop.body, ts.isNewExpression);
+                return delegated
+                    ? `Packet fields delegated to external constructor ${ delegated.expression.getText() } inside a list item`
+                    : 'List item reads nothing statically';
+            }
             fields.push({ field: { type: 'list', countType: loop.countType, item: item.map(entry => entry.field) }, position });
             continue;
         }
@@ -242,6 +249,16 @@ const runsCountTimes = (loop: ts.ForStatement | ts.WhileStatement, count: string
     if(operator === ts.SyntaxKind.GreaterThanToken && left === `${ count }--` && right === '0')
         return !mentionsCount(statements);
     return false;
+};
+
+const findNode = <T extends ts.Node>(node: ts.Node, predicate: (node: ts.Node) => node is T): T | undefined =>
+{
+    let found: T | undefined;
+    visit(node, child =>
+    {
+        if(!found && predicate(child)) found = child;
+    });
+    return found;
 };
 
 const containsNode = (node: ts.Node, predicate: (node: ts.Node) => boolean): boolean =>
@@ -536,6 +553,7 @@ const listItem = (
 
     const element = elementType(collection, parameters);
     if(!element) return `Outgoing list ${ collection } has no statically resolvable item type`;
+    if(!pushes.some(push => push.arguments.length)) return `Outgoing list over ${ collection } reads nothing statically`;
     const item: WireSchema[] = [];
     for(const value of pushes.flatMap(push => [ ...push.arguments ]))
     {
