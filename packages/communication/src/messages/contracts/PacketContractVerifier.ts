@@ -3,12 +3,7 @@ import { WireSchema } from './PacketContractTypes';
 export const verifyPacketContract = (
     expected: readonly WireSchema[],
     observed: readonly WireSchema[],
-    context: string): void =>
-{
-    if(expected.length !== observed.length)
-        throw new Error(`${ context } fields: expected ${ expected.length } fields, observed ${ observed.length }`);
-    expected.forEach((field, index) => compare(field, observed[index], `${ context } fields[${ index }]`));
-};
+    context: string): void => compareFields(expected, observed, `${ context } fields`);
 
 const compare = (expected: WireSchema, observed: WireSchema, path: string): void =>
 {
@@ -44,7 +39,10 @@ const compareFields = (
     observed: readonly WireSchema[],
     path: string): void =>
 {
-    if(expected.length !== observed.length)
+    // Same rule as the emulator's verifier: trailing optionals may be missing at any level.
+    const missingOnlyOptionals = observed.length < expected.length
+        && expected.slice(observed.length).every(field => field.type === 'optional');
+    if(observed.length > expected.length || (observed.length < expected.length && !missingOnlyOptionals))
         throw new Error(`${ path }: expected ${ expected.length } fields, observed ${ observed.length }`);
-    expected.forEach((field, index) => compare(field, observed[index], `${ path }[${ index }]`));
+    observed.forEach((field, index) => compare(expected[index], field, `${ path }[${ index }]`));
 };
