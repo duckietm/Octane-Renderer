@@ -995,9 +995,11 @@ const wireType = (type: ts.TypeNode): ScalarType | undefined =>
     return undefined;
 };
 
+/** A primitive read on the wrapper. A call that hands the wrapper on is a helper, whatever its name. */
 const readCall = (call: ts.CallExpression): ScalarType | undefined =>
 {
     if(!ts.isPropertyAccessExpression(call.expression)) return undefined;
+    if(receivesWrapper(call, wrapperNames(call))) return undefined;
     return READ_TYPES[call.expression.name.text];
 };
 

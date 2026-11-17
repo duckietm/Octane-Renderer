@@ -71,6 +71,11 @@ describe('TypeScript delegation extraction', () =>
         expect(delegationShape('ArrayFromDelegateFixture.ts')).toBe('int,list<int>[string,list<int>[int]],boolean');
     });
 
+    it('follows a helper named like a read instead of taking it for one', () =>
+    {
+        expect(delegationShape('HelperNamedLikeReadFixture.ts')).toBe('int,int,int');
+    });
+
     it('keeps a recursive delegate unsupported', () =>
     {
         expect(delegation('RecursiveDelegateFixture.ts').unsupportedReason).toContain('Recursive packet helper');
