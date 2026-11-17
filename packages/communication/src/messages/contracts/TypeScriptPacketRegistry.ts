@@ -75,7 +75,7 @@ export class TypeScriptPacketRegistry
                 const value = requireHeader(incoming, header.symbol, 'server_to_client');
                 if(value <= 0) return;
                 const eventSource = requireUniqueSource(eventSources, registeredClass);
-                const parserClass = eventParser(eventSource);
+                const parserClass = eventParser(eventSource, registeredClass);
                 const source = requireUniqueSource(parserSources, parserClass);
                 discovered.push({
                     direction: 'server_to_client', header: value, symbol: header.symbol,
@@ -206,9 +206,12 @@ const validateDeclarations = (table: HeaderTable, direction: PacketDirection): v
     }
 };
 
-const eventParser = (eventSource: string): string =>
+/** The parser handed to super() by the event class itself: one file may hold several events. */
+const eventParser = (eventSource: string, eventClass: string): string =>
 {
     const source = parse(eventSource);
+    const declaration = source.statements.find(statement => ts.isClassDeclaration(statement)
+        && statement.name?.text === eventClass);
     const importAliases = new Map<string, string>();
     for(const statement of source.statements)
     {
@@ -218,7 +221,7 @@ const eventParser = (eventSource: string): string =>
             importAliases.set(element.name.text, element.propertyName?.text ?? element.name.text);
     }
     let parser: string | undefined;
-    visit(source, node =>
+    visit(declaration ?? source, node =>
     {
         if(parser || !ts.isCallExpression(node) || node.expression.kind !== ts.SyntaxKind.SuperKeyword
             || node.arguments.length < 2) return;
