@@ -1,20 +1,12 @@
 class EmptyItemListParserFixture
 {
-    private _labels: unknown[] = [];
+    private _labels: number[] = [];
 
     public parse(wrapper: Wrapper): boolean
     {
         const count = wrapper.readInt();
-        for(let i = 0; i < count; i++) this._labels.push(ListFixtureLabel.parse(wrapper));
+        for(let i = 0; i < count; i++) this._labels.push(i);
         return true;
-    }
-}
-
-class ListFixtureLabel
-{
-    public static parse(wrapper: Wrapper): unknown
-    {
-        return wrapper.readInt();
     }
 }
 

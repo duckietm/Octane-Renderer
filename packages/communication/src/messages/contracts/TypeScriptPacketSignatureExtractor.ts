@@ -94,6 +94,7 @@ interface IncomingScopeContext
     overloaded: ReadonlySet<string>;
     stack: readonly string[];
     loops: ReadonlyMap<ts.CallExpression, ListLoop>;
+    inList?: boolean;
 }
 
 interface PositionedField
@@ -120,7 +121,7 @@ const extractIncomingScope = (scope: ts.Node, context: IncomingScopeContext): Po
         const loop = context.loops.get(call);
         if(loop)
         {
-            const item = extractIncomingScope(loop.body, context);
+            const item = extractIncomingScope(loop.body, { ...context, inList: true });
             if(typeof item === 'string') return item;
             if(!item.length)
             {
@@ -135,11 +136,23 @@ const extractIncomingScope = (scope: ts.Node, context: IncomingScopeContext): Po
         const read = readCall(call);
         if(read)
         {
+            // Outside a list a conditional read keeps its old reading; inside one it would misdescribe every item.
+            if(context.inList && insideConditionalExpression(call, scope)) return `Conditional packet read ${ call.getText() } inside a list item`;
             fields.push({ field: { type: read, name: inferredName(call) }, position });
             continue;
         }
+        const wrappers = wrapperNames(call);
+        if(ts.isPropertyAccessExpression(call.expression) && ts.isIdentifier(call.expression.expression)
+            && wrappers.has(call.expression.expression.text) && /^read/.test(call.expression.name.text))
+            return `Unknown packet read ${ call.expression.name.text }`;
         const helperName = localHelperName(call);
-        if(!helperName) continue;
+        if(!helperName)
+        {
+            const receivesWrapper = call.arguments.some(argument => ts.isIdentifier(unwrap(argument))
+                && wrappers.has((unwrap(argument) as ts.Identifier).text));
+            if(receivesWrapper) return `Packet fields delegated to external reader ${ call.expression.getText() }`;
+            continue;
+        }
         if(!context.methods.has(helperName))
         {
             if(/^(read|parse)/i.test(helperName)) return `Unresolved packet helper ${ helperName }`;
@@ -151,6 +164,26 @@ const extractIncomingScope = (scope: ts.Node, context: IncomingScopeContext): Po
         helper.fields.forEach(field => fields.push({ field, position }));
     }
     return fields;
+};
+
+/** The parameter names of the method or function around a call: the names the packet wrapper goes by there. */
+const wrapperNames = (node: ts.Node): ReadonlySet<string> =>
+{
+    for(let current = node.parent; current; current = current.parent)
+        if(ts.isFunctionLike(current))
+            return new Set(current.parameters.map(parameter => parameter.name.getText()));
+    return new Set();
+};
+
+const insideConditionalExpression = (node: ts.Node, scope: ts.Node): boolean =>
+{
+    for(let current = node.parent; current && current !== scope; current = current.parent)
+    {
+        if(ts.isConditionalExpression(current)) return true;
+        if(ts.isBinaryExpression(current) && [ ts.SyntaxKind.AmpersandAmpersandToken, ts.SyntaxKind.BarBarToken,
+            ts.SyntaxKind.QuestionQuestionToken ].includes(current.operatorToken.kind)) return true;
+    }
+    return false;
 };
 
 const insideLoopOf = (node: ts.Node, scope: ts.Node, loopNodes: ReadonlySet<ts.Node>): boolean =>

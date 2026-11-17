@@ -70,6 +70,26 @@ describe('TypeScript list extraction', () =>
         expect(listReason('EmptyItemListParserFixture.ts', 'incoming')).toContain('reads nothing');
     });
 
+    it('keeps a read passed to an external function unsupported', () =>
+    {
+        expect(listReason('ExternalReaderParserFixture.ts', 'incoming')).toContain('external reader');
+    });
+
+    it('keeps an item read through another object unsupported', () =>
+    {
+        expect(listReason('ItemParseListParserFixture.ts', 'incoming')).toContain('external reader');
+    });
+
+    it('keeps an unknown wrapper read unsupported', () =>
+    {
+        expect(listReason('UnknownReadParserFixture.ts', 'incoming')).toContain('Unknown packet read readDouble');
+    });
+
+    it('keeps a conditional read inside a list item unsupported', () =>
+    {
+        expect(listReason('ConditionalItemListParserFixture.ts', 'incoming')).toContain('Conditional packet read');
+    });
+
     it('rejects a loop driven by bytesAvailable', () =>
     {
         expect(listReason('BytesAvailableLoopParserFixture.ts', 'incoming')).toContain('Data-dependent');
