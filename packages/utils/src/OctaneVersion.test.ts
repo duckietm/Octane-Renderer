@@ -18,6 +18,6 @@ describe('OctaneVersion', () =>
         expect(text.replace(/%c/g, '').replace(/\s+/g, ' ').trim()).toBe(`Octane | Octane-Renderer | Pixijs ${VERSION}`);
 
         // Every drawn part has the same font size and padding, so nothing steps up or down along the bar.
-        for (const style of styles.slice(0, -1)) expect(style).toContain('font-size: 13px; line-height: 16px; padding: 7px 0;');
+        for(const style of styles.slice(0, -1)) expect(style).toContain('font-size: 13px; line-height: 16px; padding: 7px 0;');
     });
 });
