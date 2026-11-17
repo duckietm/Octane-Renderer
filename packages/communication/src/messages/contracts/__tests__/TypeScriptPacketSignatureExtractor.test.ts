@@ -122,6 +122,11 @@ describe('TypeScript list extraction', () =>
         expect(listShape('SpreadListComposerFixture.ts', 'outgoing')).toBe('list<int>[string]');
     });
 
+    it('extracts a spread list written in the initial literal', () =>
+    {
+        expect(listShape('LiteralSpreadComposerFixture.ts', 'outgoing')).toBe('int,list<int>[int],boolean');
+    });
+
     it('keeps an imported item type unsupported', () =>
     {
         expect(listReason('ImportedItemListComposerFixture.ts', 'outgoing')).toBeDefined();

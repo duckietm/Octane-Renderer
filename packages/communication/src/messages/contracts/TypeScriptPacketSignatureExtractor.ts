@@ -428,7 +428,8 @@ const extractConstructorSequence = (
     }
     if(start < 0) return undefined;
     const pushes = (node: ts.Node) => containsNode(node, child => isPushOn(child, arrayName));
-    if(!statements.some(pushes)) return undefined;
+    // Neither a push nor a count in the literal: the plain literal path applies, as before.
+    if(!statements.some(pushes) && !initial.elements.some(element => countOf(element))) return undefined;
 
     let mutatedElsewhere = false;
     visit(packetClass, node =>
@@ -454,13 +455,14 @@ const extractConstructorSequence = (
             if(count)
             {
                 const next = values[index + 1];
-                if(next && ts.isSpreadElement(next) && next.expression.getText() === count.collection && index + 2 === values.length)
+                if(next && ts.isSpreadElement(next) && next.expression.getText() === count.collection)
                 {
                     const element = elementType(count.collection, parameters);
                     const type = element ? wireType(element) : undefined;
                     if(!type) return `Outgoing list ${ count.collection } has no statically resolvable item type`;
                     fields.push({ type: 'list', countType: count.type, item: [ { type, name: '' } ] });
-                    return undefined;
+                    index++;
+                    continue;
                 }
                 if(!last) return `Outgoing count ${ value.getText() } is not followed by its loop`;
                 pending = count;
