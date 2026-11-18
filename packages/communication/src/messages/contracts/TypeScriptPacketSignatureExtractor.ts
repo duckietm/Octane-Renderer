@@ -249,7 +249,13 @@ const extractDelegate = (node: ts.CallExpression | ts.NewExpression, stack: read
     if(typeof resolved === 'string') return resolved;
     const { reader, dispatch } = resolved;
     const name = functionName(reader);
-    if(storesWrapper(reader)) return `The delegated reader ${ name } keeps the packet to read it later`;
+    const wrappers = wrapperNames(node);
+    const wrapperParameters = new Set((node.arguments ?? [])
+        .map((argument, position) => ts.isIdentifier(unwrap(argument)) && wrappers.has((unwrap(argument) as ts.Identifier).text)
+            ? reader.parameters[position]?.name.getText()
+            : undefined)
+        .filter((parameter): parameter is string => !!parameter));
+    if(storesWrapper(reader, wrapperParameters)) return `The delegated reader ${ name } keeps the packet to read it later`;
     const overriding = overriddenHelper(reader, dispatch);
     if(overriding) return `The delegated reader ${ name } calls ${ overriding }, which ${ dispatch.name?.text } overrides`;
     const result = extractIncomingFunction(reader, stack, true);
@@ -313,11 +319,9 @@ const resolveDelegate = (node: ts.CallExpression | ts.NewExpression): ResolvedDe
     return type ? on(instanceMethod(type, method), type) : unresolved;
 };
 
-/** Whether a delegate keeps a parameter (the wrapper) in a field, a variable or a result, to read it later. */
-const storesWrapper = (reader: ReaderFunction): boolean =>
-{
-    const names = new Set(reader.parameters.map(parameter => parameter.name.getText()));
-    return containsNode(reader.body, node =>
+/** Whether a delegate keeps the parameter that receives the wrapper in a field, a variable or a result. */
+const storesWrapper = (reader: ReaderFunction, names: ReadonlySet<string>): boolean =>
+    containsNode(reader.body, node =>
     {
         if(!ts.isIdentifier(node) || !names.has(node.text)) return false;
         const parent = node.parent;
@@ -328,7 +332,6 @@ const storesWrapper = (reader: ReaderFunction): boolean =>
             || ts.isArrayLiteralExpression(parent)
             || (ts.isReturnStatement(parent) && parent.expression === node);
     });
-};
 
 /**
  * A method that the delegate's own class declares and that a class between the object's class and it overrides:

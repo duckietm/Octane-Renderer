@@ -72,6 +72,17 @@ class RgDeclaredTypeReceiver
     }
 }
 
+class RgShorthandParameter
+{
+    public parse(wrapper: Wrapper): boolean
+    {
+        rgReadNamed(wrapper, 7);
+        return true;
+    }
+}
+
+const rgReadNamed = (wrapper: Wrapper, id: number): { id: number; name: string } => ({ id, name: wrapper.readString() });
+
 class RgEntry
 {
     constructor(wrapper: Wrapper)

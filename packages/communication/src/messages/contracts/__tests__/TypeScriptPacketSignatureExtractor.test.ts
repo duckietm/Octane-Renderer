@@ -90,6 +90,11 @@ describe('TypeScript delegation extraction', () =>
         expect(delegation('ReviewFalseGreensFixture.ts', className).unsupportedReason).toBeDefined();
     });
 
+    it('follows a delegate that keeps another parameter, not the wrapper', () =>
+    {
+        expect(delegationShape('ReviewFalseGreensFixture.ts', 'RgShorthandParameter')).toBe('string');
+    });
+
     it('keeps a recursive delegate unsupported', () =>
     {
         expect(delegation('RecursiveDelegateFixture.ts').unsupportedReason).toContain('Recursive packet helper');
