@@ -76,6 +76,20 @@ describe('TypeScript delegation extraction', () =>
         expect(delegationShape('HelperNamedLikeReadFixture.ts')).toBe('int,int,int');
     });
 
+    it.each([
+        'RgTernaryDelegate',
+        'RgShortCircuitDelegate',
+        'RgCallbackDelegate',
+        'RgStoredWrapperDelegate',
+        'RgArgumentReadDelegate',
+        'RgSuperOverrideDelegate',
+        'RgConditionalInsideDelegate',
+        'RgDeclaredTypeReceiver'
+    ])('keeps the delegate form %s unsupported', className =>
+    {
+        expect(delegation('ReviewFalseGreensFixture.ts', className).unsupportedReason).toBeDefined();
+    });
+
     it('keeps a recursive delegate unsupported', () =>
     {
         expect(delegation('RecursiveDelegateFixture.ts').unsupportedReason).toContain('Recursive packet helper');

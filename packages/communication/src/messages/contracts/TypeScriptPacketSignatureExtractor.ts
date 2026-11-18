@@ -81,7 +81,8 @@ const classMethods = (node: ts.Node): { methods: Map<string, ts.MethodDeclaratio
     return { methods, overloaded };
 };
 
-const extractIncomingFunction = (reader: ReaderFunction, stack: readonly string[]): TypeScriptExtractionResult =>
+/** `strict` (inside a delegate) refuses conditional reads anywhere, not only in list items. */
+const extractIncomingFunction = (reader: ReaderFunction, stack: readonly string[], strict = false): TypeScriptExtractionResult =>
 {
     const name = functionName(reader);
     const id = `${ reader.getSourceFile().fileName }:${ reader.getStart() }`;
@@ -92,7 +93,7 @@ const extractIncomingFunction = (reader: ReaderFunction, stack: readonly string[
     const dynamic = dynamicPacketFlow(reader, methods, loops);
     if(dynamic) return unsupported(dynamic);
 
-    const scoped = extractIncomingScope(reader.body, { methods, overloaded, stack: [...stack, id], loops });
+    const scoped = extractIncomingScope(reader.body, { methods, overloaded, stack: [...stack, id], loops, strict });
     if(typeof scoped === 'string') return unsupported(scoped);
     const fields: WireSchema[] = [];
     const optionalGuard = trailingOptionalGuard(reader);
@@ -118,6 +119,7 @@ interface IncomingScopeContext
     stack: readonly string[];
     loops: ReadonlyMap<ts.CallExpression, ListLoop>;
     inList?: boolean;
+    strict?: boolean;
 }
 
 interface PositionedField
@@ -147,6 +149,12 @@ const extractIncomingScope = (scope: ts.Node, context: IncomingScopeContext): Po
         if(ts.isNewExpression(node) || !localHelperName(node) && !readCall(node) && receivesWrapper(node, wrappers))
         {
             if(ts.isNewExpression(node) && !receivesWrapper(node, wrappers)) continue;
+            const label = node.expression.getText();
+            // A delegate reached only sometimes, maybe never, or after reads in its own arguments is not described.
+            if(insideConditionalExpression(node, scope)) return `Packet fields delegated to ${ label } under a condition`;
+            if(insideFunctionWithin(node, scope)) return `Packet fields delegated to ${ label } inside a callback`;
+            if((node.arguments ?? []).some(argument => containsNode(argument, child => ts.isCallExpression(child) && !!readCall(child))))
+                return `Packet read inside the arguments of ${ label }`;
             consumed.add(node);
             const delegated = extractDelegate(node, context.stack);
             if(typeof delegated === 'string') return delegated;
@@ -177,7 +185,8 @@ const extractIncomingScope = (scope: ts.Node, context: IncomingScopeContext): Po
         if(read)
         {
             // Outside a list a conditional read keeps its old reading; inside one it would misdescribe every item.
-            if(context.inList && insideConditionalExpression(call, scope)) return `Conditional packet read ${ call.getText() } inside a list item`;
+            if((context.inList || context.strict) && insideConditionalExpression(call, scope))
+                return `Conditional packet read ${ call.getText() } inside a list item or a delegated reader`;
             fields.push({ field: { type: read, name: inferredName(call) }, position });
             continue;
         }
@@ -192,7 +201,7 @@ const extractIncomingScope = (scope: ts.Node, context: IncomingScopeContext): Po
             continue;
         }
         if(context.overloaded.has(helperName)) return `Overloaded packet helper ${ helperName } cannot be resolved safely`;
-        const helper = extractIncomingFunction(context.methods.get(helperName), context.stack);
+        const helper = extractIncomingFunction(context.methods.get(helperName), context.stack, context.strict);
         if(helper.unsupportedReason) return helper.unsupportedReason;
         helper.fields.forEach(field => fields.push({ field, position }));
     }
@@ -236,33 +245,47 @@ const arrayFromList = (call: ts.CallExpression): { countType: ScalarType; item: 
  */
 const extractDelegate = (node: ts.CallExpression | ts.NewExpression, stack: readonly string[]): readonly WireSchema[] | string =>
 {
-    const reader = resolveDelegate(node);
-    if(typeof reader === 'string') return reader;
-    const result = extractIncomingFunction(reader, stack);
+    const resolved = resolveDelegate(node);
+    if(typeof resolved === 'string') return resolved;
+    const { reader, dispatch } = resolved;
+    const name = functionName(reader);
+    if(storesWrapper(reader)) return `The delegated reader ${ name } keeps the packet to read it later`;
+    const overriding = overriddenHelper(reader, dispatch);
+    if(overriding) return `The delegated reader ${ name } calls ${ overriding }, which ${ dispatch.name?.text } overrides`;
+    const result = extractIncomingFunction(reader, stack, true);
     if(result.unsupportedReason) return result.unsupportedReason;
     if(result.fields.some(field => field.type === 'optional'))
-        return `Optional tail inside the delegated reader ${ functionName(reader) }`;
+        return `Optional tail inside the delegated reader ${ name }`;
     return result.fields;
 };
 
-const resolveDelegate = (node: ts.CallExpression | ts.NewExpression): ReaderFunction | string =>
+/** The function a delegate runs, and the class of the object it runs on when that is known exactly. */
+interface ResolvedDelegate
+{
+    reader: ReaderFunction;
+    dispatch?: ts.ClassDeclaration;
+}
+
+const resolveDelegate = (node: ts.CallExpression | ts.NewExpression): ResolvedDelegate | string =>
 {
     const label = node.expression.getText();
     const unresolved = `Packet fields delegated to external reader ${ label } cannot be resolved`;
+    const on = (reader: ReaderFunction | string | undefined, dispatch?: ts.ClassDeclaration): ResolvedDelegate | string =>
+        typeof reader === 'string' ? reader : reader ? { reader, dispatch } : unresolved;
     if(ts.isNewExpression(node))
     {
         if(!ts.isIdentifier(node.expression)) return unresolved;
         const owner = resolveDeclaration(node.expression.text, node.getSourceFile());
         if(typeof owner === 'string') return owner;
         if(!ts.isClassDeclaration(owner)) return unresolved;
-        return constructorOf(owner) ?? `Class ${ label } has no constructor that reads the packet`;
+        return on(constructorOf(owner) ?? `Class ${ label } has no constructor that reads the packet`, owner);
     }
     const target = node.expression;
     if(ts.isIdentifier(target))
     {
         const declaration = resolveDeclaration(target.text, node.getSourceFile());
         if(typeof declaration === 'string') return declaration;
-        return functionOf(declaration) ?? unresolved;
+        return on(functionOf(declaration));
     }
     if(!ts.isPropertyAccessExpression(target)) return unresolved;
     const method = target.name.text;
@@ -272,7 +295,7 @@ const resolveDelegate = (node: ts.CallExpression | ts.NewExpression): ReaderFunc
         const owner = findAncestor(node, ts.isClassDeclaration);
         const base = owner && baseClass(owner);
         if(typeof base === 'string') return base;
-        return base ? instanceMethod(base, method) : unresolved;
+        return base ? on(instanceMethod(base, method), owner) : unresolved;
     }
     if(ts.isIdentifier(receiver))
     {
@@ -282,15 +305,60 @@ const resolveDelegate = (node: ts.CallExpression | ts.NewExpression): ReaderFunc
             const found = declared.members.find((member): member is ts.MethodDeclaration => ts.isMethodDeclaration(member)
                 && member.name.getText() === method && !!member.body
                 && !!ts.getModifiers(member)?.some(modifier => modifier.kind === ts.SyntaxKind.StaticKeyword));
-            return found ?? unresolved;
+            return on(found);
         }
     }
     const type = receiverClass(receiver);
     if(typeof type === 'string') return type;
-    return type ? instanceMethod(type, method) : unresolved;
+    return type ? on(instanceMethod(type, method), type) : unresolved;
 };
 
-/** The class of `x` or `this.x` from `new X()` or a declared type `X`, in the function or class around it. */
+/** Whether a delegate keeps a parameter (the wrapper) in a field, a variable or a result, to read it later. */
+const storesWrapper = (reader: ReaderFunction): boolean =>
+{
+    const names = new Set(reader.parameters.map(parameter => parameter.name.getText()));
+    return containsNode(reader.body, node =>
+    {
+        if(!ts.isIdentifier(node) || !names.has(node.text)) return false;
+        const parent = node.parent;
+        return (ts.isBinaryExpression(parent) && parent.operatorToken.kind === ts.SyntaxKind.EqualsToken && parent.right === node)
+            || (ts.isVariableDeclaration(parent) && parent.initializer === node)
+            || (ts.isPropertyAssignment(parent) && parent.initializer === node)
+            || ts.isShorthandPropertyAssignment(parent)
+            || ts.isArrayLiteralExpression(parent)
+            || (ts.isReturnStatement(parent) && parent.expression === node);
+    });
+};
+
+/**
+ * A method that the delegate's own class declares and that a class between the object's class and it overrides:
+ * `this.helper()` inside the delegate would then run the override.
+ */
+const overriddenHelper = (reader: ReaderFunction, dispatch: ts.ClassDeclaration | undefined): string | undefined =>
+{
+    const readerClass = findAncestor(reader, ts.isClassDeclaration);
+    if(!dispatch || !readerClass || dispatch === readerClass) return undefined;
+    const entry = ts.isMethodDeclaration(reader) ? reader.name.getText() : undefined;
+    const declared = new Set(readerClass.members.filter(ts.isMethodDeclaration).map(member => member.name.getText())
+        .filter(name => name !== entry));
+    for(let current: ts.ClassDeclaration | string | undefined = dispatch, depth = 0;
+        current && typeof current !== 'string' && current !== readerClass && depth < 6; depth++)
+    {
+        const found = current.members.find(member => ts.isMethodDeclaration(member) && declared.has(member.name.getText()));
+        if(found) return found.name.getText();
+        current = baseClass(current);
+    }
+    return undefined;
+};
+
+const insideFunctionWithin = (node: ts.Node, scope: ts.Node): boolean =>
+{
+    for(let current = node.parent; current && current !== scope; current = current.parent)
+        if(ts.isFunctionLike(current)) return true;
+    return false;
+};
+
+/** The class of `x` or `this.x` created by `new X()` around it. A declared type alone could hold a subclass. */
 const receiverClass = (receiver: ts.Expression): ts.ClassDeclaration | string | undefined =>
 {
     let declaration: ts.VariableDeclaration | ts.PropertyDeclaration | ts.ParameterDeclaration | undefined;
@@ -313,9 +381,7 @@ const receiverClass = (receiver: ts.Expression): ts.ClassDeclaration | string | 
     const initializer = declaration.initializer && unwrap(declaration.initializer);
     const name = initializer && ts.isNewExpression(initializer) && ts.isIdentifier(initializer.expression)
         ? initializer.expression.text
-        : declaration.type && ts.isTypeReferenceNode(declaration.type) && !declaration.type.typeArguments
-            ? declaration.type.typeName.getText()
-            : undefined;
+        : undefined;
     if(!name) return undefined;
     const resolved = resolveDeclaration(name, receiver.getSourceFile());
     if(typeof resolved === 'string') return resolved;
