@@ -28,6 +28,104 @@ const listShape = (name: string, side: 'incoming' | 'outgoing'): string =>
 const listReason = (name: string, side: 'incoming' | 'outgoing'): string | undefined =>
     extractTypeScriptPacketSignature(fixture(`lists/${ name }`), side).unsupportedReason;
 
+const delegation = (name: string, className?: string) =>
+    extractTypeScriptPacketSignature(fixture(`delegations/${ name }`), 'incoming', className);
+
+const delegationShape = (name: string, className?: string): string =>
+{
+    const result = delegation(name, className);
+
+    expect(result.unsupportedReason).toBeUndefined();
+    return shape(result.fields);
+};
+
+describe('TypeScript delegation extraction', () =>
+{
+    it('follows a constructor in the same file', () =>
+    {
+        expect(delegationShape('ConstructorDelegateFixture.ts')).toBe('int,list<int>[int,string],boolean');
+    });
+
+    it('follows a static parse', () =>
+    {
+        expect(delegationShape('StaticParseDelegateFixture.ts')).toBe('int,boolean');
+    });
+
+    it('follows an instance parse on a local new, with its own helpers', () =>
+    {
+        expect(delegationShape('InstanceParseDelegateFixture.ts')).toBe('list<int>[string,int]');
+    });
+
+    it('follows super.parse', () =>
+    {
+        expect(delegationShape('SuperParseDelegateFixture.ts', 'SuperParseDelegateFixture')).toBe('int,boolean');
+    });
+
+    it('follows module functions', () =>
+    {
+        expect(delegationShape('ModuleFunctionDelegateFixture.ts')).toBe('string,int,int');
+    });
+
+    it('extracts nested Array.from as lists', () =>
+    {
+        expect(delegationShape('ArrayFromDelegateFixture.ts')).toBe('int,list<int>[string,list<int>[int]],boolean');
+    });
+
+    it('follows a helper named like a read instead of taking it for one', () =>
+    {
+        expect(delegationShape('HelperNamedLikeReadFixture.ts')).toBe('int,int,int');
+    });
+
+    it.each([
+        'RgTernaryDelegate',
+        'RgShortCircuitDelegate',
+        'RgCallbackDelegate',
+        'RgStoredWrapperDelegate',
+        'RgArgumentReadDelegate',
+        'RgSuperOverrideDelegate',
+        'RgConditionalInsideDelegate',
+        'RgDeclaredTypeReceiver'
+    ])('keeps the delegate form %s unsupported', className =>
+    {
+        expect(delegation('ReviewFalseGreensFixture.ts', className).unsupportedReason).toBeDefined();
+    });
+
+    it('follows a delegate that keeps another parameter, not the wrapper', () =>
+    {
+        expect(delegationShape('ReviewFalseGreensFixture.ts', 'RgShorthandParameter')).toBe('string');
+    });
+
+    it('keeps a recursive delegate unsupported', () =>
+    {
+        expect(delegation('RecursiveDelegateFixture.ts').unsupportedReason).toContain('Recursive packet helper');
+    });
+
+    it('keeps an unresolved class unsupported', () =>
+    {
+        expect(delegation('UnresolvedDelegateFixture.ts').unsupportedReason).toBeDefined();
+    });
+
+    it('keeps a delegate called under a branch unsupported', () =>
+    {
+        expect(delegation('ConditionalDelegateFixture.ts').unsupportedReason).toContain('Data-dependent');
+    });
+
+    it('keeps a delegate with an optional tail unsupported', () =>
+    {
+        expect(delegation('OptionalTailDelegateFixture.ts').unsupportedReason).toContain('Optional tail');
+    });
+
+    it('follows a constructor imported from a sibling file and through a barrel', () =>
+    {
+        expect(delegationShape('imported/ImportedConstructorFixture.ts')).toBe('int,string');
+    });
+
+    it('keeps a name exported twice unsupported', () =>
+    {
+        expect(delegation('imported/ImportedTwiceRoot.ts').unsupportedReason).toContain('exported twice');
+    });
+});
+
 describe('TypeScript list extraction', () =>
 {
     it('extracts a list read after its count', () =>
@@ -55,9 +153,9 @@ describe('TypeScript list extraction', () =>
         expect(listShape('HelperItemListParserFixture.ts', 'incoming')).toBe('list<int>[int,string]');
     });
 
-    it('keeps a delegated item unsupported', () =>
+    it('follows a list item read by a constructor', () =>
     {
-        expect(listReason('DelegatedItemListParserFixture.ts', 'incoming')).toContain('external constructor');
+        expect(listShape('DelegatedItemListParserFixture.ts', 'incoming')).toBe('list<int>[int]');
     });
 
     it('rejects a conditional read in the body', () =>
@@ -70,14 +168,14 @@ describe('TypeScript list extraction', () =>
         expect(listReason('EmptyItemListParserFixture.ts', 'incoming')).toContain('reads nothing');
     });
 
-    it('keeps a read passed to an external function unsupported', () =>
+    it('follows a read passed to a module function', () =>
     {
-        expect(listReason('ExternalReaderParserFixture.ts', 'incoming')).toContain('external reader');
+        expect(listShape('ExternalReaderParserFixture.ts', 'incoming')).toBe('int,int,int');
     });
 
-    it('keeps an item read through another object unsupported', () =>
+    it('follows an item read through another object', () =>
     {
-        expect(listReason('ItemParseListParserFixture.ts', 'incoming')).toContain('external reader');
+        expect(listShape('ItemParseListParserFixture.ts', 'incoming')).toBe('list<int>[int,int]');
     });
 
     it('keeps an unknown wrapper read unsupported', () =>
@@ -120,6 +218,11 @@ describe('TypeScript list extraction', () =>
     it('extracts a spread primitive list', () =>
     {
         expect(listShape('SpreadListComposerFixture.ts', 'outgoing')).toBe('list<int>[string]');
+    });
+
+    it('extracts a spread list written in the initial literal', () =>
+    {
+        expect(listShape('LiteralSpreadComposerFixture.ts', 'outgoing')).toBe('int,list<int>[int],boolean');
     });
 
     it('keeps an imported item type unsupported', () =>
@@ -237,7 +340,7 @@ describe('TypeScript packet signature extractor', () =>
     {
         const result = extractTypeScriptPacketSignature(fixture('DelegatedParserFixture.ts'), 'incoming');
 
-        expect(result.unsupportedReason).toContain('external constructor Payload');
+        expect(result.unsupportedReason).toContain('Class Payload has no constructor');
     });
 
     it('rejects outgoing arrays mutated after their initial assignment', () =>

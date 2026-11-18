@@ -13,7 +13,8 @@ describe('packet contract catalog', () =>
         {
             const observed = extractTypeScriptPacketSignature(
                 resolve(contract.typescript.path),
-                contract.direction === 'server_to_client' ? 'incoming' : 'outgoing');
+                contract.direction === 'server_to_client' ? 'incoming' : 'outgoing',
+                contract.typescript.className);
             if(observed.unsupportedReason)
                 throw new Error(`${ contract.name } became unsupported: ${ observed.unsupportedReason }`);
             verifyPacketContract(contract.fields, observed.fields, contract.name);

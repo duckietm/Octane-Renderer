@@ -37,7 +37,8 @@ export class PacketContractCatalogGenerator
             {
                 const result = extractTypeScriptPacketSignature(
                     packet.source,
-                    packet.direction === 'server_to_client' ? 'incoming' : 'outgoing');
+                    packet.direction === 'server_to_client' ? 'incoming' : 'outgoing',
+                    packet.className);
                 fields = result.fields;
                 unsupportedReason = result.unsupportedReason;
             }
