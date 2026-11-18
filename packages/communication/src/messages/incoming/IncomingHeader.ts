@@ -737,6 +737,7 @@ export class IncomingHeader
     public static WIRED_VARIABLE_FX_CONFIGS_REMOVED = 9474;
     public static WIRED_VARIABLE_FX_STATUS = 9475;
     public static WIRED_VARIABLE_FX_STATUS_REMOVED = 9476;
+    public static HOTEL_SETTINGS = 9477;
     // Official AIR variable leaderboard (server -> client): the room's panels and a chunk of rows.
     public static WIRED_LEADERBOARD_SNAPSHOT = 1494;
     public static WIRED_LEADERBOARD_CHUNK = 3979;

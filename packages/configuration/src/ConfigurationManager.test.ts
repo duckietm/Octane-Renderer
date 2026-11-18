@@ -194,3 +194,41 @@ describe('ConfigurationManager.setValue', () =>
         expect(manager.getValue('loader.waiting')).toBe('yes');
     });
 });
+
+describe('ConfigurationManager.registerDefaults', () =>
+{
+    it('answers a missing key with its registered value, resolving ${...} when read', () =>
+    {
+        const manager = new ConfigurationManager();
+
+        manager.registerDefaults({ 'login.token-renew.endpoint': '${api.url}/api/auth/token/renew', 'collectibles.enabled': false });
+        manager.parseConfiguration({ 'api.url': 'http://hotel.test' });
+
+        expect(manager.getValue('login.token-renew.endpoint')).toBe('http://hotel.test/api/auth/token/renew');
+        expect(manager.getValue('collectibles.enabled', true)).toBe(false);
+    });
+
+    it('keeps the value a hotel file sets, and leaves the definitions to the files', () =>
+    {
+        const manager = new ConfigurationManager();
+
+        manager.registerDefaults({ 'hotel.name': 'Hotel' });
+        manager.parseConfiguration({ 'hotel.name': 'My Hotel' });
+
+        expect(manager.getValue('hotel.name')).toBe('My Hotel');
+
+        manager.registerDefaults({ 'chat.emoji.enabled': true });
+
+        expect(manager.definitions.has('chat.emoji.enabled')).toBe(false);
+    });
+
+    it('ignores keys that would reach the object prototype', () =>
+    {
+        const manager = new ConfigurationManager();
+
+        manager.registerDefaults({ '__proto__.polluted': true });
+
+        expect(({} as any).polluted).toBeUndefined();
+        expect(manager.getValue('__proto__.polluted', 'fallback')).toBe('fallback');
+    });
+});
