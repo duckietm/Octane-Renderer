@@ -14,6 +14,8 @@ jobs:
     steps:
       - name: Check out renderer
         uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
 
       - name: Resolve linked emulator branch
         id: emulator
@@ -77,3 +79,8 @@ jobs:
 
       - name: Verify manifest identity
         run: node scripts/verify-packet-contract-manifest.mjs --emulator emulator
+
+      # A packet that leaves the verified contracts, or a new exemption, needs a reason in
+      # protocol/packet-contract-ratchet-exceptions.json.
+      - name: Packet contract coverage ratchet
+        run: node scripts/packet-contract-ratchet.mjs --base "${{ github.event.pull_request.base.sha || 'origin/Dev' }}"

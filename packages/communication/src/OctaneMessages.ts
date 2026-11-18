@@ -611,6 +611,7 @@ import {
     HotelClosedAndOpensEvent,
     HotelClosesAndWillOpenAtEvent,
     HotelMergeNameChangeEvent,
+    HotelSettingsEvent,
     HotelViewLandingEvent,
     HotelViewLandingRequestComposer,
     HotelViewLandingResetVotesComposer,
@@ -2262,6 +2263,7 @@ export class OctaneMessages implements IMessageConfiguration
         this._events.set(IncomingHeader.HANDSHAKE_COMPLETE_DIFFIE, CompleteDiffieHandshakeEvent);
         this._events.set(IncomingHeader.HANDSHAKE_IDENTITY_ACCOUNT, IdentityAccountsEvent);
         this._events.set(IncomingHeader.FIRST_LOGIN_OF_DAY, IsFirstLoginOfDayEvent);
+        this._events.set(IncomingHeader.HOTEL_SETTINGS, HotelSettingsEvent);
 
         // NUX
         this._events.set(IncomingHeader.NEW_USER_EXPERIENCE_GIFT_OFFER, NewUserExperienceGiftOfferMessageEvent);

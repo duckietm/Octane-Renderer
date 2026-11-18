@@ -46,6 +46,26 @@ describe('TypeScript packet registry', () =>
         expect(registry.declaredOnly.some(packet => packet.header === 101)).toBe(true);
     });
 
+    it('picks the parser of the registered event class when a file holds several events', () =>
+    {
+        const root = join(tmpdir(), `packet-registry-shared-${ Date.now() }`);
+        write(root, 'messages/incoming/IncomingHeader.ts', 'export class IncomingHeader { static FIRST = 100; static SECOND = 101; }');
+        write(root, 'messages/outgoing/OutgoingHeader.ts', 'export class OutgoingHeader {}');
+        write(root, 'OctaneMessages.ts', `class OctaneMessages { register() {
+            this._events.set(IncomingHeader.FIRST, FirstEvent);
+            this._events.set(IncomingHeader.SECOND, SecondEvent);
+        }}`);
+        write(root, 'messages/incoming/test/SharedEvents.ts', `
+            export class FirstEvent { constructor(callback: Function) { super(callback, FirstParser); } }
+            export class SecondEvent { constructor(callback: Function) { super(callback, SecondParser); } }`);
+        write(root, 'messages/parser/test/FirstParser.ts', 'class FirstParser {}');
+        const second = write(root, 'messages/parser/test/SecondParser.ts', 'class SecondParser {}');
+
+        const registry = TypeScriptPacketRegistry.discover(root);
+
+        expect(registry.require('server_to_client', 101).source).toBe(second);
+    });
+
     it('rejects duplicate active headers', () =>
     {
         const root = join(tmpdir(), `packet-registry-duplicate-${ Date.now() }`);

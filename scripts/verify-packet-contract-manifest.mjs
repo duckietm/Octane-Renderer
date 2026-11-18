@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -24,6 +24,24 @@ if(!rendererBytes.equals(emulatorBytes))
 {
     console.error(`Packet contract manifests differ: renderer=${ rendererHash } emulator=${ emulatorHash }`);
     process.exit(1);
+}
+
+// The coverage ratchet and its exceptions are kept identical in both repositories too. An emulator
+// branch from before the ratchet has no copy yet: that is reported, not failed.
+for(const sharedPath of [ 'scripts/packet-contract-ratchet.mjs', 'protocol/packet-contract-ratchet-exceptions.json' ])
+{
+    const emulatorPath = resolve(argumentsList[emulatorIndex + 1], sharedPath);
+    if(!existsSync(emulatorPath))
+    {
+        console.warn(`Emulator has no ${ sharedPath } yet; not compared`);
+        continue;
+    }
+    const rendererShared = normalizeLineEndings(readFileSync(fileURLToPath(new URL(`../${ sharedPath }`, import.meta.url))));
+    if(!rendererShared.equals(normalizeLineEndings(readFileSync(emulatorPath))))
+    {
+        console.error(`${ sharedPath } differs between renderer and emulator`);
+        process.exit(1);
+    }
 }
 
 const manifest = JSON.parse(rendererBytes.toString('utf8'));
