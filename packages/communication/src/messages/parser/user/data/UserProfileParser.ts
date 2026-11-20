@@ -32,6 +32,9 @@ export class UserProfileParser implements IMessageParser
     private _level: number;
     private _nextLevelStart: number;
     private _isHidden: boolean;
+    private _borderId: number;
+    private _bannerId: number;
+    private _accentId: number;
 
     public flush(): boolean
     {
@@ -64,6 +67,9 @@ export class UserProfileParser implements IMessageParser
         this._level = 0;
         this._nextLevelStart = 0;
         this._isHidden = false;
+        this._borderId = 0;
+        this._bannerId = 0;
+        this._accentId = 0;
 
         return true;
     }
@@ -139,6 +145,14 @@ export class UserProfileParser implements IMessageParser
         if(!wrapper.bytesAvailable) return true;
 
         this._isHidden = wrapper.readBoolean();
+
+        // Profile window customisation: the infostand border, the banner from the gallery and the
+        // accent colour from the palette. 0 when absent or not chosen.
+        if(!wrapper.bytesAvailable) return true;
+
+        this._borderId = wrapper.readInt();
+        this._bannerId = wrapper.readInt();
+        this._accentId = wrapper.readInt();
 
         return true;
     }
@@ -290,5 +304,20 @@ export class UserProfileParser implements IMessageParser
     public get isHidden(): boolean
     {
         return this._isHidden;
+    }
+
+    public get borderId(): number
+    {
+        return this._borderId;
+    }
+
+    public get bannerId(): number
+    {
+        return this._bannerId;
+    }
+
+    public get accentId(): number
+    {
+        return this._accentId;
     }
 }
