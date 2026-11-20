@@ -115,5 +115,51 @@ describe('UserProfileParser presence and level', () =>
         expect(parser.level).toBe(0);
         expect(parser.nextLevelStart).toBe(0);
         expect(parser.isHidden).toBe(false);
+        expect(parser.borderId).toBe(0);
+        expect(parser.bannerId).toBe(0);
+        expect(parser.accentId).toBe(0);
+    });
+
+    it('reads the border, banner and accent after the hidden flag', () =>
+    {
+        const writer = new BinaryWriter();
+
+        writeProfile(writer);
+        writer.writeInt(1);
+        writer.writeInt(3);
+        writer.writeInt(150);
+        writer.writeByte(0);
+        writer.writeInt(17);
+        writer.writeInt(4);
+        writer.writeInt(9);
+
+        const parser = parse(writer);
+
+        expect(parser.isHidden).toBe(false);
+        expect(parser.borderId).toBe(17);
+        expect(parser.bannerId).toBe(4);
+        expect(parser.accentId).toBe(9);
+        expect(parser.bannerImage).toBe('');
+    });
+
+    it('reads the uploaded banner and background after the accent', () =>
+    {
+        const writer = new BinaryWriter();
+
+        writeProfile(writer);
+        writer.writeInt(1);
+        writer.writeInt(3);
+        writer.writeInt(150);
+        writer.writeByte(0);
+        writer.writeInt(0);
+        writer.writeInt(0);
+        writer.writeInt(0);
+        writer.writeString('7_banner_abc.jpg');
+        writer.writeString('');
+
+        const parser = parse(writer);
+
+        expect(parser.bannerImage).toBe('7_banner_abc.jpg');
+        expect(parser.backgroundImage).toBe('');
     });
 });
