@@ -139,5 +139,27 @@ describe('UserProfileParser presence and level', () =>
         expect(parser.borderId).toBe(17);
         expect(parser.bannerId).toBe(4);
         expect(parser.accentId).toBe(9);
+        expect(parser.bannerImage).toBe('');
+    });
+
+    it('reads the uploaded banner and background after the accent', () =>
+    {
+        const writer = new BinaryWriter();
+
+        writeProfile(writer);
+        writer.writeInt(1);
+        writer.writeInt(3);
+        writer.writeInt(150);
+        writer.writeByte(0);
+        writer.writeInt(0);
+        writer.writeInt(0);
+        writer.writeInt(0);
+        writer.writeString('7_banner_abc.jpg');
+        writer.writeString('');
+
+        const parser = parse(writer);
+
+        expect(parser.bannerImage).toBe('7_banner_abc.jpg');
+        expect(parser.backgroundImage).toBe('');
     });
 });

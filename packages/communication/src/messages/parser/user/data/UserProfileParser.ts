@@ -35,6 +35,8 @@ export class UserProfileParser implements IMessageParser
     private _borderId: number;
     private _bannerId: number;
     private _accentId: number;
+    private _bannerImage: string;
+    private _backgroundImage: string;
 
     public flush(): boolean
     {
@@ -70,6 +72,8 @@ export class UserProfileParser implements IMessageParser
         this._borderId = 0;
         this._bannerId = 0;
         this._accentId = 0;
+        this._bannerImage = '';
+        this._backgroundImage = '';
 
         return true;
     }
@@ -153,6 +157,12 @@ export class UserProfileParser implements IMessageParser
         this._borderId = wrapper.readInt();
         this._bannerId = wrapper.readInt();
         this._accentId = wrapper.readInt();
+
+        // Uploaded pictures: the file names of the banner and of the window background, '' when none.
+        if(!wrapper.bytesAvailable) return true;
+
+        this._bannerImage = wrapper.readString();
+        this._backgroundImage = wrapper.readString();
 
         return true;
     }
@@ -319,5 +329,15 @@ export class UserProfileParser implements IMessageParser
     public get accentId(): number
     {
         return this._accentId;
+    }
+
+    public get bannerImage(): string
+    {
+        return this._bannerImage;
+    }
+
+    public get backgroundImage(): string
+    {
+        return this._backgroundImage;
     }
 }
