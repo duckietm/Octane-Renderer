@@ -162,4 +162,35 @@ describe('UserProfileParser presence and level', () =>
         expect(parser.bannerImage).toBe('7_banner_abc.jpg');
         expect(parser.backgroundImage).toBe('');
     });
+    it('reads the own background style and the features after the pictures', () =>
+    {
+        const writer = new BinaryWriter();
+
+        writeProfile(writer);
+        writer.writeInt(1);
+        writer.writeInt(3);
+        writer.writeInt(150);
+        writer.writeByte(0);
+        writer.writeInt(0);
+        writer.writeInt(0);
+        writer.writeInt(0);
+        writer.writeString('');
+        writer.writeString('');
+        writer.writeString('1e7cb8;0b2a40;135;12');
+        writer.writeInt(5);
+
+        const parser = parse(writer);
+
+        expect(parser.backgroundStyle).toBe('1e7cb8;0b2a40;135;12');
+        expect(parser.features).toBe(5);
+    });
+
+    it('has every feature on when the server sends no switches', () =>
+    {
+        const writer = new BinaryWriter();
+
+        writeProfile(writer);
+
+        expect(parse(writer).features).toBe(UserProfileParser.ALL_FEATURES);
+    });
 });
