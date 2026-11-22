@@ -556,6 +556,9 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
 
                         if(spriteData.ink === 33) sprite.blendMode = 'add';
                         else sprite.blendMode = 'normal';
+
+                        // AIR: the effect sprites fade with the body under wired transparency.
+                        sprite.alpha = 255 * this._wiredVisibility;
                     }
                 }
             }
@@ -1731,7 +1734,8 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
                     sprite.texture = this._shadow.texture;
                     sprite.offsetX = offsetX;
                     sprite.offsetY = offsetY;
-                    sprite.alpha = 50;
+                    // AIR: the shadow fades with the body under wired transparency.
+                    sprite.alpha = 50 * this._wiredVisibility;
                     sprite.relativeDepth = 1;
                 }
                 else

@@ -40,13 +40,24 @@ export class GroupSettingsParser implements IMessageParser
     {
         if(!wrapper) return false;
 
-        const hasRoomData = wrapper.readInt();
+        // Every room the owner could pick as the group's home: id, name, flag. The home room's id follows the
+        // description; its name is the one of the matching entry.
+        const roomCount = wrapper.readInt();
+        const rooms = new Map<number, string>();
 
-        if(hasRoomData === 1)
+        for(let i = 0; i < roomCount; i++)
         {
-            this._roomId = wrapper.readInt();
-            this._roomName = wrapper.readString();
+            const roomId = wrapper.readInt();
+            const roomName = wrapper.readString();
             wrapper.readBoolean();
+
+            rooms.set(roomId, roomName);
+
+            if(i === 0)
+            {
+                this._roomId = roomId;
+                this._roomName = roomName;
+            }
         }
 
         wrapper.readBoolean();
@@ -55,7 +66,13 @@ export class GroupSettingsParser implements IMessageParser
         this._title = wrapper.readString();
         this._description = wrapper.readString();
 
-        wrapper.readInt();
+        const homeRoomId = wrapper.readInt();
+
+        if(rooms.has(homeRoomId))
+        {
+            this._roomId = homeRoomId;
+            this._roomName = rooms.get(homeRoomId);
+        }
 
         this._colorA = wrapper.readInt();
         this._colorB = wrapper.readInt();

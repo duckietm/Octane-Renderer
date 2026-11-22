@@ -66,6 +66,13 @@ export class MarketplaceOwnOffersParser implements IMessageParser
             const price = wrapper.readInt();
             const local9 = wrapper.readInt();
             const local10 = wrapper.readInt();
+
+            // A sold (2) or expired (3) offer carries its status time, a 64-bit number sent as two halves.
+            if((status === 2) || (status === 3))
+            {
+                wrapper.readInt();
+                wrapper.readInt();
+            }
             const local13 = new MarketplaceOffer(offerId, furniId, furniType, extraData, stuffData, price, status, local9, local10, -1, productCode, nftFurniType);
 
             if(i < MarketplaceOwnOffersParser.MAX_LIST_LENGTH)

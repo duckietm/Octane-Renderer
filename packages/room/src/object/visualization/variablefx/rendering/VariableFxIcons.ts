@@ -28,7 +28,8 @@ export const VARIABLE_FX_ICON_METADATA: Readonly<Record<string, { x: number, y: 
     fish: { x: 0, y: 0 },
     wooden_logs: { x: 0, y: 0 },
     misc_heart: { x: 0, y: 0 },
-    misc_skull: { x: 3, y: 0 }
+    misc_skull: { x: 3, y: 0 },
+    'xmas26.snowman': { x: 0, y: -1 }
 };
 
 export const VARIABLE_FX_ICON_ASSET_PREFIX = 'variablefx_icon_';
