@@ -31,3 +31,4 @@ export * from './HousekeepingTransferRoomOwnershipComposer';
 export * from './HousekeepingUnbanUserComposer';
 export * from './HousekeepingUserNoteComposer';
 export * from './HousekeepingWordFilterComposer';
+export * from './HousekeepingRemoveProfileImageComposer';
