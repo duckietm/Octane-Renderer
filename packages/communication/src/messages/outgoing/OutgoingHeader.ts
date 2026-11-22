@@ -719,6 +719,7 @@ export class OutgoingHeader
     public static HOUSEKEEPING_SET_PERMISSION = 9130;
     public static HOUSEKEEPING_USER_NOTE = 9131;
     public static HOUSEKEEPING_LOCKDOWN = 9132;
+    public static HOUSEKEEPING_REMOVE_PROFILE_IMAGE = 9133;
 
     // Custom features — IDs 9300+ reserved
     public static REQUEST_RARE_VALUES = 9300;

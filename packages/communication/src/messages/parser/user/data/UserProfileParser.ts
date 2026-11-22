@@ -3,6 +3,9 @@ import { HabboGroupEntryData } from '../HabboGroupEntryData';
 
 export class UserProfileParser implements IMessageParser
 {
+    /** Banner, uploads and theme, as the server reports them; all on for an older server. */
+    public static readonly ALL_FEATURES = 7;
+
     private _id: number;
     private _username: string;
     private _figure: string;
@@ -32,6 +35,13 @@ export class UserProfileParser implements IMessageParser
     private _level: number;
     private _nextLevelStart: number;
     private _isHidden: boolean;
+    private _borderId: number;
+    private _bannerId: number;
+    private _accentId: number;
+    private _bannerImage: string;
+    private _backgroundImage: string;
+    private _backgroundStyle: string;
+    private _features: number;
 
     public flush(): boolean
     {
@@ -64,6 +74,13 @@ export class UserProfileParser implements IMessageParser
         this._level = 0;
         this._nextLevelStart = 0;
         this._isHidden = false;
+        this._borderId = 0;
+        this._bannerId = 0;
+        this._accentId = 0;
+        this._bannerImage = '';
+        this._backgroundImage = '';
+        this._backgroundStyle = '';
+        this._features = UserProfileParser.ALL_FEATURES;
 
         return true;
     }
@@ -139,6 +156,27 @@ export class UserProfileParser implements IMessageParser
         if(!wrapper.bytesAvailable) return true;
 
         this._isHidden = wrapper.readBoolean();
+
+        // Profile window customisation: the infostand border, the banner from the gallery and the
+        // accent colour from the palette. 0 when absent or not chosen.
+        if(!wrapper.bytesAvailable) return true;
+
+        this._borderId = wrapper.readInt();
+        this._bannerId = wrapper.readInt();
+        this._accentId = wrapper.readInt();
+
+        // Uploaded pictures: the file names of the banner and of the window background, '' when none.
+        if(!wrapper.bytesAvailable) return true;
+
+        this._bannerImage = wrapper.readString();
+        this._backgroundImage = wrapper.readString();
+
+        // The owner's own background ("rrggbb;rrggbb;angle;pattern", '' when none), then which profile features
+        // the hotel has on (banner 1, uploads 2, theme 4). A server that sends neither has them all on.
+        if(!wrapper.bytesAvailable) return true;
+
+        this._backgroundStyle = wrapper.readString();
+        this._features = wrapper.readInt();
 
         return true;
     }
@@ -290,5 +328,40 @@ export class UserProfileParser implements IMessageParser
     public get isHidden(): boolean
     {
         return this._isHidden;
+    }
+
+    public get borderId(): number
+    {
+        return this._borderId;
+    }
+
+    public get bannerId(): number
+    {
+        return this._bannerId;
+    }
+
+    public get accentId(): number
+    {
+        return this._accentId;
+    }
+
+    public get bannerImage(): string
+    {
+        return this._bannerImage;
+    }
+
+    public get backgroundImage(): string
+    {
+        return this._backgroundImage;
+    }
+
+    public get backgroundStyle(): string
+    {
+        return this._backgroundStyle;
+    }
+
+    public get features(): number
+    {
+        return this._features;
     }
 }

@@ -213,7 +213,7 @@ export class AvatarImageCache
                     positionOffset.x = this._scale === AvatarScaleType.LARGE ? layerData.dx : layerData.dx / 2;
                     positionOffset.y = this._scale === AvatarScaleType.LARGE ? layerData.dy : layerData.dy / 2;
 
-                    adjustedFrameCount = layerData.animationFrame;
+                    if(!layerData.usesFrameCounter) adjustedFrameCount = layerData.animationFrame;
 
                     if(layerData.action) action = layerData.action;
 
@@ -331,7 +331,7 @@ export class AvatarImageCache
                     positionOffset.x = this._scale === AvatarScaleType.LARGE ? layerData.dx : layerData.dx / 2;
                     positionOffset.y = this._scale === AvatarScaleType.LARGE ? layerData.dy : layerData.dy / 2;
 
-                    adjustedFrameCount = layerData.animationFrame;
+                    if(!layerData.usesFrameCounter) adjustedFrameCount = layerData.animationFrame;
 
                     if(layerData.action) action = layerData.action;
 
