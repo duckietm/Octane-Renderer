@@ -219,7 +219,10 @@ describe('RoomPlane direct drawing (room.planes.direct)', () =>
             {
                 if((x >= patch.x) && (x < (patch.x + patch.width)) && (y >= patch.y) && (y < (patch.y + patch.height))) continue;
 
-                if(RoomPlaneContainsPoint(data, x, y, 128)) { found = true; break; }
+                if(RoomPlaneContainsPoint(data, x, y, 128))
+                {
+                    found = true; break;
+                }
             }
         }
 

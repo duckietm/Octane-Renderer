@@ -115,7 +115,7 @@ describe('RoomSpriteCanvas depth sorting', () =>
             model: { getValue: () => Number.NaN },
             getLocation: () => new TestVector3d(0, 0, 0)
         } as unknown as IRoomObject;
-        const canvas = Object.create(RoomSpriteCanvas.prototype) as any;
+        const canvas = Object.create(RoomSpriteCanvas.prototype);
 
         Object.assign(canvas, {
             _objectCache: new RoomObjectCache(''),
@@ -173,7 +173,7 @@ describe('RoomSpriteCanvas masks', () =>
         const display = master.addChild(new Container());
         const viewport = master.addChild(new Graphics().rect(0, 0, 100, 100).fill(0xFFFFFF));
         const boundary = master.addChild(new Graphics());
-        const canvas = Object.create(RoomSpriteCanvas.prototype) as any;
+        const canvas = Object.create(RoomSpriteCanvas.prototype);
 
         Object.assign(canvas, { _master: master, _display: display, _mask: viewport, _boundaryMask: boundary });
 

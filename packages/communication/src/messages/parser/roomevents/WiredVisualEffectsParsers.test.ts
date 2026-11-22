@@ -9,7 +9,10 @@ const wrapper = (values: (number | boolean)[]) =>
     return {
         readInt: () => values[index++] as number,
         readBoolean: () => values[index++] as boolean,
-        get remaining() { return values.length - index; }
+        get remaining()
+        {
+            return values.length - index;
+        }
     };
 };
 

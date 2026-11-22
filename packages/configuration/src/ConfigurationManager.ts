@@ -6,6 +6,7 @@ const UNSAFE_KEY_PARTS = new Set([ '__proto__', 'constructor', 'prototype' ]);
 export class ConfigurationManager implements IConfigurationManager
 {
     private _definitions: Map<string, unknown> = new Map();
+    private _defaults: Map<string, unknown> = new Map();
     private _config: any = {};
     private _missingKeys: string[] = [];
     private _initialLoad: Promise<void> = null;
@@ -18,7 +19,7 @@ export class ConfigurationManager implements IConfigurationManager
     /** Loads the configuration once; later calls share that load. A failed load is retried on the next call. */
     public init(): Promise<void>
     {
-        if(!this._initialLoad)
+        if(this._initialLoad === null)
         {
             this._initialLoad = this.reloadConfiguration().catch(error =>
             {
@@ -189,9 +190,32 @@ export class ConfigurationManager implements IConfigurationManager
         return value.replace('${', '').replace('}', '');
     }
 
+    /**
+     * The values a client documents for keys a hotel's files may leave out. A key the files set keeps the files' value;
+     * a missing key returns its registered value (with ${...} resolved when read) instead of the caller's fallback.
+     */
+    public registerDefaults(defaults: { [index: string]: unknown }): void
+    {
+        if(!defaults) return;
+
+        for(const key of Object.keys(defaults))
+        {
+            if(key.split('.').some(part => UNSAFE_KEY_PARTS.has(part))) continue;
+
+            this._defaults.set(key, defaults[key]);
+        }
+    }
+
     public getValue<T>(key: string, value: T = null): T
     {
         let existing = this._definitions.get(key);
+
+        if(existing === undefined && this._defaults.has(key))
+        {
+            const fallback = this._defaults.get(key);
+
+            return ((typeof fallback === 'string') ? this.interpolate(fallback) : fallback) as T;
+        }
 
         if(existing === undefined)
         {

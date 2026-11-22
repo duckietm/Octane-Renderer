@@ -19,7 +19,7 @@ describe('AvatarActionManager lay canvas offsets', () =>
     {
         const manager = new AvatarActionManager(null, { actions: [ LAY ] });
 
-        expect(layOffsets(manager, size as string, direction as number)).toEqual(expected);
+        expect(layOffsets(manager, size, direction)).toEqual(expected);
     });
 
     it('keeps offsets the actions JSON brings', () =>
@@ -39,8 +39,8 @@ describe('AvatarActionManager lay canvas offsets', () =>
         const SWIM = { id: 'Swim', state: 'swim', precedence: 900, main: true, geometryType: 'swhorizontal', activePartSet: 'swim', assetPartDefinition: 'swim', prevents: [], animation: true };
         const manager = new AvatarActionManager(null, { actions: [ SWIM ] });
 
-        expect(manager.getCanvasOffsets([ new ActiveActionData('swim') ], 'sh', direction as number)).toEqual(expected);
-        expect(manager.getCanvasOffsets([ new ActiveActionData('swim') ], 'h', direction as number)).toEqual([]);
+        expect(manager.getCanvasOffsets([ new ActiveActionData('swim') ], 'sh', direction)).toEqual(expected);
+        expect(manager.getCanvasOffsets([ new ActiveActionData('swim') ], 'h', direction)).toEqual([]);
     });
 
     it('gives other postures no offset', () =>

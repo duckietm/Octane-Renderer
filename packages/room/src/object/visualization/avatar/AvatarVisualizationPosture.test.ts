@@ -62,7 +62,7 @@ describe('AvatarVisualization lay posture parameter', () =>
     // AIR validateActions: int(postureParameter) < 0, so -0.5 truncates to 0 and is not inside.
     it.each([ [ '-1', true ], [ '-2.5', true ], [ '-0.5', false ], [ '0', false ], [ '', false ] ])('lays inside for %s: %s', (parameter, inside) =>
     {
-        expect(layState(parameter as string).inside).toBe(inside);
+        expect(layState(parameter).inside).toBe(inside);
     });
 
     it('ignores the old per-bed offset suffix', () =>

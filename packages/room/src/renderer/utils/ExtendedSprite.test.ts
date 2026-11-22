@@ -103,7 +103,7 @@ describe('ExtendedSprite hit maps', () =>
     {
         const drawFramebuffer = {};
         const textureFramebuffer = {};
-        const state = { bound: drawFramebuffer as object, reads: 0 };
+        const state = { bound: drawFramebuffer, reads: 0 };
         const gl = {
             FRAMEBUFFER: 1,
             FRAMEBUFFER_BINDING: 2,
@@ -171,14 +171,16 @@ describe('ExtendedSprite hit maps', () =>
     {
         class FakeBitmap
         {
-            constructor(public width: number, public height: number) {}
+            constructor(public width: number, public height: number)
+            {}
         }
 
         const drawn: unknown[] = [];
 
         class FakeCanvas
         {
-            constructor(private _width: number, private _height: number) {}
+            constructor(private _width: number, private _height: number)
+            {}
 
             getContext()
             {

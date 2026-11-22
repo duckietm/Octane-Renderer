@@ -44,8 +44,8 @@ export class RoomObjectVisualizationFactory implements IRoomObjectVisualizationF
             case RoomObjectVisualizationType.PET_ANIMATED:
                 visualization = PetVisualization;
                 break;
-            case RoomObjectVisualizationType.FURNITURE_STATIC:
             // The official furniture label (wf_label) and region draw as a static furni; their overlays are client UI.
+            case RoomObjectVisualizationType.FURNITURE_STATIC:
             case 'furniture_label':
             case 'furniture_region':
                 visualization = FurnitureVisualization;

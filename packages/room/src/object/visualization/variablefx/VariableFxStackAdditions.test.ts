@@ -30,7 +30,10 @@ const habbicon = (width = 54, height = 54): IVariableFxStackedAdditionVisualizer
     return visualizer;
 };
 
-const fakeTexture = () => ({ width: 1, height: 1, destroyed: false, source: { update: () => undefined }, destroy() { this.destroyed = true; } }) as unknown as Texture;
+const fakeTexture = () => ({ width: 1, height: 1, destroyed: false, source: { update: () => undefined }, destroy()
+{
+    this.destroyed = true;
+} }) as unknown as Texture;
 
 describe('the habbicon in the stacked additions (AIR layer 100)', () =>
 {
@@ -87,7 +90,10 @@ describe('the habbicon in the stacked additions (AIR layer 100)', () =>
             calls: [],
             isFinished: false,
             isPartOfStack: false,
-            update(sprite: IRoomObjectSprite, scale: number) { this.calls.push(`update:${ scale }`); },
+            update(sprite: IRoomObjectSprite, scale: number)
+            {
+                this.calls.push(`update:${ scale }`);
+            },
             animate(sprite: IRoomObjectSprite)
             {
                 this.calls.push('animate');
@@ -98,7 +104,8 @@ describe('the habbicon in the stacked additions (AIR layer 100)', () =>
 
                 return true;
             },
-            dispose() {}
+            dispose()
+            {}
         };
         const visualizer = new HabbiconStackVisualizer(source, () => 64);
 

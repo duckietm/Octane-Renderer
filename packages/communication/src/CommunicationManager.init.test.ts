@@ -3,7 +3,10 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { CommunicationManager } from './CommunicationManager';
 import { AuthenticatedEvent } from './messages';
 
-vi.mock('@thumbmarkjs/thumbmarkjs', () => ({ Thumbmark: class { get = async () => ({ thumbmark: 'test' }); } }));
+vi.mock('@thumbmarkjs/thumbmarkjs', () => ({ Thumbmark: class
+{
+    get = async () => ({ thumbmark: 'test' });
+} }));
 
 const setup = () =>
 {
@@ -13,8 +16,14 @@ const setup = () =>
         isAuthenticated: false,
         hasBeenReady: false,
         init: vi.fn(),
-        dispose: vi.fn(() => { connection.isAuthenticated = false; }),
-        authenticated: vi.fn(() => { connection.isAuthenticated = true; }),
+        dispose: vi.fn(() =>
+        {
+            connection.isAuthenticated = false;
+        }),
+        authenticated: vi.fn(() =>
+        {
+            connection.isAuthenticated = true;
+        }),
         ready: vi.fn(),
         send: vi.fn(),
         addMessageEvent: vi.fn((event: unknown) => events.push(event)),

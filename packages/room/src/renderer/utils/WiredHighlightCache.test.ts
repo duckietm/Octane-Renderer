@@ -14,8 +14,10 @@ vi.mock('@octane/utils', async () => ({
 
 class FakeBitmap
 {
-    constructor(public width: number, public height: number) {}
-    close(): void {}
+    constructor(public width: number, public height: number)
+    {}
+    close(): void
+    {}
 }
 
 const makeRenderer = () => ({

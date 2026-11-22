@@ -17,7 +17,7 @@
     "@octane/utils": "1.0.0",
     "apng-js": "^1.1.5",
     "gifuct-js": "^2.1.2",
-    "pixi.js": "^8.22.0",
+    "pixi.js": "^8.23.0",
     "wasm-webp": "^0.1.0"
   },
   "devDependencies": {

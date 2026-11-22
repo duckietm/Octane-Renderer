@@ -35,6 +35,7 @@ export * from './hotlooks';
 export * from './soundboard';
 export * from './traxeditor';
 export * from './wheel';
+export * from './plugins';
 export * from './inventory';
 export * from './inventory/achievements';
 export * from './inventory/avatareffect';

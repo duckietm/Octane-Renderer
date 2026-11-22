@@ -1,12 +1,16 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { MusicPlayer } from './MusicPlayer';
 
-vi.mock('@octane/events', () => ({ GetEventDispatcher: () => ({ dispatchEvent: vi.fn() }), SoundManagerEvent: class {} }));
+vi.mock('@octane/events', () => ({ GetEventDispatcher: () => ({ dispatchEvent: vi.fn() }), SoundManagerEvent: class
+{} }));
 
 const deferred = () =>
 {
     let resolve: () => void;
-    const promise = new Promise<void>(done => { resolve = done; });
+    const promise = new Promise<void>(done =>
+    {
+        resolve = done;
+    });
 
     return { promise, resolve: () => resolve() };
 };
