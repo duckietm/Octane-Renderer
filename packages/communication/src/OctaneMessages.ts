@@ -638,6 +638,7 @@ import {
     HousekeepingListActionLogComposer,
     HousekeepingListEvent,
     HousekeepingLockdownComposer,
+    HousekeepingRemoveProfileImageComposer,
     HousekeepingMaintenanceComposer,
     HousekeepingMaintenanceStatusEvent,
     HousekeepingMuteRoomComposer,
@@ -3199,6 +3200,7 @@ export class OctaneMessages implements IMessageConfiguration
         this._composers.set(OutgoingHeader.HOUSEKEEPING_SET_PERMISSION, HousekeepingSetPermissionComposer);
         this._composers.set(OutgoingHeader.HOUSEKEEPING_USER_NOTE, HousekeepingUserNoteComposer);
         this._composers.set(OutgoingHeader.HOUSEKEEPING_LOCKDOWN, HousekeepingLockdownComposer);
+        this._composers.set(OutgoingHeader.HOUSEKEEPING_REMOVE_PROFILE_IMAGE, HousekeepingRemoveProfileImageComposer);
 
         // Custom features
         this._composers.set(OutgoingHeader.REQUEST_RARE_VALUES, RequestRareValuesComposer);
