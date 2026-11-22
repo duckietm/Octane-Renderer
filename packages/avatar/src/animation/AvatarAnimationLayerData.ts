@@ -9,6 +9,7 @@ export class AvatarAnimationLayerData implements IAnimationLayerData
     private _id: string;
     private _action: IActiveActionData;
     private _animationFrame: number;
+    private _usesFrameCounter: boolean;
     private _dx: number;
     private _dy: number;
     private _dz: number;
@@ -21,6 +22,7 @@ export class AvatarAnimationLayerData implements IAnimationLayerData
     {
         this._id = framePart.id;
         this._animationFrame = (framePart.frame || 0);
+        this._usesFrameCounter = (framePart.frameSource === 'counter');
         this._dx = (framePart.dx || 0);
         this._dy = (framePart.dy || 0);
         this._dz = (framePart.dz || 0);
@@ -65,6 +67,12 @@ export class AvatarAnimationLayerData implements IAnimationLayerData
     public get id(): string
     {
         return this._id;
+    }
+
+    /** AIR 1.0.31 `frameSource="counter"`: the layer's frame follows the frame counter, not its own number. */
+    public get usesFrameCounter(): boolean
+    {
+        return this._usesFrameCounter;
     }
 
     public get animationFrame(): number
