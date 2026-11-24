@@ -360,6 +360,9 @@ export class OutgoingHeader
     public static WIRED_ROOM_STATE_ACTION = 3761;
     public static WIRED_ROOM_LOGS_PAGE = 3882;
     public static WIRED_VARIABLE_HOLDERS_PAGE = 975;
+    public static WIRED_PERMANENT_VARIABLES_REQUEST = 2035;
+    public static WIRED_PERMANENT_VARIABLE_SET = 627;
+    public static WIRED_VARIABLE_DELETE_ALL_HOLDERS = 2480;
     // Official AIR variable leaderboard subscription; also the hello on entering a room.
     public static WIRED_LEADERBOARD_SUBSCRIBE = 2833;
     // Official AIR WIRED Link window (client -> server). AIR's connections request is 2300, which is our
