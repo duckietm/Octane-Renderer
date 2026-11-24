@@ -4,7 +4,9 @@ export class RoomUnitChatShoutComposer implements IMessageComposer<ConstructorPa
 {
     private _data: ConstructorParameters<typeof RoomUnitChatShoutComposer>;
 
-    constructor(message: string, styleId: number, chatColour: string)
+    // The same defaults as RoomUnitChatComposer: a shout sent without a chat colour carried `undefined` as its third
+    // field, which cannot be written to the wire, so the shout was never sent.
+    constructor(message: string, styleId: number = 0, chatColour: string = '')
     {
         this._data = [message, styleId, chatColour];
     }

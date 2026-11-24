@@ -354,6 +354,8 @@ export class IncomingHeader
     public static WIRED_VARIABLES_FOR_OBJECT = 238;
     public static WIRED_CLICK_USER_RESPONSE = 9460;
     public static WIRED_VARIABLE_HOLDERS_PAGE = 9461;
+    public static WIRED_USER_PERMANENT_VARIABLES_LIST = 2933;
+    public static WIRED_PERMANENT_VARIABLE_RESULT = 2425;
     public static WIRED_VARIABLE_HOLDERS = 9462;
     public static WIRED_OPEN = 1830;
     public static WIRED_REWARD = 178;

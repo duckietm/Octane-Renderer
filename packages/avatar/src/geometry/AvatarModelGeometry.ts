@@ -12,6 +12,10 @@ export class AvatarModelGeometry
     private _itemIdToBodyPartMap: Map<string, Map<string, GeometryBodyPart>>;
     private _transformation: Matrix4x4;
     private _canvases: Map<string, Map<string, AvatarCanvas>>;
+    // AIR geometry `order-before` / `order-after`: a body part drawn right next to another whatever the camera angle
+    // (the shoulder pet's arm layers go with the arm they sit on). One table for every geometry type, as AIR keeps it.
+    private _orderBefore: Map<string, string>;
+    private _orderAfter: Map<string, string>;
 
     constructor(data: any)
     {
@@ -21,6 +25,8 @@ export class AvatarModelGeometry
         this._itemIdToBodyPartMap = new Map();
         this._transformation = new Matrix4x4();
         this._canvases = new Map();
+        this._orderBefore = new Map();
+        this._orderAfter = new Map();
 
         const camera = data.camera;
 
@@ -74,6 +80,9 @@ export class AvatarModelGeometry
                         const geometryBodyPart = new GeometryBodyPart(bodyPart);
 
                         bodyParts.set(geometryBodyPart.id, geometryBodyPart);
+
+                        if(bodyPart.orderBefore) this._orderBefore.set(geometryBodyPart.id, bodyPart.orderBefore);
+                        if(bodyPart.orderAfter) this._orderAfter.set(geometryBodyPart.id, bodyPart.orderAfter);
 
                         for(const part of geometryBodyPart.getPartIds(null))
                         {
@@ -267,7 +276,30 @@ export class AvatarModelGeometry
             ids.push(set[1].id);
         }
 
+        for(const [ bodyPartId, targetId ] of this._orderBefore) AvatarModelGeometry.placeBodyPart(ids, bodyPartId, targetId, 0);
+        for(const [ bodyPartId, targetId ] of this._orderAfter) AvatarModelGeometry.placeBodyPart(ids, bodyPartId, targetId, 1);
+
         return ids;
+    }
+
+    /**
+     * AIR placeBodyPartBefore / placeBodyPartAfter: takes the body part out of the list and puts it back at its
+     * target's index (before) or right behind it (after). A part that is not in the list is left alone; one whose
+     * target is not in the list is dropped, as in AIR.
+     */
+    private static placeBodyPart(ids: string[], bodyPartId: string, targetId: string, offset: number): void
+    {
+        const index = ids.indexOf(bodyPartId);
+
+        if(index === -1) return;
+
+        ids.splice(index, 1);
+
+        const targetIndex = ids.indexOf(targetId);
+
+        if(targetIndex === -1) return;
+
+        ids.splice((targetIndex + offset), 0, bodyPartId);
     }
 
     public getParts(geometryType: string, bodyPartId: string, direction: number, items: any[], avatar: IAvatarImage): string[]
