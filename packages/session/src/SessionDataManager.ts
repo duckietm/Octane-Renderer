@@ -151,10 +151,48 @@ export class SessionDataManager implements ISessionDataManager
         return this._userDataSnapshot;
     }
 
+    // Set when the localization reads the furniture texts from here: nothing needs copying into it then.
+    private _lazyFurnitureLocalization: boolean = false;
+
+    /** roomItem.name.<id>, roomItem.desc.<id>, wallItem.name.<id> and wallItem.desc.<id>, read from the furniture data. */
+    private resolveFurnitureLocalization(key: string): string | null
+    {
+        const isFloor = key.startsWith('roomItem.');
+
+        if(!isFloor && !key.startsWith('wallItem.')) return null;
+
+        // "roomItem." and "wallItem." are 9 characters, "name." and "desc." 5 more.
+        const field = key.slice(9, 14);
+
+        if((field !== 'name.') && (field !== 'desc.')) return null;
+
+        const isName = (field === 'name.');
+        const idText = key.slice(14);
+        const id = Number(idText);
+
+        if(!idText.length || !Number.isInteger(id)) return null;
+
+        const item = isFloor ? this.getFloorItemData(id) : this.getWallItemData(id);
+
+        if(!item) return null;
+
+        return isName ? item.name : item.description;
+    }
+
     public async init(): Promise<void>
     {
+        // The furniture texts stay in the furniture data and the localization asks for one when it is shown,
+        // instead of every name and description being copied into it at boot.
+        const localization = GetLocalizationManager();
+
+        if(typeof localization?.setFurnitureResolver === 'function')
+        {
+            localization.setFurnitureResolver(key => this.resolveFurnitureLocalization(key));
+            this._lazyFurnitureLocalization = true;
+        }
+
         await Promise.all([
-            this._furnitureData.init(),
+            this._furnitureData.init(this._lazyFurnitureLocalization),
             this._productData.init(),
             this._badgeImageManager.init(),
             Promise.resolve(this._ignoredUsersManager.init()),
@@ -267,6 +305,8 @@ export class SessionDataManager implements ISessionDataManager
 
     public getAllFurnitureData(): IFurnitureData[]
     {
+        if(!this._floorItemOverrides.size && !this._wallItemOverrides.size) return [ ...this._floorItems.values(), ...this._wallItems.values() ];
+
         return [
             ...Array.from(this._floorItems.values()).map(item => this.applyFurnitureOverrides(item, this._floorItemOverrides)),
             ...Array.from(this._wallItems.values()).map(item => this.applyFurnitureOverrides(item, this._wallItemOverrides))
@@ -280,7 +320,7 @@ export class SessionDataManager implements ISessionDataManager
     {
         if(!url || !url.length) return [];
 
-        const added = await this._furnitureData.mergeFromUrl(url);
+        const added = await this._furnitureData.mergeFromUrl(url, !this._lazyFurnitureLocalization);
 
         // Refresh the furni name/desc surfaces (catalog, inventory, infostand)
         // via the window event they actually listen to — same signal
@@ -642,6 +682,9 @@ export class SessionDataManager implements ISessionDataManager
 
     private refreshFurnitureLocalizations(): void
     {
+        // The localization reads every item through getFloorItemData / getWallItemData, overrides included.
+        if(this._lazyFurnitureLocalization) return;
+
         const localizationManager = GetLocalizationManager();
 
         for(const item of this._floorItems.values())
@@ -669,7 +712,7 @@ export class SessionDataManager implements ISessionDataManager
 
     public async applyFurnidataReloadHint(): Promise<void>
     {
-        await this._furnitureData.init();
+        await this._furnitureData.init(this._lazyFurnitureLocalization);
         if(typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('octane-localization-updated'));
     }
 

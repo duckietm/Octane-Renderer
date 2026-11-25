@@ -25,7 +25,10 @@ export class RoomContentLoader implements IRoomContentLoader
     /** AIR's variable fx bars, hearts, badges, numbers and icons (the room visualization library's variablefx assets). */
     private static VARIABLE_FX: string = 'variablefx';
 
-    public static MANDATORY_LIBRARIES: string[] = [RoomContentLoader.PLACE_HOLDER, RoomContentLoader.PLACE_HOLDER_WALL, RoomContentLoader.PLACE_HOLDER_PET, RoomContentLoader.ROOM, RoomContentLoader.LANDSCAPE, RoomContentLoader.TILE_CURSOR, RoomContentLoader.SELECTION_ARROW, RoomContentLoader.AVATAR_ADDITIONS, RoomContentLoader.FLOOR_EDITOR, RoomContentLoader.VARIABLE_FX];
+    // The libraries shipped with the renderer: they need no furniture data, so they can load before the session data is in.
+    private static LOCAL_MANDATORY_LIBRARIES: string[] = [RoomContentLoader.PLACE_HOLDER, RoomContentLoader.PLACE_HOLDER_WALL, RoomContentLoader.PLACE_HOLDER_PET, RoomContentLoader.ROOM, RoomContentLoader.TILE_CURSOR, RoomContentLoader.SELECTION_ARROW, RoomContentLoader.AVATAR_ADDITIONS, RoomContentLoader.VARIABLE_FX];
+    // floor_editor is not used at boot; it still loads when asked for.
+    public static MANDATORY_LIBRARIES: string[] = [...RoomContentLoader.LOCAL_MANDATORY_LIBRARIES, RoomContentLoader.LANDSCAPE];
 
     private _iconListener: IRoomContentListener;
     private _images: Map<string, HTMLImageElement> = new Map();
@@ -48,19 +51,54 @@ export class RoomContentLoader implements IRoomContentLoader
     private _objectOriginalNames: Map<string, string> = new Map();
 
     private _pendingContentTypes: string[] = [];
+    private _mandatoryLoad: Promise<void> = null;
+    private _landscapeLoad: Promise<void> = null;
+    private _furnitureDataProcessed: boolean = false;
+
+    /**
+     * Starts the libraries shipped with the renderer; they need neither the session data nor the room engine, so a
+     * client can call this early in its boot. Shared by every caller and never rejects: a library that fails is
+     * logged and its objects show placeholders.
+     */
+    public preloadMandatoryLibraries(): Promise<void>
+    {
+        if(this._mandatoryLoad === null) this._mandatoryLoad = this.loadLibraries(RoomContentLoader.LOCAL_MANDATORY_LIBRARIES);
+
+        return this._mandatoryLoad;
+    }
+
+    /** The landscape library, a furniture type: it waits for the furniture data, so only after the session data. */
+    public preloadLandscape(): Promise<void>
+    {
+        if(!this._furnitureDataProcessed)
+        {
+            this.processFurnitureData(GetSessionDataManager().getAllFurnitureData());
+            this._furnitureDataProcessed = true;
+        }
+
+        if(this._landscapeLoad === null) this._landscapeLoad = this.loadLibraries([ RoomContentLoader.LANDSCAPE ]);
+
+        return this._landscapeLoad;
+    }
 
     public async init(): Promise<void>
     {
-        this.processFurnitureData(GetSessionDataManager().getAllFurnitureData());
-
         for(const [index, name] of (GetConfiguration().getValue<string[]>('pet.types') ?? []).entries()) this._pets[name] = index;
 
         // One library that fails to load must not stop the room engine; its objects show placeholders.
-        const results = await Promise.allSettled(RoomContentLoader.MANDATORY_LIBRARIES.map(value => this.downloadAsset(value)));
+        await Promise.all([
+            this.preloadMandatoryLibraries(),
+            this.preloadLandscape()
+        ]);
+    }
+
+    private async loadLibraries(names: string[]): Promise<void>
+    {
+        const results = await Promise.allSettled(names.map(value => this.downloadAsset(value)));
 
         results.forEach((result, index) =>
         {
-            if(result.status === 'rejected') OctaneLogger.error(`Room library "${ RoomContentLoader.MANDATORY_LIBRARIES[index] }" failed to load`, result.reason);
+            if(result.status === 'rejected') OctaneLogger.error(`Room library "${ names[index] }" failed to load`, result.reason);
         });
     }
 

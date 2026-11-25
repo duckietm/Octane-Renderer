@@ -1,4 +1,5 @@
 import stripJsonComments from 'strip-json-comments';
+import { PrefetchedDataEntry, takePrefetchedData, takePrefetchedResponse } from './BootPrefetch';
 
 declare const __OCTANE_JSON_MODE__: 'legacy' | 'jsonc' | 'auto' | undefined;
 
@@ -172,13 +173,75 @@ export const parseConfigJsonFromResponse = async <T = any>(response: Response, s
     return parseConfigJson<T>(text, url);
 };
 
+/**
+ * A json file the page already downloaded (see BootPrefetch), read with the same rules as a fetched one.
+ * Undefined when there is none, or when its download failed or answered other than 200: the caller then fetches.
+ */
+const readPrefetchedJson = async <T>(url: string): Promise<{ value: T } | undefined> =>
+{
+    const pending = takePrefetchedData(url);
+
+    if(pending === null) return undefined;
+
+    let entry: PrefetchedDataEntry = null;
+
+    try
+    {
+        entry = await pending;
+    }
+    catch
+    {
+        return undefined;
+    }
+
+    if(!entry || (entry.status !== 200)) return undefined;
+
+    const resolvedUrl = url || entry.url || '';
+    const contentType = entry.contentType || '';
+
+    if(JSON5_MIME.test(contentType))
+    {
+        throw new ConfigJsonError(
+            `Unsupported JSON5 content type for "${ resolvedUrl }" — serve JSON or JSONC instead`,
+            'parse',
+            resolvedUrl
+        );
+    }
+
+    if(entry.json !== undefined)
+    {
+        rejectJson5Source(resolvedUrl);
+
+        return { value: entry.json as T };
+    }
+
+    if(typeof entry.text !== 'string') return undefined;
+
+    if(JSONC_MIME.test(contentType))
+    {
+        rejectJson5Source(resolvedUrl);
+
+        return { value: parseJsoncWithError<T>(entry.text, resolvedUrl) };
+    }
+
+    return { value: parseConfigJson<T>(entry.text, resolvedUrl) };
+};
+
 export const fetchConfigJson = async <T = any>(url: string, init?: RequestInit): Promise<T> =>
 {
+    // Only a plain GET can stand in for what the page downloaded.
+    if(!init)
+    {
+        const prefetched = await readPrefetchedJson<T>(url);
+
+        if(prefetched) return prefetched.value;
+    }
+
     let response: Response | undefined;
 
     try
     {
-        response = await fetch(url, init);
+        response = await ((!init && takePrefetchedResponse(url)) || fetch(url, init));
     }
     catch (networkError)
     {

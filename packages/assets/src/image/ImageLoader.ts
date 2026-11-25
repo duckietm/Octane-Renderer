@@ -1,3 +1,4 @@
+import { takePrefetchedResponse } from '@octane/utils';
 import { decodeApngImage } from './ApngImageDecoder';
 import { decodeGifImage } from './GifImageDecoder';
 import { ImageFormat } from './ImageFormat';
@@ -89,13 +90,65 @@ export const loadImageResource = async (
     }
 };
 
+const decodeBase64 = (encoded: string): Uint8Array =>
+{
+    const fromBase64 = (Uint8Array as unknown as { fromBase64?: (input: string) => Uint8Array }).fromBase64;
+
+    if(typeof fromBase64 === 'function') return fromBase64(encoded);
+
+    const binary = globalThis.atob(encoded);
+    const bytes = new Uint8Array(binary.length);
+
+    for(let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+
+    return bytes;
+};
+
+/**
+ * The bytes of a base64 `data:` address (the small images the bundler inlines), read in place instead of
+ * going through fetch. Null for any other address, or a data address this cannot read, which is then fetched.
+ */
+export const decodeBase64DataUrl = (source: string): { bytes: Uint8Array; contentType?: string } | null =>
+{
+    if(!source.startsWith('data:')) return null;
+
+    const commaIndex = source.indexOf(',');
+
+    if(commaIndex < 0) return null;
+
+    const meta = source.slice(5, commaIndex);
+
+    if(!meta.toLowerCase().endsWith(';base64')) return null;
+
+    const contentType = meta.slice(0, -7) || undefined;
+
+    try
+    {
+        return { bytes: decodeBase64(source.slice(commaIndex + 1)), contentType };
+    }
+    catch
+    {
+        return null;
+    }
+};
+
 const fetchImageBytes = async (source: string, dependencies: ImageLoaderDependencies): Promise<{ bytes: Uint8Array; contentType?: string }> =>
 {
+    // Only the browser's own fetch is bypassed: an injected one (tests, a custom loader) sees every request.
+    const usesDefaultFetch = (dependencies.fetch === DEFAULT_DEPENDENCIES.fetch);
+
+    if(usesDefaultFetch)
+    {
+        const inline = decodeBase64DataUrl(source);
+
+        if(inline) return inline;
+    }
+
     let response: ImageFetchResponse;
 
     try
     {
-        response = await dependencies.fetch(source);
+        response = await ((usesDefaultFetch && takePrefetchedResponse(source)) || dependencies.fetch(source));
     }
     catch (error)
     {

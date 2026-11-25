@@ -1,7 +1,7 @@
 import { IAssetManager, IAvatarEffectListener } from '@octane/api';
 import { GetConfiguration } from '@octane/configuration';
 import { AvatarRenderEffectLibraryEvent, GetEventDispatcher, OctaneEvent, OctaneEventType } from '@octane/events';
-import { loadGamedata } from '@octane/utils';
+import { loadGamedata, OctaneLogger } from '@octane/utils';
 import { AvatarStructure } from './AvatarStructure';
 import { EffectAssetDownloadLibrary } from './EffectAssetDownloadLibrary';
 
@@ -26,7 +26,7 @@ export class EffectAssetDownloadManager
 
     public async init(): Promise<void>
     {
-        this._missingMandatoryLibs = GetConfiguration().getValue<string[]>('avatar.mandatory.effect.libraries');
+        this._missingMandatoryLibs = GetConfiguration().getValue<string[]>('avatar.mandatory.effect.libraries') ?? [];
 
         const url = GetConfiguration().getValue<string>('avatar.effectmap.url');
 
@@ -49,7 +49,12 @@ export class EffectAssetDownloadManager
         this._libraryLoadedCallback = (event: AvatarRenderEffectLibraryEvent) => this.onLibraryLoaded(event);
         GetEventDispatcher().addEventListener(OctaneEventType.AVATAR_EFFECT_DOWNLOADED, this._libraryLoadedCallback);
 
-        await this.processMissingLibraries();
+        // The mandatory effects (the dances) are not needed before a room is entered, so the boot does not wait
+        // for them: they load in the background and announce themselves like any effect that finished loading.
+        // One that fails is logged instead of failing the avatar boot step.
+        void this.processMissingLibraries()
+            .then(() => GetEventDispatcher().dispatchEvent(new OctaneEvent(OctaneEventType.AVATAR_EFFECT_LOADED)))
+            .catch(error => OctaneLogger.warn('[EffectAssetDownloadManager] Failed to preload the mandatory effects', error));
     }
 
     public dispose(): void

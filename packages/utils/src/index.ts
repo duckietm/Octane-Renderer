@@ -2,6 +2,7 @@ export * from './AdvancedMap';
 export * from './ArrayBufferToBase64';
 export * from './BinaryReader';
 export * from './BinaryWriter';
+export * from './BootPrefetch';
 export * from './ColorConverter';
 export * from './DprRenderingMode';
 export * from './FurniId';
