@@ -9,11 +9,13 @@ declare global
 		{
             roomEngine: RoomEngine;
             setPlaneRenderMode: (mode: 'bake' | 'direct') => void;
+            setAvatarAtlasMode: (enabled: boolean) => void;
 		};
 	}
 }
 
 window.OctaneDevTools = {
     roomEngine: GetRoomEngine(),
-    setPlaneRenderMode: mode => GetRoomEngine().setPlaneRenderMode(mode === 'direct')
+    setPlaneRenderMode: mode => GetRoomEngine().setPlaneRenderMode(mode === 'direct'),
+    setAvatarAtlasMode: enabled => GetRoomEngine().setAvatarAtlasMode(enabled)
 };

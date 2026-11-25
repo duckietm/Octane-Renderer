@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { ImageLoaderDependencies, loadImageResource } from './ImageLoader';
+import { decodeBase64DataUrl, ImageLoaderDependencies, loadImageResource } from './ImageLoader';
 
 const animatedWebP = (): Uint8Array => new Uint8Array([
     0x52, 0x49, 0x46, 0x46, 20, 0, 0, 0,
@@ -90,5 +90,39 @@ describe('loadImageResource', () =>
             bytes: new Uint8Array([ 1, 2, 3 ]),
             contentType: 'application/octet-stream'
         }, createDependencies())).rejects.toThrow(/unsupported image format/i);
+    });
+});
+
+describe('base64 data addresses', () =>
+{
+    const PNG_SIGNATURE = [ 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a ];
+    const pngDataUrl = 'data:image/png;base64,' + btoa(String.fromCharCode(...PNG_SIGNATURE));
+
+    it('reads the bytes and type of a base64 data address', () =>
+    {
+        const decoded = decodeBase64DataUrl(pngDataUrl);
+
+        expect(decoded?.contentType).toBe('image/png');
+        expect(Array.from(decoded?.bytes ?? [])).toEqual(PNG_SIGNATURE);
+    });
+
+    it('leaves other addresses, and data it cannot read, to fetch', () =>
+    {
+        expect(decodeBase64DataUrl('https://cdn.example/a.png')).toBeNull();
+        expect(decodeBase64DataUrl('data:image/svg+xml,<svg/>')).toBeNull();
+        expect(decodeBase64DataUrl('data:image/png;base64')).toBeNull();
+        expect(decodeBase64DataUrl('data:image/png;base64,***')).toBeNull();
+    });
+
+    it('still hands a data address to an injected fetch', async () =>
+    {
+        const dependencies = createDependencies({
+            fetch: vi.fn().mockResolvedValue({ ok: true, status: 200, arrayBuffer: vi.fn().mockResolvedValue(new Uint8Array(PNG_SIGNATURE).buffer) })
+        });
+
+        await loadImageResource({ source: pngDataUrl }, dependencies);
+
+        expect(dependencies.fetch).toHaveBeenCalledWith(pngDataUrl);
+        expect(dependencies.decodeStatic).toHaveBeenCalledWith(expect.any(Uint8Array), 'png', pngDataUrl);
     });
 });

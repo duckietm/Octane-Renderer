@@ -71,7 +71,7 @@ describe('RoomSpriteCanvas', () =>
             _sortableSprites: []
         });
 
-        const spriteCount = (canvas as any).renderObject(object, '1', 0, true, false, 0);
+        const spriteCount = (canvas as any).renderObject(object, 0, true, false, 0);
         const [baseSortable, badgeSortable] = (canvas as any)._sortableSprites;
 
         expect(spriteCount).toBe(2);
@@ -129,7 +129,7 @@ describe('RoomSpriteCanvas depth sorting', () =>
             _sortableSpritesDirty: false
         });
 
-        const render = () => canvas.renderObject(object, '1', 0, true, false, 0);
+        const render = () => canvas.renderObject(object, 0, true, false, 0);
 
         return { canvas, render, second, visualization };
     };
@@ -210,5 +210,153 @@ describe('RoomSpriteCanvas masks', () =>
         expect(viewport.visible).toBe(false);
         expect(boundary.visible).toBe(false);
         expect(display.mask).toBeFalsy();
+    });
+});
+
+describe('RoomSpriteCanvas sprite loop', () =>
+{
+    const setup = (sprites: IRoomObjectSprite[]) =>
+    {
+        const visualization = {
+            instanceId: 7,
+            updateSpriteCounter: 1,
+            sprites,
+            update: vi.fn()
+        } as unknown as IRoomObjectSpriteVisualization & { updateSpriteCounter: number };
+        const object = {
+            id: 42,
+            instanceId: 7,
+            updateCounter: 1,
+            visualization,
+            model: { getValue: () => Number.NaN },
+            getLocation: () => new TestVector3d(0, 0, 0)
+        } as unknown as IRoomObject;
+        const canvas = Object.create(RoomSpriteCanvas.prototype);
+
+        Object.assign(canvas, {
+            _objectCache: new RoomObjectCache(''),
+            _geometry: { updateId: 1, getScreenPosition: () => new TestVector3d(0, 0, 0) },
+            _width: 100,
+            _height: 100,
+            _screenOffsetX: 0,
+            _screenOffsetY: 0,
+            _noSpriteVisibilityChecking: true,
+            _sortableSprites: [],
+            _sortableSpritesDirty: false
+        });
+
+        return { canvas, object, visualization };
+    };
+
+    it('keys the object cache by instance id and names each sortable sprite after it', () =>
+    {
+        const { canvas, object } = setup([ createSprite('', 0) ]);
+
+        canvas.renderObject(object, 0, true, false, 0);
+
+        expect(canvas._objectCache.getObjectCache(7).sprites.spriteCount).toBe(1);
+        expect(canvas._sortableSprites[0].name).toBe('7');
+
+        canvas.removeFromCache('7');
+
+        expect(canvas._objectCache.getObjectCache(7).sprites.spriteCount).toBe(0);
+    });
+
+    it('names an avatar sprite once and keeps the name it already has', () =>
+    {
+        const avatar = Object.assign(createSprite('', 0), { spriteType: 3 });
+        const { canvas, object, visualization } = setup([ avatar ]);
+        const setter = vi.fn();
+        let name = '';
+
+        Object.defineProperty(avatar, 'libraryAssetName', { get: () => name, set: (value: string) =>
+        {
+            setter(value);
+            name = value;
+        } });
+
+        canvas.renderObject(object, 0, true, false, 0);
+        visualization.updateSpriteCounter++;
+        canvas.renderObject(object, 0, true, false, 0);
+
+        expect(name).toBe('avatar_42');
+        expect(setter).toHaveBeenCalledTimes(1);
+    });
+
+    it('breaks depth ties by the running sprite count', () =>
+    {
+        const { canvas, object } = setup([ createSprite('', 0) ]);
+
+        canvas.renderObject(object, 0, true, false, 3);
+
+        expect(canvas._sortableSprites[0].z).toBeCloseTo(3 * 3.7E-11, 20);
+    });
+});
+
+describe('RoomSpriteCanvas sprite pool', () =>
+{
+    it('gives a pooled sprite the room sprite scale and flips, not the scale it had before', async () =>
+    {
+        const { Container, Texture } = await import('pixi.js');
+        const { ExtendedSprite } = await import('./utils/ExtendedSprite');
+        const pooled = new ExtendedSprite();
+
+        pooled.scale.set(-1, -1);
+
+        const canvas = Object.create(RoomSpriteCanvas.prototype);
+
+        Object.assign(canvas, { _display: new Container(), _spritePool: [ pooled ], _spriteCount: 0, _activeSpriteCount: 0 });
+
+        const sprite = Object.assign(createSprite('', 0), { texture: Texture.WHITE, scale: 0.5, flipH: true, flipV: false, alpha: 255, color: 0xFFFFFF, blendMode: 'normal', filters: null, planeDrawData: null });
+
+        canvas.createAndAddSprite({ sprite, x: 0, y: 0, name: '1' });
+
+        expect(pooled.scale.x).toBe(-0.5);
+        expect(pooled.scale.y).toBe(0.5);
+    });
+
+    it('detaches and destroys every sprite at once when the whole display is cleared', async () =>
+    {
+        const { Container } = await import('pixi.js');
+        const { ExtendedSprite } = await import('./utils/ExtendedSprite');
+        const display = new Container();
+        const sprites = [ new ExtendedSprite(), new ExtendedSprite(), new ExtendedSprite() ];
+
+        for(const sprite of sprites) display.addChild(sprite);
+
+        const canvas = Object.create(RoomSpriteCanvas.prototype);
+
+        Object.assign(canvas, { _display: display, _spriteCount: 3, _activeSpriteCount: 3 });
+
+        const removeChildAt = vi.spyOn(display, 'removeChildAt');
+        const removeChild = vi.spyOn(display, 'removeChild');
+
+        canvas.cleanSprites(0, true);
+
+        expect(display.children.length).toBe(0);
+        expect(sprites.every(sprite => sprite.destroyed)).toBe(true);
+        expect(removeChildAt).not.toHaveBeenCalled();
+        expect(removeChild).not.toHaveBeenCalled();
+    });
+
+    it('lets an idle sprite go of its filters and texture', async () =>
+    {
+        const { Container, Filter } = await import('pixi.js');
+        const { ExtendedSprite } = await import('./utils/ExtendedSprite');
+        const display = new Container();
+        const sprite = new ExtendedSprite();
+        const filters = [ new Filter({ glProgram: null, resources: {} }) ];
+
+        sprite.setFilters(filters);
+        display.addChild(sprite);
+
+        const canvas = Object.create(RoomSpriteCanvas.prototype);
+
+        Object.assign(canvas, { _display: display, _spriteCount: 1, _activeSpriteCount: 1 });
+
+        canvas.cleanSprites(0);
+
+        expect(sprite.filters ?? null).toBeNull();
+        expect(sprite.destroyed).toBe(false);
     });
 });

@@ -15,7 +15,11 @@ export class FurnitureDataLoader
         this._wallItems = wallItems;
     }
 
-    public async init(): Promise<void>
+    /**
+     * Loads the furnidata. With lazyLocalization the names and descriptions are not copied into the
+     * localization: it reads them from the furniture data on demand (see SessionDataManager).
+     */
+    public async init(lazyLocalization: boolean = false): Promise<void>
     {
         const url = GetConfiguration().getValue<string>('furnidata.url');
 
@@ -32,15 +36,15 @@ export class FurnitureDataLoader
             throw new Error(`Could not load furniture data from "${ url }" — check "furnidata.url" in renderer-config.json (${ err?.message || err })`);
         }
 
-        if(responseData.roomitemtypes) this.parseFloorItems(responseData.roomitemtypes);
+        if(responseData.roomitemtypes) this.parseFloorItems(responseData.roomitemtypes, !lazyLocalization, false);
 
-        if(responseData.wallitemtypes) this.parseWallItems(responseData.wallitemtypes);
+        if(responseData.wallitemtypes) this.parseWallItems(responseData.wallitemtypes, !lazyLocalization, false);
     }
 
     // Reload a furniture-data chunk such as custom/imported.jsonc and merge it
     // into the existing maps. Returned entries let RoomContentLoader update
     // without a full client reload.
-    public async mergeFromUrl(url: string): Promise<IFurnitureData[]>
+    public async mergeFromUrl(url: string, updateLocalization: boolean = true): Promise<IFurnitureData[]>
     {
         if(!url || !url.length) return [];
 
@@ -57,14 +61,14 @@ export class FurnitureDataLoader
 
         const added: IFurnitureData[] = [];
 
-        if(responseData.roomitemtypes) added.push(...this.parseFloorItems(responseData.roomitemtypes));
+        if(responseData.roomitemtypes) added.push(...this.parseFloorItems(responseData.roomitemtypes, updateLocalization));
 
-        if(responseData.wallitemtypes) added.push(...this.parseWallItems(responseData.wallitemtypes));
+        if(responseData.wallitemtypes) added.push(...this.parseWallItems(responseData.wallitemtypes, updateLocalization));
 
         return added;
     }
 
-    private parseFloorItems(data: any): IFurnitureData[]
+    private parseFloorItems(data: any, updateLocalization: boolean = true, collectAdded: boolean = true): IFurnitureData[]
     {
         const added: IFurnitureData[] = [];
 
@@ -82,23 +86,17 @@ export class FurnitureDataLoader
                 {
                     let colorCode = (color as string);
 
-                    if(colorCode.charAt(0) === '#')
-                    {
-                        colorCode = colorCode.replace('#', '');
+                    if(colorCode.charCodeAt(0) === 35) colorCode = colorCode.slice(1);
 
-                        colors.push(parseInt(colorCode, 16));
-                    }
-                    else
-                    {
-                        colors.push((parseInt(colorCode, 16)));
-                    }
+                    colors.push(parseInt(colorCode, 16));
                 }
             }
 
-            const classSplit = (furniture.classname as string).split('*');
-            const className = classSplit[0];
-            const colorIndex = ((classSplit.length > 1) ? parseInt(classSplit[1]) : 0);
-            const hasColorIndex = (classSplit.length > 1);
+            const rawClassName = (furniture.classname as string);
+            const starIndex = rawClassName.indexOf('*');
+            const hasColorIndex = (starIndex >= 0);
+            const className = hasColorIndex ? rawClassName.slice(0, starIndex) : rawClassName;
+            const colorIndex = hasColorIndex ? parseInt(rawClassName.slice(starIndex + 1)) : 0;
             const allowStack = this.resolveBooleanFlag(furniture.allowstack, furniture.allow_stack, furniture.allowStack);
 
             const furnitureData = new FurnitureData(FurnitureType.FLOOR, furniture.id, furniture.classname, className, furniture.category, furniture.name, furniture.description, furniture.revision, furniture.xdim, furniture.ydim, 0, colors, hasColorIndex, colorIndex, furniture.adurl, furniture.offerid, furniture.buyout, furniture.rentofferid, furniture.rentbuyout, furniture.bc, furniture.customparams, furniture.specialtype, allowStack, furniture.canstandon, furniture.cansiton, furniture.canlayon, furniture.excludeddynamic, furniture.furniline, furniture.environment, furniture.rare,
@@ -109,15 +107,15 @@ export class FurnitureDataLoader
 
             this._floorItems.set(furnitureData.id, furnitureData);
 
-            added.push(furnitureData);
+            if(collectAdded) added.push(furnitureData);
 
-            this.updateLocalizations(furnitureData);
+            if(updateLocalization) this.updateLocalizations(furnitureData);
         }
 
         return added;
     }
 
-    private parseWallItems(data: any): IFurnitureData[]
+    private parseWallItems(data: any, updateLocalization: boolean = true, collectAdded: boolean = true): IFurnitureData[]
     {
         const added: IFurnitureData[] = [];
 
@@ -136,9 +134,9 @@ export class FurnitureDataLoader
 
             this._wallItems.set(furnitureData.id, furnitureData);
 
-            added.push(furnitureData);
+            if(collectAdded) added.push(furnitureData);
 
-            this.updateLocalizations(furnitureData);
+            if(updateLocalization) this.updateLocalizations(furnitureData);
         }
 
         return added;

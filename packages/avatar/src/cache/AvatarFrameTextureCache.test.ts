@@ -533,11 +533,7 @@ describe('AvatarImage shared output integration', () =>
 
             vi.spyOn(internals._cache, 'getImageContainer').mockImplementation(() =>
             {
-                const container = new Container();
-
-                container.addChild(new Sprite(texture));
-
-                const part = new AvatarImageBodyPartContainer(container, new Point(), false);
+                const part = new AvatarImageBodyPartContainer([{ texture, flipped: false, x: 0, y: 0, tint: 0xFFFFFF }], texture.width, texture.height, new Point(), false, null);
 
                 vi.spyOn(part, 'dispose');
                 disposed.push(part);

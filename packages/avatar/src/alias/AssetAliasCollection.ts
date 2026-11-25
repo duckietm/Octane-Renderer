@@ -9,6 +9,8 @@ export class AssetAliasCollection
     private _avatarRenderManager: AvatarRenderManager;
     private _missingAssetNames: string[];
     private _processedCollections: WeakSet<object> = new WeakSet();
+    // Bumped whenever an alias is added, so a cached name resolution can tell it may be out of date.
+    private _aliasRevision: number = 0;
 
     constructor(avatarRenderManager: AvatarRenderManager, assets: IAssetManager)
     {
@@ -48,8 +50,22 @@ export class AssetAliasCollection
                 if(!alias) continue;
 
                 this._aliases.set(name, new AssetAlias(name, alias));
+                this._aliasRevision++;
             }
         }
+    }
+
+    /**
+     * Changes whenever getAsset may answer differently: an alias was added or the asset manager's assets changed.
+     * Both counters only grow, so their sum changes with either. -1 when the asset manager keeps no revision.
+     */
+    public get revision(): number
+    {
+        const assetRevision = this._assets?.assetRevision;
+
+        if((assetRevision === undefined) || (assetRevision === null)) return -1;
+
+        return (assetRevision + this._aliasRevision);
     }
 
     public hasAlias(name: string): boolean

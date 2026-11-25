@@ -505,7 +505,7 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
             {
                 if(!object) continue;
 
-                spriteCount = (spriteCount + this.renderObject(object, object.instanceId.toString(), time, update, updateVisuals, spriteCount));
+                spriteCount = (spriteCount + this.renderObject(object, time, update, updateVisuals, spriteCount));
             }
         }
 
@@ -591,26 +591,28 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
 
     public removeFromCache(identifier: string): void
     {
-        this._objectCache.removeObjectCache(identifier);
+        this._objectCache.removeObjectCache(Number(identifier));
 
         this._sortableSpritesDirty = true;
     }
 
-    private renderObject(object: IRoomObject, identifier: string, time: number, update: boolean, updateVisuals: boolean, count: number): number
+    private renderObject(object: IRoomObject, time: number, update: boolean, updateVisuals: boolean, count: number): number
     {
         if(!object) return 0;
 
         const visualization = object.visualization as IRoomObjectSpriteVisualization;
+        // The cache is keyed by the instance id itself, so no id string is built per object per frame.
+        const instanceId = object.instanceId;
 
         if(!visualization)
         {
-            this.removeFromCache(identifier);
+            this.removeObjectCache(instanceId);
 
             return 0;
         }
 
-        const cache = this.getCacheItem(identifier);
-        cache.objectId = object.instanceId;
+        const cache = this.getCacheItem(instanceId);
+        cache.objectId = instanceId;
 
         const locationCache = cache.location;
         const sortableCache = cache.sprites;
@@ -619,12 +621,12 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
 
         if(!vector)
         {
-            this.removeFromCache(identifier);
+            this.removeObjectCache(instanceId);
 
             return 0;
         }
 
-        if(updateVisuals) visualization.update(this._geometry, time, (!sortableCache.isEmpty || update), (this._skipObjectUpdate && this._runningSlow));
+        if(updateVisuals) visualization.update(this._geometry, time, (!sortableCache.isEmpty || update), (this._skipObjectUpdate && this._runningSlow), !sortableCache.isEmpty);
 
         if(locationCache.locationChanged) update = true;
 
@@ -645,8 +647,13 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
 
         let spriteCount = 0;
 
-        for(const sprite of visualization.sprites.values())
+        const sprites = visualization.sprites;
+        const totalSprites = (sprites ? sprites.length : 0);
+
+        for(let index = 0; index < totalSprites; index++)
         {
+            const sprite = sprites[index];
+
             if(!sprite || !sprite.visible) continue;
 
             const texture = sprite.texture;
@@ -691,14 +698,17 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
 
                 this._sortableSpritesDirty = true;
 
-                sortableSprite.name = identifier;
+                // A sortable sprite stays with its object, so its name is built once.
+                sortableSprite.name = instanceId.toString();
             }
 
             sortableSprite.sprite = sprite;
 
             if((sprite.spriteType === RoomObjectSpriteType.AVATAR) || (sprite.spriteType === RoomObjectSpriteType.AVATAR_OWN))
             {
-                sortableSprite.sprite.libraryAssetName = 'avatar_' + object.id;
+                // A sprite belongs to one object for life: name it once instead of building the
+                // same string every frame for every avatar.
+                if(!sprite.libraryAssetName || !sprite.libraryAssetName.startsWith('avatar_')) sprite.libraryAssetName = 'avatar_' + object.id;
             }
 
             sortableSprite.x = (spriteX - this._screenOffsetX);
@@ -862,8 +872,11 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
 
         extendedSprite.setPlaneDrawData(sprite.planeDrawData);
 
-        if(sprite.flipH) extendedSprite.scale.x = -1;
-        if(sprite.flipV) extendedSprite.scale.y = -1;
+        // A pooled sprite keeps its previous scale, so set it like the update path does.
+        const magnitude = (sprite.scale && (sprite.scale > 0)) ? sprite.scale : 1;
+
+        extendedSprite.scale.x = sprite.flipH ? -magnitude : magnitude;
+        extendedSprite.scale.y = sprite.flipV ? -magnitude : magnitude;
 
         this.updateEnterRoomEffect(extendedSprite, sprite);
 
@@ -894,13 +907,23 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
 
         if((spriteCount < this._activeSpriteCount) || !this._activeSpriteCount)
         {
-            let iterator = (this._spriteCount - 1);
-
-            while(iterator >= spriteCount)
+            // Detaching every sprite at once, last first as before, avoids a linear child search
+            // per sprite (removeChild and removeChildAt both look the child up). Only the whole
+            // display: Pixi's removeChildren(begin, end) removes end items from begin, not a range.
+            if(destroy && !spriteCount && this._spriteCount && (this._spriteCount === this._display.children.length))
             {
-                this.cleanSprite(this.getExtendedSprite(iterator), destroy);
+                for(const sprite of this._display.removeChildren()) this.cleanSprite(sprite as ExtendedSprite, true);
+            }
+            else
+            {
+                let iterator = (this._spriteCount - 1);
 
-                iterator--;
+                while(iterator >= spriteCount)
+                {
+                    this.cleanSprite(this.getExtendedSprite(iterator), destroy);
+
+                    iterator--;
+                }
             }
         }
 
@@ -932,7 +955,9 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
 
         if(!destroy)
         {
+            // An idle sprite lets go of its filters too, so it holds no highlight or glow of a sprite gone.
             sprite.setPlaneDrawData(null);
+            sprite.setFilters(null);
             sprite.setTexture(null);
         }
         else
@@ -957,9 +982,16 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
         this._mouseListener = listener;
     }
 
-    private getCacheItem(id: string): RoomObjectCacheItem
+    private getCacheItem(id: number): RoomObjectCacheItem
     {
         return this._objectCache.getObjectCache(id);
+    }
+
+    private removeObjectCache(id: number): void
+    {
+        this._objectCache.removeObjectCache(id);
+
+        this._sortableSpritesDirty = true;
     }
 
     private isSpriteVisible(x: number, y: number, width: number, height: number): boolean

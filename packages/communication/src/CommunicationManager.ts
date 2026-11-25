@@ -5,7 +5,10 @@ import { GetTickerTime, OctaneLogger } from '@octane/utils';
 import { OctaneMessages } from './OctaneMessages';
 import { SocketConnection } from './SocketConnection';
 import { AuthenticatedEvent, ClientHelloMessageComposer, ClientPingEvent, DisconnectReasonEvent, InfoRetrieveMessageComposer, PongMessageComposer, SSOTicketMessageComposer, UniqueIDMessageComposer } from './messages';
-import { Thumbmark } from '@thumbmarkjs/thumbmarkjs';
+
+/** Where the last computed machine fingerprint is kept, so the next login need not wait for a new one. */
+export const MACHINE_ID_STORAGE_KEY = 'octane.machineId';
+const MACHINE_ID_PATTERN = /^IID-[A-Za-z0-9_-]{8,128}$/;
 
 export class CommunicationManager implements ICommunicationManager
 {
@@ -20,19 +23,52 @@ export class CommunicationManager implements ICommunicationManager
     private _socketReconnectedCallback: () => void = null;
 
     private _machineIdPromise: Promise<string> | null = null;
+    // The remembered fingerprint sent at login; checked against a fresh one once the client is idle.
+    private _sentCachedMachineId: string | null = null;
+    private _machineIdVerifyTimer: ReturnType<typeof setTimeout> | null = null;
+    private _machineIdVerifyIdle: number | null = null;
     private _initResolved: boolean = false;
     private _listenersRegistered: boolean = false;
     private _connectionStarted: boolean = false;
     private _initAttempt: { resolve: () => void; reject: (error: Error) => void } = null;
     private _recoveryToken: string = '';
 
-    private async generateMachineID(): Promise<string>
+    private readCachedMachineID(): string | null
     {
         try
         {
+            const cached = globalThis.localStorage?.getItem(MACHINE_ID_STORAGE_KEY);
+
+            return (cached && MACHINE_ID_PATTERN.test(cached)) ? cached : null;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    /** Fingerprints this browser (the library loads only when needed) and remembers the result for the next login. */
+    protected async computeFreshMachineID(): Promise<string>
+    {
+        try
+        {
+            const { Thumbmark } = await import('@thumbmarkjs/thumbmarkjs');
             const result = await new Thumbmark().get();
 
-            return result.thumbmark ? `IID-${result.thumbmark}` : 'FAILED';
+            if(!result.thumbmark) return 'FAILED';
+
+            const machineId = `IID-${result.thumbmark}`;
+
+            try
+            {
+                globalThis.localStorage?.setItem(MACHINE_ID_STORAGE_KEY, machineId);
+            }
+            catch
+            {
+                // Storage full or blocked: the next login computes it again.
+            }
+
+            return machineId;
         }
         catch (error)
         {
@@ -40,6 +76,68 @@ export class CommunicationManager implements ICommunicationManager
 
             return 'FAILED';
         }
+    }
+
+    /**
+     * The fingerprint sent with the login. A remembered one is used at once, as computing it takes a while;
+     * it is checked after the login (scheduleMachineIDVerification), so an outdated or edited one is corrected.
+     */
+    private async generateMachineID(): Promise<string>
+    {
+        const cached = this.readCachedMachineID();
+
+        this._sentCachedMachineId = cached;
+
+        return cached ?? this.computeFreshMachineID();
+    }
+
+    private cancelMachineIDVerification(): void
+    {
+        if(this._machineIdVerifyTimer !== null)
+        {
+            clearTimeout(this._machineIdVerifyTimer);
+            this._machineIdVerifyTimer = null;
+        }
+
+        if(this._machineIdVerifyIdle !== null)
+        {
+            (globalThis as { cancelIdleCallback?: (id: number) => void }).cancelIdleCallback?.(this._machineIdVerifyIdle);
+            this._machineIdVerifyIdle = null;
+        }
+    }
+
+    /**
+     * After a login made with the remembered fingerprint, computes the real one when the browser is idle and
+     * sends it if it differs; the server accepts the UniqueID message after the login and checks bans on it.
+     */
+    private scheduleMachineIDVerification(): void
+    {
+        const sentCached = this._sentCachedMachineId;
+
+        if(!sentCached) return;
+
+        this._sentCachedMachineId = null;
+        this.cancelMachineIDVerification();
+
+        const runVerification = () =>
+        {
+            this._machineIdVerifyTimer = null;
+            this._machineIdVerifyIdle = null;
+
+            void this.computeFreshMachineID().then(freshId =>
+            {
+                if(!freshId || (freshId === 'FAILED') || (freshId === sentCached)) return;
+
+                // Reconnects send the corrected one from now on.
+                this._machineIdPromise = Promise.resolve(freshId);
+                this._connection?.send(new UniqueIDMessageComposer(freshId, '', ''));
+            });
+        };
+
+        const requestIdle = (globalThis as { requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number }).requestIdleCallback;
+
+        if(typeof requestIdle === 'function') this._machineIdVerifyIdle = requestIdle.call(globalThis, runVerification, { timeout: 5000 });
+        else this._machineIdVerifyTimer = setTimeout(runVerification, 2500);
     }
 
     private async sendHandshake(): Promise<void>
@@ -71,6 +169,9 @@ export class CommunicationManager implements ICommunicationManager
     public init(): Promise<void>
     {
         if(this._initResolved && this._connection.isAuthenticated) return Promise.resolve();
+
+        // Started before the socket opens, so the handshake rarely waits for it.
+        if(this._machineIdPromise === null) this._machineIdPromise = this.generateMachineID();
 
         this.registerListeners();
 
@@ -172,6 +273,8 @@ export class CommunicationManager implements ICommunicationManager
 
             event.connection.send(new InfoRetrieveMessageComposer());
 
+            if(!isReconnect) this.scheduleMachineIDVerification();
+
             if(isReconnect)
             {
                 OctaneLogger.log('[CommunicationManager] Dispatching SOCKET_REAUTHENTICATED');
@@ -199,6 +302,8 @@ export class CommunicationManager implements ICommunicationManager
 
     public dispose(): void
     {
+        this.cancelMachineIDVerification();
+
         // Stop pong interval
         this.stopPong();
 

@@ -1,7 +1,7 @@
 import { inflate } from 'pako';
 import { Texture } from 'pixi.js';
 import { BinaryReader } from './BinaryReader';
-import { isHabBundle, readHabBundle } from './HabBundle';
+import { isHabBundle, readHabBundleAsync } from './HabBundle';
 
 export type OctaneBundleTextureDecoder = (bytes: ArrayBuffer, entryName: string) => Promise<Texture>;
 
@@ -61,7 +61,7 @@ export class OctaneBundle
      */
     private async parseHab(arrayBuffer: ArrayBuffer, textureDecoder: OctaneBundleTextureDecoder): Promise<void>
     {
-        const { name, entries } = readHabBundle(arrayBuffer);
+        const { name, entries } = await readHabBundleAsync(arrayBuffer);
         const images = entries.filter(entry => entry.mimeType.startsWith('image/') || /\.(png|webp|jpe?g|gif)$/i.test(entry.name));
         const json = entries.find(entry => entry.mimeType === 'application/json' || entry.name.endsWith('.json'));
 

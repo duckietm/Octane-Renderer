@@ -33,7 +33,12 @@ export class LocalizationManager implements ILocalizationManager
         return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
 
+    // Texts set at run time (setValue); they win over the text files.
     private _definitions: Map<string, string> = new Map();
+    // The parsed text files, in load order; a key is read from them (and kept in the cache) on its first lookup.
+    private _baseDocuments: { [index: string]: unknown }[] = [];
+    private _baseCache: Map<string, string> = new Map();
+    private _furnitureResolver: ((key: string) => string | null) | null = null;
     private _overrideDefinitions: Map<string, string> = new Map();
     private _parameters: Map<string, Map<string, string>> = new Map();
     private _badgePointLimits: Map<string, number> = new Map();
@@ -63,6 +68,10 @@ export class LocalizationManager implements ILocalizationManager
                 }
             }));
 
+            // A new load replaces the text files of an earlier one.
+            this._baseDocuments = [];
+            this._baseCache.clear();
+
             for(const data of documents) this.parseLocalization(data);
 
             GetCommunication().registerMessageEvent(new BadgePointLimitsEvent(this.onBadgePointLimitsEvent.bind(this)));
@@ -78,15 +87,56 @@ export class LocalizationManager implements ILocalizationManager
     {
         if(!data) return false;
 
-        // Like AIR's CoreLocalizationManager, a backslash followed by "n" in a text file is a line break.
-        for(const key in data)
-        {
-            const value = data[key];
-
-            this._definitions.set(key, (typeof value === 'string') ? value.replace(/\\n/g, '\n') : value);
-        }
+        // Kept as parsed: copying tens of thousands of keys into a map is boot time spent on texts never shown.
+        this._baseDocuments.push(data);
+        this._baseCache.clear();
 
         return true;
+    }
+
+    /** Like AIR's CoreLocalizationManager, a backslash followed by "n" in a text file is a line break. */
+    private static decodeValue(value: unknown): unknown
+    {
+        return ((typeof value === 'string') && value.includes('\\n')) ? value.replace(/\\n/g, '\n') : value;
+    }
+
+    /** A key of the text files; a later file wins over an earlier one. */
+    private lookupBaseDefinition(key: string): string | undefined
+    {
+        if(this._baseCache.has(key)) return this._baseCache.get(key);
+
+        for(let i = this._baseDocuments.length - 1; i >= 0; i--)
+        {
+            const document = this._baseDocuments[i];
+
+            if(!Object.prototype.hasOwnProperty.call(document, key)) continue;
+
+            const value = LocalizationManager.decodeValue(document[key]) as string;
+
+            this._baseCache.set(key, value);
+
+            return value;
+        }
+
+        return undefined;
+    }
+
+    public setFurnitureResolver(resolver: ((key: string) => string | null) | null): void
+    {
+        this._furnitureResolver = resolver;
+    }
+
+    /** A furniture name or description (roomItem.* / wallItem.*) from the furniture data, when a resolver is set. */
+    private resolveFurnitureValue(key: string): string | null
+    {
+        if(!this._furnitureResolver) return null;
+
+        if(!key.startsWith('roomItem.') && !key.startsWith('wallItem.')) return null;
+
+        const value = this._furnitureResolver(key);
+
+        // As raw as the furniture data has it, like the texts the furniture data used to copy in with setValue.
+        return ((value === null) || (value === undefined)) ? null : value;
     }
 
     private onBadgePointLimitsEvent(event: BadgePointLimitsEvent): void
@@ -122,7 +172,7 @@ export class LocalizationManager implements ILocalizationManager
 
     public hasValue(key: string): boolean
     {
-        return (this._overrideDefinitions.has(key) || this._definitions.has(key));
+        return (this._overrideDefinitions.has(key) || (this.resolveFurnitureValue(key) !== null) || this._definitions.has(key) || (this.lookupBaseDefinition(key) !== undefined));
     }
 
     public getValue(key: string, doParams: boolean = true): string
@@ -141,7 +191,9 @@ export class LocalizationManager implements ILocalizationManager
             for(const splitKey of keys) key = key.replace(splitKey, this.resolveValue(splitKey.slice(2, -1), doParams, true));
         }
 
-        let value = (this._overrideDefinitions.get(key) || this._definitions.get(key) || null);
+        // A furniture text comes from the furniture data while it knows the item, so it never goes stale;
+        // what setValue stored for one is only kept for items it does not know.
+        let value = (this._overrideDefinitions.get(key) || this.resolveFurnitureValue(key) || this._definitions.get(key) || this.lookupBaseDefinition(key) || null);
 
         if(!value)
         {

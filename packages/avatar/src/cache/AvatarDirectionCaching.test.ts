@@ -54,22 +54,47 @@ describe('avatar action cache directions', () =>
 {
     const direction = () => ({ dispose: vi.fn() }) as unknown as AvatarImageDirectionCache;
 
-    it('keeps the three most recently used directions and disposes the evicted one', async () =>
+    it('without the atlas keeps the three most recently used directions and disposes the evicted one', async () =>
     {
         const { AvatarImageActionCache } = await import('./AvatarImageActionCache');
+
+        AvatarImageActionCache.MAX_DIRECTIONS = AvatarImageActionCache.DEFAULT_MAX_DIRECTIONS;
+
+        try
+        {
+            const cache = new AvatarImageActionCache();
+            const [ d0, d1, d2, d3 ] = [ direction(), direction(), direction(), direction() ];
+
+            cache.updateDirectionCache(0, d0);
+            cache.updateDirectionCache(1, d1);
+            cache.updateDirectionCache(2, d2);
+            cache.getDirectionCache(0);
+            cache.updateDirectionCache(3, d3);
+
+            expect(d1.dispose).toHaveBeenCalledOnce();
+            expect(cache.getDirectionCache(1)).toBeNull();
+            expect(cache.getDirectionCache(0)).toBe(d0);
+            expect(d0.dispose).not.toHaveBeenCalled();
+        }
+        finally
+        {
+            AvatarImageActionCache.MAX_DIRECTIONS = AvatarImageActionCache.ATLAS_MAX_DIRECTIONS;
+        }
+    });
+
+    it('with the atlas (on from the start) keeps all eight directions', async () =>
+    {
+        const { AvatarImageActionCache } = await import('./AvatarImageActionCache');
+
+        expect(AvatarImageActionCache.MAX_DIRECTIONS).toBe(8);
+
         const cache = new AvatarImageActionCache();
-        const [ d0, d1, d2, d3 ] = [ direction(), direction(), direction(), direction() ];
+        const directions = Array.from({ length: 8 }, () => direction());
 
-        cache.updateDirectionCache(0, d0);
-        cache.updateDirectionCache(1, d1);
-        cache.updateDirectionCache(2, d2);
-        cache.getDirectionCache(0);
-        cache.updateDirectionCache(3, d3);
+        directions.forEach((entry, index) => cache.updateDirectionCache(index, entry));
+        directions.forEach((entry, index) => expect(cache.getDirectionCache(index)).toBe(entry));
 
-        expect(d1.dispose).toHaveBeenCalledOnce();
-        expect(cache.getDirectionCache(1)).toBeNull();
-        expect(cache.getDirectionCache(0)).toBe(d0);
-        expect(d0.dispose).not.toHaveBeenCalled();
+        expect(directions.every(entry => !(entry.dispose as unknown as { mock: { calls: unknown[] } }).mock.calls.length)).toBe(true);
     });
 
     it('disposes a direction that is replaced by a fresh one', async () =>
