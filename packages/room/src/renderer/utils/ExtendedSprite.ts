@@ -1,5 +1,5 @@
 import { AlphaTolerance, IRoomPlaneDrawData } from '@octane/api';
-import { GetRenderer, TextureUtils } from '@octane/utils';
+import { GetRegionHitMap, GetRenderer, RegionHitMap, TextureUtils } from '@octane/utils';
 import { DestroyOptions, Filter, Point, Sprite, Texture, TextureSource, WebGLRenderer, WebGPURenderer } from 'pixi.js';
 import { RoomPlaneDisplay } from './RoomPlaneDisplay';
 import { RoomPlaneContainsPoint } from './RoomPlaneHitTest';
@@ -336,6 +336,11 @@ export class ExtendedSprite extends Sprite
 
         if(!super.containsPoint(point)) return false;
 
+        // An avatar atlas cell keeps a hit map of its own rectangle (ported from plus-emulator/volt-renderer, by Dennis, GPL-3.0).
+        const region = GetRegionHitMap(texture);
+
+        if(region) return ExtendedSprite.regionContainsPoint(texture, region, point, this.alphaTolerance);
+
         const textureSource = texture.source;
 
         if((!textureSource || !textureSource.hitMap) && !ExtendedSprite.generateHitMapForTextureSource(textureSource)) return false;
@@ -361,6 +366,67 @@ export class ExtendedSprite extends Sprite
         const index = (dx + dy * textureSource.width) * 4;
 
         return (hitMap[index + 3] >= this.alphaTolerance);
+    }
+
+    private static regionContainsPoint(texture: Texture, region: RegionHitMap, point: Point, alphaTolerance: number): boolean
+    {
+        if((!region.pixels || (region.dirty && ((Date.now() - region.time) > 100))) && !ExtendedSprite.readRegionHitMap(texture, region)) return false;
+
+        const resolution = texture.source.resolution;
+        const width = Math.max(Math.round(texture.frame.width * resolution), 1);
+        const height = Math.max(Math.round(texture.frame.height * resolution), 1);
+        const dx = (Math.round(point.x) * resolution);
+        const dy = (Math.round(point.y) * resolution);
+
+        if((dx < 0) || (dy < 0) || (dx >= width) || (dy >= height)) return false;
+
+        return (region.pixels[((dx + dy * width) * 4) + 3] >= alphaTolerance);
+    }
+
+    // Reads back only the region's rectangle of its render target.
+    private static readRegionHitMap(texture: Texture, region: RegionHitMap): boolean
+    {
+        const textureSource = texture.source;
+        const renderer = GetRenderer();
+
+        if(!textureSource || !(renderer instanceof WebGLRenderer))
+        {
+            const pixels = TextureUtils.getPixels(texture)?.pixels ?? null;
+
+            if(!pixels) return false;
+
+            region.pixels = pixels;
+        }
+        else
+        {
+            const resolution = textureSource.resolution;
+            const width = Math.max(Math.round(texture.frame.width * resolution), 1);
+            const height = Math.max(Math.round(texture.frame.height * resolution), 1);
+            const gl = renderer.gl;
+            const framebuffer = gl.getParameter(gl.FRAMEBUFFER_BINDING) as WebGLFramebuffer | null;
+            const adaptor = renderer.renderTarget.adaptor;
+
+            if(!region.pixels || (region.pixels.length !== (BYTES_PER_PIXEL * width * height))) region.pixels = new Uint8ClampedArray(BYTES_PER_PIXEL * width * height);
+
+            try
+            {
+                const renderTarget = renderer.renderTarget.getRenderTarget(textureSource);
+                const glRenderTarget = renderer.renderTarget.getGpuRenderTarget(renderTarget);
+
+                adaptor.bindFramebuffer(glRenderTarget.resolveTargetFramebuffer);
+
+                gl.readPixels(Math.round(texture.frame.x * resolution), Math.round(texture.frame.y * resolution), width, height, gl.RGBA, gl.UNSIGNED_BYTE, region.pixels);
+            }
+            finally
+            {
+                adaptor.bindFramebuffer(framebuffer);
+            }
+        }
+
+        region.dirty = false;
+        region.time = Date.now();
+
+        return true;
     }
 
     private static generateHitMapForTextureSource(textureSource: TextureSource): boolean

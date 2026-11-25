@@ -70,10 +70,17 @@ describe('Collectibles marketplace parsers', () =>
     {
         const writer = new BinaryWriter();
         writer.writeInt(0);
-        writer.writeInt(1);
+        writer.writeInt(2);
         writeNftOffer(writer, 41, 2);
         writer.writeInt(100);
         writer.writeInt(0);
+        writer.writeInt(0);
+        // A sold offer carries its 64-bit status time; the open offer after it has to stay in step.
+        writer.writeInt(0);
+        writer.writeInt(1700000000);
+        writeNftOffer(writer, 42, 1);
+        writer.writeInt(250);
+        writer.writeInt(30);
         writer.writeInt(0);
 
         const parser = new MarketplaceOwnOffersParser();
@@ -84,6 +91,8 @@ describe('Collectibles marketplace parsers', () =>
         expect(parser.offers[0].productCode).toBe('nft_h23_bunny');
         expect(parser.offers[0].status).toBe(2);
         expect(parser.offers[0].price).toBe(100);
+        expect(parser.offers[1].offerId).toBe(42);
+        expect(parser.offers[1].price).toBe(250);
     });
 
     it('reads the configuration with and without the collectibles part', () =>

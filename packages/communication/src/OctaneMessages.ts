@@ -638,6 +638,7 @@ import {
     HousekeepingListActionLogComposer,
     HousekeepingListEvent,
     HousekeepingLockdownComposer,
+    HousekeepingRemoveProfileImageComposer,
     HousekeepingMaintenanceComposer,
     HousekeepingMaintenanceStatusEvent,
     HousekeepingMuteRoomComposer,
@@ -1372,6 +1373,11 @@ import {
     WiredLinkSaveSelectionComposer,
     WiredLogPageEvent,
     WiredMenuErrorEvent,
+    WiredPermanentVariableResultEvent,
+    WiredPermanentVariableSetComposer,
+    WiredPermanentVariablesRequestComposer,
+    WiredUserPermanentVariablesListEvent,
+    WiredVariableDeleteAllHoldersComposer,
     WiredMenuPermissionsSaveComposer,
     WiredMonitorDataEvent,
     WiredMonitorRequestComposer,
@@ -2110,6 +2116,8 @@ export class OctaneMessages implements IMessageConfiguration
         this._events.set(IncomingHeader.CITIZENSHIP_VIP_OFFER_PROMO_ENABLED, CitizenshipVipOfferPromoEnabledEvent);
         this._events.set(IncomingHeader.WIRED_LOG_PAGE, WiredLogPageEvent);
         this._events.set(IncomingHeader.WIRED_VARIABLE_HOLDERS_PAGE, WiredVariableHoldersPageEvent);
+        this._events.set(IncomingHeader.WIRED_USER_PERMANENT_VARIABLES_LIST, WiredUserPermanentVariablesListEvent);
+        this._events.set(IncomingHeader.WIRED_PERMANENT_VARIABLE_RESULT, WiredPermanentVariableResultEvent);
         this._events.set(IncomingHeader.WIRED_VARIABLE_HOLDERS, WiredVariableHoldersEvent);
         this._events.set(IncomingHeader.WIRED_ALL_VARIABLES_HASH, WiredAllVariablesHashEvent);
         this._events.set(IncomingHeader.WIRED_ALL_VARIABLES_DIFF, WiredAllVariablesDiffEvent);
@@ -2940,6 +2948,9 @@ export class OctaneMessages implements IMessageConfiguration
         this._composers.set(OutgoingHeader.WIRED_ROOM_STATE_ACTION, WiredRoomStateActionComposer);
         this._composers.set(OutgoingHeader.WIRED_ROOM_LOGS_PAGE, WiredRoomLogsPageComposer);
         this._composers.set(OutgoingHeader.WIRED_VARIABLE_HOLDERS_PAGE, WiredVariableHoldersPageComposer);
+        this._composers.set(OutgoingHeader.WIRED_PERMANENT_VARIABLES_REQUEST, WiredPermanentVariablesRequestComposer);
+        this._composers.set(OutgoingHeader.WIRED_PERMANENT_VARIABLE_SET, WiredPermanentVariableSetComposer);
+        this._composers.set(OutgoingHeader.WIRED_VARIABLE_DELETE_ALL_HOLDERS, WiredVariableDeleteAllHoldersComposer);
         this._composers.set(OutgoingHeader.WIRED_LEADERBOARD_SUBSCRIBE, WiredLeaderboardSubscribeComposer);
         this._composers.set(OutgoingHeader.WIRED_LINK_REQUEST_CONFIG, WiredLinkRequestConfigComposer);
         this._composers.set(OutgoingHeader.WIRED_LINK_SAVE_SELECTION, WiredLinkSaveSelectionComposer);
@@ -3199,6 +3210,7 @@ export class OctaneMessages implements IMessageConfiguration
         this._composers.set(OutgoingHeader.HOUSEKEEPING_SET_PERMISSION, HousekeepingSetPermissionComposer);
         this._composers.set(OutgoingHeader.HOUSEKEEPING_USER_NOTE, HousekeepingUserNoteComposer);
         this._composers.set(OutgoingHeader.HOUSEKEEPING_LOCKDOWN, HousekeepingLockdownComposer);
+        this._composers.set(OutgoingHeader.HOUSEKEEPING_REMOVE_PROFILE_IMAGE, HousekeepingRemoveProfileImageComposer);
 
         // Custom features
         this._composers.set(OutgoingHeader.REQUEST_RARE_VALUES, RequestRareValuesComposer);

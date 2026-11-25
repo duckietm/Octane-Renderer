@@ -55,8 +55,15 @@ export const isHabBundle = (buffer: ArrayBuffer): boolean =>
     return magic[0] === 0x48 && magic[1] === 0x41 && magic[2] === 0x42 && magic[3] === 0;
 };
 
-/** Reads every entry of a .hab bundle; every length is checked, so a damaged file fails loudly. */
-export const readHabBundle = (buffer: ArrayBuffer): HabBundleContents =>
+/** The header and index of a .hab bundle, with every entry checked to lie inside the data section. */
+interface HabBundleLayout
+{
+    name: string;
+    entries: HabIndexEntry[];
+    dataStart: number;
+}
+
+const readHabLayout = (buffer: ArrayBuffer, inflateIndex: (stored: Uint8Array) => Uint8Array): HabBundleLayout =>
 {
     if(!isHabBundle(buffer)) throw new Error('Not a HAB bundle (missing "HAB\\0" magic)');
 
@@ -73,7 +80,7 @@ export const readHabBundle = (buffer: ArrayBuffer): HabBundleContents =>
 
     if(dataStart + dataLength > buffer.byteLength) throw new Error('HAB bundle is shorter than its header says');
 
-    const indexBytes = inflate(new Uint8Array(buffer, HEADER_LENGTH, indexLength));
+    const indexBytes = inflateIndex(new Uint8Array(buffer, HEADER_LENGTH, indexLength));
 
     if(indexRawLength && indexBytes.byteLength !== indexRawLength) throw new Error('HAB index has the wrong length');
 
@@ -85,7 +92,7 @@ export const readHabBundle = (buffer: ArrayBuffer): HabBundleContents =>
 
     const names = new Set<string>();
 
-    const entries: HabBundleEntry[] = index.entries.map(entry =>
+    for(const entry of index.entries)
     {
         if(typeof entry?.name !== 'string' || names.has(entry.name)) throw new Error(`HAB entry "${ entry?.name }" is missing or listed twice`);
 
@@ -96,17 +103,76 @@ export const readHabBundle = (buffer: ArrayBuffer): HabBundleContents =>
 
         if(entry.compression !== undefined && entry.compression !== 'deflate' && entry.compression !== 'none')
             throw new Error(`HAB entry "${ entry.name }" uses unknown compression "${ entry.compression }"`);
+    }
 
-        const stored = new Uint8Array(buffer, dataStart + entry.offset, entry.storedLength);
-        const bytes = entry.compression === 'deflate' ? inflateEntry(stored) : stored.slice();
+    return { name: index.name ?? '', entries: index.entries, dataStart };
+};
 
-        if(entry.originalLength !== undefined && bytes.byteLength !== entry.originalLength)
-            throw new Error(`HAB entry "${ entry.name }" has the wrong length`);
+const storedBytes = (buffer: ArrayBuffer, layout: HabBundleLayout, entry: HabIndexEntry): Uint8Array =>
+    new Uint8Array(buffer, layout.dataStart + entry.offset, entry.storedLength);
 
-        return { name: entry.name, mimeType: entry.mimeType ?? '', bytes };
+const checkedEntry = (entry: HabIndexEntry, bytes: Uint8Array): HabBundleEntry =>
+{
+    if(entry.originalLength !== undefined && bytes.byteLength !== entry.originalLength)
+        throw new Error(`HAB entry "${ entry.name }" has the wrong length`);
+
+    return { name: entry.name, mimeType: entry.mimeType ?? '', bytes };
+};
+
+/** Reads every entry of a .hab bundle; every length is checked, so a damaged file fails loudly. */
+export const readHabBundle = (buffer: ArrayBuffer): HabBundleContents =>
+{
+    const layout = readHabLayout(buffer, stored => inflate(stored));
+
+    const entries = layout.entries.map(entry =>
+    {
+        const stored = storedBytes(buffer, layout, entry);
+
+        return checkedEntry(entry, (entry.compression === 'deflate') ? inflateEntry(stored) : stored.slice());
     });
 
-    return { name: index.name ?? '', entries };
+    return { name: layout.name, entries };
+};
+
+/**
+ * The same as {@link readHabBundle}, but larger compressed entries are inflated by the browser's own
+ * DecompressionStream, off the script's thread, and all entries at once. Where that stream is missing or
+ * refuses an entry (a raw deflate stream), the entry is inflated by pako as before.
+ */
+export const readHabBundleAsync = async (buffer: ArrayBuffer): Promise<HabBundleContents> =>
+{
+    const layout = readHabLayout(buffer, stored => inflate(stored));
+
+    const entries = await Promise.all(layout.entries.map(async entry =>
+    {
+        const stored = storedBytes(buffer, layout, entry);
+
+        return checkedEntry(entry, (entry.compression === 'deflate') ? await inflateEntryAsync(stored) : stored.slice());
+    }));
+
+    return { name: layout.name, entries };
+};
+
+/** Smaller entries inflate faster in pako than through a stream. */
+export const HAB_NATIVE_INFLATE_MIN_BYTES = 4096;
+
+const inflateEntryAsync = async (stored: Uint8Array): Promise<Uint8Array> =>
+{
+    if((stored.byteLength >= HAB_NATIVE_INFLATE_MIN_BYTES) && (typeof DecompressionStream === 'function') && (typeof Response === 'function'))
+    {
+        try
+        {
+            const stream = new Response(stored.slice()).body?.pipeThrough(new DecompressionStream('deflate'));
+
+            if(stream) return new Uint8Array(await new Response(stream).arrayBuffer());
+        }
+        catch
+        {
+            // Not a zlib stream, or the browser refused it: pako below.
+        }
+    }
+
+    return inflateEntry(stored);
 };
 
 /** Habbo stores zlib streams; a raw deflate stream is accepted too. */

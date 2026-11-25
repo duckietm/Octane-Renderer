@@ -1,9 +1,16 @@
-import { IAssetData, IAssetManager, IGraphicAsset, IGraphicAssetCollection } from '@octane/api';
-import { OctaneBundle, OctaneBundleTextureDecoder, parseConfigJsonFromResponse } from '@octane/utils';
+import { IAsset, IAssetData, IAssetManager, IGraphicAsset, IGraphicAssetCollection } from '@octane/api';
+import { OctaneBundle, OctaneBundleTextureDecoder, OctaneLogger, parseConfigJsonFromResponse, takePrefetchedBuffer, takePrefetchedResponse } from '@octane/utils';
 import { Spritesheet, SpritesheetData, Texture } from 'pixi.js';
 import { assetImageFallbackUrl, isAssetJsonUrl } from './AssetJsonUrl';
 import { GraphicAssetCollection } from './GraphicAssetCollection';
 import { detectImageFormat, ImageLoadRequest, LoadedImageResource, loadImageResource, normalizedSourceExtension } from './image';
+import avatarAdditionsAssetData from './assets/avatar_additions/avatar_additions.asset.json';
+import placeHolderAssetData from './assets/place_holder/place_holder.asset.json';
+import placeHolderPetAssetData from './assets/place_holder_pet/place_holder_pet.asset.json';
+import placeHolderWallAssetData from './assets/place_holder_wall/place_holder_wall.asset.json';
+import roomAssetData from './assets/room/room.asset.json';
+import selectionArrowAssetData from './assets/selection_arrow/selection_arrow.asset.json';
+import tileCursorAssetData from './assets/tile_cursor/tile_cursor.asset.json';
 
 /** Bundles of an asset json and its sheet: Octane's .nitro and Habbo's .hab. */
 const isBundleExtension = (extension: string): boolean => extension === 'nitro' || extension === 'hab';
@@ -43,6 +50,10 @@ export class AssetManager implements IAssetManager
     // The image resource key whose sheet a downloaded collection was cut from.
     private _collectionSources: WeakMap<GraphicAssetCollection, string> = new WeakMap();
     private _downloads: Map<string, Promise<boolean>> = new Map();
+    // Bumped on every change to the asset index, so lookups cached elsewhere know when to start over.
+    private _assetRevision: number = 0;
+    // The room's landscape images, decoded after the rest of the room library; settles once they are in.
+    private _deferredRoomAssets: Promise<void> = Promise.resolve();
 
     constructor(private readonly _dependencies: AssetManagerDependencies = DEFAULT_DEPENDENCIES)
     {
@@ -90,8 +101,21 @@ export class AssetManager implements IAssetManager
         return first?.getAsset(name) ?? null;
     }
 
+    /** Settles once the room library's landscape images, decoded after the boot, are in. */
+    public whenRoomAssetsReady(): Promise<void>
+    {
+        return this._deferredRoomAssets;
+    }
+
+    public get assetRevision(): number
+    {
+        return this._assetRevision;
+    }
+
     private assetChanged(collection: GraphicAssetCollection, name: string, added: boolean): void
     {
+        this._assetRevision++;
+
         let candidates = this._assetIndex.get(name);
 
         if(added)
@@ -214,13 +238,13 @@ export class AssetManager implements IAssetManager
             // A .hab with the same json and sheet as a .nitro is read by the same bundle reader.
             if(isBundleExtension(normalizedSourceExtension(url)))
             {
-                const response = await this.fetchAsset(url);
+                const buffer = await this.fetchBundleBuffer(url);
                 const decodedResources: LoadedImageResource[] = [];
 
                 try
                 {
                     const octaneBundle = await this._dependencies.loadOctaneBundle(
-                        await response.arrayBuffer(),
+                        buffer,
                         async (bytes, entryName) =>
                         {
                             const detected = detectImageFormat(new Uint8Array(bytes), undefined, entryName);
@@ -327,8 +351,32 @@ export class AssetManager implements IAssetManager
         }
     }
 
+    /** Only the browser's own fetch is replaced by what the page prefetched: an injected one sees every request. */
+    private get usesDefaultFetch(): boolean
+    {
+        return (this._dependencies.fetch === DEFAULT_DEPENDENCIES.fetch);
+    }
+
+    /** A bundle's bytes: the ones the page already downloaded when it did, otherwise fetched. */
+    private async fetchBundleBuffer(url: string): Promise<ArrayBuffer>
+    {
+        if(this.usesDefaultFetch)
+        {
+            const prefetched = await takePrefetchedBuffer(url);
+
+            if(prefetched) return prefetched;
+        }
+
+        const response = await this.fetchAsset(url);
+
+        return response.arrayBuffer();
+    }
+
     private async fetchAsset(url: string): Promise<Response>
     {
+        // The first try may be the page's own early request for this address; a retry always fetches anew.
+        let prefetched = this.usesDefaultFetch ? takePrefetchedResponse(url) : null;
+
         for(let attempt = 0; ; attempt++)
         {
             const canRetry = (attempt < FETCH_RETRY_DELAYS_MS.length);
@@ -336,7 +384,10 @@ export class AssetManager implements IAssetManager
 
             try
             {
-                response = await this._dependencies.fetch(url);
+                const request = prefetched ?? this._dependencies.fetch(url);
+
+                prefetched = null;
+                response = await request;
             }
             catch (error)
             {
@@ -375,8 +426,7 @@ export class AssetManager implements IAssetManager
 
     private async loadLocalRoom(): Promise<void>
     {
-        const roomDataModule = await import('./assets/room/room.asset.json');
-        const roomData = (roomDataModule.default ?? roomDataModule) as IAssetData;
+        const roomData = roomAssetData as unknown as IAssetData;
         const collection = this.createCollection(roomData, null) as GraphicAssetCollection;
         if(!collection) return;
 
@@ -384,7 +434,7 @@ export class AssetManager implements IAssetManager
         const roomImagesSub = import.meta.glob('./assets/room/images/*.{png,jpg,jpeg,gif,webp,avif,svg,bmp}', { eager: true });
         const merged = { ...roomImages, ...roomImagesSub };
 
-        await Promise.all(Object.keys(merged).map(async path =>
+        const loadEntry = async (path: string): Promise<void> =>
         {
             const mod = merged[path];
             const imageUrl = ((mod as { default?: string }).default ?? mod) as string;
@@ -408,9 +458,50 @@ export class AssetManager implements IAssetManager
                 this.setTexture(normalizedName, texture);
                 collection.textures.set(normalizedName, texture);
             }
-        }));
+        };
+
+        const eagerPaths: string[] = [];
+        const deferredPaths: string[] = [];
+
+        // The landscape images (about 40) are not needed to finish the boot; they are decoded right after it.
+        // The small window and door masks stay in the first pass, so the plane masks are complete for the first room.
+        for(const path of Object.keys(merged)) (imageNameFromPath(path).includes('landscape_') ? deferredPaths : eagerPaths).push(path);
+
+        await Promise.all(eagerPaths.map(loadEntry));
 
         collection.define(roomData);
+
+        if(deferredPaths.length) this._deferredRoomAssets = this.loadDeferredRoomAssets(collection, roomData, deferredPaths, loadEntry);
+    }
+
+    private loadDeferredRoomAssets(collection: GraphicAssetCollection, roomData: IAssetData, paths: string[], loadEntry: (path: string) => Promise<void>): Promise<void>
+    {
+        return new Promise<void>(resolve =>
+        {
+            setTimeout(() =>
+            {
+                void Promise.allSettled(paths.map(loadEntry))
+                    .then(results =>
+                    {
+                        results.forEach((result, index) =>
+                        {
+                            if(result.status === 'rejected') OctaneLogger.warn(`[AssetManager] Failed to load deferred room asset "${ paths[index] }"`, result.reason);
+                        });
+
+                        // Only the assets that are new now: defining an existing flipped door or window asset again
+                        // would replace and recycle it.
+                        const missingAssets: { [index: string]: IAsset } = {};
+
+                        for(const [assetName, assetDef] of Object.entries(roomData.assets || {}))
+                        {
+                            if(!collection.getAsset(assetName)) missingAssets[assetName] = assetDef;
+                        }
+
+                        if(Object.keys(missingAssets).length) collection.define({ ...roomData, assets: missingAssets, palettes: undefined });
+                    })
+                    .finally(resolve);
+            }, 0);
+        });
     }
 
     private async loadLocalAsset(name: string): Promise<void>
@@ -420,22 +511,22 @@ export class AssetManager implements IAssetManager
         switch(name)
         {
             case 'place_holder':
-                dataModule = await import('./assets/place_holder/place_holder.asset.json');
+                dataModule = placeHolderAssetData;
                 break;
             case 'place_holder_wall':
-                dataModule = await import('./assets/place_holder_wall/place_holder_wall.asset.json');
+                dataModule = placeHolderWallAssetData;
                 break;
             case 'place_holder_pet':
-                dataModule = await import('./assets/place_holder_pet/place_holder_pet.asset.json');
+                dataModule = placeHolderPetAssetData;
                 break;
             case 'tile_cursor':
-                dataModule = await import('./assets/tile_cursor/tile_cursor.asset.json');
+                dataModule = tileCursorAssetData;
                 break;
             case 'selection_arrow':
-                dataModule = await import('./assets/selection_arrow/selection_arrow.asset.json');
+                dataModule = selectionArrowAssetData;
                 break;
             case 'avatar_additions':
-                dataModule = await import('./assets/avatar_additions/avatar_additions.asset.json');
+                dataModule = avatarAdditionsAssetData;
                 break;
             case 'floor_editor':
                 dataModule = await import('./assets/floor_editor/floor_editor.asset.json');
@@ -485,7 +576,8 @@ export class AssetManager implements IAssetManager
         {
             spritesheet = new Spritesheet(texture, data.spritesheet);
 
-            await spritesheet.parse();
+            // All frames at once: parse() splits a sheet of over 1000 frames into timer-separated batches.
+            spritesheet.parseSync();
 
             spritesheet.textureSource.label = data.name ?? null;
         }

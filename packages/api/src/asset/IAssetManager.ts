@@ -14,5 +14,9 @@ export interface IAssetManager
     createCollection(data: IAssetData, spritesheet: Spritesheet): IGraphicAssetCollection;
     downloadAssets(urls: string[]): Promise<boolean>;
     downloadAsset(url: string): Promise<boolean>;
+    /** Settles once the room library's images decoded after the boot (the landscapes) are in. */
+    whenRoomAssetsReady?(): Promise<void>;
     readonly collections: Map<string, IGraphicAssetCollection>;
+    // Changes whenever an asset name starts or stops resolving (collections loaded or replaced, assets added or removed).
+    readonly assetRevision?: number;
 }

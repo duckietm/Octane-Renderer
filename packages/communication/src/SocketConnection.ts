@@ -10,6 +10,21 @@ import { shouldReconnectAfterClose } from './socketClosePolicy';
 
 type CryptoState = 'disabled' | 'awaiting_server_hello' | 'ready' | 'error';
 
+/**
+ * A socket the hotel page may open before the client script has loaded, left as `window.__octaneEarlySocket`.
+ * The page records what happened to it until the client takes it over; `detach` removes the page's own listeners.
+ */
+export interface IEarlySocket
+{
+    url: string;
+    socket: WebSocket;
+    opened: boolean;
+    closed: CloseEvent | null;
+    errored: boolean;
+    messages: ArrayBuffer[];
+    detach: () => void;
+}
+
 export class SocketConnection implements IConnection
 {
     private _socket: WebSocket = null;
@@ -93,8 +108,12 @@ export class SocketConnection implements IConnection
         this._directional = null;
         this._pendingEncryptedSends = [];
 
+        const early = this.takeEarlySocket(socketUrl);
+
         // Asking for the subprotocol is how this client offers version 2; an older server ignores it.
-        this._socket = (this._cryptoState === 'awaiting_server_hello') ? new WebSocket(socketUrl, [ SUBPROTOCOL_V2 ]) : new WebSocket(socketUrl);
+        if(early) this._socket = early.socket;
+        else this._socket = (this._cryptoState === 'awaiting_server_hello') ? new WebSocket(socketUrl, [ SUBPROTOCOL_V2 ]) : new WebSocket(socketUrl);
+
         this._socket.binaryType = 'arraybuffer';
         this._onOpenCallback = () => this.onSocketOpened();
         this._onCloseCallback = (event: Event) => this.onSocketClosed(event as CloseEvent);
@@ -106,6 +125,70 @@ export class SocketConnection implements IConnection
         this._socket.addEventListener(WebSocketEventEnum.CONNECTION_MESSAGE, this._onMessageCallback);
 
         this.startConnectTimeout(this._socket);
+
+        if(early)
+        {
+            // What the socket did before it was taken over, replayed in order. No socket event can run before this
+            // microtask, so an open socket opened before the listeners above were added and gets no second open.
+            queueMicrotask(() =>
+            {
+                if(this._socket !== early.socket) return;
+
+                if(early.opened || (early.socket.readyState === WebSocket.OPEN)) this.onSocketOpened();
+
+                for(const message of early.messages) this.onSocketMessage(message);
+            });
+        }
+    }
+
+    /**
+     * The page's early socket, when it is one this connection can use: the same address, still connecting or open,
+     * and no encrypted session (that one offers a subprotocol the page cannot know). Taken once; one that cannot be
+     * used is closed and a new socket is made as usual.
+     */
+    private takeEarlySocket(socketUrl: string): IEarlySocket | null
+    {
+        const holder = globalThis as { __octaneEarlySocket?: IEarlySocket };
+        const early = holder.__octaneEarlySocket;
+
+        if(!early) return null;
+
+        delete holder.__octaneEarlySocket;
+
+        try
+        {
+            early.detach?.();
+        }
+        catch
+        {
+            // The page's own listeners only record; one left behind does no harm.
+        }
+
+        const usable = (this._cryptoState === 'disabled')
+            && !this._isReconnecting
+            && !!early.socket
+            && (early.url === socketUrl)
+            && !early.closed
+            && !early.errored
+            && (early.socket.readyState <= WebSocket.OPEN);
+
+        if(usable)
+        {
+            early.messages = Array.isArray(early.messages) ? early.messages : [];
+
+            return early;
+        }
+
+        try
+        {
+            early.socket?.close();
+        }
+        catch
+        {
+            // Already closing.
+        }
+
+        return null;
     }
 
     private startConnectTimeout(socket: WebSocket): void

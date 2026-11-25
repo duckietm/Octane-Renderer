@@ -92,6 +92,11 @@ export interface IRoomEngine
     processRoomObjectPlacement(placementSource: string, id: number, category: number, typeId: number, legacyString?: string, stuffData?: IObjectData, state?: number, frameNumber?: number, posture?: string): boolean;
     dispatchMouseEvent(canvasId: number, x: number, y: number, type: string, altKey: boolean, ctrlKey: boolean, shiftKey: boolean, buttonDown: boolean): void;
     createTextureFromRoom(roomId: number, canvasId?: number, bounds?: Rectangle): Texture;
+    // Direct planes (room.planes.direct): on or off for every open room at once; WebGL2 only, else it stays off.
+    setPlaneRenderMode(direct: boolean): void;
+    readonly planesDrawnDirect: boolean;
+    setAvatarAtlasMode(enabled: boolean): void;
+    readonly avatarsDrawnInAtlas: boolean;
     saveTextureAsScreenshot(texture: RenderTexture, saveAsThumbnail?: boolean): Promise<void>;
     saveBase64AsScreenshot(base64: string, saveAsThumbnail?: boolean): void;
     deleteRoomObject(objectId: number, objectCategory: number): boolean;

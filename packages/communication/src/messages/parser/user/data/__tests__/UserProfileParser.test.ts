@@ -115,5 +115,82 @@ describe('UserProfileParser presence and level', () =>
         expect(parser.level).toBe(0);
         expect(parser.nextLevelStart).toBe(0);
         expect(parser.isHidden).toBe(false);
+        expect(parser.borderId).toBe(0);
+        expect(parser.bannerId).toBe(0);
+        expect(parser.accentId).toBe(0);
+    });
+
+    it('reads the border, banner and accent after the hidden flag', () =>
+    {
+        const writer = new BinaryWriter();
+
+        writeProfile(writer);
+        writer.writeInt(1);
+        writer.writeInt(3);
+        writer.writeInt(150);
+        writer.writeByte(0);
+        writer.writeInt(17);
+        writer.writeInt(4);
+        writer.writeInt(9);
+
+        const parser = parse(writer);
+
+        expect(parser.isHidden).toBe(false);
+        expect(parser.borderId).toBe(17);
+        expect(parser.bannerId).toBe(4);
+        expect(parser.accentId).toBe(9);
+        expect(parser.bannerImage).toBe('');
+    });
+
+    it('reads the uploaded banner and background after the accent', () =>
+    {
+        const writer = new BinaryWriter();
+
+        writeProfile(writer);
+        writer.writeInt(1);
+        writer.writeInt(3);
+        writer.writeInt(150);
+        writer.writeByte(0);
+        writer.writeInt(0);
+        writer.writeInt(0);
+        writer.writeInt(0);
+        writer.writeString('7_banner_abc.jpg');
+        writer.writeString('');
+
+        const parser = parse(writer);
+
+        expect(parser.bannerImage).toBe('7_banner_abc.jpg');
+        expect(parser.backgroundImage).toBe('');
+    });
+    it('reads the own background style and the features after the pictures', () =>
+    {
+        const writer = new BinaryWriter();
+
+        writeProfile(writer);
+        writer.writeInt(1);
+        writer.writeInt(3);
+        writer.writeInt(150);
+        writer.writeByte(0);
+        writer.writeInt(0);
+        writer.writeInt(0);
+        writer.writeInt(0);
+        writer.writeString('');
+        writer.writeString('');
+        writer.writeString('1e7cb8;0b2a40;135;12');
+        writer.writeInt(5);
+
+        const parser = parse(writer);
+
+        expect(parser.backgroundStyle).toBe('1e7cb8;0b2a40;135;12');
+        expect(parser.features).toBe(5);
+    });
+
+    it('has every feature on when the server sends no switches', () =>
+    {
+        const writer = new BinaryWriter();
+
+        writeProfile(writer);
+
+        expect(parse(writer).features).toBe(UserProfileParser.ALL_FEATURES);
     });
 });

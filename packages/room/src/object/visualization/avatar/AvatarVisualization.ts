@@ -1,11 +1,14 @@
 import { AlphaTolerance, AvatarAction, AvatarGuideStatus, AvatarSetType, IAdvancedMap, IAvatarEffectListener, IAvatarImage, IAvatarImageListener, IGraphicAsset, IObjectVisualizationData, IRoomGeometry, IRoomObject, IRoomObjectModel, IRoomObjectSprite, IRoomObjectVariableFxEntry, RoomObjectSpriteData, RoomObjectSpriteType, RoomObjectVariable } from '@octane/api';
 import { GetAssetManager, getHalfSizeTexture, halfSizeOffset, halfSizePadding, isPixelArtTexture } from '@octane/assets';
+import { GetAvatarRenderManager } from '@octane/avatar';
 import { AdvancedMap, GetRenderer, Vector3d } from '@octane/utils';
 import { Container, RenderTexture, Sprite, Texture } from 'pixi.js';
+import { HalfSizeTextureCache } from '../HalfSizeTexture';
 import { RoomObjectSpriteVisualization } from '../RoomObjectSpriteVisualization';
 import { RoomWindowReflectionState } from '../RoomWindowReflectionState';
 import { usesWiredHighlightCompositeSilhouette, WiredHighlightFilterCache } from '../WiredHighlightFilters';
 import { WiredHighlightSilhouette } from '../WiredHighlightSilhouette';
+import { AvatarCompositeBudget } from './AvatarCompositeBudget';
 import { AvatarVisualizationData } from './AvatarVisualizationData';
 import { ExpressionAdditionFactory, FloatingIdleZAddition, GameClickTargetAddition, GuideStatusBubbleAddition, HabbiconBubbleAddition, IAvatarAddition, MutedBubbleAddition, NumberBubbleAddition, TypingBubbleAddition, VariableFxStackAddition } from './additions';
 
@@ -38,6 +41,8 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
     private static AVATAR_OWN_DEPTH_ADJUST: number = 0.001;
     private static AVATAR_SPRITE_LAYING_DEPTH: number = -0.409;
     private static AVATAR_SPRITE_LAYING_INSIDE_DEPTH: number = -0.5;
+    // Large effect art resampled for the zoomed-out room when it is not pixel art (AIR resampleBitmapData).
+    private static HALF_SIZE_EFFECT_TEXTURES: HalfSizeTextureCache = new HalfSizeTextureCache(512);
 
     protected _data: AvatarVisualizationData;
 
@@ -66,6 +71,13 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
     private _expression: number;
     private _sleep: boolean;
     private _blink: boolean;
+    // The last model update changed only mouth or eyes (or the next tile of a walk): AvatarCompositeBudget may hold it back.
+    private _cosmeticModelUpdate: boolean = false;
+    // updateObject reports every move of a visible avatar; this is only set when it turned.
+    private _turned: boolean = false;
+    // A redraw put off (off screen, or out of budget), and whether it changed more than mouth and eyes.
+    private _pendingRedraw: boolean = false;
+    private _pendingStructuralRedraw: boolean = false;
     private _gesture: number;
     private _sign: number;
     private _highlightEnabled: boolean;
@@ -104,6 +116,8 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
     private _reflectionMirrors: Map<number, Texture>;
 
     private _avatarTextureRenderVersion: number;
+    // The image shown before a zoom or effect change, until the new one has a texture: its kept atlas frames go back then.
+    private _previousAvatarImage: IAvatarImage = null;
     private _windowReflectionPushed: boolean;
     private _lastReflectionPushedTexture: Texture;
     private _lastReflectionPushedDirection: number;
@@ -231,7 +245,7 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
         this._disposed = true;
     }
 
-    public update(geometry: IRoomGeometry, time: number, update: boolean, skipUpdate: boolean): void
+    public update(geometry: IRoomGeometry, time: number, update: boolean, skipUpdate: boolean, visible: boolean = true): void
     {
         if(!this.object || !geometry || !this._data) return;
 
@@ -271,6 +285,8 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
 
             if(didScaleUpdate || !this._avatarImage || didEffectUpdate)
             {
+                if(this._avatarImage && !this._previousAvatarImage) this._previousAvatarImage = this._avatarImage;
+
                 this._avatarImage = this.createAvatarImage(scale, this._effect);
 
                 if(!this._avatarImage) return;
@@ -329,28 +345,51 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
 
         const update1 = (objectUpdate || updateModel || didScaleUpdate);
         const update2 = ((this._isAnimating || (this._forcedAnimFrames > 0)) && update);
+        const structural = (this._turned || didScaleUpdate || otherUpdate || (updateModel && !this._cosmeticModelUpdate));
+        const budgeted = AvatarCompositeBudget.ENABLED;
+
+        this._turned = false;
 
         if(update1) this._forcedAnimFrames = AvatarVisualization.ANIMATION_FRAME_UPDATE_INTERVAL;
 
-        if(update1 || update2)
+        if(update1 || update2 || (budgeted && this._pendingRedraw && visible))
         {
             this.updateSpriteCounter++;
 
             this._forcedAnimFrames--;
             this._updatesUntilFrameUpdate--;
 
-            if((((this._updatesUntilFrameUpdate <= 0) || didScaleUpdate) || updateModel) || otherUpdate)
-            {
-                this._avatarImage.updateAnimationByFrames(1);
-
-                this._updatesUntilFrameUpdate = AvatarVisualization.ANIMATION_FRAME_UPDATE_INTERVAL;
-            }
-            else
+            if(!((((this._updatesUntilFrameUpdate <= 0) || didScaleUpdate) || updateModel) || otherUpdate || this._pendingRedraw))
             {
                 this.updateWindowReflectionSource(true);
 
                 return;
             }
+
+            const shownSprite = this.getSprite(AvatarVisualization.SPRITE_INDEX_AVATAR);
+
+            // Nothing to show yet, or a new zoom level: always draw. Otherwise an avatar off screen
+            // waits until it comes back, and mouth and eye frames wait for room in the frame's budget.
+            if(budgeted && shownSprite?.texture && !didScaleUpdate)
+            {
+                const urgent = (structural || this._pendingStructuralRedraw);
+                const cosmetic = (!urgent && (this._posture !== AvatarAction.POSTURE_WALK));
+
+                if(!visible || (cosmetic && !AvatarCompositeBudget.allow(this.object.id)))
+                {
+                    this._pendingRedraw = true;
+                    this._pendingStructuralRedraw = urgent;
+
+                    return;
+                }
+            }
+
+            this._pendingRedraw = false;
+            this._pendingStructuralRedraw = false;
+
+            this._avatarImage.updateAnimationByFrames(1);
+
+            this._updatesUntilFrameUpdate = AvatarVisualization.ANIMATION_FRAME_UPDATE_INTERVAL;
 
             let canvasOffsets = this._avatarImage.getCanvasOffsets();
 
@@ -363,7 +402,10 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
 
                 this.renderMirrorTextures(highlightEnabled);
 
-                const avatarImage = this._avatarImage.processAsTexture(AvatarSetType.FULL, highlightEnabled);
+                const startedAt = performance.now();
+                const avatarImage = this._avatarImage.processAsTexture(AvatarSetType.FULL, highlightEnabled, this.canDeferAvatarTexture());
+
+                AvatarCompositeBudget.record(performance.now() - startedAt);
 
                 if(!this._isAnimating && this._avatarImage.isAnimating()) this._isAnimating = true;
 
@@ -371,6 +413,13 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
                 {
                     sprite.texture = avatarImage;
                     this._avatarTextureRenderVersion++;
+
+                    if(this._previousAvatarImage)
+                    {
+                        if(this._previousAvatarImage !== this._avatarImage) this._previousAvatarImage.releaseCachedFrames?.();
+
+                        this._previousAvatarImage = null;
+                    }
 
                     if(highlightEnabled)
                     {
@@ -509,10 +558,22 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
                         // from the art of 0-3.
                         const asset = this._avatarImage.getAsset(assetName);
                         // .hab effects ship only large art: draw it as a real half-size sprite when zoomed out.
-                        const largeAsset = ((!asset && (scale < 48)) ? this._avatarImage.getAsset(('h_' + spriteData.member + '_' + dd + '_' + frameNumber)) : null);
+                        const largeAssetName = ('h_' + spriteData.member + '_' + dd + '_' + frameNumber);
+                        const largeAsset = ((!asset && (scale < 48)) ? this._avatarImage.getAsset(largeAssetName) : null);
                         const halfTexture = (isPixelArtTexture(largeAsset?.texture) ? getHalfSizeTexture(largeAsset.texture, halfSizePadding(largeAsset.offsetX), halfSizePadding(largeAsset.offsetY)) : null);
+                        // Art that is not pixel art (or cannot be halved by blocks) is resampled as AIR does, off the render path.
+                        const resamplable = (!halfTexture && !!largeAsset?.texture && !largeAsset.texture.destroyed);
+                        const resampledTexture = (resamplable ? AvatarVisualization.HALF_SIZE_EFFECT_TEXTURES.getTexture(largeAssetName, largeAsset.texture) : null);
 
-                        if(!asset && !halfTexture)
+                        if(!asset && !halfTexture && !resampledTexture && resamplable && !AvatarVisualization.HALF_SIZE_EFFECT_TEXTURES.hasFailed(largeAsset.texture))
+                        {
+                            // The half-size art is not ready yet: keep the sprite as it is and redraw until it is.
+                            this._forcedAnimFrames = AvatarVisualization.ANIMATION_FRAME_UPDATE_INTERVAL;
+
+                            continue;
+                        }
+
+                        if(!asset && !halfTexture && !resampledTexture)
                         {
                             // Official: an effect sprite without art for this frame is cleared, not left showing the previous effect.
                             sprite.texture = Texture.EMPTY;
@@ -528,11 +589,18 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
                             sprite.offsetY = (asset.offsetY + offsetY);
                             sprite.flipH = asset.flipH;
                         }
-                        else
+                        else if(halfTexture)
                         {
                             sprite.texture = halfTexture;
                             sprite.offsetX = ((halfSizeOffset(largeAsset.offsetX, largeAsset.flipH) - (scale / 2)) + offsetX);
                             sprite.offsetY = (halfSizeOffset(largeAsset.offsetY, false) + offsetY);
+                            sprite.flipH = largeAsset.flipH;
+                        }
+                        else
+                        {
+                            sprite.texture = resampledTexture;
+                            sprite.offsetX = (((largeAsset.offsetX / 2) - (scale / 2)) + offsetX);
+                            sprite.offsetY = ((largeAsset.offsetY / 2) + offsetY);
                             sprite.flipH = largeAsset.flipH;
                         }
 
@@ -556,6 +624,9 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
 
                         if(spriteData.ink === 33) sprite.blendMode = 'add';
                         else sprite.blendMode = 'normal';
+
+                        // AIR: the effect sprites fade with the body under wired transparency.
+                        sprite.alpha = 255 * this._wiredVisibility;
                     }
                 }
             }
@@ -675,6 +746,8 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
         {
             update = true;
 
+            if(direction !== this._angle) this._turned = true;
+
             this._angle = direction;
 
             direction = (direction - (135 - 22.5));
@@ -686,6 +759,8 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
         if((headDirection !== this._headAngle) || force)
         {
             update = true;
+
+            if(headDirection !== this._headAngle) this._turned = true;
 
             this._headAngle = headDirection;
 
@@ -712,6 +787,8 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
         if(this.updateModelCounter === model.updateCounter) return false;
 
         let needsUpdate = false;
+        // Mouth and eye frames alone are cosmetic: AvatarCompositeBudget may hold them back.
+        let cosmeticUpdate = false;
 
         const talk = (model.getValue<number>(RoomObjectVariable.FIGURE_TALK) > 0);
 
@@ -719,7 +796,7 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
         {
             this._talk = talk;
 
-            needsUpdate = true;
+            cosmeticUpdate = true;
         }
 
         const expression = model.getValue<number>(RoomObjectVariable.FIGURE_EXPRESSION);
@@ -746,7 +823,7 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
         {
             this._blink = blink;
 
-            needsUpdate = true;
+            cosmeticUpdate = true;
         }
 
         const gesture = (model.getValue<number>(RoomObjectVariable.FIGURE_GESTURE) || 0);
@@ -773,7 +850,9 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
         {
             this._postureParameter = postureParameter;
 
-            needsUpdate = true;
+            // While walking the parameter is the next tile, new on every step; the picture is the same.
+            if(posture === AvatarAction.POSTURE_WALK) cosmeticUpdate = true;
+            else needsUpdate = true;
         }
 
         const canStandUp = model.getValue<boolean>(RoomObjectVariable.FIGURE_CAN_STAND_UP);
@@ -1118,8 +1197,9 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
         }
 
         this.updateModelCounter = model.updateCounter;
+        this._cosmeticModelUpdate = (cosmeticUpdate && !needsUpdate);
 
-        return needsUpdate;
+        return (needsUpdate || cosmeticUpdate);
     }
 
     // Wired transparency, click-through and highlight apply to the avatar body sprite (AIR AvatarVisualization L530-545, L1546-1600).
@@ -1496,6 +1576,34 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
         this._lastReflectionPushedTexture = null;
     }
 
+    // The image copies the sprites' pixels at once, so atlas cells still waiting for the flush are drawn first.
+    public getImage(): Texture
+    {
+        GetAvatarRenderManager().flushCompositions();
+
+        return super.getImage();
+    }
+
+    // The avatar atlas was switched on or off: the images are created again, through the other drawing path.
+    public recreateAvatarImages(): void
+    {
+        this.clearAvatar();
+    }
+
+    /**
+     * Whether the body may be an atlas cell that is only drawn when the room engine flushes the atlas, after
+     * the room update. The wired highlight glow and the window reflections copy the body's pixels during the
+     * update, so an avatar that has either gets a texture that is drawn at once.
+     */
+    private canDeferAvatarTexture(): boolean
+    {
+        if(!!this._wiredHighlight.filters && usesWiredHighlightCompositeSilhouette(this._wiredHighlight.type)) return false;
+
+        if(!RoomWindowReflectionState.hasZones) return true;
+
+        return !RoomWindowReflectionState.isNearAnyZone(this.object.getLocation(), this.object.model?.getValue<string>(RoomObjectVariable.OBJECT_ROOM_ID));
+    }
+
     private clearAvatar(): void
     {
         const sprite = this.getSprite(AvatarVisualization.AVATAR_LAYER_ID);
@@ -1518,6 +1626,7 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
 
 
         this._avatarImage = null;
+        this._previousAvatarImage = null;
 
         if(this.object) RoomWindowReflectionState.removeAvatar(this.object.id, this.object.model?.getValue<string>(RoomObjectVariable.OBJECT_ROOM_ID));
 
@@ -1731,7 +1840,8 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
                     sprite.texture = this._shadow.texture;
                     sprite.offsetX = offsetX;
                     sprite.offsetY = offsetY;
-                    sprite.alpha = 50;
+                    // AIR: the shadow fades with the body under wired transparency.
+                    sprite.alpha = 50 * this._wiredVisibility;
                     sprite.relativeDepth = 1;
                 }
                 else

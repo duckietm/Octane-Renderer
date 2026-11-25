@@ -93,3 +93,74 @@ describe('LocalizationManager parameters (AIR Localization.fillParameterValues)'
         expect(LocalizationManager.replaceParameter('cost %x(% now', 'x(', '5')).toBe('cost 5 now');
     });
 });
+
+describe('LocalizationManager text files and furniture texts', () =>
+{
+    const withTexts = (...documents: { [index: string]: unknown }[]) =>
+    {
+        const localization = new LocalizationManager();
+
+        for(const document of documents) (localization as unknown as { parseLocalization(data: object): boolean }).parseLocalization(document);
+
+        return localization;
+    };
+
+    it('reads keys from the text files on demand, a later file winning', () =>
+    {
+        const localization = withTexts({ 'a': 'first', 'b': 'only first' }, { 'a': 'second' });
+
+        expect(localization.getValue('a')).toBe('second');
+        expect(localization.getValue('b')).toBe('only first');
+        expect(localization.hasValue('b')).toBe(true);
+        expect(localization.hasValue('missing')).toBe(false);
+        expect(localization.getValue('missing')).toBe('missing');
+    });
+
+    it('turns a written \\n of a text file into a line break', () =>
+    {
+        expect(withTexts({ 'lines': 'one\\ntwo' }).getValue('lines')).toBe('one\ntwo');
+    });
+
+    it('lets setValue win over the text files', () =>
+    {
+        const localization = withTexts({ 'a': 'from file' });
+
+        localization.setValue('a', 'set');
+
+        expect(localization.getValue('a')).toBe('set');
+    });
+
+    it('answers furniture texts from the furniture data while it knows the item', () =>
+    {
+        const localization = withTexts({ 'roomItem.name.1': 'file name', 'roomItem.name.2': 'file only', 'room.name': 'room' });
+        const names: Record<string, string> = { 'roomItem.name.1': 'Chair', 'wallItem.desc.5': 'A poster\\nwith a newline' };
+        const asked: string[] = [];
+
+        localization.setValue('roomItem.name.1', 'stale copy');
+        localization.setValue('wallItem.name.9', 'unknown to the furniture data');
+        localization.setFurnitureResolver(key =>
+        {
+            asked.push(key);
+
+            return names[key] ?? null;
+        });
+
+        expect(localization.getValue('roomItem.name.1')).toBe('Chair');
+        expect(localization.hasValue('wallItem.desc.5')).toBe(true);
+        // Kept as raw as the furniture data has it, as setValue used to store it.
+        expect(localization.getValue('wallItem.desc.5')).toBe('A poster\\nwith a newline');
+        expect(localization.getValue('wallItem.name.9')).toBe('unknown to the furniture data');
+        expect(localization.getValue('roomItem.name.2')).toBe('file only');
+        expect(localization.getValue('room.name')).toBe('room');
+        expect(asked).not.toContain('room.name');
+
+        localization.setOverrideValues(new Map([ [ 'roomItem.name.1', 'Stuhl' ] ]));
+
+        expect(localization.getValue('roomItem.name.1')).toBe('Stuhl');
+
+        localization.setFurnitureResolver(null);
+        localization.clearOverrideValues();
+
+        expect(localization.getValue('roomItem.name.1')).toBe('stale copy');
+    });
+});

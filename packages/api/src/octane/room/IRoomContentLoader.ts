@@ -9,6 +9,10 @@ import { IRoomContentListener } from './IRoomContentListener';
 export interface IRoomContentLoader
 {
     init(): Promise<void>;
+    /** Starts the libraries shipped with the renderer, before the session data; shared, and never rejects. */
+    preloadMandatoryLibraries(): Promise<void>;
+    /** Starts the landscape library; it needs the furniture data. */
+    preloadLandscape?(): Promise<void>;
     processFurnitureData(furnitureData: IFurnitureData[]): void;
 	downloadAssetSync(type: string): void
     downloadAsset(type: string): Promise<void>;

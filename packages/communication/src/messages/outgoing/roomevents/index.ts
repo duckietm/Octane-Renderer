@@ -47,3 +47,6 @@ export * from './WiredSetupExportComposer';
 export * from './WiredSetupImportComposer';
 export * from './GetWiredContractContentsComposer';
 export * from './UpdateWiredContractComposer';
+export * from './WiredPermanentVariableSetComposer';
+export * from './WiredPermanentVariablesRequestComposer';
+export * from './WiredVariableDeleteAllHoldersComposer';

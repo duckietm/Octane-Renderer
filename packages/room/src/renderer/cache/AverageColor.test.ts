@@ -56,7 +56,7 @@ describe('RoomObjectCache.getSortableSpriteList average colours', () =>
 
     const addSprite = (cache: RoomObjectCache, id: number, values: Partial<IRoomObjectSprite>): void =>
     {
-        const item = cache.getObjectCache(String(id));
+        const item = cache.getObjectCache(id);
 
         item.objectId = id;
 

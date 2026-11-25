@@ -5,14 +5,17 @@ import { GetEventDispatcher, OctaneEventType } from '@octane/events';
 import { loadGamedata } from '@octane/utils';
 import { AvatarAssetDownloadManager } from './AvatarAssetDownloadManager';
 import { AvatarFigureContainer } from './AvatarFigureContainer';
-import { AvatarImage } from './AvatarImage';
+import { AvatarFigureShare, AvatarImage } from './AvatarImage';
 import { AvatarStructure } from './AvatarStructure';
 import { getMissingBundledActions } from './actions/BundledAvatarActions';
 import { EffectAssetDownloadManager } from './EffectAssetDownloadManager';
 import { FigureDataContainer } from './FigureDataContainer';
 import { PlaceHolderAvatarImage } from './PlaceHolderAvatarImage';
 import { AssetAliasCollection } from './alias';
+import { AvatarAtlasCompositor } from './cache/AvatarAtlasCompositor';
 import { AvatarFrameTextureCache } from './cache/AvatarFrameTextureCache';
+import { AvatarImageActionCache } from './cache/AvatarImageActionCache';
+import { AvatarImageCache } from './cache/AvatarImageCache';
 import { HabboAvatarAnimations } from './data/HabboAvatarAnimations';
 import { HabboAvatarDanceSixSeven } from './data/HabboAvatarDanceSixSeven';
 import { HabboAvatarGeometry } from './data/HabboAvatarGeometry';
@@ -31,9 +34,15 @@ export class AvatarRenderManager implements IAvatarRenderManager
     // Finished avatar frames, shared by every avatar that shows the same composition.
     private _frameTextures: AvatarFrameTextureCache = new AvatarFrameTextureCache();
     private _aliasResetCallback: () => void = null;
+    // Avatars whose figure nobody else wears draw into cells of shared atlas pages, always, as in Volt. The room
+    // engine can still switch it for a session (setAvatarAtlasMode, from the developer tools).
+    private _compositor: AvatarAtlasCompositor = new AvatarAtlasCompositor();
+    private _figureShares: Map<string, AvatarFigureShare> = new Map();
+    private _atlasEnabled: boolean = true;
 
     public async init(): Promise<void>
     {
+
         this._structure?.initGeometry(HabboAvatarGeometry.geometry);
         this._structure?.initPartSets(HabboAvatarPartSets.partSets);
 
@@ -55,7 +64,12 @@ export class AvatarRenderManager implements IAvatarRenderManager
         this._aliasCollection.init();
 
         // Store callback for cleanup
-        this._aliasResetCallback = () => this._aliasCollection.reset();
+        this._aliasResetCallback = () =>
+        {
+            this._aliasCollection.reset();
+            // The resolved part assets also start over by revision; this keeps the cache small after a load.
+            AvatarImageCache.clearResolvedAssets();
+        };
         GetEventDispatcher().addEventListener(OctaneEventType.AVATAR_ASSET_LOADED, this._aliasResetCallback);
         GetEventDispatcher().addEventListener(OctaneEventType.AVATAR_EFFECT_LOADED, this._aliasResetCallback);
 
@@ -80,6 +94,7 @@ export class AvatarRenderManager implements IAvatarRenderManager
         this._avatarAssetDownloadManager?.dispose();
         this._effectAssetDownloadManager?.dispose();
         this._frameTextures.dispose();
+        this._compositor.dispose();
     }
 
     private async loadActions(): Promise<void>
@@ -154,19 +169,89 @@ export class AvatarRenderManager implements IAvatarRenderManager
 
         if(this._avatarAssetDownloadManager.isAvatarFigureContainerReady(figureContainer))
         {
-            return new AvatarImage(this._structure, this._aliasCollection, figureContainer, size, this._effectAssetDownloadManager, effectListener, this._frameTextures);
+            // Off: no compositor and no figure share, so every frame is a shared frame texture or the avatar's own.
+            if(!this._atlasEnabled) return new AvatarImage(this._structure, this._aliasCollection, figureContainer, size, this._effectAssetDownloadManager, effectListener, this._frameTextures);
+
+            return new AvatarImage(this._structure, this._aliasCollection, figureContainer, size, this._effectAssetDownloadManager, effectListener, this._frameTextures, this._compositor, this.getFigureShare(figureContainer.getFigureString(), size));
         }
 
         this._avatarAssetDownloadManager.downloadAvatarFigure(figureContainer, listener);
 
-        return new PlaceHolderAvatarImage(this._structure, this._aliasCollection, this._placeHolderFigure, size, this._effectAssetDownloadManager);
+        return this.createPlaceholderImage(size);
     }
 
     public createPlaceholderAvatarImage(size: string): IAvatarImage
     {
         if(!this._structure) return null;
 
-        return new PlaceHolderAvatarImage(this._structure, this._aliasCollection, this._placeHolderFigure, size, this._effectAssetDownloadManager);
+        return this.createPlaceholderImage(size);
+    }
+
+    // Every placeholder wears the same figure, so they all share the cached frames (and, with the atlas, its cells).
+    private createPlaceholderImage(size: string): PlaceHolderAvatarImage
+    {
+        if(!this._atlasEnabled) return new PlaceHolderAvatarImage(this._structure, this._aliasCollection, this._placeHolderFigure, size, this._effectAssetDownloadManager, this._frameTextures);
+
+        return new PlaceHolderAvatarImage(this._structure, this._aliasCollection, this._placeHolderFigure, size, this._effectAssetDownloadManager, this._frameTextures, this._compositor, this.getFigureShare(this._placeHolderFigure.getFigureString(), size));
+    }
+
+    private getFigureShare(figure: string, size: string): AvatarFigureShare
+    {
+        const key = `${ size }|${ figure }`;
+
+        let share = this._figureShares.get(key);
+
+        if(!share)
+        {
+            share = { count: 0 };
+
+            this._figureShares.set(key, share);
+        }
+
+        share.count++;
+
+        // Forget figures nobody wears any more, now and then, so the map follows the room.
+        if(this._figureShares.size > 8192)
+        {
+            for(const [ shareKey, value ] of this._figureShares)
+            {
+                if(value.count <= 0) this._figureShares.delete(shareKey);
+            }
+        }
+
+        return share;
+    }
+
+    // Whether avatar images created from now on may draw into the atlas. Images that exist keep the
+    // path they were created with; the room engine recreates the ones it shows (setAvatarAtlasMode).
+    public get atlasEnabled(): boolean
+    {
+        return this._atlasEnabled;
+    }
+
+    public set atlasEnabled(enabled: boolean)
+    {
+        this._atlasEnabled = !!enabled;
+        this._compositor.setKeepEmptyPages(this._atlasEnabled);
+
+        AvatarImageActionCache.MAX_DIRECTIONS = this._atlasEnabled ? AvatarImageActionCache.ATLAS_MAX_DIRECTIONS : AvatarImageActionCache.DEFAULT_MAX_DIRECTIONS;
+    }
+
+    // How long the last atlas flush took, and how many avatars it drew.
+    public get lastCompositionFlushMs(): number
+    {
+        return (this._compositor?.lastFlushMs ?? 0);
+    }
+
+    public get lastCompositionFlushJobs(): number
+    {
+        return (this._compositor?.lastFlushJobs ?? 0);
+    }
+
+    // Draws the avatars that changed this frame into their atlas cells; does nothing when none wait.
+    public flushCompositions(): void
+    {
+        this._compositor?.flush();
     }
 
     public downloadAvatarFigure(container: IAvatarFigureContainer, listener: IAvatarImageListener): void

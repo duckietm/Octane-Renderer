@@ -1,6 +1,6 @@
-import { deflate } from 'pako';
-import { describe, expect, it } from 'vitest';
-import { readHabBundle } from './HabBundle';
+import { deflate, deflateRaw } from 'pako';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { HAB_NATIVE_INFLATE_MIN_BYTES, readHabBundle, readHabBundleAsync } from './HabBundle';
 
 const buildHab = (index: object, data: Uint8Array, version: number = 1): ArrayBuffer =>
 {
@@ -53,5 +53,78 @@ describe('readHabBundle', () =>
     it('rejects an entry outside the data section', () =>
     {
         expect(() => readHabBundle(buildHab({ format: 'hab', version: 1, entries: [ entry('a.bin', { offset: 2 }) ] }, DATA))).toThrow(/outside/);
+    });
+});
+
+describe('readHabBundleAsync', () =>
+{
+    // Pseudo-random bytes, so they stay above the native inflate threshold once compressed.
+    let seed = 12345;
+    const original = new Uint8Array(HAB_NATIVE_INFLATE_MIN_BYTES * 2).map(() => (seed = (seed * 1103515245 + 12345) >>> 0) >>> 24);
+    const NativeDecompressionStream = globalThis.DecompressionStream;
+    let nativeStreams = 0;
+
+    const countNativeStreams = (): void =>
+    {
+        nativeStreams = 0;
+
+        vi.stubGlobal('DecompressionStream', class extends NativeDecompressionStream
+        {
+            constructor(format: CompressionFormat)
+            {
+                super(format);
+                nativeStreams++;
+            }
+        });
+    };
+
+    afterEach(() => vi.unstubAllGlobals());
+
+    const compressedBundle = (packed: Uint8Array): ArrayBuffer =>
+    {
+        const small = deflate(DATA);
+        const data = new Uint8Array(packed.byteLength + small.byteLength);
+
+        data.set(packed, 0);
+        data.set(small, packed.byteLength);
+
+        return buildHab({ format: 'hab', version: 1, name: 'bundle', entries: [
+            { name: 'big.png', mimeType: 'image/png', offset: 0, storedLength: packed.byteLength, originalLength: original.byteLength, compression: 'deflate' },
+            { name: 'small.json', mimeType: 'application/json', offset: packed.byteLength, storedLength: small.byteLength, originalLength: DATA.byteLength, compression: 'deflate' }
+        ] }, data);
+    };
+
+    it('reads the same entries as the synchronous reader, in index order', async () =>
+    {
+        const packed = deflate(original);
+
+        expect(packed.byteLength).toBeGreaterThanOrEqual(HAB_NATIVE_INFLATE_MIN_BYTES);
+
+        const buffer = compressedBundle(packed);
+
+        countNativeStreams();
+
+        const contents = await readHabBundleAsync(buffer);
+
+        // Only the large entry goes through the browser's stream; the small one stays with pako.
+        expect(nativeStreams).toBe(1);
+
+        expect(contents).toEqual(readHabBundle(buffer));
+        expect(contents.entries.map(entry => entry.name)).toEqual([ 'big.png', 'small.json' ]);
+        expect(contents.entries[0].bytes).toEqual(original);
+        expect(Array.from(contents.entries[1].bytes)).toEqual([ 1, 2, 3, 4 ]);
+    });
+
+    it('still reads a raw deflate entry, which the native zlib stream refuses', async () =>
+    {
+        const contents = await readHabBundleAsync(compressedBundle(deflateRaw(original)));
+
+        expect(contents.entries[0].bytes).toEqual(original);
+    });
+
+    it('fails on a damaged bundle like the synchronous reader', async () =>
+    {
+        await expect(readHabBundleAsync(buildHab({ format: 'hab', version: 1, entries: [ entry('a.bin', { offset: 2 }) ] }, DATA))).rejects.toThrow(/outside/);
+        await expect(readHabBundleAsync(buildHab({ format: 'hab', version: 1, entries: [ entry('a.bin', { originalLength: 5 }) ] }, DATA))).rejects.toThrow(/wrong length/);
     });
 });
