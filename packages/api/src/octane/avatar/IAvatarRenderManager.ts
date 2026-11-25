@@ -19,6 +19,13 @@ export interface IAvatarRenderManager
     getFigureStringWithFigureIds(figure: string, gender: string, figureIds: number[]): string;
     getMandatoryAvatarPartSetIds(gender: string, clubLevel: number): string[];
     getAssetByName(name: string): IGraphicAsset;
+    /** Whether new avatar images draw into the shared avatar atlas (always, unless a developer switched it off). */
+    atlasEnabled: boolean;
+    /** How long the last atlas flush took (ms) and how many avatars it drew. */
+    readonly lastCompositionFlushMs: number;
+    readonly lastCompositionFlushJobs: number;
+    /** Draws the avatars that changed this frame into the atlas; the room engine calls it before the stage renders. */
+    flushCompositions(): void;
     assets: IAssetManager;
     structureData: IStructureData;
 }

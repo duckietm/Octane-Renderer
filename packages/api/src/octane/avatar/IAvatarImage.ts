@@ -19,7 +19,13 @@ export interface IAvatarImage
     getAsset(name: string): IGraphicAsset;
     getSprites(): ISpriteDataContainer[];
     getLayerData(sprite: ISpriteDataContainer): IAnimationLayerData;
-    processAsTexture(setType: string, hightlight: boolean, texture?: Texture): Texture;
+    /**
+     * deferred: the caller shows the texture in the room this frame, so it may be an atlas cell whose
+     * pixels are only drawn when the room engine flushes the atlas, just before the stage renders.
+     */
+    processAsTexture(setType: string, hightlight: boolean, deferred?: boolean): Texture;
+    /** Gives the atlas cells of kept frames back; the image draws again when it is shown later. */
+    releaseCachedFrames?(): void;
     /** Grows each time processAsTexture may have drawn a new frame; the same value means the same picture. */
     readonly textureRevision?: number;
     processAsImageUrl(setType: string): string;

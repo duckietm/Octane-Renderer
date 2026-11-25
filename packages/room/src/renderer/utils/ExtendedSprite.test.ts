@@ -1,12 +1,14 @@
-import { GlRenderTargetAdaptor, Texture, TextureSource, WebGLRenderer } from 'pixi.js';
+import { GlRenderTargetAdaptor, Point, Rectangle, Texture, TextureSource, WebGLRenderer } from 'pixi.js';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { GetRegionHitMap, MarkRegionHitMapDirty, RegisterRegionHitMap, UnregisterRegionHitMap } from '../../../../utils/src/RegionHitMap';
 import { ExtendedSprite } from './ExtendedSprite';
 
 const { rendererState } = vi.hoisted(() => ({ rendererState: { value: null } }));
 
-vi.mock('@octane/utils', () => ({
+vi.mock('@octane/utils', async () => ({
     GetRenderer: () => rendererState.value,
-    TextureUtils: {}
+    TextureUtils: {},
+    ...await import('../../../../utils/src/RegionHitMap')
 }));
 
 const makeTexture = (): Texture => new Texture({ source: new TextureSource({ width: 4, height: 4 }) });
@@ -103,7 +105,7 @@ describe('ExtendedSprite hit maps', () =>
     {
         const drawFramebuffer = {};
         const textureFramebuffer = {};
-        const state = { bound: drawFramebuffer, reads: 0 };
+        const state = { bound: drawFramebuffer, reads: 0, lastRead: null as number[] };
         const gl = {
             FRAMEBUFFER: 1,
             FRAMEBUFFER_BINDING: 2,
@@ -114,9 +116,10 @@ describe('ExtendedSprite hit maps', () =>
             {
                 state.bound = framebuffer;
             },
-            readPixels: (_x: number, _y: number, _width: number, _height: number, _format: number, _type: number, pixels: Uint8ClampedArray) =>
+            readPixels: (x: number, y: number, width: number, height: number, _format: number, _type: number, pixels: Uint8ClampedArray) =>
             {
                 state.reads++;
+                state.lastRead = [ x, y, width, height ];
 
                 if(failRead) throw new Error('read failed');
 
@@ -165,6 +168,45 @@ describe('ExtendedSprite hit maps', () =>
         adaptor.bindFramebuffer(drawFramebuffer);
         expect(state.bound).toBe(drawFramebuffer);
         source.destroy();
+    });
+
+    it('reads only the rectangle of an avatar atlas cell and hit tests inside it', () =>
+    {
+        const { renderer, adaptor, drawFramebuffer, state } = makeGlRenderer(false);
+        const page = new TextureSource({ width: 64, height: 64 });
+        const cell = new Texture({ source: page, frame: new Rectangle(17, 33, 8, 12) });
+        const sprite = new ExtendedSprite({ texture: cell });
+
+        rendererState.value = renderer;
+        RegisterRegionHitMap(cell);
+
+        expect(sprite.containsPoint(new Point(3, 5))).toBe(true);
+        expect(state.lastRead).toEqual([ 17, 33, 8, 12 ]);
+        expect(GetRegionHitMap(cell).pixels).toHaveLength(8 * 12 * 4);
+        // The whole page was never read back.
+        expect(page.hitMap).toBeUndefined();
+
+        // Clean: the next test reuses the pixels. Dirty and older than 100 ms: read again.
+        expect(sprite.containsPoint(new Point(1, 1))).toBe(true);
+        expect(state.reads).toBe(1);
+
+        MarkRegionHitMapDirty(cell);
+        GetRegionHitMap(cell).time = 0;
+
+        expect(sprite.containsPoint(new Point(1, 1))).toBe(true);
+        expect(state.reads).toBe(2);
+
+        // A transparent pixel of the cell does not hit.
+        GetRegionHitMap(cell).pixels[((2 + (4 * 8)) * 4) + 3] = 0;
+
+        expect(sprite.containsPoint(new Point(2, 4))).toBe(false);
+
+        adaptor.bindFramebuffer(drawFramebuffer);
+        expect(state.bound).toBe(drawFramebuffer);
+
+        UnregisterRegionHitMap(cell);
+        sprite.destroy();
+        cell.destroy(true);
     });
 
     it('reads a decoded image on the CPU without touching the GPU', () =>

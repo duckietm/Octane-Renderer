@@ -1,127 +1,98 @@
 import { IMessageDataWrapper, IMessageParser } from '@octane/api';
+import { IWiredChestTransactionRow, readWiredChestTransaction } from './WiredChestRoomLogsMessageParser';
 
+/** AIR's ChestItemType with how many of it moved. */
 export interface IWiredChestTransactionDetailItem
 {
-    spriteId: number;
+    wallItem: boolean;
+    typeId: number;
+    posterId: string;
     quantity: number;
 }
 
 /**
- * One wired chest transaction with the furni it moved. Wire layout:
- * int transactionId, int chestId, int chestKind, int type, int source, int userId, string userName,
- * int currencyType, int withdrawn, int deposited, int timestamp,
- * int itemCount, [int spriteId, int quantity]*.
+ * One wired chest transaction with its chests and furni, as AIR's WiredTransactionDetails. Wire layout:
+ * the transaction, int chestCount, [int chestId]*, int withdrawnCount, [bool wall, int typeId, string posterId,
+ * int quantity]*, int depositedCount, [the same]*, bool incomplete.
  *
- * The item list is empty for a currency transaction. spriteId is the furnidata class id, the same
- * identity ChestDataMessageParser carries.
+ * typeId is the furnidata class id, the same identity ChestDataMessageParser carries. incomplete says the lines
+ * do not name all the furni the counts do.
  */
 export class WiredChestTransactionDetailsMessageParser implements IMessageParser
 {
-    private _transactionId: number = 0;
-    private _chestId: number = 0;
-    private _chestKind: number = 0;
-    private _type: number = 0;
-    private _source: number = 0;
-    private _userId: number = 0;
-    private _userName: string = '';
-    private _currencyType: number = -1;
-    private _withdrawn: number = 0;
-    private _deposited: number = 0;
-    private _timestamp: number = 0;
-    private _items: IWiredChestTransactionDetailItem[] = [];
+    private _transaction: IWiredChestTransactionRow | null = null;
+    private _chestIds: number[] = [];
+    private _withdrawn: IWiredChestTransactionDetailItem[] = [];
+    private _deposited: IWiredChestTransactionDetailItem[] = [];
+    private _incomplete: boolean = false;
 
     public flush(): boolean
     {
-        this._transactionId = 0;
-        this._chestId = 0;
-        this._chestKind = 0;
-        this._type = 0;
-        this._source = 0;
-        this._userId = 0;
-        this._userName = '';
-        this._currencyType = -1;
-        this._withdrawn = 0;
-        this._deposited = 0;
-        this._timestamp = 0;
-        this._items = [];
+        this._transaction = null;
+        this._chestIds = [];
+        this._withdrawn = [];
+        this._deposited = [];
+        this._incomplete = false;
 
         return true;
     }
 
     public parse(wrapper: IMessageDataWrapper): boolean
     {
-        this._transactionId = wrapper.readInt();
-        this._chestId = wrapper.readInt();
-        this._chestKind = wrapper.readInt();
-        this._type = wrapper.readInt();
-        this._source = wrapper.readInt();
-        this._userId = wrapper.readInt();
-        this._userName = wrapper.readString();
-        this._currencyType = wrapper.readInt();
-        this._withdrawn = wrapper.readInt();
-        this._deposited = wrapper.readInt();
-        this._timestamp = wrapper.readInt();
+        this._transaction = readWiredChestTransaction(wrapper);
 
-        const count = wrapper.readInt();
-        this._items = [];
+        const chestCount = wrapper.readInt();
+        this._chestIds = [];
 
-        for(let i = 0; i < count; i++)
-        {
-            const spriteId = wrapper.readInt();
-            const quantity = wrapper.readInt();
+        for(let i = 0; i < chestCount; i++) this._chestIds.push(wrapper.readInt());
 
-            this._items.push({ spriteId, quantity });
-        }
+        this._withdrawn = WiredChestTransactionDetailsMessageParser.readItems(wrapper);
+        this._deposited = WiredChestTransactionDetailsMessageParser.readItems(wrapper);
+        this._incomplete = wrapper.readBoolean();
 
         return true;
     }
 
+    private static readItems(wrapper: IMessageDataWrapper): IWiredChestTransactionDetailItem[]
+    {
+        const count = wrapper.readInt();
+        const items: IWiredChestTransactionDetailItem[] = [];
+
+        for(let i = 0; i < count; i++)
+        {
+            const wallItem = wrapper.readBoolean();
+            const typeId = wrapper.readInt();
+            const posterId = wrapper.readString();
+            const quantity = wrapper.readInt();
+
+            items.push({ wallItem, typeId, posterId, quantity });
+        }
+
+        return items;
+    }
+
+    public get transaction(): IWiredChestTransactionRow | null
+    {
+        return this._transaction;
+    }
     public get transactionId(): number
     {
-        return this._transactionId;
+        return this._transaction?.transactionId ?? 0;
     }
-    public get chestId(): number
+    public get chestIds(): number[]
     {
-        return this._chestId;
+        return this._chestIds;
     }
-    public get chestKind(): number
-    {
-        return this._chestKind;
-    }
-    public get type(): number
-    {
-        return this._type;
-    }
-    public get source(): number
-    {
-        return this._source;
-    }
-    public get userId(): number
-    {
-        return this._userId;
-    }
-    public get userName(): string
-    {
-        return this._userName;
-    }
-    public get currencyType(): number
-    {
-        return this._currencyType;
-    }
-    public get withdrawn(): number
+    public get withdrawn(): IWiredChestTransactionDetailItem[]
     {
         return this._withdrawn;
     }
-    public get deposited(): number
+    public get deposited(): IWiredChestTransactionDetailItem[]
     {
         return this._deposited;
     }
-    public get timestamp(): number
+    public get incomplete(): boolean
     {
-        return this._timestamp;
-    }
-    public get items(): IWiredChestTransactionDetailItem[]
-    {
-        return this._items;
+        return this._incomplete;
     }
 }

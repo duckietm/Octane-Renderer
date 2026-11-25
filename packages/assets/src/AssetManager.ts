@@ -43,6 +43,8 @@ export class AssetManager implements IAssetManager
     // The image resource key whose sheet a downloaded collection was cut from.
     private _collectionSources: WeakMap<GraphicAssetCollection, string> = new WeakMap();
     private _downloads: Map<string, Promise<boolean>> = new Map();
+    // Bumped on every change to the asset index, so lookups cached elsewhere know when to start over.
+    private _assetRevision: number = 0;
 
     constructor(private readonly _dependencies: AssetManagerDependencies = DEFAULT_DEPENDENCIES)
     {
@@ -90,8 +92,15 @@ export class AssetManager implements IAssetManager
         return first?.getAsset(name) ?? null;
     }
 
+    public get assetRevision(): number
+    {
+        return this._assetRevision;
+    }
+
     private assetChanged(collection: GraphicAssetCollection, name: string, added: boolean): void
     {
+        this._assetRevision++;
+
         let candidates = this._assetIndex.get(name);
 
         if(added)

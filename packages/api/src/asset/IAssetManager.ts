@@ -15,4 +15,6 @@ export interface IAssetManager
     downloadAssets(urls: string[]): Promise<boolean>;
     downloadAsset(url: string): Promise<boolean>;
     readonly collections: Map<string, IGraphicAssetCollection>;
+    // Changes whenever an asset name starts or stops resolving (collections loaded or replaced, assets added or removed).
+    readonly assetRevision?: number;
 }

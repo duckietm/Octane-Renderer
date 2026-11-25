@@ -27,6 +27,7 @@ export * from './OctaneVersion';
 export * from './Node3D';
 export * from './NumberBank';
 export * from './PointMath';
+export * from './RegionHitMap';
 export * from './RoomId';
 export * from './TextureContentVersion';
 export * from './TexturePool';

@@ -1,6 +1,7 @@
 import { IFurnitureStackingHeightMap, IGetImageListener, IImageResult, ILegacyWallGeometry, IObjectData, IPetColorResult, IPlaneDrawingData, IPetCustomPart, IRoomAreaSelectionManager, IRoomContentListener, IRoomContentLoader, IRoomCreator, IRoomEngine, IRoomEngineServices, IRoomGeometry, IRoomInstance, IRoomManager, IRoomManagerListener, IRoomObject, IRoomObjectController, IRoomObjectModel, IRoomObjectVariableFxEntry, IRoomObjectVisualization, IRoomRenderer, IRoomRenderingCanvas, IRoomSessionManager, ISelectedRoomObjectData, ISessionDataManager, ITileObjectMap, IUpdateReceiver, IVector3D, LegacyDataType, MouseEventType, ObjectDataFactory, PetFigureData, RoomControllerLevel, RoomObjectCategory, RoomObjectOperationType, RoomObjectUserType, RoomObjectVariable, ToolbarIconEnum } from '@octane/api';
 import { GetCommunication, RenderRoomMessageComposer, RenderRoomThumbnailMessageComposer } from '@octane/communication';
 import { GetAssetManager } from '@octane/assets';
+import { GetAvatarRenderManager } from '@octane/avatar';
 import { GetConfiguration } from '@octane/configuration';
 import { BadgeImageReadyEvent, GetEventDispatcher, OctaneToolbarAnimateIconEvent, RoomBackgroundColorEvent, RoomDragEvent, RoomEngineAreaHideStateEvent, RoomEngineEvent, RoomEngineObjectEvent, RoomObjectEvent, RoomObjectFurnitureActionEvent, RoomObjectMouseEvent, RoomSessionEvent, RoomToObjectOwnAvatarMoveEvent } from '@octane/events';
 import { GetRoomSessionManager, GetSessionDataManager } from '@octane/session';
@@ -19,7 +20,7 @@ import { RoomRenderScene } from './RoomRenderScene';
 import { buildRoomObjectImageKey, DisposableTexture, RoomObjectImageCache, SharedImageResult } from './RoomObjectImageCache';
 import { RoomVariableEnum } from './RoomVariableEnum';
 import { ObjectAvatarBlockedUpdateMessage, ObjectAvatarCarryObjectUpdateMessage, ObjectAvatarChatUpdateMessage, ObjectAvatarDanceUpdateMessage, ObjectAvatarEffectUpdateMessage, ObjectAvatarExperienceUpdateMessage, ObjectAvatarExpressionUpdateMessage, ObjectAvatarFigureUpdateMessage, ObjectAvatarFlatControlUpdateMessage, ObjectAvatarGestureUpdateMessage, ObjectAvatarGuideStatusUpdateMessage, ObjectAvatarHabbiconUpdateMessage, ObjectAvatarMutedUpdateMessage, ObjectAvatarOwnMessage, ObjectAvatarPetGestureUpdateMessage, ObjectAvatarPlayerValueUpdateMessage, ObjectAvatarPlayingGameUpdateMessage, ObjectAvatarPostureUpdateMessage, ObjectAvatarSignUpdateMessage, ObjectAvatarSleepUpdateMessage, ObjectAvatarTypingUpdateMessage, ObjectAvatarUpdateMessage, ObjectAvatarUseObjectUpdateMessage, ObjectDataUpdateMessage, ObjectGroupBadgeUpdateMessage, ObjectHeightUpdateMessage, ObjectItemDataUpdateMessage, ObjectModelDataUpdateMessage, ObjectMoveUpdateMessage, ObjectRoomColorUpdateMessage, ObjectRoomFloorHoleUpdateMessage, ObjectRoomMaskUpdateMessage, ObjectRoomPlanePropertyUpdateMessage, ObjectRoomPlaneVisibilityUpdateMessage, ObjectRoomUpdateMessage, ObjectStateUpdateMessage, RoomObjectUpdateMessage } from './messages';
-import { RoomLogic, RoomMapData, RoomPlane, RoomVisualization } from './object';
+import { AvatarCompositeBudget, AvatarVisualization, RoomLogic, RoomMapData, RoomPlane, RoomVisualization } from './object';
 import { RoomWindowReflectionState } from './object/visualization/RoomWindowReflectionState';
 import { RoomRenderer } from './renderer';
 import { RoomAreaSelectionManager, RoomCamera, RoomData, RoomEnterEffect, RoomFurnitureData, RoomGeometry, RoomInstanceData, RoomObjectBadgeImageAssetListener } from './utils';
@@ -83,6 +84,8 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
     public async init(): Promise<void>
     {
         this.setPlaneRenderMode(GetConfiguration().getValue<boolean>('room.planes.direct', false));
+        // Mouth and eye frames of a crowd take turns and avatars off screen wait with their redraw; off restores the old behaviour.
+        AvatarCompositeBudget.ENABLED = (GetConfiguration().getValue<boolean>('room.avatar.redraw.budget', true) !== false);
         // Official `room.dragging.always_center`: the room goes back to its centre when a drag ends.
         // Optional: asked for only when the hotel set it, so a config without it logs no missing key.
         this._roomDraggingAlwaysCenters = (GetConfiguration().definitions.has('room.dragging.always_center') && (GetConfiguration().getValue<boolean>('room.dragging.always_center', false) === true));
@@ -910,6 +913,44 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
         }
     }
 
+    // Whether floors and walls are drawn straight from their tiles right now.
+    public get planesDrawnDirect(): boolean
+    {
+        return RoomPlane.DIRECT_DRAW;
+    }
+
+    // The avatar atlas gives an avatar whose figure nobody else wears a cell of a shared
+    // page instead of a texture of its own; all cells are drawn together just before the stage renders.
+    // Avatars in the rooms are created again, so they change over at once.
+    public setAvatarAtlasMode(enabled: boolean): void
+    {
+        const manager = GetAvatarRenderManager();
+
+        enabled = !!enabled;
+
+        if(manager.atlasEnabled === enabled) return;
+
+        manager.atlasEnabled = enabled;
+
+        if(!this._roomManager?.rooms) return;
+
+        for(const instance of this._roomManager.rooms.values())
+        {
+            for(const object of instance.getRoomObjectsForCategory(RoomObjectCategory.UNIT))
+            {
+                const visualization = object?.visualization;
+
+                if(visualization instanceof AvatarVisualization) visualization.recreateAvatarImages();
+            }
+        }
+    }
+
+    // Whether new avatars draw into the avatar atlas right now.
+    public get avatarsDrawnInAtlas(): boolean
+    {
+        return GetAvatarRenderManager().atlasEnabled;
+    }
+
     public isRoomIdPlayingGame(roomId: number): boolean
     {
         const roomInstance = this.getRoomInstance(roomId);
@@ -1029,6 +1070,9 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
         this._roomManager.update(time, update);
 
         this.updateRoomCameras(time);
+
+        // Avatars that changed this frame draw into their atlas cells before the stage renders.
+        GetAvatarRenderManager().flushCompositions();
 
         if(this._mouseCursorUpdate) this.setPointer();
 
@@ -3767,6 +3811,9 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
 
     public createTextureFromRoom(roomId: number, canvasId: number = -1, bounds: Rectangle = null): Texture
     {
+        // The capture reads the avatars' atlas cells, so cells still waiting are drawn first.
+        GetAvatarRenderManager().flushCompositions();
+
         let canvas: IRoomRenderingCanvas = null;
 
         if(canvasId > -1)

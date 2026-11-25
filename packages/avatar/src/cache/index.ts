@@ -3,3 +3,4 @@ export * from './AvatarImageBodyPartCache';
 export * from './AvatarImageCache';
 export * from './AvatarImageDirectionCache';
 export * from './ImageData';
+export * from './AvatarAtlasCompositor';

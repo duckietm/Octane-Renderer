@@ -3,12 +3,17 @@ import { AvatarImageDirectionCache } from './AvatarImageDirectionCache';
 
 export class AvatarImageActionCache
 {
-    // Directions kept per action. Each holds a baked container per animation frame, and a walking
-    // avatar visits all eight; the finished frames stay shared in AvatarFrameTextureCache, so turning
-    // back to an evicted direction only rebuilds its first frames. Three covers a head turned either side.
-    private static MAX_DIRECTIONS: number = 3;
+    // Directions kept per action. Without the atlas a part still gets a Pixi container the first time a
+    // shared frame is drawn from it, and a walking avatar visits all eight directions; the finished frames
+    // stay shared in AvatarFrameTextureCache, so three (a head turned either side) is enough.
+    public static DEFAULT_MAX_DIRECTIONS: number = 3;
+    // With the atlas a part is only a short layer list, so all eight fit: a crowd that redraws less
+    // often (see AvatarCompositeBudget) would otherwise rebuild its parts on almost every redraw.
+    public static ATLAS_MAX_DIRECTIONS: number = 8;
+    // Set by AvatarRenderManager when the atlas is switched on or off; the atlas is on from the start.
+    public static MAX_DIRECTIONS: number = AvatarImageActionCache.ATLAS_MAX_DIRECTIONS;
 
-    private _cache: Map<string, AvatarImageDirectionCache>;
+    private _cache: Map<number, AvatarImageDirectionCache>;
     private _lastAccessTime: number;
 
     constructor()
@@ -34,27 +39,29 @@ export class AvatarImageActionCache
 
     public getDirectionCache(direction: number): AvatarImageDirectionCache
     {
-        const key = direction.toString();
-        const existing = this._cache.get(key);
+        const existing = this._cache.get(direction);
 
         if(!existing) return null;
 
-        // Most recently used last, so the oldest direction is evicted first.
-        this._cache.delete(key);
-        this._cache.set(key, existing);
+        // Most recently used last, so the oldest direction is evicted first. When all eight directions fit,
+        // nothing is ever evicted and the lookup needs no reordering.
+        if(AvatarImageActionCache.MAX_DIRECTIONS < AvatarImageActionCache.ATLAS_MAX_DIRECTIONS)
+        {
+            this._cache.delete(direction);
+            this._cache.set(direction, existing);
+        }
 
         return existing;
     }
 
     public updateDirectionCache(direction: number, directionCache: AvatarImageDirectionCache): void
     {
-        const key = direction.toString();
-        const existing = this._cache.get(key);
+        const existing = this._cache.get(direction);
 
         if(existing && (existing !== directionCache)) existing.dispose();
 
-        this._cache.delete(key);
-        this._cache.set(key, directionCache);
+        this._cache.delete(direction);
+        this._cache.set(direction, directionCache);
 
         // Safe mid-frame: a body part uses one direction per frame, and this is that part's cache.
         while(this._cache.size > AvatarImageActionCache.MAX_DIRECTIONS)

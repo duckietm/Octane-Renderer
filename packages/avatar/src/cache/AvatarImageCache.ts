@@ -1,8 +1,8 @@
 import { AvatarDirectionAngle, AvatarFigurePartType, AvatarScaleType, GeometryType, IActiveActionData, IAvatarImage, IGraphicAsset, RoomObjectSpriteData } from '@octane/api';
 import { getHalfSizeTexture, GraphicAsset, halfSizePadding } from '@octane/assets';
-import { GetRenderer, GetTexturePool, GetTickerTime } from '@octane/utils';
-import { Container, Matrix, Point, Rectangle, RenderTexture, Sprite, Texture } from 'pixi.js';
-import { AvatarImageBodyPartContainer } from '../AvatarImageBodyPartContainer';
+import { GetTickerTime } from '@octane/utils';
+import { Matrix, Point, Rectangle } from 'pixi.js';
+import { AvatarImageBodyPartContainer, AvatarPartLayer } from '../AvatarImageBodyPartContainer';
 import { AvatarImagePartContainer } from '../AvatarImagePartContainer';
 import { AvatarStructure } from '../AvatarStructure';
 import { AssetAliasCollection } from '../alias';
@@ -12,9 +12,30 @@ import { AvatarImageActionCache } from './AvatarImageActionCache';
 import { AvatarImageBodyPartCache } from './AvatarImageBodyPartCache';
 import { AvatarImageDirectionCache } from './AvatarImageDirectionCache';
 import { ImageData } from './ImageData';
+import { AvatarScaleTextureCache } from './AvatarScaleTextureCache';
+
+type AssetsByFrame = Map<number, IGraphicAsset>;
 
 export class AvatarImageCache
 {
+    // Every avatar resolves its parts' assets through the same names (scale, action, part type and
+    // id, direction, frame, with up to four fallbacks), and building and hashing those names was most
+    // of the cost of a body part an avatar had not shown yet. Parts repeat across figures, so the
+    // result is kept once for all avatars: part type -> part id -> action -> frame key -> asset or null.
+    // It starts over whenever the alias collection's revision moves (any asset added, removed or
+    // replaced in the asset manager, or any alias added), and when avatar libraries finish loading.
+    // Ported from plus-emulator/volt-renderer (by Dennis, GPL-3.0).
+    private static RESOLVED_ASSETS: Map<string, Map<string, Map<string, AssetsByFrame>>> = new Map();
+    private static RESOLVED_ASSETS_OWNER: AssetAliasCollection = null;
+    private static RESOLVED_ASSETS_REVISION: number = -1;
+
+    public static clearResolvedAssets(): void
+    {
+        AvatarImageCache.RESOLVED_ASSETS.clear();
+        AvatarImageCache.RESOLVED_ASSETS_OWNER = null;
+        AvatarImageCache.RESOLVED_ASSETS_REVISION = -1;
+    }
+
     private static DEFAULT_MAX_CACHE_STORAGE_TIME_MS: number = 60000;
     // Shared read-only defaults for the per-frame hot path — never mutate.
     private static EMPTY_REMOVE_DATA: string[] = [];
@@ -64,7 +85,8 @@ export class AvatarImageCache
             {
                 if(!asset) continue;
 
-                if(asset.texture instanceof RenderTexture) GetTexturePool().putTexture(asset.texture);
+                // Only a scaled-down copy is counted there; a real half-size sprite is left alone.
+                AvatarScaleTextureCache.release(asset.texture);
 
                 asset.recycle();
             }
@@ -191,9 +213,8 @@ export class AvatarImageCache
         let removeData: string[] = AvatarImageCache.EMPTY_REMOVE_DATA;
         let items: Map<string, string> = AvatarImageCache.EMPTY_ITEMS;
 
-        // NOT a shared scratch: the (cached) image container stores this
-        // Point by reference via its offset setter.
-        const positionOffset = new Point();
+        let offsetX = 0;
+        let offsetY = 0;
 
         if(action.definition.isAnimation)
         {
@@ -210,8 +231,8 @@ export class AvatarImageCache
                 {
                     adjustedDirection = (direction + layerData.dd + 8) % 8;
 
-                    positionOffset.x = this._scale === AvatarScaleType.LARGE ? layerData.dx : layerData.dx / 2;
-                    positionOffset.y = this._scale === AvatarScaleType.LARGE ? layerData.dy : layerData.dy / 2;
+                    offsetX = this._scale === AvatarScaleType.LARGE ? layerData.dx : layerData.dx / 2;
+                    offsetY = this._scale === AvatarScaleType.LARGE ? layerData.dy : layerData.dy / 2;
 
                     if(!layerData.usesFrameCounter) adjustedFrameCount = layerData.animationFrame;
 
@@ -251,6 +272,8 @@ export class AvatarImageCache
             actionCache.updateDirectionCache(direction, directionCache);
         }
 
+        if(!directionCache.getPartList().length) return null;
+
         if(!this._hasAnimatedContent)
         {
             for(const part of directionCache.getPartList())
@@ -284,10 +307,8 @@ export class AvatarImageCache
 
         const offset = this._structure.getFrameBodyPartOffset(adjustedAction, direction, adjustedFrameCount, key);
 
-        positionOffset.x += offset.x;
-        positionOffset.y += offset.y;
-
-        imageContainer.offset = positionOffset;
+        // The container keeps its own offset point, so nothing is allocated per body part per redraw.
+        imageContainer.setOffset((offsetX + offset.x), (offsetY + offset.y));
 
         return imageContainer;
     }
@@ -556,26 +577,7 @@ export class AvatarImageCache
                         }
                     }
 
-                    let assetName = (this._scale + '_' + assetPartDefinition + '_' + partType + '_' + partId + '_' + assetDirection + '_' + frameNumber);
-                    let asset = this._assets.getAsset(assetName);
-
-                    if(!asset)
-                    {
-                        assetName = (this._scale + '_' + assetPartDefinition + '_' + partType + '_' + partId + '_' + assetDirection + '_0');
-                        asset = this._assets.getAsset(assetName);
-                    }
-
-                    if(!asset)
-                    {
-                        assetName = (this._scale + '_' + this._defaultAction + '_' + partType + '_' + partId + '_' + assetDirection + '_' + frameNumber);
-                        asset = this._assets.getAsset(assetName);
-                    }
-
-                    if(!asset)
-                    {
-                        assetName = (this._scale + '_' + this._defaultAction + '_' + partType + '_' + partId + '_' + assetDirection + '_0');
-                        asset = this._assets.getAsset(assetName);
-                    }
+                    let asset = this.resolveAsset(assetPartDefinition, partType, partId, assetDirection, frameNumber);
 
                     if(!asset && (this._scale !== AvatarScaleType.LARGE))
                     {
@@ -609,7 +611,8 @@ export class AvatarImageCache
 
         if(!this._unionImages.length) return null;
 
-        const imageData = this.createUnionImage(this._unionImages, isFlipped);
+        const layers: AvatarPartLayer[] = [];
+        const imageData = this.createUnionImage(this._unionImages, isFlipped, layers);
         const canvasOffset = ((this._scale === AvatarScaleType.LARGE) ? (this._canvas.height - 16) : (this._canvas.height - 8));
         const offset = new Point(-(imageData.regPoint.x), (canvasOffset - imageData.regPoint.y));
 
@@ -626,7 +629,58 @@ export class AvatarImageCache
             imageIndex--;
         }
 
-        return new AvatarImageBodyPartContainer(imageData.container, offset, isCacheable);
+        return new AvatarImageBodyPartContainer(layers, imageData.width, imageData.height, offset, isCacheable, imageData.rect);
+    }
+
+    /** The part's asset through the four names AIR tries, looked up once for all avatars (see RESOLVED_ASSETS). */
+    private resolveAsset(assetPartDefinition: string, partType: string, partId: string, direction: number, frameNumber: number): IGraphicAsset
+    {
+        const revision = this._assets.revision;
+
+        // Without a revision a cached answer could not be known to be current, so every lookup goes to the assets.
+        if(revision < 0) return this.findAsset(assetPartDefinition, partType, partId, direction, frameNumber);
+
+        if((AvatarImageCache.RESOLVED_ASSETS_OWNER !== this._assets) || (AvatarImageCache.RESOLVED_ASSETS_REVISION !== revision))
+        {
+            AvatarImageCache.RESOLVED_ASSETS.clear();
+            AvatarImageCache.RESOLVED_ASSETS_OWNER = this._assets;
+            AvatarImageCache.RESOLVED_ASSETS_REVISION = revision;
+        }
+
+        let byId = AvatarImageCache.RESOLVED_ASSETS.get(partType);
+
+        if(!byId) AvatarImageCache.RESOLVED_ASSETS.set(partType, (byId = new Map()));
+
+        let byAction = byId.get(partId);
+
+        if(!byAction) byId.set(partId, (byAction = new Map()));
+
+        let byFrame = byAction.get(assetPartDefinition);
+
+        if(!byFrame) byAction.set(assetPartDefinition, (byFrame = new Map()));
+
+        // Frame, direction, the scale and the default action, in one number.
+        const key = ((((frameNumber * 16) + direction) * 4) + ((this._scale === AvatarScaleType.LARGE) ? 0 : 2) + ((this._defaultAction === 'std') ? 0 : 1));
+        const cached = byFrame.get(key);
+
+        if((cached !== undefined) && (!cached || !cached.texture || !cached.texture.destroyed)) return cached;
+
+        const asset = this.findAsset(assetPartDefinition, partType, partId, direction, frameNumber);
+
+        byFrame.set(key, asset);
+
+        return asset;
+    }
+
+    private findAsset(assetPartDefinition: string, partType: string, partId: string, direction: number, frameNumber: number): IGraphicAsset
+    {
+        let asset = this._assets.getAsset(this._scale + '_' + assetPartDefinition + '_' + partType + '_' + partId + '_' + direction + '_' + frameNumber);
+
+        if(!asset) asset = this._assets.getAsset(this._scale + '_' + assetPartDefinition + '_' + partType + '_' + partId + '_' + direction + '_0');
+        if(!asset) asset = this._assets.getAsset(this._scale + '_' + this._defaultAction + '_' + partType + '_' + partId + '_' + direction + '_' + frameNumber);
+        if(!asset) asset = this._assets.getAsset(this._scale + '_' + this._defaultAction + '_' + partType + '_' + partId + '_' + direction + '_0');
+
+        return (asset ?? null);
     }
 
     private getSmallScaleFallbackAsset(assetPartDefinition: string, partType: string, partId: string, assetDirection: number, frameNumber: number): IGraphicAsset
@@ -677,24 +731,12 @@ export class AvatarImageCache
             return halfAsset;
         }
 
-        const renderer = GetRenderer();
+        // No half-size sprite could be made: one scaled-down copy per source texture, shared by every avatar.
+        const texture = AvatarScaleTextureCache.acquire(source);
 
-        if(!renderer) return null;
+        if(!texture) return null;
 
-        const halfWidth = Math.max(1, Math.round(largeAsset.width / 2));
-        const halfHeight = Math.max(1, Math.round(largeAsset.height / 2));
-
-        const renderTexture = GetTexturePool().getTexture(halfWidth, halfHeight);
-        const sprite = new Sprite(source);
-
-        sprite.width = halfWidth;
-        sprite.height = halfHeight;
-
-        renderer.render({ container: sprite, target: renderTexture, clear: true });
-
-        sprite.destroy();
-
-        const fallback = GraphicAsset.createAsset((largeName + '_shfallback'), null, renderTexture, Math.round(largeAsset.x / 2), Math.round(largeAsset.y / 2), largeAsset.flipH, largeAsset.flipV, largeAsset.usesPalette);
+        const fallback = GraphicAsset.createAsset((largeName + '_shfallback'), null, texture, Math.round(largeAsset.x / 2), Math.round(largeAsset.y / 2), largeAsset.flipH, largeAsset.flipV, largeAsset.usesPalette);
 
         this._fallbackAssets.set(largeName, fallback);
 
@@ -711,54 +753,66 @@ export class AvatarImageCache
         return hex;
     }
 
-    private createUnionImage(images: ImageData[], isFlipped: boolean): ImageData
+    // Lays the part's assets out in one rectangle and returns the layers in it. Same placement as the
+    // container it used to build: a sizing sprite over the union, then one sprite per asset.
+    private createUnionImage(images: ImageData[], isFlipped: boolean, layers: AvatarPartLayer[]): { rect: Rectangle, regPoint: Point, width: number, height: number }
     {
+        // The union starts at the origin, as the container version did, so part bounds stay what they were.
         const bounds = new Rectangle();
 
         for(const data of images) data && bounds.enlarge(data.offsetRect);
 
-        const point = new Point(-(bounds.x), -(bounds.y));
-        const container = new Container();
+        const pointX = -(bounds.x);
+        const pointY = -(bounds.y);
+        const width = Math.max(0, bounds.width);
+        const height = Math.max(0, bounds.height);
 
-        const sprite = new Sprite(Texture.EMPTY);
-
-        sprite.width = bounds.width;
-        sprite.height = bounds.height;
-
-        container.addChild(sprite);
+        // Local bounds of the laid-out part: the sizing sprite plus every layer.
+        let minX = 0;
+        let minY = 0;
+        let maxX = width;
+        let maxY = height;
+        // The old container's width grew with each sprite already added; the flipped placement used it.
+        let containerWidth = width;
 
         for(const data of images)
         {
             if(!data) continue;
 
-            const regPoint = point.clone();
+            let regX = (pointX - data.regPoint.x);
+            const regY = (pointY - data.regPoint.y);
 
-            regPoint.x -= data.regPoint.x;
-            regPoint.y -= data.regPoint.y;
+            if(isFlipped) regX = (containerWidth - (regX + data.rect.width));
 
-            if(isFlipped) regPoint.x = (container.width - (regPoint.x + data.rect.width));
+            const flipped = (isFlipped != data.flipH);
+            const x = flipped ? ((data.rect.x + data.rect.width) + regX) : (regX - data.rect.x);
+            const y = (regY - data.rect.y);
+            // Pixi's quad bounds: the trimmed rectangle when there is one.
+            const trim = data.texture.trim;
+            const orig = data.texture.orig;
+            const quadMinX = trim ? trim.x : 0;
+            const quadMaxX = trim ? (trim.x + trim.width) : orig.width;
+            const quadMinY = trim ? trim.y : 0;
+            const quadMaxY = trim ? (trim.y + trim.height) : orig.height;
+            const left = flipped ? (x - quadMaxX) : (x + quadMinX);
+            const right = flipped ? (x - quadMinX) : (x + quadMaxX);
 
-            if(isFlipped != data.flipH)
-            {
-                this._matrix.a = -1;
-                this._matrix.tx = ((data.rect.x + data.rect.width) + regPoint.x);
-                this._matrix.ty = (regPoint.y - data.rect.y);
-            }
-            else
-            {
-                this._matrix.a = 1;
-                this._matrix.tx = (regPoint.x - data.rect.x);
-                this._matrix.ty = (regPoint.y - data.rect.y);
-            }
+            layers.push({ texture: data.texture, flipped, x, y, tint: data.colorTransform });
 
-            const sprite = new Sprite(data.texture);
+            if(left < minX) minX = left;
+            if((y + quadMinY) < minY) minY = (y + quadMinY);
+            if(right > maxX) maxX = right;
+            if((y + quadMaxY) > maxY) maxY = (y + quadMaxY);
 
-            sprite.tint = data.colorTransform;
-            sprite.setFromMatrix(this._matrix);
-
-            container.addChild(sprite);
+            containerWidth = (maxX - minX);
         }
 
-        return new ImageData(null, container.getLocalBounds().rectangle, point, isFlipped, null, container);
+        const rect = new Rectangle(minX, minY, (maxX - minX), (maxY - minY));
+        const regPoint = new Point(pointX, pointY);
+
+        // ImageData flipped the registration point by the part's width.
+        if(isFlipped) regPoint.x = (-(regPoint.x) + rect.width);
+
+        return { rect, regPoint, width, height };
     }
 }
