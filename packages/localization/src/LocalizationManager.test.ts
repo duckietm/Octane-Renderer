@@ -164,3 +164,38 @@ describe('LocalizationManager text files and furniture texts', () =>
         expect(localization.getValue('roomItem.name.1')).toBe('stale copy');
     });
 });
+
+// Habbo's external texts point some keys at others; AIR follows those links when it shows the text.
+describe('LocalizationManager text references', () =>
+{
+    afterEach(() => GetConfiguration().setValue('socket.url', undefined));
+
+    it('fills a text that points at another text, also through parameters', () =>
+    {
+        const localization = new LocalizationManager();
+
+        localization.setValue('widget.areahide.area_selection', '${wiredfurni.params.area_selection}');
+        localization.setValue('wiredfurni.params.area_selection', 'Selected area');
+        localization.setValue('widget.areahide.button.on', '${widget.dimmer.button.on}');
+        localization.setValue('widget.dimmer.button.on', 'Turn %what% on');
+
+        expect(localization.getValue('widget.areahide.area_selection')).toBe('Selected area');
+        expect(localization.getValueWithParameter('widget.areahide.button.on', 'what', 'it')).toBe('Turn it on');
+    });
+
+    it('leaves an unknown reference, a configuration value and a loop as written', () =>
+    {
+        GetConfiguration().setValue('socket.url', 'wss://internal:2096');
+
+        const localization = new LocalizationManager();
+
+        localization.setValue('a.missing', 'Go ${not.there}');
+        localization.setValue('a.config', 'At ${socket.url}');
+        localization.setValue('loop.one', 'x ${loop.two}');
+        localization.setValue('loop.two', 'y ${loop.one}');
+
+        expect(localization.getValue('a.missing')).toBe('Go ${not.there}');
+        expect(localization.getValue('a.config')).toBe('At ${socket.url}');
+        expect(localization.getValue('loop.one')).toMatch(/^x y x y/);
+    });
+});

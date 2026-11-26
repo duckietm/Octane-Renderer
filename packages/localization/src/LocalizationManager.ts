@@ -205,6 +205,10 @@ export class LocalizationManager implements ILocalizationManager
             if(configured && (typeof configured !== 'object')) return String(configured);
         }
 
+        // A text can point at another text, as Habbo's external texts do ("widget.areahide.area_selection" is
+        // "${wiredfurni.params.area_selection}"); AIR follows those links, so fill each one it knows.
+        if(value && (value.indexOf('${') >= 0)) value = this.resolveReferences(value, 0);
+
         if(value && doParams)
         {
             const parameters = this._parameters.get(key);
@@ -219,6 +223,31 @@ export class LocalizationManager implements ILocalizationManager
         }
 
         return (value || key);
+    }
+
+    private static readonly MAX_REFERENCE_DEPTH = 8;
+
+    // Replaces each ${key} in a text value by that key's text; a key that has no text, or a loop deeper
+    // than MAX_REFERENCE_DEPTH, stays as written.
+    private resolveReferences(value: string, depth: number): string
+    {
+        if(depth >= LocalizationManager.MAX_REFERENCE_DEPTH) return value;
+
+        return value.replace(/\$\{([^}]+)\}/g, (match: string, key: string) =>
+        {
+            let text = (this._overrideDefinitions.get(key) || this.resolveFurnitureValue(key) || this._definitions.get(key) || this.lookupBaseDefinition(key) || null);
+
+            if(!text && LocalizationManager.isPlaceholderConfigurationKey(key))
+            {
+                const configured = GetConfiguration().definitions.get(key);
+
+                if(configured !== undefined && configured !== null && (typeof configured !== 'object')) text = String(configured);
+            }
+
+            if(!text) return match;
+
+            return (text.indexOf('${') >= 0) ? this.resolveReferences(text, depth + 1) : text;
+        });
     }
 
     private static isPlaceholderConfigurationKey(key: string): boolean
