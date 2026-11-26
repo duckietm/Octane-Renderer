@@ -12,7 +12,7 @@
     "@octane/api": "1.0.0",
     "pako": "^3.0.3",
     "pixi.js": "^8.23.0",
-    "strip-json-comments": "^5.0.3"
+    "strip-json-comments": "^5.1.0"
   },
   "devDependencies": {
     "typescript": "^6.0.3"
