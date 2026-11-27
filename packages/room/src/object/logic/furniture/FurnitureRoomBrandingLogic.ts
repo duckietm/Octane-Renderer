@@ -115,9 +115,9 @@ export class FurnitureRoomBrandingLogic extends FurnitureLogic
         const alpha = isNaN(alphaRaw) ? 100 : alphaRaw;
         this.object.model.setValue(RoomObjectVariable.FURNITURE_BRANDING_ALPHA, alpha);
 
-        let options = (((FurnitureRoomBrandingLogic.IMAGEURL_KEY + '=') + ((imageUrl !== null) ? imageUrl : '')) + '\t');
+        let options = (((FurnitureRoomBrandingLogic.IMAGEURL_KEY + '=') + (imageUrl ?? '')) + '\t');
 
-        if(this._hasClickUrl) options = (options + (((FurnitureRoomBrandingLogic.CLICKURL_KEY + '=') + ((clickUrl !== null) ? clickUrl : '')) + '\t'));
+        if(this._hasClickUrl) options = (options + (((FurnitureRoomBrandingLogic.CLICKURL_KEY + '=') + (clickUrl ?? '')) + '\t'));
 
         options = (options + (((FurnitureRoomBrandingLogic.OFFSETX_KEY + '=') + offsetX) + '\t'));
         options = (options + (((FurnitureRoomBrandingLogic.OFFSETY_KEY + '=') + offsetY) + '\t'));

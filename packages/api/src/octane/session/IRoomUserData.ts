@@ -9,6 +9,10 @@ export interface IRoomUserData
     overlay: number;
     cardBackground: number;
     borderId: number;
+    /** The avatar's pose in the profile picture: direction 0-7 (2 by default) and offset in pixels (0, 0). */
+    avatarDirection: number;
+    avatarOffsetX: number;
+    avatarOffsetY: number;
     name: string;
     type: number;
     sex: string;

@@ -19,6 +19,7 @@ export interface IUserDataManager
     updateNickIcon(roomIndex: number, nickIcon: string): void;
     updateCustomization(roomIndex: number, nickIcon: string, prefixText: string, prefixColor: string, prefixIcon: string, prefixEffect: string, prefixFont: string, displayOrder: string): void;
     updateBackground(roomIndex: number, background: number, stand: number, overlay: number, cardBackground?: number, borderId?: number): void;
+    updateAvatarPose(roomIndex: number, direction: number, offsetX: number, offsetY: number): void;
     updateAchievementScore(roomIndex: number, score: number): void;
     updatePetLevel(roomIndex: number, level: number): void;
     updatePetBreedingStatus(roomIndex: number, canBreed: boolean, canHarvest: boolean, canRevive: boolean, hasBreedingPermission: boolean): void;

@@ -185,6 +185,44 @@ describe('UserProfileParser presence and level', () =>
         expect(parser.features).toBe(5);
     });
 
+    it('reads the avatar pose after the features', () =>
+    {
+        const writer = new BinaryWriter();
+
+        writeProfile(writer);
+        writer.writeInt(1);
+        writer.writeInt(3);
+        writer.writeInt(150);
+        writer.writeByte(0);
+        writer.writeInt(0);
+        writer.writeInt(0);
+        writer.writeInt(0);
+        writer.writeString('');
+        writer.writeString('');
+        writer.writeString('');
+        writer.writeInt(7);
+        writer.writeInt(5);
+        writer.writeInt(-12);
+        writer.writeInt(9);
+
+        const parser = parse(writer);
+
+        expect(parser.features).toBe(7);
+        expect([ parser.avatarDirection, parser.avatarOffsetX, parser.avatarOffsetY ]).toEqual([ 5, -12, 9 ]);
+    });
+
+    it('stands the avatar as before when an older server sends no pose', () =>
+    {
+        const writer = new BinaryWriter();
+
+        writeProfile(writer);
+
+        const parser = parse(writer);
+
+        expect([ parser.avatarDirection, parser.avatarOffsetX, parser.avatarOffsetY ]).toEqual([ UserProfileParser.DEFAULT_AVATAR_DIRECTION, 0, 0 ]);
+        expect(UserProfileParser.DEFAULT_AVATAR_DIRECTION).toBe(2);
+    });
+
     it('has every feature on when the server sends no switches', () =>
     {
         const writer = new BinaryWriter();

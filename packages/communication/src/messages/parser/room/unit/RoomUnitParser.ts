@@ -86,6 +86,10 @@ export class RoomUnitParser implements IMessageParser
                 user.displayOrder = wrapper.readString();
                 // Always sent per user; a bytesAvailable guard would misread the next record.
                 user.badgesRank = wrapper.readInt();
+                // The avatar's pose in the profile picture, also always sent per user (unguarded, see above).
+                user.avatarDirection = wrapper.readInt();
+                user.avatarOffsetX = wrapper.readInt();
+                user.avatarOffsetY = wrapper.readInt();
             }
 
             else if(type === 2)

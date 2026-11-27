@@ -142,6 +142,16 @@ the cherry-pick), not the parser side. Document any future
 trailing-int extension in this same place so the next reader doesn't
 re-introduce a bytesAvailable guard "for safety".
 
+**Profile picture pose** (Polaris): inside the `type === 1` (user) branch,
+right after `badgesRank`, `RoomUnitParser` reads three more unconditional
+ints, `avatarDirection` / `avatarOffsetX` / `avatarOffsetY`. Polaris'
+`RoomUsersComposer` writes them in both user paths (bots and pets do not
+carry them), so this renderer needs a Polaris build that sends them. The
+same three ints are optional trailing fields of `RoomUnitInfoParser` (UNIT_INFO,
+per-field ternaries like the rest of that parser) and `UserProfileParser`,
+and trail `RoomUnitBackgroundComposer` (direction `KEEP_PROFILE_AVATAR_POSE`
+keeps the saved pose).
+
 ### Dropped dead code: `sendWhisperGroupMessage`
 
 `IRoomSession.sendWhisperGroupMessage(userId)` referenced a

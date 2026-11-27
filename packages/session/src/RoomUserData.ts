@@ -22,6 +22,9 @@ export class RoomUserData implements IRoomUserData
     private _overlay: number;
     private _cardBackground: number;
     private _borderId: number = 0;
+    private _avatarDirection: number = 2;
+    private _avatarOffsetX: number = 0;
+    private _avatarOffsetY: number = 0;
     private _webID: number = 0;
     private _groupID: number = 0;
     private _groupStatus: number = 0;
@@ -119,6 +122,36 @@ export class RoomUserData implements IRoomUserData
     public set borderId(value: number)
     {
         this._borderId = value;
+    }
+
+    public get avatarDirection(): number
+    {
+        return this._avatarDirection;
+    }
+
+    public set avatarDirection(value: number)
+    {
+        this._avatarDirection = value;
+    }
+
+    public get avatarOffsetX(): number
+    {
+        return this._avatarOffsetX;
+    }
+
+    public set avatarOffsetX(value: number)
+    {
+        this._avatarOffsetX = value;
+    }
+
+    public get avatarOffsetY(): number
+    {
+        return this._avatarOffsetY;
+    }
+
+    public set avatarOffsetY(value: number)
+    {
+        this._avatarOffsetY = value;
     }
 
     public get name(): string
