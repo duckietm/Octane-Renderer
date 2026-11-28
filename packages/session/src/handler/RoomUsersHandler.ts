@@ -67,6 +67,9 @@ export class RoomUsersHandler extends BaseHandler
                 userData.overlay = user.overlay;
                 userData.cardBackground = user.cardBackground;
                 userData.borderId = user.borderId;
+                userData.avatarDirection = user.avatarDirection;
+                userData.avatarOffsetX = user.avatarOffsetX;
+                userData.avatarOffsetY = user.avatarOffsetY;
                 userData.activityPoints = user.activityPoints;
                 userData.badgesRank = user.badgesRank;
                 userData.figure = user.figure;
@@ -118,8 +121,9 @@ export class RoomUsersHandler extends BaseHandler
         session.userDataManager.updateAchievementScore(parser.unitId, parser.achievementScore);
 
         session.userDataManager.updateBackground(parser.unitId, parser.backgroundId, parser.standId, parser.overlayId, parser.cardBackgroundId, parser.borderId);
+        session.userDataManager.updateAvatarPose(parser.unitId, parser.avatarDirection, parser.avatarOffsetX, parser.avatarOffsetY);
 
-        GetEventDispatcher().dispatchEvent(new RoomSessionUserFigureUpdateEvent(session, parser.unitId, parser.figure, parser.gender, parser.motto, parser.achievementScore, parser.backgroundId, parser.standId, parser.overlayId, parser.cardBackgroundId, parser.nickIcon || '', parser.prefixText || '', parser.prefixColor || '', parser.prefixIcon || '', parser.prefixEffect || '', parser.prefixFont || '', parser.displayOrder || 'icon-prefix-name', parser.borderId));
+        GetEventDispatcher().dispatchEvent(new RoomSessionUserFigureUpdateEvent(session, parser.unitId, parser.figure, parser.gender, parser.motto, parser.achievementScore, parser.backgroundId, parser.standId, parser.overlayId, parser.cardBackgroundId, parser.nickIcon || '', parser.prefixText || '', parser.prefixColor || '', parser.prefixIcon || '', parser.prefixEffect || '', parser.prefixFont || '', parser.displayOrder || 'icon-prefix-name', parser.borderId, parser.avatarDirection, parser.avatarOffsetX, parser.avatarOffsetY));
 
     }
 

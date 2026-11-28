@@ -2685,6 +2685,21 @@
           "kind": "scalar",
           "type": "int",
           "name": "requestedAccent"
+        },
+        {
+          "kind": "scalar",
+          "type": "int",
+          "name": "requestedDirection"
+        },
+        {
+          "kind": "scalar",
+          "type": "int",
+          "name": "requestedOffsetX"
+        },
+        {
+          "kind": "scalar",
+          "type": "int",
+          "name": "requestedOffsetY"
         }
       ]
     },
@@ -21012,8 +21027,44 @@
           "fields": [
             {
               "kind": "scalar",
+              "type": "int",
+              "name": "typeId"
+            },
+            {
+              "kind": "scalar",
+              "type": "int",
+              "name": "paletteId"
+            },
+            {
+              "kind": "scalar",
               "type": "string",
+              "name": "color"
+            },
+            {
+              "kind": "scalar",
+              "type": "int",
               "name": ""
+            },
+            {
+              "kind": "list",
+              "countType": "int",
+              "item": [
+                {
+                  "kind": "scalar",
+                  "type": "int",
+                  "name": ""
+                },
+                {
+                  "kind": "scalar",
+                  "type": "int",
+                  "name": ""
+                },
+                {
+                  "kind": "scalar",
+                  "type": "int",
+                  "name": ""
+                }
+              ]
             }
           ]
         }
@@ -24936,6 +24987,21 @@
         {
           "kind": "scalar",
           "type": "string",
+          "name": ""
+        },
+        {
+          "kind": "scalar",
+          "type": "int",
+          "name": ""
+        },
+        {
+          "kind": "scalar",
+          "type": "int",
+          "name": ""
+        },
+        {
+          "kind": "scalar",
+          "type": "int",
           "name": ""
         },
         {
@@ -33766,7 +33832,7 @@
         "className": "UserProfileParser",
         "path": "packages/communication/src/messages/parser/user/data/UserProfileParser.ts"
       },
-      "reason": "Pre-existing wire mismatch requires runtime protocol decision: Java [int, string, string, string, string, int, int, boolean, boolean, boolean, list\u003cint:[int, string, string, string, string, boolean, int, boolean]\u003e, int, boolean, int, int, int, int, string, string, string, string, string, string, string, int, int, int, int, boolean, int, int, int, string, string] versus TypeScript [int, string, string, string, string, int, int, boolean, boolean, boolean, list\u003cint:[int, string, string, string, string, boolean, int, boolean]\u003e, int, boolean, optional\u003cbytesAvailable:[int, int, int, int, string, string, string, string, string, string, string, int, int, int, int, boolean, int, int, int, string, string]\u003e]"
+      "reason": "Pre-existing wire mismatch requires runtime protocol decision: Java [int, string, string, string, string, int, int, boolean, boolean, boolean, list\u003cint:[int, string, string, string, string, boolean, int, boolean]\u003e, int, boolean, int, int, int, int, string, string, string, string, string, string, string, int, int, int, int, boolean, int, int, int, string, string, string, int, int, int, int] versus TypeScript [int, string, string, string, string, int, int, boolean, boolean, boolean, list\u003cint:[int, string, string, string, string, boolean, int, boolean]\u003e, int, boolean, optional\u003cbytesAvailable:[int, int, int, int, string, string, string, string, string, string, string, int, int, int, int, boolean, int, int, int, string, string, string, int, int, int, int]\u003e]"
     },
     {
       "name": "NOT_ENOUGH_BALANCE",

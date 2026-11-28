@@ -19,6 +19,9 @@ export class RoomUnitInfoParser implements IMessageParser
     private _prefixEffect: string;
     private _prefixFont: string;
     private _displayOrder: string;
+    private _avatarDirection: number;
+    private _avatarOffsetX: number;
+    private _avatarOffsetY: number;
 
     public flush(): boolean
     {
@@ -39,6 +42,9 @@ export class RoomUnitInfoParser implements IMessageParser
         this._prefixEffect = '';
         this._prefixFont = '';
         this._displayOrder = 'icon-prefix-name';
+        this._avatarDirection = 2;
+        this._avatarOffsetX = 0;
+        this._avatarOffsetY = 0;
 
         return true;
     }
@@ -64,6 +70,12 @@ export class RoomUnitInfoParser implements IMessageParser
         this._prefixFont = (wrapper.bytesAvailable ? wrapper.readString() : '');
         this._displayOrder = (wrapper.bytesAvailable ? wrapper.readString() : 'icon-prefix-name');
         this._borderId = (wrapper.bytesAvailable ? wrapper.readInt() : 0);
+
+        // The avatar's pose in the profile picture: direction, offset x, offset y (2, 0, 0 from an older server).
+        // Read like the fields above, one guard each, so the packet stays a verified contract with the emulator.
+        this._avatarDirection = (wrapper.bytesAvailable ? wrapper.readInt() : 2);
+        this._avatarOffsetX = (wrapper.bytesAvailable ? wrapper.readInt() : 0);
+        this._avatarOffsetY = (wrapper.bytesAvailable ? wrapper.readInt() : 0);
 
         return true;
     }
@@ -151,5 +163,20 @@ export class RoomUnitInfoParser implements IMessageParser
     public get displayOrder(): string
     {
         return this._displayOrder;
+    }
+
+    public get avatarDirection(): number
+    {
+        return this._avatarDirection;
+    }
+
+    public get avatarOffsetX(): number
+    {
+        return this._avatarOffsetX;
+    }
+
+    public get avatarOffsetY(): number
+    {
+        return this._avatarOffsetY;
     }
 }

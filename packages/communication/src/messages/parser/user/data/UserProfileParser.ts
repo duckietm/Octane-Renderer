@@ -5,6 +5,8 @@ export class UserProfileParser implements IMessageParser
 {
     /** Banner, uploads and theme, as the server reports them; all on for an older server. */
     public static readonly ALL_FEATURES = 7;
+    /** The way the avatar faces in the profile picture when the server does not say. */
+    public static readonly DEFAULT_AVATAR_DIRECTION = 2;
 
     private _id: number;
     private _username: string;
@@ -42,6 +44,9 @@ export class UserProfileParser implements IMessageParser
     private _backgroundImage: string;
     private _backgroundStyle: string;
     private _features: number;
+    private _avatarDirection: number;
+    private _avatarOffsetX: number;
+    private _avatarOffsetY: number;
 
     public flush(): boolean
     {
@@ -81,6 +86,9 @@ export class UserProfileParser implements IMessageParser
         this._backgroundImage = '';
         this._backgroundStyle = '';
         this._features = UserProfileParser.ALL_FEATURES;
+        this._avatarDirection = UserProfileParser.DEFAULT_AVATAR_DIRECTION;
+        this._avatarOffsetX = 0;
+        this._avatarOffsetY = 0;
 
         return true;
     }
@@ -177,6 +185,14 @@ export class UserProfileParser implements IMessageParser
 
         this._backgroundStyle = wrapper.readString();
         this._features = wrapper.readInt();
+
+        // The avatar's pose in the profile picture: the direction it faces (0-7), then how far it is moved in the
+        // box (x, y in pixels). 2, 0, 0 when absent: the look of an older server.
+        if(!wrapper.bytesAvailable) return true;
+
+        this._avatarDirection = wrapper.readInt();
+        this._avatarOffsetX = wrapper.readInt();
+        this._avatarOffsetY = wrapper.readInt();
 
         return true;
     }
@@ -363,5 +379,23 @@ export class UserProfileParser implements IMessageParser
     public get features(): number
     {
         return this._features;
+    }
+
+    /** The direction the avatar faces in the profile picture, 0-7; 2 when the server does not send it. */
+    public get avatarDirection(): number
+    {
+        return this._avatarDirection;
+    }
+
+    /** How far the avatar is moved right in the profile picture, in pixels; 0 when the server does not send it. */
+    public get avatarOffsetX(): number
+    {
+        return this._avatarOffsetX;
+    }
+
+    /** How far the avatar is moved down in the profile picture, in pixels; 0 when the server does not send it. */
+    public get avatarOffsetY(): number
+    {
+        return this._avatarOffsetY;
     }
 }

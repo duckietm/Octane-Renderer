@@ -2906,6 +2906,13 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
         this._roomObjectEventHandler.modifyRoomObject(this._activeRoomId, objectId, category, operation);
     }
 
+    public commitActiveObjectPlacement(): boolean
+    {
+        if(!this._roomObjectEventHandler) return false;
+
+        return this._roomObjectEventHandler.commitActiveObjectPlacement(this._activeRoomId);
+    }
+
     public rotateActiveObjectPreview(positive: boolean): boolean
     {
         if(!this._roomObjectEventHandler) return false;

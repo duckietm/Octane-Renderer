@@ -87,6 +87,8 @@ export interface IRoomEngine
     changeObjectState(roomId: number, objectId: number, category: number): void;
     processRoomObjectOperation(objectId: number, category: number, operation: string): boolean;
     rotateActiveObjectPreview(positive: boolean): boolean;
+    /** Drops the item being placed or moved where its preview stands; false when there is no valid preview. */
+    commitActiveObjectPlacement(): boolean;
     modifyRoomObjectDataWithMap(objectId: number, category: number, operation: string, data: Map<string, string>): boolean
     modifyRoomObjectData(objectId: number, category: number, colorHex: string, data: string): boolean
     processRoomObjectPlacement(placementSource: string, id: number, category: number, typeId: number, legacyString?: string, stuffData?: IObjectData, state?: number, frameNumber?: number, posture?: string): boolean;

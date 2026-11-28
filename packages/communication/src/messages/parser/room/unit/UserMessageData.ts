@@ -47,6 +47,9 @@ export class UserMessageData
     private _roomEntryMethod: string = 'unknown';
     private _roomEntryTeleportId: number = 0;
     private _borderId: number = 0;
+    private _avatarDirection: number = 2;
+    private _avatarOffsetX: number = 0;
+    private _avatarOffsetY: number = 0;
     private _isReadOnly: boolean = false;
 
     constructor(roomIndex: number)
@@ -605,6 +608,45 @@ export class UserMessageData
         if(!this._isReadOnly)
         {
             this._borderId = value;
+        }
+    }
+
+    public get avatarDirection(): number
+    {
+        return this._avatarDirection;
+    }
+
+    public set avatarDirection(value: number)
+    {
+        if(!this._isReadOnly)
+        {
+            this._avatarDirection = value;
+        }
+    }
+
+    public get avatarOffsetX(): number
+    {
+        return this._avatarOffsetX;
+    }
+
+    public set avatarOffsetX(value: number)
+    {
+        if(!this._isReadOnly)
+        {
+            this._avatarOffsetX = value;
+        }
+    }
+
+    public get avatarOffsetY(): number
+    {
+        return this._avatarOffsetY;
+    }
+
+    public set avatarOffsetY(value: number)
+    {
+        if(!this._isReadOnly)
+        {
+            this._avatarOffsetY = value;
         }
     }
 }

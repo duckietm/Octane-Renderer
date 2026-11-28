@@ -132,6 +132,35 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
         return true;
     }
 
+    /**
+     * Drops the item being placed or moved where its preview stands now, without a pointer event. A touch
+     * client has no pointer resting on the preview, so it cannot repeat the click a mouse would make there.
+     * False when nothing is being placed or moved, or when the preview is not on a valid spot (it is then not
+     * in the room); the placement stays active in that case.
+     */
+    public commitActiveObjectPlacement(roomId: number): boolean
+    {
+        if(!this._roomEngine) return false;
+
+        const selectedData = this.getSelectedRoomObjectData(roomId);
+
+        if(!selectedData) return false;
+
+        if(!this._roomEngine.getRoomObject(roomId, selectedData.id, selectedData.category)) return false;
+
+        switch(selectedData.operation)
+        {
+            case RoomObjectOperationType.OBJECT_PLACE:
+                this.placeObject(roomId, (selectedData.category !== RoomObjectCategory.WALL), (selectedData.category === RoomObjectCategory.WALL));
+
+                return true;
+            case RoomObjectOperationType.OBJECT_MOVE:
+                return this.modifyRoomObject(roomId, selectedData.id, selectedData.category, RoomObjectOperationType.OBJECT_MOVE_TO);
+        }
+
+        return false;
+    }
+
     // Rotates the floor item currently being moved or placed without talking to
     // the server: the preview direction only becomes real once it is dropped.
     public rotateActiveObjectPreview(roomId: number, positive: boolean): boolean

@@ -236,6 +236,20 @@ export class UserDataManager implements IUserDataManager
         this.invalidateRoomUserListSnapshot();
     }
 
+    /** The avatar's pose in the profile picture of a user in the room. */
+    public updateAvatarPose(roomIndex: number, direction: number, offsetX: number, offsetY: number): void
+    {
+        const userData = this.getUserDataByIndex(roomIndex);
+
+        if(!userData) return;
+
+        userData.avatarDirection = direction;
+        userData.avatarOffsetX = offsetX;
+        userData.avatarOffsetY = offsetY;
+
+        this.invalidateRoomUserListSnapshot();
+    }
+
     public updateAchievementScore(roomIndex: number, score: number): void
     {
         const userData = this.getUserDataByIndex(roomIndex);
